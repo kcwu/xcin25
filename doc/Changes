@@ -31,6 +31,9 @@ xcin-2.5.2.2:  2000/12/
 
 9. Documents update.
 
+10. Add .cvsignore in all xcin sub-dirs.
+    Thanks to Chun-Chung Chen <cjj@u.washington.edu>.
+
 
 xcin-2.5.2.1:  2000/10/30
 ------------------------------
