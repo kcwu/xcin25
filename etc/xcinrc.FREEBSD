@@ -78,8 +78,8 @@
           (BEEP_WRONG           YES)
           (BEEP_DUPCHAR         NO)
           (TSI_FNAME            "%tabe_data%tsi.db")
-	  (HINT_SELECT		NO)
-	  (HINT_TSI		NO)))
+	  (HINT_SELECT		YES)
+	  (HINT_TSI		YES)))
 
 (define bimsphone_default
         '((N_SELECTION_KEY      9)
@@ -102,6 +102,7 @@
           (SPACE_SELECTION      NO)
           (PHRASE_SELECTION     YES)
           (N_SELECTION_PHR      4)
+          (TSI_GUESS            NO)
         ;
         ; The following has effect only when AUTO_SELECTION is NO
           (AUTO_UPCHAR          YES)))
@@ -129,13 +130,11 @@
 
 (define phone@utf-8
         '((SETKEY               3)
-          (END_KEY              YES)
-          (BEEP_DUPCHAR         YES)))
+          (END_KEY              YES)))
 
 (define jyutping@utf-8
         '((SETKEY               4)
-          (END_KEY              YES)
-          (BEEP_DUPCHAR         YES)))
+          (END_KEY              YES)))
 
 (define bimsphone@utf-8
         '((SETKEY               6)
@@ -147,13 +146,11 @@
 
 (define array30@utf-8
         '((SETKEY               8)
-          (BEEP_DUPCHAR         YES)
           (DISABLE_SEL_LIST     "w")
           (KEYSTROKE_REMAP      "t:0xaaba;T:0xaaba;")))
 
 (define jyutping0@utf-8
-        '((SETKEY               9)
-          (BEEP_DUPCHAR         YES)))
+        '((SETKEY               9)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
