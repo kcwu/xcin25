@@ -49,7 +49,6 @@ xcin-2.5.3-pre3:  2001/12
 
 17. Add comments of source codes from <pyeh@phys.ntu.edu.tw>.
 
-
 18. Fix by <thhsieh@linux.org.tw>:
     Add ez input method table (for gen_inp).
     Thanks to woodman <tuen@bigfoot.com>.
@@ -58,6 +57,8 @@ xcin-2.5.3-pre3:  2001/12
     Using N_() for all the message output by perr().
     Thanks to Kuang-che Wu <kcwu@kcwu.homeip.net>.
 
+20. Update array30.cin v0.5, 2003-02-24
+    Thanks to Anthony Fok <anthony@thizlinux.com>.
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
