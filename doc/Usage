@@ -273,6 +273,11 @@ xcin: inp_styles: Root OverTheSpot
 	太多的訊息顯示。因此原本顯示在 xcin 主視窗中的資訊，只能有一小部
 	分移到這裡來顯示，而其餘的資訊就沒辦法了。
 
+   KEYBOARD_TRANSLATE:
+	是否啟動鍵盤碼轉換功能。如果您的鍵盤不是傳統的 "qwerty" 鍵盤，則
+	您必須打開此鍵盤碼轉換功能，如此您所輸入的鍵盤碼才能正確地對應到
+	xcin 內部預設的鍵盤碼 (即 "qwerty" 鍵盤)。
+
    FKEY_ZHEN:  (預設 "ctrl space")
 	設定英數/中文切換鍵。
 

@@ -34,6 +34,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include <X11/Xlib.h>
 #include "Ximd/IMdkit.h"
 #include "Ximd/Xi18n.h"

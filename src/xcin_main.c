@@ -315,6 +315,11 @@ read_core_config(void)
     if (get_resource(cmd, value, 256, 1))
 	set_data(&(xcin_core.xcin_mode), RC_IFLAG, value,
 			XCIN_OVERSPOT_WINONLY, 0);
+
+    cmd[0] = "KEYBOARD_TRANSLATE";
+    if (get_resource(cmd, value, 256, 1))
+	set_data(&(xcin_core.xcin_mode), RC_IFLAG, value,
+			XCIN_KEYBOARD_TRANS, 0);
 }
 
 static void

@@ -31,6 +31,7 @@
 (define KEEP_POSITION_ON	"NO")
 (define DISABLE_WM_CTRL		"NO")
 (define DIFF_BEEP		"NO")
+(define KEYBOARD_TRANSLATE	"NO")
 
 (define LOCALE	'(zh_TW.big5 zh_HK.hkbig5 zh_CN.hp15cn zh_CN.GBK))
 

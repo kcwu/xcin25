@@ -616,6 +616,10 @@ xim_trigger_handler(XIMS ims, IMTriggerNotifyStruct *call_data, int *icid)
         return False;
 }
 
+#ifndef AltGrMask
+#define AltGrMask (1L<<13)
+#endif
+
 static int
 xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
 {
@@ -643,6 +647,42 @@ xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
     keyinfo.keystr_len = XLookupString(kev, keyinfo.keystr, 16, 
 					&(keyinfo.keysym), NULL);
     keyinfo.keystr[(keyinfo.keystr_len >= 0) ? keyinfo.keystr_len : 0] = 0;
+
+/*
+ *  Keycode translation for different layout of keyboards.
+ *
+ *  In most places of the world, we use the "qwerty" layout of the keyboard.
+ *  But in other places, e.g., France, they use the "azerty" layout of the
+ *  keyboard. There are many differences between them. For example, the
+ *  number keys KP_1 .... KP_9 for "qwerty" keyboard do not have the Shift
+ *  ON, but for "azerty" they do. So we have to do the keyboard translation
+ *  here, if necessary. The translation is just from other layout to the
+ *  "standard" "qwerty" layout.
+ *
+ *  This translation code is provided by dupre <dupre@lifo.univ-orleans.fr>.
+ *  He commented that to do the correct translation, we have to turn off
+ *  the non-necessary Shift mask for some keys, and turn on Shift mask for
+ *  the others. Sometimes the keycode of the "azerty" keyboard will come
+ *  with the "AltGr" mask on. It should always be turned off. Note that the
+ *  translation is performed only when Shift and AltGr are NOT ON at the
+ *  same moment.
+ */
+    if ((xccore->xcin_mode & XCIN_KEYBOARD_TRANS)) {
+	if (! (keyinfo.keystate & ShiftMask &&
+	       keyinfo.keystate & AltGrMask) &&
+	    keyinfo.keysym > 32 && keyinfo.keysym < 127 &&
+	    keyinfo.keystr_len) {
+	    if (strstr("',-./0123456789;=[\\]`abcdefghijklmnopqrstuvwxyz",
+			keyinfo.keystr) != NULL) {
+		keyinfo.keystate &= ~ShiftMask;
+		keyinfo.keystate &= ~AltGrMask;
+	    }
+	    else {
+		keyinfo.keystate |=  ShiftMask;
+		keyinfo.keystate &= ~AltGrMask;
+	    }
+	}
+    }
 
 /*
  *  Process the special key binding.

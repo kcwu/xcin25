@@ -30,6 +30,7 @@
 (define KEEP_POSITION_ON	"NO")
 (define DISABLE_WM_CTRL		"NO")
 (define DIFF_BEEP		"NO")
+(define KEYBOARD_TRANSLATE	"NO")
 
 ;
 ;  XIM Input Style Adjustments.

@@ -17,6 +17,9 @@ xcin-2.5.3-pre1:  2001/
 5. Add pinyin0.cin in big5 encoding.
    Converted from pinyin.cin in gb encoding via zh-autoconvert_0.3.13-1.
 
+6. Add keyboard layout translation patch.
+   Thanks to dupre <dupre@lifo.univ-orleans.fr>.
+
 
 xcin-2.5.2.3:  2001/03/12
 ------------------------------

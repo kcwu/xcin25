@@ -315,6 +315,12 @@ xcin: inp_styles: Root OverTheSpot
 	partial information originally displayed in the xcin main window can
 	be moved here, and the other part will be neglected.
 
+   KEYBOARD_TRANSLATE:
+	Turn on the keyboard layout translation or not. If your keyboard is
+	not the conventional "qwerty" keyboard, you have to enable this
+	keyboard layout translation facility. Then the keycode you input
+	could be mapped to the correct keycode built in xcin.
+
    FKEY_ZHEN:  (default: "ctrl space")
 	Set the trigger key of English/Chinese input mode.
 
