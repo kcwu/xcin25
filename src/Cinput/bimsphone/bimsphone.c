@@ -54,7 +54,7 @@ enum {
     BIMSP_LAST
 };
 
-static DB_pool *dp[BIMSP_LAST], cdp;
+static DB_pool dp[BIMSP_LAST], cdp;
 static int bimsp_zhuyin_noauto;
 
 /*----------------------------------------------------------------------------
@@ -670,15 +670,12 @@ phone_xim_init(void *conf, inpinfo_t *inpinfo)
     inpinfo->inp_ename = cf->inp_ename;
     if (! (cf->mode & BIMSPH_MODE_PINYIN)) {
 	inpinfo->area3_len = N_MAX_KEYCODE_ZUYIN * 2 + 2;
-	cdp = dp[BIMSP_ZHUYIN];
-if (cdp == NULL)
-perr(XCINMSG_IERROR, "cdp zhuyin null!!\n");
+	if(cf->mode & BIMSPH_MODE_AUTOSEL)
+	    cdp = dp[BIMSP_ZHUYIN];
     }
     else {
 	inpinfo->area3_len = N_MAX_KEYCODE_PINYIN + 2;
 	cdp = dp[BIMSP_PINYIN];
-if (cdp == NULL)
-perr(XCINMSG_IERROR, "cdp pinyin null!!\n");
     }
 
     inpinfo->keystroke_len = 0;
