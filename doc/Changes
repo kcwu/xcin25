@@ -3,7 +3,7 @@ xcin-2.5.2.2:  2000/12/
 1. Remove useless character set counting code from testprog.c: create_fontset().
    Add a cursor into testprog window.
 
-2. Add new docs: doc/En/internal/structer.En
+2. Add new docs: doc/En/internal/structer.En, module.En.
 
 3. Report a compiling problem in GNU/Linux glibc-2.1.2.
    Thanks to <ptcheng@ee.nthu.edu.tw>.

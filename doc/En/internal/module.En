@@ -418,3 +418,300 @@ struct inpinfo_s {
 
 ----------------------------------------
 C. The description of "module_t":
+
+   In the following the field with a (*) sign means it should be set, otherwise
+   it is optional (i.e., its value could be 0 or NULL).
+
+   1. name (*):  Module name.
+
+   2. version (*):
+
+      The module version. Please note that the module version of the system
+      should be date string, e.g., "19990217". When the system loads the
+      module, it will check if the module version is the same as that of the
+      system or not. If not, it will not be loaded (because the module
+      structer might be changed). Therefore, if you want to add a new module
+      into xcin, please refer to the current module definition of a specific
+      xcin version.
+
+   3. comments:
+
+      A brief description of this module. It could be printed via
+		xcin -m <module name>
+      See Usage file for details.
+
+   4. valid_objname:
+
+      Set the valid input method name list which could adapt this module.
+      This last item of this list should be NULL. If it is not set, then
+      the system will assume that this module is adaptable by the input
+      method with the name the same as that of the module. The wild characters
+      "*" or "?" could be used in the name list, for example:
+
+	{"my_inp", "my_inp_ext_*", "my_inp_ver??", NULL}
+
+      This means the input methods with the name "my_inp", "my_inp_ext_style1",
+      "my_inp_ext_power", or "my_inp_ver99" .... could adapt this module.
+
+   5. module_type (*):
+
+      Currently xcin only defines one module_type. Hence it should be set to
+      MOD_CINPUT.
+
+   6. conf_size (*):
+
+      The size of the configuration data structer of this module.
+
+   7. int (*init) (void *conf, char *objname, xcin_rc_t *xc) (*):
+
+      The initialization function of this module. It will be called when the
+      module is loaded into xcin system. It should provide all the necessary
+      initialization and should read all the needed configurations from the
+      rcfile. The meaning of its arguements are:
+
+      conf:  pointer to the configuration data structer of this module.
+
+      objname:  the English name of the input method which use this module.
+
+      xc:  the pointer to xcin_rc_t (xcin global data structer), which is
+	   useful for the module to obtain some internal information of xcin.
+	   It is defined as:
+
+        typedef struct {
+            char *lc_ctype;             /* LC_CTYPE locale category name */
+            char *lc_messages;          /* LC_MESSAGES locale category name */
+            char *encoding;             /* encoding name */
+        } locale_t;
+
+        typedef struct {
+            char *rcfile;               /* rcfile name. */
+            char *default_dir;          /* Default module directory. */
+            char *user_dir;             /* User data directory. */
+            locale_t locale;            /* Locale name. */
+        } xcin_rc_t;
+
+      The return value of this function is True when excuting successfully,
+      or False when excuting false.
+
+   8. int (*xim_init) (void *conf, inpinfo_t *inpinfo) (*)
+
+      This function will be called when a new IC is created (a new XIM client
+      window is ready to accept the input from xcin), or an IC switch its
+      current input method to another one. Then it should do the initialization
+      for this IC and its input method status (i.e., the inpinfo).
+
+      Please note that since inpinfo is one part of the IC (IMC) data structer,
+      but not modules. All the modules will use it to communicate with xcin.
+      So it is shared by all the modules. Therefore, when a input method is
+      used by an IC, then xcin will call this function, and it should set the
+      initial values of all the fields of inpinfo (since their values are set
+      by the previously used input method, and may not suitable for this
+      input method), and allocate the memories for inpinfo->iccf, 
+      inpinfo->s_keystroke, inpinfo->lcch, and inpinfo->cch if necessary.
+
+      When sucess, this function should return Ture, otherwise should return
+      False.
+
+   9. unsigned int (*xim_end) (void *conf, inpinfo_t *inpinfo) (*)
+
+      When an IC is going to terminate, or this input method is going to be
+      switched out, this function will be called (for the later case, this
+      function will be called before the xim_init() call of the next input
+      method). So we could do some final jobs in this function, e.g., free
+      the buffers inpinfo->iccf, inpinfo->s_keystroke, inpinfo->lcch, and
+      inpinfo->cch if necessary .... etc.
+
+      The return value of this function is the same as that of the keystroke()
+      function. So it could used for string committing. See below.
+
+  10. unsigned int (*keystroke) (void *conf,
+			inpinfo_t *inpinfo, keyinfo_t *keyinfo) (*)
+
+      This function defines the algorithms to process the keystrokes. When
+      the user type one key via the keyboard, xcin will call this function
+      to handle this key. Then this function should try to explain the
+      meaning of this key, change the window status of xcin if necessary,
+      and return the result to xcin for further processings. The conf and
+      inpinfo is the same as already described, and the definition of
+      keyinfo_t is:
+
+typedef struct {
+    KeySym keysym;                      /* X11 key code. */
+    unsigned int keystate;              /* X11 key state/modifiers */
+    char keystr[16];                    /* X11 key name (in ascii) */
+    int keystr_len;                     /* key name length */
+} keyinfo_t;
+
+      The return value of this function could be any bitwise OR combination
+      of the following:
+
+      IMKEY_ABSORB:  The input method absorbs this key quietly. So xcin will
+		not do further processings. This often happens during the
+		character preediting.
+
+      IMKEY_COMMIT:  The input method completes the preediting. Then xcin
+		will commit the characters in "inpinfo->cch" to the XIM
+		client.
+
+      IMKEY_IGNORE:  The key is useless for this input method, so it is not
+		processed here. Then xcin will pass this key to other part
+		for processings.
+
+      IMKEY_BELL:  The input method requests xcin to beep.
+
+      IMKEY_BELL2:  The input method requests xcin to beep in another frequency.
+		Now xcin supports 2 kinds of "beep". Usually they could stand
+		for multi-character selection, or the input error of the user.
+		The input method could support this facility or not depends
+		on its requirements.
+
+      IMKEY_SHIFTESC:  This means the user presses a normal key and a shift
+		key simultaneously, and the input method do not process this
+		key combination. It will inform xcin to pass this key into
+		the wide ASCII/sigle byte ASCII sub-system for handling.
+
+      IMKEY_SHIFTPHR:  This means the user presses a normal key and a shift
+		key simultaneously. But this time it will inform xcin to
+		pass the key combination to the qphrase sub-system for
+		handling. This facility is optional.
+
+      IMKEY_CTRLPHR:  This means the user presses a normal key and a ctrl
+		key simultaneously. Its effect is the same as that of
+		IMKEY_SHIFTPHR.
+
+      IMKEY_ALTPHR:  This means the user presses a normal key and a alt key
+		simultaneously. Its effect is the same as that of
+		IMKEY_SHIFTPHR.
+
+      IMKEY_FALLBACKPHR:  This means the user presses a normal key, but the
+		input method does not process it and wants it be handled by
+		the qphrase subsystem. Its effect is the same as that of
+		IMKEY_SHIFTPHR.
+
+  11. int (*show_keystroke) (void *conf, simdinfo_t *simdinfo);
+
+      This function is use to recall the keystroke of the characters. xcin
+      will call it when needed. The definition of simdinfo_t is:
+
+typedef struct {
+    int imid;                           /* ID of current Input Context */
+    unsigned short xcin_wlen;           /* xcin window length */
+    unsigned short guimode;             /* GUI mode flag */
+    wch_t cch_publish;                  /* A published cch. */
+    wch_t *s_keystroke;                 /* keystroke of cch_publish returned */
+} simdinfo_t;
+
+      The cch_publish is the character which xcin queries for the keystroke.
+      And its keystroke will be returned to xcin via s_keystroke field.
+
+      Please note that xcin will not maintain the s_keystroke buffer, so
+      this function should maintain it by itself. A simple method is to
+      declare a static buffer for it, for example:
+
+	static wch_t my_keystroke[BUF_SIZE];
+	simdinfo->s_keystroke = my_keystroke;
+	.........
+
+  12. int (*terminate) (void *conf);
+
+      When xcin is going to unload this input method (e.g., xcin is going to
+      terminate), if this function is defined, then xcin will call this
+      function to do some final jobs, e.g., close the data files .... etc.
+
+
+----------------------------------------
+D. Initialization of the IM modules:
+
+There are 2 states of the module initialization. One is when it is loaded
+and going to be used. In this state all the data structer of the IM module
+should be initialized. Another state is whenever the user switch to this
+input method, then the inpinfo_t structer should be initialized here. These
+2 state of initializations will be handled in "int (*init)()" and
+"int (*xim_init)()" functions of the module.
+
+As described before, since inpinfo_t is the communication media between xcin
+and the IM modules, and it belongs to the IMC structer. Therefore, whenever
+the IMC changes its input method, the inpinfo_t structer will be used by
+the new input method. Therefore, whenever the input method is switched for
+using, it should always initialize the contents of inpinfo_t.
+
+For the first state, the initialization works includes:
+
+1. Determine the input method name:
+
+   Because beginning from xcin-2.5.2, the xcinrc can support the
+   <IM_name>@<encoding> format as the input method name, e.g., "cj@big5"
+   means the "cj" input method for Big5 encoding. Therefore, the "objname"
+   arguement of
+
+	int (*init) (void *conf, char *objname, xcin_rc_t *xc);
+
+   will probably be different to the actual input method name. Therefore we
+   have to call this function:
+
+	int get_objenc(char *objname, objenc_t *objenc);
+
+   where its "objname" is the "objname" arguement of (*init)() function.
+   This function will return the objenc_t structer with the following
+   definition:
+
+typedef struct {
+    char objname[50];		/* input method name */
+    char encoding[50];		/* encoding name */
+    char objloadname[100];	/* input method name appeared in xcinrc
+				   (i.e., <IM_name>@<encoding> */
+} objenc_t;
+
+
+2. Read the configurations of xcinrc:
+
+   We can use the function
+
+	int get_resource(char **cmd_list, char *value, int v_size,
+			 int n_cmd_list)
+
+   to read the configurations of xcinrc. The "cmd_list" represents the section
+   labels in xcinrc. Please note that the configuratioins of a specific input
+   method usually appears in the section of that input method. Therefore
+   the "cmd_list[0]" should be set to the name of the input method. For
+   example, if we want to read the AUTO_COMPOSE option of the "cj" input
+   method, which appears in xcinrc with the format:
+
+        (define cj
+                '((AUTO_COMPOSE  1)
+                  .................))
+
+   then we should call get_resource() in the following way:
+
+        char *cmd[2], value[256];
+        cmd[0] = "cj";
+        cmd[1] = "AUTO_COMPOSE";
+        if (get_resource(cmd, value, sizeof(value), 2)) {
+            /* we have read the value of AUTO_COMPOSE */
+        }
+
+   However, since an IM module could be used by many kinds of input methods,
+   so the cmd[0] above could not hard code to be "cj". But we could not use
+   objname appeared above either, because the configuration of xcinrc could
+   be:
+
+        (define cj@big5
+                '((AUTO_COMPOSE  1)
+                  .................))
+
+   Therefore, the correct way is use get_objenc() to obtain is return value
+   and use it:
+
+        objenc_t objenc;
+        ........ .......
+
+        if (get_objenc(objname, &objenc) == -1)
+            return False;
+        cmd[0] = objenc.objloadname;
+        ............................
+
+   So, the configuration of xcinrc could be read correctly.
+
+
+
+T.H.Hsieh
