@@ -1,0 +1,11 @@
+#
+# PLEASE DON'T EDIT.
+#
+# This is automatically generated from "make depend".
+# You need GCC and perl to generate me.
+#
+
+slib.lo: slib.c  ../../../config.h siod.h siodp.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ slib.c
+sliba.lo: sliba.c  siod.h siodp.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ sliba.c

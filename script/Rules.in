@@ -1,0 +1,76 @@
+#
+# Rules to make xcin.
+#
+CC              = @CC@
+CFLAGS          = @CFLAGS@ @DEFS@
+CPPFLAGS        = @CPPFLAGS@
+LDFLAGS         = @LDFLAGS@
+LN_S		= @LN_S@
+RANLIB		= @RANLIB@
+INSTALL	        = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
+OS_TYPE		= @os_type@
+GNU_GETTEXT	= @GNU_GETTEXT@
+OLD_GNU_GETTEXT = @OLD_GNU_GETTEXT@
+@SET_MAKE@
+
+#
+# XCIN installation path.
+#
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+program_prefix	= @program_prefix@
+libdir		= @libdir@
+moddir		= @with_xcin_dir@
+xcin_binp	= $(program_prefix)@bindir@
+xcin_libp	= $(program_prefix)$(libdir)
+xcin_modp	= $(program_prefix)$(moddir)
+xcin_datap	= $(xcin_modp)/tab
+xcin_rcp	= $(program_prefix)@with_xcin_rcdir@
+xcin_manp	= $(program_prefix)@mandir@
+xcin_msgp	= $(program_prefix)@with_locale_dir@
+tabe_data	= @tabe_data@
+
+#
+# Libraries and Header paths.
+#
+x_includes      = @x_includes@
+x_libraries     = @x_libraries@
+extra_inc	= @with_extra_inc@
+extra_lib	= @with_extra_lib@
+dl_lib		= @with_dl_lib@
+locale_lib      = @with_locale_lib@
+socket_lib	= @with_socket_lib@
+intl_inc	= @with_intl_inc@
+intl_lib	= @with_intl_lib@
+db_inc		= @with_db_inc@
+db_lib		= @with_db_lib@
+tabe_inc	= @with_tabe_inc@
+tabe_lib	= @with_tabe_lib@
+
+#
+# XCIN devel resources.
+#
+config_h	= ${top_srcdir}/config.h
+xc_inc		= ${top_srcdir}/src/include
+xc_lib		= ${top_srcdir}/src/lib
+ximd_inc	= ${top_srcdir}/src/lib/IMdkit
+rules		= ${top_srcdir}/Rules
+makedep		= ${top_srcdir}/script/makedep
+pofix		= ${top_srcdir}/script/pofix
+
+LIBTOOL		= ${top_srcdir}/libtool
+xcininc		= -I$(xc_inc) -I$(top_srcdir) $(extra_inc)
+xcinlib		= -L$(xc_lib) $(extra_lib)
+cin2tab		= $(top_srcdir)/src/util/cin2tab/cin2tab
+xcinrc		= $(top_srcdir)/etc/xcinrc
+
+#
+# Making rules.
+#
+CC_Rule = $(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@
+
+LC_Rule = @$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@
+
+Dep_Rule = $(CC) -M $(CFLAGS) $(DEFS) $(INC) $(SRC)

@@ -178,7 +178,7 @@ fi
 dnl-----------------------------------------------------------------------
 dnl libtool commands.
 dnl-----------------------------------------------------------------------
-dnl AC_LIBTOOL_DLOPEN
+AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
@@ -251,12 +251,10 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(select, ,
 	[ AC_MSG_RESULT([select() does not supported in your system.])
 	  exit 1 ])
-AC_CHECK_FUNCS(snprintf, ,
-	[ extra_func="$extra_func xcin_snprintf.o"
-	  extra_sfunc="$extra_sfunc xcin_snprintf.so" ])
 
 AC_CHECK_FUNCS(getcwd \
 dnl	gethostname \
+	snprintf \
 	gettimeofday \
 	mkdir \
 	mktime \
@@ -271,8 +269,6 @@ dnl	gethostname \
 	strtoul \
 	uname \
 	nl_langinfo)
-AC_SUBST(extra_func)
-AC_SUBST(extra_sfunc)
 
 dnl-----------------------------------------------------------------------
 dnl Set include and library paths.
@@ -335,7 +331,7 @@ OLD_GNU_GETTEXT=0
 if test x$GNU_GETTEXT = x1; then
     need_gettext_ver1=0
     need_gettext_ver2=10
-    need_gettext_ver3=37
+    need_gettext_ver3=36
     need_gettext_ver=$need_gettext_ver1.$need_gettext_ver2.$need_gettext_ver3
 
     gettext_ver=`xgettext -V | awk '{if(NR==1) print $NF}'`
@@ -390,16 +386,32 @@ AC_CHECK_HEADERS(iconv.h, ,
       exit 1 ])
 
 AC_CHECK_FUNCS(iconv, [ found=y ], [ found=n ])
-if test $found = n; then
-    for f in iconv giconv; do
-	AC_CHECK_LIB($f, iconv,
-	    [ found=y; AC_DEFINE(HAVE_ICONV)
-	      with_iconv_lib="$with_iconv_lib -l$f" ], [ found=n ])
-	test $found = y && break
+dnl if test $found = n; then
+    for f in x iconv giconv; do
+	if test $f != x; then
+	    LIBS="$OLD_LIBS -l$f"
+	    AC_MSG_CHECKING([iconv in -l$f])
+	else
+	    AC_MSG_CHECKING([iconv in standard libc])
+	fi
+
+	AC_TRY_LINK([
+#include <stdlib.h>
+#include <iconv.h>], [
+iconv_t cd = iconv_open("","");
+iconv(cd,NULL,NULL,NULL,NULL);
+iconv_close(cd);], [ found=y; AC_DEFINE(HAVE_ICONV)
+		     with_iconv_lib="$with_iconv_lib -l$f" ], [ found=n ])
+	if test $found = y; then
+	    AC_MSG_RESULT([yes])
+	    break
+	else
+	    AC_MSG_RESULT([no])
+	fi
     done
-fi
+dnl fi
 if test $found = n; then
-    AC_MSG_RESULT([iconv() does not supported in your system.])
+    AC_MSG_RESULT([iconv() is not supported in your system.])
     AC_MSG_RESULT([Please use --with-iconv-lib to configure.])
     exit 1
 fi
@@ -457,17 +469,23 @@ AC_SUBST(x_libraries)
 dnl-----------------------------------------------------------------------
 dnl Checks for tabe & bims libraries.
 dnl-----------------------------------------------------------------------
-LIBS="$OLD_LIBS"
-CPP="$CPP $x_includes"
+AC_MSG_CHECKING([tabe data files])
 if test x$with_tabe_lib = x; then
-    tabe_data=$extra_prefix/share/tabe/tsiyin
+    tabe_data="$with_extra_prefix/share/tabe/tsiyin/"
 else
     tabe_data=`echo $with_tabe_lib | \
-	sed 's|^-L\(.*\)/lib$|\1/share/tabe/tsiyin|'`
+	sed 's|^-L\(.*\)/lib$|\1/share/tabe/tsiyin/|'`
 fi
-test ! -f $tabe_data/tsi.db && tabe_data=''
+if test ! -f $tabe_data/tsi.db; then
+    tabe_data=''
+    AC_MSG_RESULT([not found])
+else
+    AC_MSG_RESULT([$tabe_data])
+fi
 AC_SUBST(tabe_data)
 
+LIBS="$OLD_LIBS"
+CPP="$CPP $x_includes"
 AC_CHECK_LIB(tabe, tabeZhiInfoLookupYin, , 
     [ AC_MSG_RESULT([You need libtabe to compile bimsphone module.])
       AC_MSG_RESULT([Please use --with-tabe-lib to configure.])
@@ -540,6 +558,7 @@ AC_DEFINE_UNQUOTED(XCIN_DEFAULT_DIR,	"${xcin_p}")
 AC_DEFINE_UNQUOTED(XCIN_MSGLOCAT,	"${xcin_msgp}")
 
 AC_OUTPUT(Makefile:script/Makefile.in \
+	Rules:script/Rules.in \
 	src/Makefile \
 	src/lib/Makefile \
  	src/lib/xcintool/Makefile \
@@ -559,6 +578,3 @@ AC_OUTPUT(Makefile:script/Makefile.in \
 	cin/gb/Makefile \
 	etc/Makefile \
 	po/Makefile)
-
-AC_MSG_RESULT([making links ....])
-make -s makelinks

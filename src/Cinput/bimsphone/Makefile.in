@@ -1,71 +1,28 @@
-CC              = @CC@
-CFLAGS          = @CFLAGS@
-CPPFLAGS        = @CPPFLAGS@
-DEFS            = @DEFS@
-LDFLAGS         = @LDFLAGS@
-INSTALL         = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA    = @INSTALL_DATA@
-RANLIB		= @RANLIB@
-LN_S 		= @LN_S@
-@SET_MAKE@
-
-x_includes      = @x_includes@
-x_libraries     = @x_libraries@
-extra_inc	= @with_extra_inc@
-extra_lib	= @with_extra_lib@
-tabe_lib	= @with_tabe_lib@
-tabe_inc	= @with_tabe_inc@
-db_inc		= @with_db_inc@
-db_lib		= @with_db_lib@
-
-program_prefix	= @program_prefix@
 srcdir		= @srcdir@
 top_srcdir	= @top_srcdir@
-prefix		= @prefix@
-exec_prefix	= @exec_prefix@
-LIBTOOL		= $(top_srcdir)/libtool
+include $(top_srcdir)/Rules
 
-xcin_binp	= $(program_prefix)@bindir@
-xcin_libp	= $(program_prefix)@with_xcin_dir@
-xcin_datap	= ${xcin_libp}/tab
-xcin_rcp	= $(program_prefix)@with_xcin_rcdir@
-xcin_manp	= $(program_prefix)@mandir@
-
-xcininc = -I$(top_srcdir)/src/include
-xcinlib = -L${top_srcdir}/src/lib
-INC     = $(xcininc) $(x_includes) $(extra_inc) $(tabe_inc) $(db_inc)
-LIB     = $(xcinlib) $(extra_lib) $(tabe_lib) $(db_lib)
+INC     = $(xcininc) $(x_includes) $(tabe_inc) $(db_inc)
+LIB     = $(xcinlib) $(tabe_lib) $(db_lib)
 TARGET  = bimsphone.la
-
 
 SRC = bimsphone.c bimspinyin.c
 OBJ = $(SRC:.c=.lo)
 
+.PHONY: depend clean distclean
 
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
 	$(LIBTOOL) --mode=link $(CC) -module -o $(TARGET) $(OBJ) $(LIB) \
-		-rpath $(xcin_libp)
+		-rpath $(moddir)
+include .depend
 
-bimsphone.lo: bimsphone.c ../../include/xcintool.h ../../include/module.h \
-  bimsphone.h ../../include/constant.h ../../include/config.h
-	$(LIBTOOL) --mode=compile \
-		$(CC) -c $(CFLAGS) $(INC) $(DEFS) -o $@ bimsphone.c
-
-bimspinyin.lo: bimspinyin.c ../../include/module.h ../../include/xcintool.h \
-  bimsphone.h ../../util/cin2tab/bimscin.h ../../include/constant.h \
-  ../../include/config.h 
-	$(LIBTOOL) --mode=compile \
-		$(CC) -c $(CFLAGS) $(INC) $(DEFS) -o $@ bimspinyin.c
-
-
-.PHONY: clean distclean
+depend:
+	$(Dep_Rule) | $(makedep) $(rules) LC_Rule lo > .depend
 clean:
 	rm -f $(OBJ) *.o $(TARGET) core *.a
 distclean: clean
-	rm -rf Makefile .depend .libs
+	rm -rf Makefile .libs
 install: $(module_build)
-	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(TARGET) $(xcin_libp)
-
+	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(TARGET) $(xcin_modp)

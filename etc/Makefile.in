@@ -1,37 +1,22 @@
 #
 # This is Makefile.in for autoconf configure program.
 #
-INSTALL	        = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA	= @INSTALL_DATA@
-OS_TYPE		= @os_type@
-@SET_MAKE@
-
-#
-# XCIN installation path.
-#
-program_prefix	= @program_prefix@
 srcdir		= @srcdir@
 top_srcdir	= @top_srcdir@
-prefix		= @prefix@
-exec_prefix	= @exec_prefix@
-
-xcin_binp	= $(program_prefix)@bindir@
-xcin_libp	= $(program_prefix)@with_xcin_dir@
-xcin_datap	= ${xcin_libp}/tab
-xcin_rcp	= $(program_prefix)@with_xcin_rcdir@
-xcin_manp	= $(program_prefix)@mandir@
+include $(top_srcdir)/Rules
 
 all: xcinrc
 
 xcinrc:
 	@if [ -f "xcinrc.$(OS_TYPE)" ]; then \
 	     echo "Creating xcinrc for $(OS_TYPE) ...."; \
-	     sed "s|%xcin_dir%|$(xcin_libp)|" xcinrc.$(OS_TYPE) > xcinrc; \
+	     sed "s|%xcin_dir%|$(xcin_modp)|;\
+		  s|%tabe_data%|$(tabe_data)|" xcinrc.$(OS_TYPE) > xcinrc; \
 	 else \
 	     echo "Warning: the locale support of your system is UNKNOWN!!"; \
 	     echo "Please report this to: xcin@linux.org.tw";\
-	     sed "s|%xcin_dir%|$(xcin_libp)|" xcinrc.UNKNOWN > xcinrc; \
+	     sed "s|%xcin_dir%|$(xcin_modp)|;\
+		  s|%tabe_data%|$(tabe_data)|" xcinrc.UNKNOWN > xcinrc; \
 	 fi
 
 .PHONY: install clean distclean subsys
@@ -45,4 +30,3 @@ clean:
 	rm -f xcinrc
 distclean:
 	rm -f xcinrc Makefile .depend
-

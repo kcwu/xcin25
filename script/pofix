@@ -1,0 +1,22 @@
+#!/bin/sh
+
+perl=`which perl`
+if [ ! -z "$perl" ]; then
+    $perl -e \
+'while (defined($in = <stdin>)) {
+    @str = split(//, $in);
+    for($i=0; $i<=$#str; $i++) {
+        $_ = $str[$i];
+        if (/[\x80-\xff]/ && $i<=$#str-1) {
+            printf("$str[$i]");
+            $_ = $str[$i+1];
+            (/[\\]/) ? printf("\\\\") : printf("$str[$i+1]");
+            $i++; }
+        else { printf("$str[$i]"); } } }' | msgfmt -o $1 -
+
+else
+    echo "Warning: Your GNU Gettext is too old such that I have to fix"
+    echo "Warning: my origianl po files.  However, perl program is not"
+    echo "Warning: available in your system.  Hence I will skip the mo"
+    echo "Warning: file compilation/installation."
+fi

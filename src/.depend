@@ -1,0 +1,27 @@
+#
+# PLEASE DON'T EDIT.
+#
+# This is automatically generated from "make depend".
+# You need GCC and perl to generate me.
+#
+
+xcin_main.o: xcin_main.c  ../config.h ../src/include/constant.h ../src/include/xcintool.h ../src/include/xcin.h ../src/include/gui.h ../src/include/IC.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/imodule.h ../src/include/module.h ../src/include/fkey.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ xcin_main.c
+module.o: module.c  ../config.h ../src/include/xcintool.h ../src/include/imodule.h ../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ module.c
+gui.o: gui.c  ../config.h ../src/include/constant.h ../src/include/gui.h ../src/include/xcintool.h ../src/include/xcin.h ../src/include/IC.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/imodule.h ../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui.c
+xim.o: xim.c  ../config.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/constant.h ../src/include/xcintool.h ../src/include/fkey.h ../src/include/imodule.h ../src/include/module.h ../src/include/xcin.h ../src/include/gui.h ../src/include/IC.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ xim.c
+xim_IC.o: xim_IC.c  ../config.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/xcintool.h ../src/include/xcin.h ../src/include/gui.h ../src/include/IC.h ../src/include/imodule.h ../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ xim_IC.c
+fkey.o: fkey.c  ../config.h ../src/lib/IMdkit/IMdkit.h ../src/include/xcintool.h ../src/include/fkey.h ../src/include/imodule.h ../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ fkey.c
+gui_main.o: gui_main.c  ../config.h ../src/include/constant.h ../src/include/xcintool.h ../src/include/gui.h ../src/include/xcin.h ../src/include/IC.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/imodule.h ../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_main.c
+gui_menusel.o: gui_menusel.c  ../config.h ../src/include/constant.h ../src/include/xcintool.h ../src/include/gui.h ../src/include/IC.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/imodule.h ../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_menusel.c
+gui_overspot.o: gui_overspot.c  ../config.h ../src/include/constant.h ../src/include/xcintool.h ../src/include/xcin.h ../src/include/gui.h ../src/include/IC.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/imodule.h ../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_overspot.c
+gui_main2.o: gui_main2.c  ../config.h ../src/include/constant.h ../src/include/xcintool.h ../src/include/gui.h ../src/include/xcin.h ../src/include/IC.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/imodule.h ../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_main2.c

@@ -21,42 +21,42 @@ make-big5hkscs: $(big5hkscs)
 
 
 sys.tab.$(BIG5ENC): sys.cin.big5
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) -o $@ sys.cin.big5
+	$(build) -r $(xcinrc) -l $(BIG5ENC) -o $@ sys.cin.big5
 array30.tab.$(BIG5ENC): array30.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ array30.cin
 bims_pinyin.tab.$(BIG5ENC): bims_pinyin.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ bims_pinyin.cin
 cj.tab.$(BIG5ENC): cj.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ cj.cin
 phone.tab.$(BIG5ENC): phone.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ phone.cin
 pinyin.tab.$(BIG5ENC): pinyin.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ pinyin.cin
 pinyin0.tab.$(BIG5ENC): pinyin0.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ pinyin0.cin
 simplex.tab.$(BIG5ENC): simplex.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ simplex.cin
 jyutping.tab.$(BIG5ENC): jyutping.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ jyutping.cin
 jyutping0.tab.$(BIG5ENC): jyutping0.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ jyutping0.cin
 telecode.tab.$(BIG5ENC): telecode.cin sys.tab.$(BIG5ENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ telecode.cin
 
 sys.tab.$(BIG5HKENC): sys.cin.big5hkscs
-	$(cin2tab) -r $(xcinrc) -l $(BIG5HKENC) -o $@ sys.cin.big5hkscs
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) -o $@ sys.cin.big5hkscs
 cj.tab.$(BIG5HKENC): cj.cin sys.tab.$(BIG5HKENC)
-	$(cin2tab) -r $(xcinrc) -l $(BIG5HKENC) \
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
 		-s sys.tab.$(BIG5HKENC) -o $@ cj.cin
 
 

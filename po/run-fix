@@ -1,6 +1,0 @@
-#!/bin/sh
-
-perl=`which perl`
-if [ ! -z "$perl" ]; then
-    $perl fix-slash | msgfmt -o $1 -
-fi

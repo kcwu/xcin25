@@ -1,0 +1,21 @@
+#
+# PLEASE DON'T EDIT.
+#
+# This is automatically generated from "make depend".
+# You need GCC and perl to generate me.
+#
+
+enclist.lo: enclist.c  ../../../config.h ../../../src/include/xcintool.h charset.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ enclist.c
+charset.lo: charset.c  ../../../config.h ../../../src/include/xcintool.h charset.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ charset.c
+utf8.lo: utf8.c  ../../../config.h ../../../src/include/xcintool.h charset.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ utf8.c
+big5.lo: big5.c  ../../../config.h ../../../src/include/xcintool.h charset.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ big5.c
+big5hkscs.lo: big5hkscs.c  ../../../config.h ../../../src/include/xcintool.h charset.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ big5hkscs.c
+gb2312.lo: gb2312.c  ../../../config.h ../../../src/include/xcintool.h charset.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ gb2312.c
+gbk.lo: gbk.c  ../../../config.h ../../../src/include/xcintool.h charset.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ gbk.c

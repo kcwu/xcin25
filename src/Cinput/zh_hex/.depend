@@ -1,0 +1,9 @@
+#
+# PLEASE DON'T EDIT.
+#
+# This is automatically generated from "make depend".
+# You need GCC and perl to generate me.
+#
+
+zh_hex.lo: zh_hex.c  ../../../config.h ../../../src/include/xcintool.h ../../../src/include/module.h zh_hex.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ zh_hex.c

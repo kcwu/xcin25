@@ -1,56 +1,28 @@
-CC              = @CC@
-CFLAGS          = @CFLAGS@
-CPPFLAGS        = @CPPFLAGS@
-DEFS            = @DEFS@
-LDFLAGS         = @LDFLAGS@
-INSTALL         = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA    = @INSTALL_DATA@
-LN_S 		= @LN_S@
-RANLIB		= @RANLIB@
-@SET_MAKE@
-
-x_includes      = @x_includes@
-x_libraries     = @x_libraries@
-extra_inc	= @with_extra_inc@
-extra_lib	= @with_extra_lib@
-
-program_prefix	= @program_prefix@
 srcdir		= @srcdir@
 top_srcdir	= @top_srcdir@
-prefix		= @prefix@
-exec_prefix	= @exec_prefix@
-LIBTOOL		= $(top_srcdir)/libtool
+include $(top_srcdir)/Rules
 
-xcin_binp	= $(program_prefix)@bindir@
-xcin_libp	= $(program_prefix)@with_xcin_dir@
-xcin_datap	= ${xcin_libp}/tab
-xcin_rcp	= $(program_prefix)@with_xcin_rcdir@
-xcin_manp	= $(program_prefix)@mandir@
-
-xcininc		= -I$(top_srcdir)/src/include
 INC		= $(xcininc) $(x_includes)
 TARGET		= zh_hex.la
 
 SRC = zh_hex.c
 OBJ = $(SRC:.c=.lo)
 
+.PHONY: depend clean distclean
+
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
 	$(LIBTOOL) --mode=link $(CC) -module -o $(TARGET) $(OBJ) \
-		-rpath $(xcin_libp)
+		-rpath $(moddir)
+include .depend
 
-zh_hex.lo: zh_hex.c ../../include/xcintool.h ../../include/config.h \
-  ../../include/module.h zh_hex.h
-	$(LIBTOOL) --mode=compile \
-		$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ zh_hex.c
+depend:
+	$(Dep_Rule) | $(makedep) $(rules) LC_Rule lo > .depend
 
-.PHONY: clean distclean
 clean:
 	rm -f $(OBJ) $(TARGET) core *.o
 distclean: clean
-	rm -rf Makefile .depend .libs
+	rm -rf Makefile .libs
 install: $(module_build)
-	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(TARGET) $(xcin_libp)
-
+	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(TARGET) $(xcin_modp)

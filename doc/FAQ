@@ -46,6 +46,7 @@ QB.9:  為什麼我在編譯 libtabe 到一半時，出現如下的錯誤訊息呢？
        tabe_tsidbint.c:165: structure has no member named 'bt_nrecs'
        tabe_tsidbint.c:In function 'tabeTsiDBCursorSet':            
        tabe_tsidbint.c:394: too few arguments to function
+QB.10: 要如何在一進入 X Window 時就啟動 xcin 呢？
 
 C. xcinrc 設定相關問題:
 -----------------------
@@ -532,6 +533,33 @@ file (include/) 的路徑。請您先找出您的 header file 的路徑，它通常位於
 	configure --with-dbinc=/usr/include/db2
 
 然後重新編譯 libtabe 即可。
+
+
+------------------------
+QB.10: 要如何在一進入 X Window 時就啟動 xcin 呢？
+
+如果您是在文字模式下打 startx 或其他類似的指令進入 X Window 環境的話，請
+您編輯您的 $HOME/.xinitrc 檔案，將啟動 xcin 的指令寫進去。如果您原本沒有
+$HOME/.xinitrc 檔的話，請您自行編寫一個，它的內容大致如下:
+
+========================== Cut Here ====================================
+#!/bin/sh
+
+PATH=$PATH:/usr/X11R6/bin:/usr/local/bin; export PATH
+LC_CTYPE=zh_TW.Big5; export LC_CTYPE
+XMODIFIERS="@im=xcin"; export XMODIFIERS
+xcin &
+exec <start_your_WM>
+========================== Cut Here ====================================
+
+其中 <start_your_WM> 是啟動您的 Window Manager 的指令。例如您使用 fvwm
+的話，則該指令就是 fvwm。若您使用 KDE 的話，則該指令就應該是 startkde。
+請您查閱您的系統說明文件找出您的 Window Manager 的啟動指令。
+
+如果，您不是由文字模式下進入 X Window 系統的，而是直接由圖形介面 login
+進入系統的 (例如從 xdm login)，則您要編寫您的 $HOME/.xsession 檔案，讓
+您在 login 進入後就啟動 xcin。 $HOME/.xsession 檔的內容與上述的
+$HOME/.xinitrc 的內容完全一樣。
 
 
 

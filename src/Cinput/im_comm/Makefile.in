@@ -1,30 +1,14 @@
-CC          = @CC@
-CFLAGS      = @CFLAGS@
-CPPFLAGS    = @CPPFLAGS@
-DEFS        = @DEFS@
-RANLIB      = @RANLIB@
-LN_S        = @LN_S@
-@SET_MAKE@
-
-x_includes  = @x_includes@
-extra_inc   = @with_extra_inc@
-extra_lib   = @with_extra_lib@
-
 srcdir      = @srcdir@
 top_srcdir  = @top_srcdir@
-prefix      = @prefix@
-exec_prefix = @exec_prefix@
+include $(top_srcdir)/Rules
 
-xcininc = -I$(top_srcdir)/src/include
-INC     = $(xcininc) $(x_includes)
-TARGET  = libim_comm.a
-
+INC      = $(xcininc) $(x_includes)
+TARGET   = libim_comm.a
 
 SRC = ascii_wb.c keymap.c charcode.c qphrase.c
-OBJ = ascii_wb.o keymap.o charcode.o qphrase.o
+OBJ = $(SRC:.c=.o)
 
-.c.o:
-	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
+.PHONY: depend clean distclean
 
 all: $(TARGET)
 
@@ -33,19 +17,12 @@ $(TARGET): $(OBJ)
 	if [ -n "$(RANLIB)" ]; then $(RANLIB) $(TARGET); fi
 	rm -f ../../lib/$(TARGET)
 	( cd ../../lib; $(LN_S) ../Cinput/im_comm/$(TARGET) . )
+include .depend
 
-ascii_wb.o: ascii_wb.c ../../include/module.h ../../include/xcintool.h
+depend:
+	$(Dep_Rule) | $(makedep) $(rules) CC_Rule o > .depend
 
-keymap.o: keymap.c ../../include/module.h ../../include/xcintool.h
-
-charcode.o: charcode.c ../../include/module.h ../../include/xcintool.h
-
-qphrase.o: qphrase.c ../../include/xcintool.h ../../include/module.h \
-	../../include/config.h
-
-
-.PHONY: clean distclean
 clean:
 	rm -f $(OBJ) $(TARGET) core
 distclean: clean
-	rm -f *.o Makefile .depend
+	rm -f Makefile

@@ -28,7 +28,7 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
-#include "Ximd/IMdkit.h"
+#include "IMdkit.h"
 #include "xcintool.h"
 #include "fkey.h"
 

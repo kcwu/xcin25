@@ -1,0 +1,11 @@
+#
+# PLEASE DON'T EDIT.
+#
+# This is automatically generated from "make depend".
+# You need GCC and perl to generate me.
+#
+
+bimsphone.lo: bimsphone.c  ../../../config.h ../../../src/include/xcintool.h ../../../src/include/module.h bimsphone.h ../../util/cin2tab/bimscin.h ../../../src/include/constant.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ bimsphone.c
+bimspinyin.lo: bimspinyin.c  ../../../src/include/module.h ../../../src/include/xcintool.h bimsphone.h ../../util/cin2tab/bimscin.h ../../../src/include/constant.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ bimspinyin.c

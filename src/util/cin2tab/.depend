@@ -1,0 +1,15 @@
+#
+# PLEASE DON'T EDIT.
+#
+# This is automatically generated from "make depend".
+# You need GCC and perl to generate me.
+#
+
+cin2tab.o: cin2tab.c  ../../../config.h ../../../src/include/xcintool.h ../../../src/include/module.h cin2tab.h syscin.h gencin.h ../../../src/include/constant.h bimscin.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ cin2tab.c
+syscin.o: syscin.c  ../../../config.h ../../../src/include/xcintool.h syscin.h ../../../src/include/module.h cin2tab.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ syscin.c
+gencin.o: gencin.c  ../../../config.h ../../../src/include/xcintool.h gencin.h ../../../src/include/constant.h ../../../src/include/module.h cin2tab.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gencin.c
+bimscin.o: bimscin.c  ../../../config.h ../../../src/include/xcintool.h bimscin.h ../../../src/include/constant.h cin2tab.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ bimscin.c

@@ -36,8 +36,8 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <unistd.h>
 #include <time.h>
 #include <X11/Xlib.h>
-#include "Ximd/IMdkit.h"
-#include "Ximd/Xi18n.h"
+#include "IMdkit.h"
+#include "Xi18n.h"
 #include "xcintool.h"
 #include "xcin.h"
 

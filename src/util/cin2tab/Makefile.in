@@ -1,76 +1,28 @@
-CC              = @CC@
-CFLAGS          = @CFLAGS@
-CPPFLAGS        = @CPPFLAGS@
-DEFS            = @DEFS@
-LDFLAGS         = @LDFLAGS@
-INSTALL         = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA    = @INSTALL_DATA@
-@SET_MAKE@
+srcdir	   = @srcdir@
+top_srcdir = @top_srcdir@
+include $(top_srcdir)/Rules
 
-x_includes      = @x_includes@
-x_libraries     = @x_libraries@
-extra_inc	= @with_extra_inc@
-extra_lib	= @with_extra_lib@
-locale_lib      = @with_locale_lib@
-intl_lib	= @with_intl_lib@
-
-#
-# XCIN installation path.
-#
-program_prefix	= @program_prefix@
-srcdir		= @srcdir@
-top_srcdir	= @top_srcdir@
-prefix		= @prefix@
-exec_prefix	= @exec_prefix@
-LIBTOOL		= $(top_srcdir)/libtool
-
-xcin_binp	= $(program_prefix)@bindir@
-xcin_libp	= $(program_prefix)@xcin_dir@
-xcin_datap	= ${xcin_libp}/tab
-xcin_rcp	= $(program_prefix)@xcin_rcdir@
-xcin_manp	= $(program_prefix)@mandir@
-
-#
-# Compiling valuables.
-#
-xcininc = -I${top_srcdir}/src/include
-xcinlib = -L${top_srcdir}/src/lib
-INC     = $(x_includes) $(xcininc) $(extra_inc)
-LIB     = $(extra_lib) $(xcinlib) -lim_comm ../../lib/libxcin.la \
-	  $(locale_lib) $(intl_lib) -lm
+INC = $(x_includes) $(xcininc)
+LIB = $(xcinlib) -lim_comm ../../lib/libxcin.la $(locale_lib) $(intl_lib) -lm
 
 BIN = cin2tab
 SRC = cin2tab.c syscin.c gencin.c bimscin.c
-OBJ = cin2tab.o syscin.o gencin.o bimscin.o
+OBJ = $(SRC:.c=.o)
 
-.c.o:
-	$(CC) $(CFLAGS) $(INC) $(DEFS) -c -o $@ $<
+.PHONY: clean distclean depend install
 
 all: $(BIN)
 
 $(BIN): $(OBJ)
 	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(INC) $(DEFS) -o $(BIN) $(OBJ) $(LIB)
+include .depend
 
-cin2tab.o: cin2tab.c ../../include/xcintool.h ../../include/module.h \
-  cin2tab.h syscin.h ../../include/constant.h ../../include/config.h \
-  gencin.h bimscin.h
+depend:
+	$(Dep_Rule) | $(makedep) $(rules) CC_Rule o > .depend
 
-syscin.o: syscin.c ../../include/xcintool.h syscin.h ../../include/constant.h \
-  ../../include/config.h ../../include/module.h cin2tab.h
-
-gencin.o: gencin.c ../../include/xcintool.h gencin.h ../../include/constant.h \
-  ../../include/config.h ../../include/module.h cin2tab.h
-
-bimscin.o: bimscin.c ../../include/xcintool.h bimscin.h \
-  ../../include/constant.h ../../include/config.h cin2tab.h
-
-
-.PHONY: clean distclean
 clean:
 	rm -f *.o $(BIN) core
 distclean: clean
-	rm -rf Makefile .depend .libs
+	rm -rf Makefile .libs
 install: $(BIN)
 	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $(BIN) $(xcin_binp)
-

@@ -37,7 +37,7 @@
 #include "xcintool.h"
 #include "xcin.h"
 #include "fkey.h"
-#include "syscin.h"
+#include "util/cin2tab/syscin.h"
 
 static xccore_t xcin_core;		/* XCIN kernel data. */
 int verbose;

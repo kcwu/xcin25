@@ -1,50 +1,12 @@
 #
 # This is Makefile.in for autoconf configure program.
 #
-CC              = @CC@
-CFLAGS          = @CFLAGS@
-CPPFLAGS        = @CPPFLAGS@
-DEFS	        = @DEFS@
-LDFLAGS         = @LDFLAGS@
-INSTALL	        = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA	= @INSTALL_DATA@
-@SET_MAKE@
-
-x_includes      = @x_includes@
-x_libraries     = @x_libraries@
-extra_inc	= @with_extra_inc@
-extra_lib	= @with_extra_lib@
-dl_lib		= @with_dl_lib@
-locale_lib      = @with_locale_lib@
-intl_lib	= @with_intl_lib@
-db_lib		= @with_db_lib@
-socket_lib	= @with_socket_lib@
-
-#
-# XCIN installation path.
-#
-program_prefix	= @program_prefix@
 srcdir		= @srcdir@
 top_srcdir	= @top_srcdir@
-prefix		= @prefix@
-exec_prefix	= @exec_prefix@
-LIBTOOL		= $(top_srcdir)/libtool
+include $(top_srcdir)/Rules
 
-xcin_binp	= $(program_prefix)@bindir@
-xcin_libp	= $(program_prefix)@with_xcin_dir@
-xcin_datap	= $(xcin_libp)/tab
-xcin_rcp	= $(program_prefix)@with_xcin_rcdir@
-xcin_manp	= $(program_prefix)@mandir@
-
-#
-# Compiling valuables.
-#
-xcininc = -I${top_srcdir}/src/include
-xcinlib = -L${top_srcdir}/src/lib
-
-INC	= ${x_includes} ${xcininc} ${extra_inc}
-LIB	= ${extra_lib} ${xcinlib} -lXimd -lim_comm lib/libxcin.la \
+INC	= ${xcininc} ${x_includes} -I${ximd_inc}
+LIB	= ${xcinlib} -lXimd -lim_comm lib/libxcin.la \
 	  ${x_libraries} ${locale_lib} ${dl_lib} ${intl_lib} -lm
 
 BIN	= xcin
@@ -57,84 +19,35 @@ UTIL	= util
 #
 # Compiling Rules.
 #
+.PHONY: subsys util_bin depend clean distclean install \
+	install_path install_xcin
+
 all: $(BIN) util_bin
 
 $(BIN): subsys $(OBJ)
-	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) -export-dynamic \
+	@$(LIBTOOL) --mode=link $(CC) $(CFLAGS) -export-dynamic \
 		$(INC) $(DEFS) -o $(BIN) $(OBJ) $(LIB)
+include .depend
 
 subsys:
 	@for d in ${SUBSYS}; do ( cd $$d; ${MAKE} ); done
-
 util_bin: 
 	@( cd ${UTIL}; ${MAKE} )
 
-fkey.o: fkey.c include/xcintool.h include/config.h include/fkey.h \
-  include/imodule.h include/module.h include/Ximd/IMdkit.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ fkey.c
-
-gui.o: gui.c include/gui.h include/xcintool.h \
-  include/xcin.h include/IC.h include/Ximd/IMdkit.h include/Ximd/Xi18n.h \
-  include/Ximd/XimProto.h include/imodule.h include/module.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui.c
-
-gui_main.o: gui_main.c include/constant.h include/config.h include/xcintool.h \
-  include/xcin.h include/gui.h include/IC.h include/Ximd/IMdkit.h \
-  include/Ximd/Xi18n.h include/Ximd/XimProto.h include/imodule.h \
-  include/module.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_main.c
-
-gui_main2.o: gui_main2.c include/constant.h include/config.h include/xcintool.h\
-  include/xcin.h include/gui.h include/IC.h include/Ximd/IMdkit.h \
-  include/Ximd/Xi18n.h include/Ximd/XimProto.h include/imodule.h \
-  include/module.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_main2.c
-
-gui_menusel.o: gui_menusel.c include/constant.h include/config.h \
-  include/xcintool.h include/gui.h include/IC.h include/Ximd/IMdkit.h \
-  include/Ximd/Xi18n.h include/Ximd/XimProto.h include/imodule.h \
-  include/module.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_menusel.c
-
-gui_overspot.o: gui_overspot.c include/constant.h include/config.h \
-  include/xcintool.h include/xcin.h include/gui.h include/IC.h \
-  include/Ximd/IMdkit.h include/Ximd/Xi18n.h include/Ximd/XimProto.h \
-  include/imodule.h include/module.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_overspot.c
-
-module.o: module.c include/config.h include/xcintool.h include/imodule.h \
-  include/module.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ module.c
-
-xcin_main.o: xcin_main.c include/constant.h include/config.h \
-  include/xcintool.h include/xcin.h include/gui.h include/IC.h \
-  include/Ximd/IMdkit.h include/Ximd/Xi18n.h include/Ximd/XimProto.h \
-  include/imodule.h include/module.h include/fkey.h include/syscin.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ xcin_main.c
-
-xim.o: xim.c include/Ximd/IMdkit.h include/Ximd/Xi18n.h \
-  include/Ximd/XimProto.h include/config.h include/constant.h \
-  include/xcintool.h include/fkey.h include/imodule.h include/module.h \
-  include/xcin.h include/gui.h include/IC.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ xim.c
-
-xim_IC.o: xim_IC.c include/Ximd/IMdkit.h include/Ximd/Xi18n.h \
-  include/Ximd/XimProto.h include/config.h include/xcintool.h include/xcin.h \
-  include/gui.h include/IC.h include/imodule.h include/module.h
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ xim_IC.c
-
-
-.PHONY: install clean distclean subsys
+depend:
+	$(Dep_Rule) | $(makedep) $(rules) CC_Rule o > .depend
+	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} depend ); done
 
 install: install_path install_xcin install_subsys
 
 install_path:
 	if [ ! -d "$(xcin_binp)" ];  then $(INSTALL) -d $(xcin_binp);  fi
 	if [ ! -d "$(xcin_libp)" ];  then $(INSTALL) -d $(xcin_libp);  fi
+	if [ ! -d "$(xcin_modp)" ];  then $(INSTALL) -d $(xcin_modp);  fi
 	if [ ! -d "$(xcin_datap)" ]; then $(INSTALL) -d $(xcin_datap); fi
 
 install_xcin: $(BIN)
-	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $(BIN) $(xcin_binp)
+	@$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $(BIN) $(xcin_binp)
 
 install_subsys:
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} install ); done
@@ -143,7 +56,5 @@ clean:
 	rm -f $(OBJ) $(BIN) core
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} clean ); done
 distclean:
-	rm -f $(OBJ) $(BIN) core
-	rm -rf Makefile .depend .libs
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} distclean ); done
-
+	rm -rf $(OBJ) $(BIN) core Makefile Rules .libs

@@ -1,0 +1,31 @@
+#
+# PLEASE DON'T EDIT.
+#
+# This is automatically generated from "make depend".
+# You need GCC and perl to generate me.
+#
+
+FrameMgr.o: FrameMgr.c  FrameMgr.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ FrameMgr.c
+IMValues.o: IMValues.c  IMdkit.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ IMValues.c
+i18nIMProto.o: i18nIMProto.c  FrameMgr.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nIMProto.c
+i18nPtHdr.o: i18nPtHdr.c  ../../../config.h FrameMgr.h IMdkit.h Xi18n.h XimProto.h XimFunc.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nPtHdr.c
+i18nX.o: i18nX.c  FrameMgr.h IMdkit.h Xi18n.h XimProto.h Xi18nX.h XimFunc.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nX.c
+IMConn.o: IMConn.c  IMdkit.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ IMConn.c
+i18nAttr.o: i18nAttr.c  IMdkit.h Xi18n.h XimProto.h XimFunc.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nAttr.c
+i18nIc.o: i18nIc.c  IMdkit.h Xi18n.h XimProto.h FrameMgr.h XimFunc.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nIc.c
+IMMethod.o: IMMethod.c  IMdkit.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ IMMethod.c
+i18nClbk.o: i18nClbk.c  IMdkit.h Xi18n.h XimProto.h FrameMgr.h XimFunc.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nClbk.c
+i18nMethod.o: i18nMethod.c  FrameMgr.h IMdkit.h Xi18n.h XimProto.h XimFunc.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nMethod.c
+i18nUtil.o: i18nUtil.c  IMdkit.h Xi18n.h XimProto.h FrameMgr.h XimFunc.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nUtil.c

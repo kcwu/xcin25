@@ -1,24 +1,8 @@
-CC		= @CC@
-CFLAGS		= @CFLAGS@
-CPPFLAGS	= @CPPFLAGS@
-DEFS		= @DEFS@
-RANLIB		= @RANLIB@
-LN_S		= @LN_S@
-@SET_MAKE@
+srcdir	   = @srcdir@
+top_srcdir = @top_srcdir@
+include $(top_srcdir)/Rules
 
-extra_inc	= @with_extra_inc@
-extra_lib	= @with_extra_lib@
-intl_inc	= @with_intl_inc@
-
-srcdir		= @srcdir@
-top_srcdir	= @top_srcdir@
-prefix		= @prefix@
-exec_prefix	= @exec_prefix@
-LIBTOOL		= $(top_srcdir)/libtool
-
-xcininc		= -I$(top_srcdir)/src/include
-INC		= $(xcininc) $(extra_inc) $(intl_inc)
-
+INC =	$(xcininc) $(intl_inc)
 SRC =	perr.c open_file.c open_data.c copy_file.c check_file_exist.c \
 	check_version.c get_line.c get_word.c set_data.c strcmp_wild.c \
 	xcin_rc.c set_locale.c wchs_to_mbs.c wchs_len.c stable_sort.c \
@@ -26,70 +10,16 @@ SRC =	perr.c open_file.c open_data.c copy_file.c check_file_exist.c \
 
 OBJ =   $(SRC:.c=.lo)
 
+.PHONY: depend clean distclean
+
 all: $(OBJ)
 
-perr.lo: perr.c ../../include/constant.h ../../include/config.h \
-  ../../include/xcintool.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ perr.c
+include .depend
 
-open_file.lo: open_file.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ open_file.c
+depend:
+	$(Dep_Rule) | $(makedep) $(rules) LC_Rule lo > .depend
 
-open_data.lo: open_data.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ open_data.c
-
-copy_file.lo: copy_file.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ copy_file.c
-
-check_file_exist.lo: check_file_exist.c ../../include/config.h \
-  ../../include/xcintool.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ check_file_exist.c
-
-check_version.lo: check_version.c ../../include/config.h \
-  ../../include/xcintool.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ check_version.c
-
-get_line.lo: get_line.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ get_line.c
-
-get_word.lo: get_word.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ get_word.c
-
-set_data.lo: set_data.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ set_data.c
-
-strcmp_wild.lo: strcmp_wild.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ strcmp_wild.c
-
-xcin_rc.lo: xcin_rc.c ../../include/constant.h ../../include/config.h \
-  ../../include/xcintool.h ../siod/siod.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ xcin_rc.c
-
-set_locale.lo: set_locale.c ../../include/constant.h ../../include/config.h \
-  ../../include/xcintool.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ set_locale.c
-
-wchs_to_mbs.lo: wchs_to_mbs.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ wchs_to_mbs.c
-
-wchs_len.lo: wchs_len.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ wchs_len.c
-
-stable_sort.lo: stable_sort.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ stable_sort.c
-
-debug.lo: debug.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ debug.c
-
-snprintf.lo: snprintf.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ snprintf.c
-
-extract_char.lo: extract_char.c ../../include/xcintool.h ../../include/config.h
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ extract_char.c
-
-
-.PHONY: clean distclean
 clean:
 	rm -f $(OBJ) *.o core
 distclean: clean
-	rm -rf Makefile .depend .libs
+	rm -rf Makefile .libs

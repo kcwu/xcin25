@@ -30,8 +30,8 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
 #include <X11/Xlib.h>           /* for IMdkit.h/Xpointer */
-#include "Ximd/IMdkit.h"
-#include "Ximd/Xi18n.h"
+#include "IMdkit.h"
+#include "Xi18n.h"
 #include "imodule.h"
 
 typedef struct {

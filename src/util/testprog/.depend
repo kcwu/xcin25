@@ -1,0 +1,9 @@
+#
+# PLEASE DON'T EDIT.
+#
+# This is automatically generated from "make depend".
+# You need GCC and perl to generate me.
+#
+
+testprog.o: testprog.c  ../../../config.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ testprog.c

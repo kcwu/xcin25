@@ -1,20 +1,21 @@
-@SET_MAKE@
-
 SUBSYS = cin2tab
 OTHERS = testprog
+
+.PHONY: clean distclean depend install
 
 all: subdirs
 
 subdirs:
 	@for i in $(SUBSYS); do ( cd $$i && $(MAKE) ); done
+depend:
+	@for i in $(SUBSYS) $(OTHERS); do ( cd $$i && $(MAKE) depend ); done
 
-.PHONY: clean distclean depend install
 clean:
 	for d in $(SUBSYS) $(OTHERS); do ( cd $$d; $(MAKE) clean ); done
 
 distclean:
 	for d in $(SUBSYS) $(OTHERS); do ( cd $$d; $(MAKE) distclean ); done
-	rm -f Makefile .depend
+	rm -f Makefile
 
 install:
 	for d in $(SUBSYS); do ( cd $$d; $(MAKE) install ); done

@@ -1,23 +1,6 @@
-INSTALL         = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA    = @INSTALL_DATA@
-GNU_GETTEXT     = @GNU_GETTEXT@
-OLD_GNU_GETTEXT = @OLD_GNU_GETTEXT@
-@SET_MAKE@
-
-program_prefix = @program_prefix@
 srcdir      = @srcdir@
 top_srcdir  = @top_srcdir@
-prefix      = @prefix@
-exec_prefix = @exec_prefix@
-
-xcin_binp   = $(program_prefix)@bindir@
-xcin_libp   = $(program_prefix)@with_xcin_dir@
-xcin_datap  = ${xcin_libp}/tab
-xcin_rcp    = $(program_prefix)@with_xcin_rcdir@
-xcin_manp   = $(program_prefix)@mandir@
-xcin_msgp   = $(program_prefix)@with_locale_dir@
-
+include $(top_srcdir)/Rules
 
 LC_MESG = zh_TW
 
@@ -34,7 +17,7 @@ install:
 		if [ "$(OLD_GNU_GETTEXT)" = 0 ]; then \
 		    msgfmt -o $$msgpath/xcin.mo xcin-$$l.po; \
 		else \
-		    ./run-fix $$msgpath/xcin.mo < xcin-$$l.po; \
+		    $(pofix) $$msgpath/xcin.mo < xcin-$$l.po; \
 		fi \
 	    done; \
 	fi
@@ -51,4 +34,3 @@ pot:
 
 distclean:
 	rm -f Makefile
-

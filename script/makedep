@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+
+$rules  = $ARGV[0];
+$arg    = $ARGV[1];
+$suffix = $ARGV[2];
+
+open(FF, $rules) || die "cannot open Rules file: $rules\n";
+while (defined($_ = <FF>)) {
+    if (/$arg/) {
+	chop();
+	($make_rule = $_) =~ s/$arg = (.*)/$1/;
+    }
+}
+close(FF);
+(length($make_rule) > 0) || die "specified rule not found: $arg\n";
+
+printf("#\n");
+printf("# PLEASE DON'T EDIT.\n");
+printf("#\n");
+printf("# This is automatically generated from \"make depend\".\n");
+printf("# You need GCC and perl to generate me.\n");
+printf("#\n\n");
+
+while (defined($_ = <stdin>)) {
+    chop();
+    s/([^\\]+) \\$/$1/;
+    if (/[^:]*:/) {
+	if (length($target) > 0 && length($depend) > 0) {
+	    printf("$target: $source $depend\n");
+	    printf("\t$make_rule $source\n");
+	}
+	($target = $_) =~ s/([^:]*): .*/$1/;
+	($source = $_) =~ s/[^:]*: ([^ ]*) .*/$1/;
+	$target =~ s/([^\.]*)\..*/$1\.$suffix/;
+	$depend = '';
+    }
+    $#arr = -1;
+    @arr = split();
+    for ($i=0; $i<=$#arr; $i++) {
+	$_ = $arr[$i];
+	if (/^\.\./ || /^[^\/]*\.h$/) {
+	    $depend = "$depend $_";
+	}
+    }
+}
+printf("$target: $source $depend\n");
+printf("\t$make_rule $source\n");

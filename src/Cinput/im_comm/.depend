@@ -1,0 +1,15 @@
+#
+# PLEASE DON'T EDIT.
+#
+# This is automatically generated from "make depend".
+# You need GCC and perl to generate me.
+#
+
+ascii_wb.o: ascii_wb.c  ../../../src/include/module.h ../../../src/include/xcintool.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ ascii_wb.c
+keymap.o: keymap.c  ../../../src/include/module.h ../../../src/include/xcintool.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ keymap.c
+charcode.o: charcode.c  ../../../src/include/module.h ../../../src/include/xcintool.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ charcode.c
+qphrase.o: qphrase.c  ../../../config.h ../../../src/include/xcintool.h ../../../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ qphrase.c

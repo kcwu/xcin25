@@ -5,6 +5,7 @@ xcin-2.5.3-pre1:  2001/
 2. Add a FAQ from Yuting Kuo <yuting@bigfoot.com>: QF.11
    Add a FAQ from <mison@bbs.ee.ntu.edu.tw>: QB.9
    Add FAQs from Kuang-che Wu <kcwu@ck.tp.edu.tw>: Q0, QD.12
+   Add a FAQ from Carfield Yim <carfield@programmer.net>: QB.10
 
 3. Add "miu     £v£¸£²" into bims_pinyin.cin.
    Thanks to Dan Jacobson <jidanni@kimo.com.tw>
@@ -29,6 +30,12 @@ xcin-2.5.3-pre1:  2001/
 
 8. Add NetBSD porting patches.
    Thanks to Rui-Xiang Guo <rxg@ms25.url.com.tw>.
+
+9. Many changes in Makefiles:
+   a. add .depend and "make depend" in each xcin/src/ sub-dirs.
+   b. add Rules.in, pofix, makedep in xcin/script.
+   c. change the check of iconv() to use AC_TRY_LINK.
+   d. remove "make link" from the xcin/Makefile.
 
 
 xcin-2.5.2.3:  2001/03/12

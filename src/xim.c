@@ -28,8 +28,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
-#include <Ximd/IMdkit.h>
-#include <Ximd/Xi18n.h>
+#include "IMdkit.h"
+#include "Xi18n.h"
 #include "constant.h"
 #include "xcintool.h"
 #include "fkey.h"

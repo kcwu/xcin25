@@ -2,38 +2,14 @@
 # This is Makefile.in for autoconf configure program.
 #
 
-LN_S = @LN_S@
 @SET_MAKE@
-
-sys_inc    = src/include
-IMdkit_inc = src/lib/IMdkit/exports/include
-
-links = $(sys_inc)/config.h \
-	$(sys_inc)/syscin.h \
-	$(sys_inc)/Ximd/IMdkit.h \
-	$(sys_inc)/Ximd/Xi18n.h \
-	$(sys_inc)/Ximd/XimProto.h
 
 all:
 	( cd src; ${MAKE} )
 	( cd etc; ${MAKE} )
 	( cd cin; ${MAKE} )
 
-.PHONY: makelinks clean distclean install
-makelinks:
-	if [ ! -f $(sys_inc)/config.h ]; then \
-	    (cd $(sys_inc); ${LN_S} ../../config.h .); fi
-	if [ ! -f $(sys_inc)/syscin.h ]; then \
-	    (cd $(sys_inc); ${LN_S} ../util/cin2tab/syscin.h .); fi
-
-	if [ ! -d $(sys_inc)/Ximd ]; then \
-	    mkdir $(sys_inc)/Ximd; fi
-	if [ ! -f $(sys_inc)/Ximd/IMdkit.h ]; then \
-	    (cd $(sys_inc)/Ximd; ${LN_S} ../../lib/IMdkit/IMdkit.h .); fi
-	if [ ! -f $(sys_inc)/Ximd/Xi18n.h ]; then \
-	    (cd $(sys_inc)/Ximd; ${LN_S} ../../lib/IMdkit/Xi18n.h .); fi
-	if [ ! -f $(sys_inc)/Ximd/XimProto.h ]; then \
-	    (cd $(sys_inc)/Ximd; ${LN_S} ../../lib/IMdkit/XimProto.h .); fi
+.PHONY: clean distclean install
 
 install:
 	( cd src; ${MAKE} install )
@@ -48,6 +24,6 @@ distclean:
 	( cd cin; $(MAKE) distclean )
 	( cd etc; $(MAKE) distclean )
 	( cd po;  $(MAKE) distclean )
-	rm -f config.cache config.h config.log config.status libtool Makefile
-	rm -rf $(sys_inc)/Ximd ${links}
+	rm -f config.cache config.h config.log config.status libtool
+	rm -f Rules Makefile
 
