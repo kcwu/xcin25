@@ -52,6 +52,10 @@ install_xcin: $(BIN)
 install_subsys:
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} install ); done
 
+install_header:
+	if [ ! -d "$(xcin_incp)" ]; then $(INSTALL) -d $(xcin_incp); fi
+	@cd include && for f in IC.h constant.h fkey.h gui.h imodule.h module.h xcin.h xcintool.h; do ( $(LIBTOOL) --mode=install $(INSTALL_DATA) $(xcin_incp) $f ); done
+
 clean:
 	rm -f $(OBJ) $(BIN) core
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} clean ); done
