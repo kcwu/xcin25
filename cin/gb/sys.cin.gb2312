@@ -2,7 +2,7 @@
 #
 # This is the system constant string cin file of xcin-2.5.
 # 
-# keyname		big5-char
+# keyname		gb2312-char
 
 INPN_ENGLISH		Ó¢Êý
 INPN_SBYTE		°ë½Ç

@@ -233,13 +233,13 @@ syscin(cintab_t *cintab)
 	    perr(XCINMSG_ERROR, N_("%s(%d): unknown syscin key: %s\n"),
 		cintab->fname_cin, cintab->lineno, cmd);
 	if (! arg[0])
-	    perr(XCINMSG_ERROR, N_("%s(%d): %s: arguement expected.\n"),
+	    perr(XCINMSG_ERROR, N_("%s(%d): %s: argument expected.\n"),
 		cintab->fname_cin, cintab->lineno, cmd);
 
 	if (i == 0) {
 	    if (strcmp("begin", arg))
 		perr(XCINMSG_ERROR, 
-			N_("%s(%d): %s: arguement \"begin\" expected.\n"),
+			N_("%s(%d): %s: argument \"begin\" expected.\n"),
 			cintab->fname_cin, cintab->lineno, cmd);
 	    for (i=0; i<WCH_SIZE; i++)
 		memset(ccp+i, 0, sizeof(charcode_t));
