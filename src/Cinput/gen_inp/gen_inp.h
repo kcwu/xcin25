@@ -66,12 +66,7 @@ typedef struct {
     int n_kremap;		/* Number of keystroke remapping */
     kremap_t *kremap;		/* Keystroke remapping list */
 
-#ifdef KCWU
     icode_t *ic[MAX_ICODE_MODE]; /* icode & idx for different memory models */
-#else
-    icode_t *ic1;		/* icode & idx for different memory models */
-    icode_t *ic2;
-#endif
     icode_idx_t *icidx;
     ichar_t *ichar;
 

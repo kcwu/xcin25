@@ -1,4 +1,3 @@
-#define KCWU
 /*
     Copyright (C) 1999 by  XCIN TEAM
 
@@ -259,14 +258,8 @@ extern int get_objenc(char *objname, objenc_t *objenc);
 /* Key <-> Code convertion */
 extern int key2code(int key);
 extern int code2key(int code);
-#ifdef KCWU
 extern int keys2codes(unsigned int *klist, int klist_size, char *keystroke);
 extern void codes2keys(unsigned int *klist, int n_klist, char *keystroke, int keystroke_len);
-#else
-/* KhoGuan rev: unsigned int => unsigned long long */
-extern int keys2codes(unsigned long long *klist, int klist_size, char *keystroke);
-extern void codes2keys(unsigned long long *klist, int n_klist, char *keystroke, int keystroke_len);
-#endif
 
 /* CharCode system */
 extern void ccode_init(charcode_t *ccp, int n);

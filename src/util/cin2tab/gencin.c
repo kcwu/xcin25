@@ -38,12 +38,7 @@ static ccode_info_t ccinfo;
 static cintab_head_t th;
 static icode_idx_t *icode_idx;
 static ichar_t *ichar;
-#ifdef KCWU
 static icode_t *icode[MAX_ICODE_MODE];
-#else
-static icode_t *icode1;
-static icode_t *icode2;
-#endif
 static int n_ignore;
 
 /* KhoGuan add */
@@ -57,11 +52,7 @@ typedef struct {
     unsigned int key[2];
 */
     icode_idx_t char_idx;
-#ifdef KCWU
     icode_t key[MAX_ICODE_MODE];
-#else
-    icode_t key[2];
-#endif
     byte_t mark;
 /* KhoGuan add */
 /* tsi_len and tsi will be used for multi-zi tsi only. Otherwise, they are kept 0. */
@@ -426,11 +417,7 @@ cin_chardef(char *arg, cintab_t *cintab)
 /* KhoGuan rev
     ret = (th.n_max_keystroke <= 5) ? ICODE_MODE1 : ICODE_MODE2;
 */
-#ifdef KCWU
     ret = (th.n_max_keystroke+4)/5;
-#else
-    ret = (th.n_max_keystroke <= 10) ? ICODE_MODE1 : ICODE_MODE2;
-#endif
     th.icode_mode = ret;
 
     /*
@@ -459,29 +446,17 @@ cin_chardef(char *arg, cintab_t *cintab)
     ichar = xcin_malloc(cch_size * sizeof(ichar_t), 1); */
     ichar = xcin_malloc(ccinfo.total_char * sizeof(ichar_t), 1);
     icode_idx = xcin_malloc(sizeof(icode_idx_t)*th.n_icode, 1);
-#ifdef KCWU
     for (i=0; i<ret; i++) {
       icode[i] = xcin_malloc(th.n_icode*sizeof(icode_t), 1);
     }
-#else
-    icode1 = xcin_malloc(th.n_icode*sizeof(icode_t), 1);
-    if (ret == ICODE_MODE2)
-        icode2 = xcin_malloc(th.n_icode*sizeof(icode_t), 1);
-#endif
     memset(idx, 0, ccinfo.total_char);
 
     for (i=0; i<ccinfo.total_char; i++)
         ichar[i] = (ichar_t)ICODE_IDX_NOTEXIST;
     for (i=0, cch=cchar; i<th.n_icode; i++, cch++) {
 	icode_idx[i] = ic = (icode_idx_t)(cch->char_idx);
-#ifdef KCWU
 	for(j=0; j<ret; j++)
 	  icode[j][i] = (icode_t)(cch->key[j]);
-#else
-	icode1[i] = (icode_t)(cch->key[0]);
-        if (ret == ICODE_MODE2)
-	    icode2[i] = (icode_t)(cch->key[1]);
-#endif
 
 	if (ic >= (icode_idx_t)0 && ic < (icode_idx_t)ccinfo.total_char) { 
 	    if (! idx[ic] || cch->mark) {
@@ -570,19 +545,10 @@ gencin(cintab_t *cintab)
     free(icode_idx);
     fwrite(ichar, sizeof(ichar_t), ccinfo.total_char, cintab->fw);
     free(ichar);
-#ifdef KCWU
     for(i=0; i<th.icode_mode; i++) {
 	fwrite(icode[i], sizeof(icode_t), th.n_icode, cintab->fw);
 	free(icode[i]);
     }
-#else
-    fwrite(icode1, sizeof(icode_t), th.n_icode, cintab->fw);
-    free(icode1);
-    if (th.icode_mode == ICODE_MODE2) {
-        fwrite(icode2, sizeof(icode_t), th.n_icode, cintab->fw);
-        free(icode2);
-    }
-#endif
 /* KhoGuan add */
     if (th.n_tsi > 0) {
         perr(XCINMSG_NORMAL, 

@@ -46,9 +46,7 @@
 static int
 loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
 {
-#ifdef KCWU
     int i, j;
-#endif
     int n, nn, ret=1;
     char modID[MODULE_ID_SIZE];
     /* KhoGuan add */
@@ -79,7 +77,6 @@ loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
     nn = cf->ccinfo.total_char;
     cf->icidx = xcin_malloc(sizeof(icode_idx_t) * n, 0);
     cf->ichar = xcin_malloc(sizeof(ichar_t) * nn, 0);
-#ifdef KCWU
     if(ret && n)
 	ret = (fread(cf->icidx, sizeof(icode_idx_t), n, fp)==n);
     if(ret && nn)
@@ -98,29 +95,6 @@ loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
 	    break;
 	}
     }
-#else
-    cf->ic1 = xcin_malloc(sizeof(icode_t) * n, 0);
-    if (!n || !nn ||
-	fread(cf->icidx, sizeof(icode_idx_t), n, fp) != n ||
-	fread(cf->ichar, sizeof(ichar_t), nn, fp) != nn ||
-	fread(cf->ic1, sizeof(icode_t), n, fp) != n) {
-	if (n) {
-	    free(cf->icidx);
-	    free(cf->ic1);
-	}
-	if (nn)
-	    free(cf->ichar);
-	ret = 0;
-    }
-    if (ret && cf->header.icode_mode == ICODE_MODE2) {
-        cf->ic2 = xcin_malloc(sizeof(icode_t) * n, 0);
-	if (fread(cf->ic2, sizeof(icode_t), n, fp) != n) {
-	    if (n)
-		free(cf->ic2);
-	    ret = 0;
-	}
-    }
-#endif
 
     /* KhoGuan: add support of phrase input.
        read further for phrase data appended to the cin table */
@@ -532,15 +506,9 @@ reset_keystroke(inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 /*------------------------------------------------------------------------*/
 
 static int
-#ifdef KCWU
 cmp_icvalue(icode_t *ic[MAX_ICODE_MODE], unsigned int idx,
 	    icode_t icode[MAX_ICODE_MODE], int mode)
-#else
-cmp_icvalue(icode_t *ic1, icode_t *ic2, unsigned int idx,
-	    icode_t icode1, icode_t icode2, int mode)
-#endif
 {
-#ifdef KCWU
     int i;
     for(i=0; i<mode; i++)
 	if(ic[i][idx] > icode[i])
@@ -548,43 +516,18 @@ cmp_icvalue(icode_t *ic1, icode_t *ic2, unsigned int idx,
 	else if(ic[i][idx] < icode[i])
 	    return -1;
     return 0;
-#else
-    if (ic1[idx] > icode1)
-	return 1;
-    else if (ic1[idx] < icode1)
-	return -1;
-    else {
-	if (! mode)
-	    return 0;
-	else if (ic2[idx] > icode2)
-	    return 1;
-	else if (ic2[idx] < icode2)
-	    return -1;
-	else
-	    return 0;
-    }
-#endif
 }
 
 static int 
-#ifdef KCWU
 bsearch_char(icode_t *ic[MAX_ICODE_MODE], icode_t icode[MAX_ICODE_MODE], 
 	int size, int mode, int wild)
-#else
-bsearch_char(icode_t *ic1, icode_t *ic2, 
-	     icode_t icode1, icode_t icode2, int size, int mode, int wild)
-#endif
 {
     int head, middle, end, ret;
 
     head   = 0;
     middle = size / 2;
     end    = size;
-#ifdef KCWU
     while ((ret=cmp_icvalue(ic, middle, icode, mode))) {
-#else
-    while ((ret=cmp_icvalue(ic1, ic2, middle, icode1, icode2, mode))) {
-#endif
         if (ret > 0)
             end = middle;
         else
@@ -595,11 +538,7 @@ bsearch_char(icode_t *ic1, icode_t *ic2,
     }
     if (ret == 0) {
 	while(middle > 0 &&
-#ifdef KCWU
 	      ! cmp_icvalue(ic, middle-1, icode, mode)) 
-#else
-	      ! cmp_icvalue(ic1, ic2, middle-1, icode1, icode2, mode)) 
-#endif
 	    middle --;
 	return middle;
     }
@@ -615,15 +554,9 @@ static int
 pick_cch_wild(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, int *head, byte_t dir,
 		wch_t *mcch, unsigned int mcch_size, unsigned int *n_ich)
 {
-/* KhoGuan rev
-    unsigned int i, size, klist[2]; */
     unsigned int i, size;
-#ifdef KCWU
     int j;
     unsigned int klist[MAX_ICODE_MODE];
-#else
-    unsigned long long klist[2];
-#endif
 
     int n_klist, ks_size, r=0, idx;
     char *ks;
@@ -633,11 +566,7 @@ pick_cch_wild(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, int *head, byte_t dir,
     size = cf->header.n_icode;
     ks_size = cf->header.n_max_keystroke + 1;
     ks = xcin_malloc(ks_size, 0);
-#ifdef KCWU
     n_klist = cf->header.icode_mode;
-#else
-    n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
-#endif
     dir = (dir > 0) ? (byte_t)1 : (byte_t)-1;
 
     if (iccf->n_mkey_list)
@@ -648,14 +577,8 @@ pick_cch_wild(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, int *head, byte_t dir,
     memset(iccf->all_grouping, 0, sizeof(ubyte_t)*(1+num_candi_bufsz));
 
     for (i=0, idx = *head; idx>=0 && idx<size && i<=mcch_size; idx+=dir) {
-#ifdef KCWU
 	for(j=0; j<n_klist; j++)
 	    klist[j] = cf->ic[j][idx];
-#else
-	klist[0] = cf->ic1[idx];
-	if (cf->header.icode_mode == ICODE_MODE2)
-	    klist[1] = cf->ic2[idx];
-#endif
 	codes2keys(klist, n_klist, ks, ks_size);
 
 	if (strcmp_wild(iccf->keystroke, ks) == 0) {
@@ -680,24 +603,15 @@ static int
 match_keystroke_wild(gen_inp_conf_t *cf, 
 		       inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 {
-#ifdef KCWU
     int i;
     icode_t icode[MAX_ICODE_MODE];
-#else
-    icode_t icode[2];
-#endif
     unsigned int md, n_ich;
     int idx;
     char *s1, *s2, *s, tmpch;
 
-#ifdef KCWU
     md = cf->header.icode_mode;
     for(i=0; i<md; i++)
 	icode[i] = 0;
-#else
-    md = (cf->header.icode_mode == ICODE_MODE2) ? 1 : 0;
-    icode[0] = icode[1] = 0;
-#endif
 
     /*
      *  Search for the first char.
@@ -713,14 +627,9 @@ match_keystroke_wild(gen_inp_conf_t *cf,
     tmpch = *s;
     *s = '\0';
 
-#ifdef KCWU
-    keys2codes(icode, MAX_ICODE_MODE, iccf->keystroke);
-    idx = bsearch_char(cf->ic, icode, cf->header.n_icode, md, 1);
-#else
     keys2codes(icode, 2, iccf->keystroke);
     idx = bsearch_char(cf->ic1, cf->ic2, icode[0], icode[1], 
 			cf->header.n_icode, md, 1);
-#endif
     *s = tmpch;
     iccf->mcch_hidx = idx;		/* refer to head index of cf->icidx */
 
@@ -808,11 +717,7 @@ static int
 match_keystroke_normal(gen_inp_conf_t *cf, 
 		       inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 {
-#ifdef KCWU
     icode_t icode[MAX_ICODE_MODE];
-#else
-    icode_t icode[2];
-#endif
     unsigned int size, md, n_ich=0, n_zi = 0, mcch_size;
     int idx, i, j;
     wch_t *mcch; 
@@ -821,28 +726,16 @@ match_keystroke_normal(gen_inp_conf_t *cf,
     memset(mcch_grouping_buf, 0, sizeof(mcch_grouping_buf));
 
     size = cf->header.n_icode;
-#ifdef KCWU
     md = cf->header.icode_mode;
     for(i=0; i<md; i++)
 	icode[i] = 0;
-#else
-    md = (cf->header.icode_mode == ICODE_MODE2) ? 1 : 0;
-    icode[0] = icode[1] = 0;
-#endif
 
     /*
      *  Search for the first char.
      */
-#ifdef KCWU
     keys2codes(icode, MAX_ICODE_MODE, iccf->keystroke);
     if ((idx = bsearch_char(cf->ic, icode, size, md, 0)) == -1)
 	return 0;
-#else
-    keys2codes(icode, 2, iccf->keystroke);
-    if ((idx = bsearch_char(cf->ic1, cf->ic2, 
-		icode[0], icode[1], size, md, 0)) == -1)
-	return 0;
-#endif
 
     /*
      *  Search for all the chars with the same keystroke.
@@ -890,11 +783,7 @@ match_keystroke_normal(gen_inp_conf_t *cf,
 	n_ich ++;
         idx ++;
     } while (idx < size &&
-#ifdef KCWU
              ! cmp_icvalue(cf->ic, idx, icode, md));
-#else
-             ! cmp_icvalue(cf->ic1, cf->ic2, idx, icode[0], icode[1], md));
-#endif
 
     /*
      *  Prepare mcch for display.
@@ -972,11 +861,7 @@ get_correct_skeystroke(gen_inp_conf_t *cf,
 /* KhoGuan rev
     unsigned int i=0, j, klist[2]; */
     unsigned int i=0, j;
-#ifdef KCWU
     unsigned int klist[MAX_ICODE_MODE];
-#else
-    unsigned long long klist[2];
-#endif
 
     int n_klist, ks_size, keycode;
     char *ks;
@@ -989,17 +874,9 @@ get_correct_skeystroke(gen_inp_conf_t *cf,
     }
     ks_size = cf->header.n_max_keystroke + 1;
     ks = xcin_malloc(ks_size, 0);
-#ifdef KCWU
     n_klist = cf->header.icode_mode;
     for(j=0; j<n_klist; j++)
 	klist[j] = cf->ic[j][i];
-#else
-    n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
-
-    klist[0] = cf->ic1[i];
-    if (cf->header.icode_mode == ICODE_MODE2)
-	klist[1] = cf->ic2[i];
-#endif
     codes2keys(klist, n_klist, ks, ks_size);
     if (strcmp_wild(iccf->keystroke, ks) == 0) {
 	for (j=0; ks[j] != '\0'; j++) {
@@ -1900,32 +1777,16 @@ gen_inp_show_keystroke(void *conf, simdinfo_t *simdinfo)
     wchar_t tmp;
     char *k, keystroke[INP_CODE_LENGTH+1];
     static wch_t keystroke_list[INP_CODE_LENGTH+1];
-#ifdef KCWU
     unsigned int klist[MAX_ICODE_MODE];
-#endif
 
     if ((i = ccode_to_idx(&(simdinfo->cch_publish))) == -1)
         return False;
 
     if ((idx = cf->ichar[i]) == ICODE_IDX_NOTEXIST)
 	return False;
-#ifdef KCWU
     for(i=0; i<cf->header.icode_mode; i++)
 	klist[i] = cf->ic[i][idx];
     codes2keys(klist, cf->header.icode_mode, keystroke, SELECT_KEY_LENGTH+1);
-#else
-    if (cf->header.icode_mode == ICODE_MODE1)
-	codes2keys(&(cf->ic1[idx]), 1, keystroke, SELECT_KEY_LENGTH+1);
-    else if (cf->header.icode_mode == ICODE_MODE2) {
-/* KhoGuan rev
-        unsigned int klist[2]; */
-        unsigned long long klist[2];
-
-	klist[0] = cf->ic1[idx];
-	klist[1] = cf->ic2[idx];
-	codes2keys(klist, 2, keystroke, SELECT_KEY_LENGTH+1);
-    }
-#endif
     for (i=0, k=keystroke; i<INP_CODE_LENGTH && *k; i++, k++) {
 	idx = key2code(*k);
 	if ((tmp = cf->header.keyname[idx].wch))
