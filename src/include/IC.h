@@ -104,7 +104,7 @@ typedef struct greq_win_s {
 typedef struct _IMC IM_Context_t;
 struct _IMC {
     unsigned short	id;		/* id of this IMC */
-    unsigned int	icid;		/* id of the current attached IC */
+    unsigned short	icid;		/* id of the current attached IC */
     ic_rec_t	       *ic_rec;		/* point to the current IC resource */
 
     inp_state_t		inp_state;      /* ic cinput state */

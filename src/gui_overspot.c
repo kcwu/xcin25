@@ -158,7 +158,6 @@ overspot_draw_multich(gui_t *gui, winlist_t *win,
 	toggle_flag = 1;
 	n_groups = inpinfo->mcch_grouping[0];
     }
-
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
 /*
@@ -362,7 +361,7 @@ draw_lcch(gui_t *gui, winlist_t *win, int x, int y, inpinfo_t *inpinfo)
 /*
 	len = wch_mblen(tmp);
 */
-	len = (tmp->s[1] == '\0') ? 2 : 1;
+	len = (tmp->s[1] == '\0') ? 1 : 2;
 	XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 		win->wingc[GCM_idx], x, y, (char *)tmp->s, len);
 	x += XmbTextEscapement(win->font->fontset, (char *)tmp->s, len);

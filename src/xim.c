@@ -53,16 +53,46 @@ void check_ic_exist(int icid, xccore_t *xccore);
 
 ----------------------------------------------------------------------------*/
 
+struct commit_buf_s {
+    unsigned short icid, connect_id;
+    int slen, size;
+    char *str;
+} commit_buf;
+
 static void
-xim_commit(IC *ic, char *str)
+xim_commit(void)
 {
     char *cch_str_list[1];
     XTextProperty tp;
-    int cch_len;
     IMCommitStruct call_data;
 
-    if (! str)
+    if (commit_buf.slen == 0)
+	return;
+    DebugLog(1, verbose, "commit str: %s\n", commit_buf.str);
+
+    cch_str_list[0] = commit_buf.str;
+    XmbTextListToTextProperty(xccore->gui.display, cch_str_list, 1,
+                                  XCompoundTextStyle, &tp);
+    memset(&call_data, 0, sizeof(call_data));
+    call_data.major_code = XIM_COMMIT;
+    call_data.icid = commit_buf.icid;
+    call_data.connect_id = commit_buf.connect_id;
+    call_data.flag = XimLookupChars;
+    call_data.commit_string = (char *)tp.value;
+    IMCommitString(ims, (XPointer)(&call_data));
+    XFree(tp.value);
+    commit_buf.slen = 0;
+}
+
+static void
+commit_string(IC *ic, char *str)
+{
+    int cch_len;
+
+    if (! str) {
 	str = ic->imc->cch;
+	cch_len = strlen(str);
+    }
     else {
         cch_len = strlen(str);
         if (ic->imc->cch_size < cch_len+1) {
@@ -71,19 +101,17 @@ xim_commit(IC *ic, char *str)
         }
         strcpy(ic->imc->cch, str);
     }
-    DebugLog(1, verbose, "commit str: %s\n", str);
-
-    cch_str_list[0] = str;
-    XmbTextListToTextProperty(xccore->gui.display, cch_str_list, 1,
-                                  XCompoundTextStyle, &tp);
-    memset(&call_data, 0, sizeof(call_data));
-    call_data.major_code = XIM_COMMIT;
-    call_data.icid = ic->id;
-    call_data.connect_id = ic->connect_id;
-    call_data.flag = XimLookupChars;
-    call_data.commit_string = (char *)tp.value;
-    IMCommitString(ims, (XPointer)(&call_data));
-    XFree(tp.value);
+    if (commit_buf.icid != ic->id) {
+	xim_commit();
+	commit_buf.icid = ic->id;
+	commit_buf.connect_id = ic->connect_id;
+    }
+    if (commit_buf.size-commit_buf.slen < cch_len+1) {
+	commit_buf.size = commit_buf.slen+cch_len+1;
+	commit_buf.str = xcin_realloc(commit_buf.str, commit_buf.size);
+    }
+    strcpy(commit_buf.str+commit_buf.slen, str);
+    commit_buf.slen += cch_len;
 }
 
 static int
@@ -108,6 +136,7 @@ xim_disconnect(IC *ic)
 
     if (! (ic->ic_state & IC_CONNECT))
 	return True;
+    xim_commit();
     call_data.connect_id = (CARD16)(ic->connect_id);
     call_data.icid = (CARD16)(ic->id);
     ic->ic_state &= ~IC_CONNECT;
@@ -128,7 +157,7 @@ process_IMKEY(IC *ic, keyinfo_t *keyinfo, unsigned int ret)
     if ((ret & IMKEY_COMMIT) && imc->inpinfo.cch) {
 	/* Send the result to IM lib. */
 	xccore->gui.winchange |= WIN_CHANGE_IM;
-	xim_commit(ic, imc->inpinfo.cch);
+	commit_string(ic, imc->inpinfo.cch);
     }
     if ((ret & IMKEY_BELL)) {
 	/* The IM request a bell ring. */
@@ -163,10 +192,12 @@ process_IMKEY(IC *ic, keyinfo_t *keyinfo, unsigned int ret)
 	}
 	if (cch) {
 	    xccore->gui.winchange |= WIN_CHANGE_IM;
-	    xim_commit(ic, cch);
+	    commit_string(ic, cch);
 	    ret &= ~IMKEY_IGNORE;
 	}
     }
+    xim_commit();
+
     if (! (ret & IMKEY_IGNORE)) {
 	/* The key will not be processed further more, and will not be
 	   forewared back to XIM client. */
@@ -206,7 +237,6 @@ call_xim_end(IC *ic, int ic_delete, int clear)
 	    ret = imc->imodp->xim_end(imc->imodp->conf, &(imc->inpinfo));
 	    if (! ic_delete && ret)
 		process_IMKEY(ic, NULL, ret);
-
 	    for (i=0; i<imc->n_gwin; i++)
 		gui_freewin(imc->gwin[i].window);
 	    imc->n_gwin = 0;
@@ -569,7 +599,7 @@ xim_trigger_handler(XIMS ims, IMTriggerNotifyStruct *call_data, int *icid)
 	    break;
 	case FKEY_QPHRASE:
 	    if ((str = qphrase_str(minor_code, QPHR_TRIGGER)))
-		xim_commit(ic, str);
+		commit_string(ic, str);
 	    xim_disconnect(ic);
 	}
         return True;
@@ -681,7 +711,7 @@ xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
             change_IM(ic, minor_code);
 	    break;
 	case FKEY_CHREP:
-	    xim_commit(ic, NULL);
+	    commit_string(ic, NULL);
 	    break;
 	case FKEY_SIMD:
             change_simd(ic);
@@ -704,7 +734,7 @@ xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
 	    break;
 	case FKEY_QPHRASE:
 	    if ((str = qphrase_str(minor_code, QPHR_TRIGGER)))
-                xim_commit(ic, str);
+                commit_string(ic, str);
 	    break;
 	}
 	if (! (imc->inp_state & IM_CINPUT) && ! (imc->inp_state & IM_2BYTES))
@@ -730,7 +760,8 @@ xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
 	if ((keyinfo.keystate & Mod1Mask) != Mod1Mask &&
 	    (keyinfo.keystate & ControlMask) != ControlMask &&
             (cch = fullchar_keystroke(&(imc->inpinfo), keyinfo.keysym))) {
-	    xim_commit(ic, cch);
+	    commit_string(ic, cch);
+	    xim_commit();
 	    return True;
 	}
     }
