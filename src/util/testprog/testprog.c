@@ -582,7 +582,7 @@ locale_init(void)
     else
 	s = "";
 
-#ifdef HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO) && !defined(CYGWIN)
     encoding = (char *)strdup(nl_langinfo(CODESET));
 #else
     encoding = s;

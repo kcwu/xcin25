@@ -323,14 +323,6 @@ CPPFLAGS="$OLD_CPPFLAGS $incs"
 LDFLAGS="$OLD_LDFLAGS $libs"
 
 dnl-----------------------------------------------------------------------
-dnl Checks for Locale related library.
-dnl-----------------------------------------------------------------------
-LIBS="$OLD_LIBS"
-AC_CHECK_LIB(xpg4, setlocale,
-	     [ with_locale_lib=-lxpg4 ], [ with_locale_lib="" ])
-AC_SUBST(with_locale_lib)
-
-dnl-----------------------------------------------------------------------
 dnl Checks for dlopen related library.
 dnl-----------------------------------------------------------------------
 LIBS="$OLD_LIBS"
@@ -494,6 +486,20 @@ AC_CHECK_LIB(X11, XmbDrawImageString, ,
     [ AC_MSG_RESULT([You need X11R6 to compile xcin.])
       AC_MSG_RESULT([Please use --x-includes and --x-libraries to configure.])
       exit 1 ])
+
+LDFLAGS="$OLD_LDFLAGS $libs"
+
+dnl-----------------------------------------------------------------------
+dnl Checks for Locale related library.
+dnl-----------------------------------------------------------------------
+LIBS="$OLD_LIBS"
+if test $os_type = CYGWIN; then
+    with_locale_lib="-L$x_libraries -lX11"
+else
+    AC_CHECK_LIB(xpg4, setlocale,
+		 [ with_locale_lib=-lxpg4 ], [ with_locale_lib="" ])
+fi
+AC_SUBST(with_locale_lib)
 
 LDFLAGS="$OLD_LDFLAGS $libs"
 

@@ -79,7 +79,7 @@ set_lc_ctype(char *loc_name, char *loc_return, int loc_size,
 
 /* Determine the encoding */
     if (enc_return && enc_size > 0) {
-#ifdef HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO) && !defined(CYGWIN)
 	if ((s = nl_langinfo(CODESET)))
 	    strncpy(enc_return, s, enc_size);
 #else
