@@ -171,7 +171,7 @@
     (DEFAULT_IM_SINMD	"DEFAULT")
     (PHRASE		"default.phr")
     (CINPUT		(pinyin shuangpin jtcj_gb wubizixing phonegb2
-			 array30 zh_hex))
+			 zh_hex))
     (FONTSET		"-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-gb2312.1980-1")
     (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-medium-r-*-16-*-gb2312.1980-1")))
 ;
@@ -195,12 +195,6 @@
 
 (define wubizixing@hp15CN
 	'((SETKEY		5)))
-
-(define array30@gb2312
-	'((SETKEY		8)
-	  (BEEP_DUPCHAR		YES)
-	  (DISABLE_SEL_LIST	"w")
-	  (KEYSTROKE_REMAP	"t:0xb5c4;T:0xb5c4;")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
