@@ -199,13 +199,13 @@ get_resource_long(xcin_rc_t *xrc, char **cmd_list,
 static void
 find_rcfile(char *rcfn, int rcfn_size, char *user_home, char *user_dir)
 {
-    if (user_home) {
+    if (user_dir) {
     /* User: $HOME/.xcin/xcinrc */
 	snprintf(rcfn, rcfn_size, "%s/%s", user_dir, XCIN_DEFAULT_RC);
 	if (check_file_exist(rcfn, FTYPE_FILE) == True)
 	    return;
     }
-    if (user_dir) {
+    if (user_home) {
     /* User: $HOME/.xcinrc */
 	snprintf(rcfn, rcfn_size, "%s/.%s", user_home, XCIN_DEFAULT_RC);
 	if (check_file_exist(rcfn, FTYPE_FILE) == True)
