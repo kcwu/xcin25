@@ -71,6 +71,9 @@ QD.6:  請問要如何增加新的輸入法呢？
 QD.7:  我如何在 bimsphone 輸入法中加入新詞呢？
 QD.8:  我發現注音輸入法中可以連續輸入兩個 ㄅ，或者可以輸入如 ㄚㄉ 這樣的
        音，這似乎很不合理？
+QD.9:  當我切換到 bimsphone 輸入法時，卻出現如下錯誤訊息，該怎麼辦呢？
+       xcin: Warning: bimsphone: bimsphone@big5: cannot open data file: tsi.db
+       xcin: Warning: error loading IM: bimsphone@big5, ignore.
 
 E. xcin 設計相關問題:
 ---------------------
@@ -973,6 +976,35 @@ QD.8:  我發現注音輸入法中可以連續輸入兩個 ㄅ，或者可以輸入如 ㄚㄉ 這樣的
 	(AUTO_SELECTION		NO)
 
 然後重新啟動 xcin 即可，如此它就是一個純種的注音輸入法了。
+
+
+------------------------
+QD.9:  當我切換到 bimsphone 輸入法時，卻出現如下錯誤訊息，該怎麼辦呢？
+       xcin: Warning: bimsphone: bimsphone@big5: cannot open data file: tsi.db
+       xcin: Warning: error loading IM: bimsphone@big5, ignore.
+
+bimsphone 輸入法需要兩個特別的資料檔: tsi.db 與 yin.db。這兩個檔屬於 libtabe
+套件的一部分，而非 xcin 的一部分。理論上，當您正確安裝了 libtabe 與 xcin 之
+後，那兩個檔案已經安裝在您的系統裡了。之所以會出現以上的錯誤訊息，很可能是您
+的 xcinrc 檔的相關路徑設定錯誤導至。
+
+當您見到上述的訊息時，請先確定您的系統已正確安裝了 libtabe 了，然後找一下您的
+libtabe 的安裝路徑。那兩個檔案通常是放在這裡:
+
+	$libtabe_prefix/share/tabe/tsiyin/tsi.db
+	$libtabe_prefix/share/tabe/tsiyin/yin.db
+
+其中 $libtabe_prefix 就是您的 libtabe 的安裝路徑，它可能是 /usr, 也可能是
+/usr/local, 視您當於怎麼安裝而定。一但您找到這兩個檔案後，請修改您的 xcinrc，
+找到以下的內容:
+
+        ;
+        ; The following has effect only when AUTO_SELECTION is YES
+          (TSI_FNAME            "tsi.db")
+          (YIN_FNAME            "yin.db")
+
+將 TSI_FNAME 改成您的 tsi.db 的確實路徑，同時將 YIN_FNAME 改成您的 yin.db 的
+確實路徑。最後，重新啟動 xcin 即可。
 
 
 
