@@ -9,7 +9,12 @@ big5 = 		sys.tab.$(BIG5ENC) \
 		simplex.tab.$(BIG5ENC) \
 		jyutping.tab.$(BIG5ENC) \
 		jyutping0.tab.$(BIG5ENC) \
-		telecode.tab.$(BIG5ENC)
+		telecode.tab.$(BIG5ENC) \
+		4corner.tab.$(BIG5ENC) \
+		daibuun.tab.$(BIG5ENC) \
+		hakka.tab.$(BIG5ENC) \
+		tcj.tab.$(BIG5ENC) \
+		wm2.tab.$(BIG5ENC)
 
 big5hkscs =	sys.tab.$(BIG5HKENC) \
 		array30.tab.$(BIG5HKENC) \
@@ -21,7 +26,11 @@ big5hkscs =	sys.tab.$(BIG5HKENC) \
 		simplex.tab.$(BIG5HKENC) \
 		jyutping.tab.$(BIG5HKENC) \
 		jyutping0.tab.$(BIG5HKENC) \
-		telecode.tab.$(BIG5HKENC)
+		telecode.tab.$(BIG5HKENC) \
+		4corner.tab.$(BIG5HKENC) \
+		hakka.tab.$(BIG5HKENC) \
+		tcj.tab.$(BIG5HKENC) \
+		wm2.tab.$(BIG5HKENC)
 
 utf-8 = 	sys.tab.$(UTF8ENC) \
 		array30.tab.$(UTF8ENC) \
@@ -37,6 +46,11 @@ utf-8 = 	sys.tab.$(UTF8ENC) \
 		jyutping0.tab.$(UTF8ENC) \
 		telecode.tab.$(UTF8ENC) \
 		bims_pinyin.tab.$(UTF8ENC) \
+		4corner.tab.$(UTF8ENC) \
+		daibuun.tab.$(UTF8ENC) \
+		hakka.tab.$(UTF8ENC) \
+		tcj.tab.$(UTF8ENC) \
+		wm2.tab.$(UTF8ENC) \
 		default.phr.$(UTF8ENC)
 include Makefile
 
@@ -81,6 +95,21 @@ jyutping0.tab.$(BIG5ENC): jyutping0.cin sys.tab.$(BIG5ENC)
 telecode.tab.$(BIG5ENC): telecode.cin sys.tab.$(BIG5ENC)
 	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ telecode.cin
+4corner.tab.$(BIG5ENC): 4corner.cin sys.tab.$(BIG5ENC)
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ 4corner.cin
+daibuun.tab.$(BIG5ENC): daibuun.cin sys.tab.$(BIG5ENC)
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ daibuun.cin
+hakka.tab.$(BIG5ENC): hakka.cin sys.tab.$(BIG5ENC)
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ hakka.cin
+tcj.tab.$(BIG5ENC): tcj.cin sys.tab.$(BIG5ENC)
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ tcj.cin
+wm2.tab.$(BIG5ENC): wm2.cin sys.tab.$(BIG5ENC)
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ wm2.cin
 
 sys.tab.$(BIG5HKENC): sys.cin.big5hkscs
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) -o $@ sys.cin.big5hkscs
@@ -114,6 +143,18 @@ jyutping0.tab.$(BIG5HKENC): jyutping0.cin sys.tab.$(BIG5HKENC)
 telecode.tab.$(BIG5HKENC): telecode.cin sys.tab.$(BIG5HKENC)
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
 		-s sys.tab.$(BIG5HKENC) -o $@ telecode.cin
+4corner.tab.$(BIG5HKENC): 4corner.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ 4corner.cin
+hakka.tab.$(BIG5HKENC): hakka.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ hakka.cin
+tcj.tab.$(BIG5HKENC): tcj.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ tcj.cin
+wm2.tab.$(BIG5HKENC): wm2.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ wm2.cin
 
 sys.tab.$(UTF8ENC): sys.cin.utf-8
 	$(build) -r $(xcinrc) -l $(UTF8ENC) -o $@ sys.cin.utf-8
@@ -157,6 +198,21 @@ jyutping0.tab.$(UTF8ENC): jyutping0.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
 telecode.tab.$(UTF8ENC): telecode.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
 	$(build) -r $(xcinrc) -l $(UTF8ENC) \
 		-s sys.tab.$(UTF8ENC) -o $@ telecode.cin.$(UTF8ENC)
+4corner.tab.$(UTF8ENC): 4corner.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
+	$(build) -r $(xcinrc) -l $(UTF8ENC) \
+		-s sys.tab.$(UTF8ENC) -o $@ 4corner.cin.$(UTF8ENC)
+daibuun.tab.$(UTF8ENC): daibuun.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
+	$(build) -r $(xcinrc) -l $(UTF8ENC) \
+		-s sys.tab.$(UTF8ENC) -o $@ daibuun.cin.$(UTF8ENC)
+hakka.tab.$(UTF8ENC): hakka.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
+	$(build) -r $(xcinrc) -l $(UTF8ENC) \
+		-s sys.tab.$(UTF8ENC) -o $@ hakka.cin.$(UTF8ENC)
+tcj.tab.$(UTF8ENC): tcj.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
+	$(build) -r $(xcinrc) -l $(UTF8ENC) \
+		-s sys.tab.$(UTF8ENC) -o $@ tcj.cin.$(UTF8ENC)
+wm2.tab.$(UTF8ENC): wm2.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
+	$(build) -r $(xcinrc) -l $(UTF8ENC) \
+		-s sys.tab.$(UTF8ENC) -o $@ wm2.cin.$(UTF8ENC)
 bims_pinyin.tab.$(UTF8ENC): bims_pinyin.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
 	$(build) -r $(xcinrc) -l $(UTF8ENC) \
 		-s sys.tab.$(UTF8ENC) -o $@ bims_pinyin.cin.$(UTF8ENC)
