@@ -41,6 +41,9 @@ xcin-2.5.3-pre3:  2001/12
     Check pointers to prevent xcin crash when xcin terminate.
     Thanks to Geoffrey Lee <snailtalk@linux-mandrake.com>.
 
+14. Document update.
+
+15. Toggle off default setting BEEP_DUPCHAR of some modules.
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------

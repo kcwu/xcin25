@@ -129,13 +129,11 @@
 
 (define phone@big5
 	'((SETKEY		3)
-	  (END_KEY		YES)
-	  (BEEP_DUPCHAR		YES)))
+	  (END_KEY		YES)))
 
 (define jyutping@big5
 	'((SETKEY		4)
-	  (END_KEY		YES)
-	  (BEEP_DUPCHAR		YES)))
+	  (END_KEY		YES)))
 
 (define bimspinyin@big5
 	'((SETKEY		5)
@@ -147,7 +145,6 @@
 
 (define array30@big5
 	'((SETKEY		8)
-      	  (BEEP_DUPCHAR		YES)
 	  (DISABLE_SEL_LIST	"w")
 	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba;")))
 
@@ -168,12 +165,10 @@
 ;  Here are detailed configuration of each IM (for zh_CN.EUC locale).
 ;
 (define pinyin@euc
-	'((SETKEY		1)
-	  (BEEP_DUPCHAR		YES)))
+	'((SETKEY		1)))
 
 (define shuangpin@euc
-	'((SETKEY		2)
-	  (BEEP_DUPCHAR 	YES)))
+	'((SETKEY		2)))
 
 (define jtcj_gb@euc
 	'((SETKEY		3)))

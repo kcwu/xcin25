@@ -102,7 +102,7 @@ find_module(char *path, int path_size, xcin_rc_t *xrc, char *sub_path)
 }
 
 mod_header_t *
-load_module(char *modname, int mod_type, char *version,
+load_module(char *modname, enum mtype mod_type, char *version,
 	    xcin_rc_t *xrc, char *sub_path)
 {
     struct _mod_stack_s *ms=mod_stack;

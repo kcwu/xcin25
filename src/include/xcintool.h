@@ -224,7 +224,7 @@ enum mtype {
 
 #define MODULE_ID_SIZE 20	/* module id buffer size */
 typedef struct {		/* common module header */
-    int module_type;
+    enum mtype module_type;
     char *name;
     char *version;
     char *comments;
@@ -267,7 +267,7 @@ extern int check_file_exist(char *path, int type);
 extern int check_datafile(char *fn, char *sub_path,
 		xcin_rc_t *xrc, char *true_fn, int true_fnsize);
 extern void check_xcin_path(xcin_rc_t *xrc, int exitcode);
-extern mod_header_t *load_module(char *modname, int mod_type,
+extern mod_header_t *load_module(char *modname, enum mtype mod_type,
 		char *version, xcin_rc_t *xrc, char *sub_path);
 extern void unload_module(mod_header_t *imodule);
 extern void module_comment(mod_header_t *modp, char *mod_name);

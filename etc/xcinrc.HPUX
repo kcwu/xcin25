@@ -134,13 +134,11 @@
 
 (define phone@big5
 	'((SETKEY		3)
-	  (END_KEY		YES)
-	  (BEEP_DUPCHAR		YES)))
+	  (END_KEY		YES)))
 
 (define jyutping@big5
 	'((SETKEY		4)
-	  (END_KEY		YES)
-	  (BEEP_DUPCHAR		YES)))
+	  (END_KEY		YES)))
 
 (define bimsphone@big5
 	'((SETKEY		6)
@@ -152,13 +150,11 @@
 
 (define array30@big5
 	'((SETKEY		8)
-      	  (BEEP_DUPCHAR		YES)
 	  (DISABLE_SEL_LIST	"w")
 	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba;")))
 
 (define jyutping0@big5
-	'((SETKEY		9)
-	  (BEEP_DUPCHAR		YES)))
+	'((SETKEY		9)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -178,20 +174,17 @@
 ;  Here are detailed configuration of each IM (for zh_CN.GB2312 locale).
 ;
 (define pinyin@hp15CN
-	'((SETKEY		1)
-	  (BEEP_DUPCHAR		YES)))
+	'((SETKEY		1)))
 
 (define shuangpin@hp15CN
-	'((SETKEY		2)
-	  (BEEP_DUPCHAR 	YES)))
+	'((SETKEY		2)))
 
 (define jtcj_gb@hp15CN
 	'((SETKEY		3)))
 
 (define phonegb2@gb2312
 	'((SETKEY		4)
-	  (END_KEY		YES)
-	  (BEEP_DUPCHAR		YES)))
+	  (END_KEY		YES)))
 
 (define wubizixing@hp15CN
 	'((SETKEY		5)))
@@ -220,13 +213,11 @@
 
 (define phone@hkbig5
 	'((SETKEY		3)
-	  (END_KEY		YES)
-	  (BEEP_DUPCHAR		YES)))
+	  (END_KEY		YES)))
 
 (define jyutping@hkbig5
 	'((SETKEY		4)
-	  (END_KEY		YES)
-	  (BEEP_DUPCHAR		YES)))
+	  (END_KEY		YES)))
 
 (define bimsphone@hkbig5
 	'((SETKEY		6)
@@ -238,14 +229,12 @@
 
 (define array30@hkbig5
 	'((SETKEY		8)
-	  (BEEP_DUPCHAR		YES)
 	  (DISABLE_SEL_LIST	"w")
 	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba")))
 
 (define jyutping0@hkbig5
 	'((SETKEY		9)
-	  (END_KEY		YES)
-	  (BEEP_DUPCHAR		YES)))
+	  (END_KEY		YES)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
