@@ -1,5 +1,7 @@
 XCIN 常見問題與解答:
 
+Q0: XCIN 開發計畫與網路資源，如何取得 XCIN？
+
 A. I18N 與 XIM 相關問題:
 ------------------------
 QA.1:  什麼是 I18N? 什麼是 locale? 什麼又是 XIM?
@@ -37,6 +39,13 @@ QB.7:  為什麼我執行 xcin 時，會跑出如下的錯誤訊息呢？
        xcin internal error: NULL xcin locale_sub_path
 QB.8:  為什麼我執行 xcin 時，會跑出如下的錯誤訊息呢？
        xcin: error: IMOpenIM() with name "xcin" transport "X/" failed.
+QB.9:  為什麼我在編譯 libtabe 到一半時，出現如下的錯誤訊息呢？
+       tabe_tsidbint.c: In function 'tabeTsiDBOpen':
+       tabe_tsidbint.c:85: warning: implicit declearation of function 'db_open'
+       tabe_tsidbint.c: In function 'tabeTsiDBRecordNumber':                   
+       tabe_tsidbint.c:165: structure has no member named 'bt_nrecs'
+       tabe_tsidbint.c:In function 'tabeTsiDBCursorSet':            
+       tabe_tsidbint.c:394: too few arguments to function
 
 C. xcinrc 設定相關問題:
 -----------------------
@@ -76,6 +85,7 @@ QD.9:  當我切換到 bimsphone 輸入法時，卻出現如下錯誤訊息，該怎麼辦呢？
        xcin: Warning: error loading IM: bimsphone@big5, ignore.
 QD.10: 有沒有比 bimsphone 更好用的自動猜字注音輸入法呢？
 QD.11: 該如何打全形標點符號呢？
+QD.12: 我可以在 bimsphone 輸入法中使用自己的詞庫嗎？
 
 E. xcin 設計相關問題:
 ---------------------
@@ -110,6 +120,70 @@ QF.11: 當我在 rxvt 中啟動 xcin, 但忘了在後頭加 '&', 於是我按了 ctrl+z, 但
        rxvt 卻動也不動了，怎麼辦呢？
 
 ==============================================================================
+
+------------------------
+Q0: XCIN 開發計畫與網路資源，如何取得 XCIN？
+
+XCIN 開發計畫的網頁是在:
+
+	http://xcin.linux.org.tw
+
+所有與 xcin 相關的最新資訊都會公佈在該網頁上，包括本 FAQ 的最新版本。除此之
+外，由於 xcin 需要 I18N/locale 與 libtabe 才能運作，故這些資訊也可以在 XCIN
+的網頁上找到:
+
+	I18N/locale 資訊:  http://xcin.linux.org.tw/i18n/
+	libtabe 資訊:      http://xcin.linux.org.tw/libtabe/
+			   http://libtabe.sourceforge.net/
+
+除此之外，您可以在這裡下載 xcin/libtabe 等套件的原始碼:
+
+	xcin stable:       ftp://xcin.linux.org.tw/pub/xcin/xcin/
+	xcin devel:        ftp://xcin.linux.org.tw/pub/xcin/xcin/devel/
+
+	libtabe stable:    ftp://xcin.linux.org.tw/pub/xcin/libtabe/
+	libtabe devel:     ftp://xcin.linux.org.tw/pub/xcin/libtabe/devel/
+
+	i18ntool:	   ftp://xcin.linux.org.tw/pub/xcin/i18n/
+
+其中 stable 代表穩定版。而 devel 則是尚在發展中的版本，可能包含了最新的錯誤
+修正、新的功能與特色 .... 等等，但我們不保證它在您的系統下可以正確執行。至於
+其他地區的 ftp mirror site 請見:
+
+	http://xcin.linux.org.tw/download.html
+
+另外我們還有一個 CVS server，所有 xcin 與 libtabe 最新的原始碼都可以在 CVS
+server 上找到，它們的使用方式為:
+
+	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home2/xcin login
+
+這時它會問您 password, 請輸入 xcin。然後，如果您要第一次下載原始碼時，您可以
+用以下的指令:
+
+    下載 xcin:
+	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home2/xcin checkout xcin
+
+    下載 libtabe:
+	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home2/xcin checkout libtabe
+
+如果您之前已自 CVS 中下載 xcin 或 libtabe 的原始碼了，但想要更新原始碼的內容
+時，可以到 xcin 或 libtabe 的目錄底下，執行:
+
+	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home2/xcin update
+
+另外，我們還有一個 xcin 的 mailing list, 用來討論 xcin 的相關問題，以及 xcin
+的發展 .... 等等，它的位址是:
+
+	xcin@linux.org.tw
+
+至於要如何加入此郵遞列表，請參考:
+
+	http://xcin.linux.org.tw/intro/listing.html
+
+而我們過去在 mailing list 上的討論內容，可以在這裡找到:
+
+	http://www.linux.org.tw/mail-archie/xcin/
+
 
 
 A. I18N 與 XIM 相關問題:
@@ -426,6 +500,38 @@ xcin:
 請注意，若使用不同的 XIM server 名來跑的話，其他的 XIM client 也必
 須使用此 XIM server 名，如此才能與該 xcin 連線。詳見 UserGuide 的
 說明。
+
+
+------------------------
+QB.9:  為什麼我在編譯 libtabe 到一半時，出現如下的錯誤訊息呢？
+       tabe_tsidbint.c: In function 'tabeTsiDBOpen':
+       tabe_tsidbint.c:85: warning: implicit declearation of function 'db_open'
+       tabe_tsidbint.c: In function 'tabeTsiDBRecordNumber':                   
+       tabe_tsidbint.c:165: structure has no member named 'bt_nrecs'
+       tabe_tsidbint.c:In function 'tabeTsiDBCursorSet':            
+       tabe_tsidbint.c:394: too few arguments to function
+
+原因是 libtabe 在 configure 時沒有正確設定您的 Berkeley DB2 的 header
+file (include/) 的路徑。請您先找出您的 header file 的路徑，它通常位於
+系統的 /usr/include/db2/ 目路下 (如果您有安裝 Berkeley DB2 這個套件的
+話)，或者 /usr/local/include/ 下。該 header file 的檔名是叫做 db.h，
+而您去看它的內容時，您應該可以從中見到 db_open 的字眼。
+
+(請注意，不同版本的 DB 套件，如 DB1 或 DB3, 其 header file 的檔名可能
+也是叫 db.h, 但我們要的是 DB2 的 header file，故您要去找找它的內容，看
+看有沒有 db_open 的字眼)
+
+當您確定 db.h 的所在目錄後，請您在重新執行 configure 的指令，但這回要
+加入參數:
+
+	configure --with-dbinc=<DB2 db.h 的所在目錄名> ....
+
+例如您在 /usr/include/db2 下發現它，則請這樣下指令:
+
+	configure --with-dbinc=/usr/include/db2
+
+然後重新編譯 libtabe 即可。
+
 
 
 C. xcinrc 設定相關問題:
@@ -946,8 +1052,14 @@ bimsphone 的詞庫是屬於 libtabe 套件的一部分，如果您要加入新詞的話，首先
 
 其中第一個指令將整個詞庫檔排序，存成一個新檔: tsi.src.new，第二個指令讀
 入 tsi.src.new 產生 tsi.db 檔，最後一個指令讀入 tsi.db 檔產生 yin.db 檔，
-而 tsi.db 與 yin.db 就是編譯完成的詞庫檔。接下來，您就可以將這兩個詞庫檔
-安裝到系統目錄去:
+而 tsi.db 與 yin.db 就是編譯完成的詞庫檔。由於編譯過後的 yin.db 相當大，
+故我們可以用 db_dump 與 db_load 兩個程式將它壓縮，這兩個程式都是屬於
+Berkeley DB2 的工具程式之一:
+
+	db_dump yin.db | db_load yin.db.new
+	mv yin.db.new yin.db
+
+接下來，您就可以將這兩個詞庫檔安裝到系統目錄去:
 
 	cp tsi.db yin.db $(prefix)/share/tabe/tsiyin/
 
@@ -1049,6 +1161,27 @@ shift+alt+p	﹖
 或 /usr/X11R6。而 $encoding 為內碼名稱，如 big5, gb2312 .... 等等。有關這個
 檔案的內容與設定方式，請參考 xcin/doc/modules/im_comm 的說明 (尋找 qphrase
 字眼)。
+
+
+------------------------
+QD.12: 我可以在 bimsphone 輸入法中使用自己的詞庫嗎？
+
+bimsphone 的注音猜字功能是藉由詞庫的查詢而達成，在一般情況下它所使用的詞庫
+是 libtabe 所提供的預設詞庫檔 (詳見 QD.9)。由於 bimsphone/libtabe 在運作時，
+一次只能開啟一份詞庫檔 (tsi.db/yin.db)，故如果您打算使用自己準備的詞庫檔的
+話，則您將不能使用系統預設的詞庫，反之亦然。
+
+如果您決定要用自己的詞庫檔的話，以下是一些建議:
+
+1. 取得 libtabe 的原始碼，並以它的詞庫檔原始碼 tsi.src 為藍本，將它修改為您
+   自己的詞庫檔，然後將它編譯成 tsi.db 與 yin.db (詳見 QD.7)。
+
+2. 在您自己的 $HOME 目錄下建一個 .xcin 的目錄，然後將編譯好的 tsi.db 與 yin.db
+   放進去。
+
+3. 修改 xcinrc 的設定，將 tsi.db 與 yin.db 的路徑改成您放置這兩個檔案的路徑
+   (詳見 QD.9)。
+
 
 
 

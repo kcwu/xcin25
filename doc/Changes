@@ -2,16 +2,16 @@ xcin-2.5.3-pre1:  2001/
 ------------------------------
 1. Fix bug in qphrase.c/qphrase_init() for insufficient buffer size.
 
-2. Add a FAQ from Yuting Kuo <yuting@bigfoot.com>:
-   "Solution to rxvt crash problems".
+2. Add a FAQ from Yuting Kuo <yuting@bigfoot.com>: QF.11
+   Add a FAQ from <mison@bbs.ee.ntu.edu.tw>: QB.9
+   Add FAQs from Kuang-che Wu <kcwu@ck.tp.edu.tw>: Q0, QD.12
 
 3. Add "miu     гvг╕г▓" into bims_pinyin.cin.
    Thanks to Dan Jacobson <jidanni@kimo.com.tw>
-
-4. Add "chua гег╣гл" into bims_pinyin.cin.
+   Add "chua гег╣гл" into bims_pinyin.cin.
    Thanks to andrew <andrew@linux.org.tw>
 
-5. Add telecode.cin.
+4. Add telecode.cin.
    Thanks to <ljm@ljm.qqjane.net>
 
 
