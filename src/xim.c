@@ -66,7 +66,8 @@ xim_commit(void)
 
     if (commit_buf.slen == 0)
 	return;
-    DebugLog(1, ("commit str: %s\n", commit_buf.str));
+    DebugLog(1, ("commit str (%u,%u): %s\n",
+		commit_buf.icid, commit_buf.connect_id, commit_buf.str));
 
     cch_str_list[0] = commit_buf.str;
     XmbTextListToTextProperty(xccore->gui.display, cch_str_list, 1,
@@ -99,7 +100,7 @@ commit_string(IC *ic, char *str)
         }
         strcpy(ic->imc->cch, str);
     }
-    if (commit_buf.icid != ic->id) {
+    if (commit_buf.icid!=ic->id || commit_buf.connect_id!=ic->connect_id) {
 	xim_commit();
 	commit_buf.icid = ic->id;
 	commit_buf.connect_id = ic->connect_id;
