@@ -26,7 +26,7 @@ dnl xcin configure command line options.
 dnl-----------------------------------------------------------------------
 AC_ARG_ENABLE(debug,
     [  --enable-debug            enable debug],
-    [  test x$enableval = xyes && AC_DEFINE(DEBUG) ])
+    [  test x$enableval = xyes && AC_DEFINE(DEBUG, 1, [Define if the debug option is enabled.]) ])
 
 AC_ARG_WITH(xcin_rcdir,
     [  --with-xcin-rcdir=PATH    set the xcin rcfile path.], ,
@@ -185,27 +185,31 @@ dnl-----------------------------------------------------------------------
 case "$host_os" in
     linux*)  
 	os_type=LINUX
-        AC_DEFINE(LINUX)
+        AC_DEFINE([LINUX], 1, [Define for Linux system.])
 	;;
     freebsd*)
 	os_type=FREEBSD
-        AC_DEFINE(FREEBSD)
+        AC_DEFINE(FREEBSD, 1, [Define for FreeBSD system.])
 	;;
     hp*)
 	os_type=HPUX
-        AC_DEFINE(HPUX)
+        AC_DEFINE(HPUX, 1, [Define for HP-UX system.])
 	;;
     openbsd*)
 	os_type=OPENBSD
-	AC_DEFINE(OPENBSD)
+	AC_DEFINE(OPENBSD, 1, [Define for OpenBSD system.])
 	;;
     netbsd*)
 	os_type=NETBSD
-	AC_DEFINE(NETBSD)
+	AC_DEFINE(NETBSD, 1, [Define for NETBSD system.])
 	;;
     solaris*)
 	os_type=SOLARIS
-	AC_DEFINE(SOLARIS)
+	AC_DEFINE(SOLARIS, 1, [Define for Solaris system.])
+	;;
+    darwin*)
+	os_type=DARWIN
+	AC_DEFINE(DARWIN, 1, [Define for Darwin system.])
 	;;
     *)
 	AC_MSG_RESULT([Warning: xcin does not support this system yet.])
@@ -612,9 +616,9 @@ LIBS=$OLD_LIBS
 eval xcin_rcp=$with_xcin_rcdir
 eval xcin_p=$with_xcin_dir
 eval xcin_msgp=$with_locale_dir
-AC_DEFINE_UNQUOTED(XCIN_DEFAULT_RCDIR,	"${xcin_rcp}")
-AC_DEFINE_UNQUOTED(XCIN_DEFAULT_DIR,	"${xcin_p}")
-AC_DEFINE_UNQUOTED(XCIN_MSGLOCAT,	"${xcin_msgp}")
+AC_DEFINE_UNQUOTED(XCIN_DEFAULT_RCDIR,	"${xcin_rcp}", [Define for XCIN_DEFAULT_RCDIR variable.])
+AC_DEFINE_UNQUOTED(XCIN_DEFAULT_DIR,	"${xcin_p}", [Define for XCIN_DEFAULT_DIR variable.])
+AC_DEFINE_UNQUOTED(XCIN_MSGLOCAT,	"${xcin_msgp}", [Define for XCIN_MSGLOCAT variable.])
 
 AC_OUTPUT(Makefile:script/Makefile.in \
 	Rules:script/Rules.in \

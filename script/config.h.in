@@ -1,64 +1,13 @@
 /* script/config.h.in.  Generated from configure.in by autoheader.  */
-/* acconfig.h
-   This file is in the public domain.
 
-   Descriptive text for the C preprocessor macros that
-   the distributed Autoconf macros can define.
-   No software package will use all of them; autoheader copies the ones
-   your configure.in uses into your configuration header file templates.
-
-   The entries are in sort -df order: alphabetical, case insensitive,
-   ignoring punctuation (such as underscores).  Although this order
-   can split up related entries, it makes it easier to check whether
-   a given entry is in the file.
-
-   Leave the following blank line there!!  Autoheader needs it.  */
-
+/* Define for Darwin system. */
+#undef DARWIN
 
 /* Define if the debug option is enabled. */
 #undef DEBUG
 
-/* Define for building the dynamic loadable IM-modules */
-#undef USE_DYNAMIC
-
-/* Define for dlopen() function (ELF) */
-#undef HAVE_DLOPEN
-
-/* Define for shl_load() function (HP-UX) */
-#undef HAVE_SHL_LOAD
-
-/* Define for gettext() function */
-#undef HAVE_GETTEXT
-
-/* Define for iconv() function */
-#undef HAVE_ICONV
-
-/* Define for XCIN_DEFAULT_DIR variable */
-#undef XCIN_DEFAULT_DIR
-
-/* Define for XCIN_DEFAULT_RCDIR variable */
-#undef XCIN_DEFAULT_RCDIR
-
-/* Define for XCIN_MSGLOCAT variable */
-#undef XCIN_MSGLOCAT
-
-/* Define for Linux system */
-#undef LINUX
-
-/* Define for FreeBSD system */
+/* Define for FreeBSD system. */
 #undef FREEBSD
-
-/* Define for OpenBSD system */
-#undef OPENBSD
-
-/* Define for NETBSD system */
-#undef NETBSD
-
-/* Define for Solaris system */
-#undef SOLARIS
-
-/* Define for HP-UX system */
-#undef HPUX
 
 /* Define to 1 if the `getpgrp' function requires zero arguments. */
 #undef GETPGRP_VOID
@@ -69,6 +18,9 @@
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
 
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
@@ -253,6 +205,12 @@
 /* Define to 1 if you have the <wchar.h> header file. */
 #undef HAVE_WCHAR_H
 
+/* Define for HP-UX system. */
+#undef HPUX
+
+/* Define for Linux system. */
+#undef LINUX
+
 /* Define to 1 if `major', `minor', and `makedev' are declared in <mkdev.h>.
    */
 #undef MAJOR_IN_MKDEV
@@ -260,6 +218,12 @@
 /* Define to 1 if `major', `minor', and `makedev' are declared in
    <sysmacros.h>. */
 #undef MAJOR_IN_SYSMACROS
+
+/* Define for NETBSD system. */
+#undef NETBSD
+
+/* Define for OpenBSD system. */
+#undef OPENBSD
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
@@ -297,6 +261,9 @@
 /* The size of a `short', as computed by sizeof. */
 #undef SIZEOF_SHORT
 
+/* Define for Solaris system. */
+#undef SOLARIS
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
@@ -305,6 +272,15 @@
 
 /* Define to 1 if your <sys/time.h> declares `struct tm'. */
 #undef TM_IN_SYS_TIME
+
+/* Define for XCIN_DEFAULT_DIR variable. */
+#undef XCIN_DEFAULT_DIR
+
+/* Define for XCIN_DEFAULT_RCDIR variable. */
+#undef XCIN_DEFAULT_RCDIR
+
+/* Define for XCIN_MSGLOCAT variable. */
+#undef XCIN_MSGLOCAT
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

@@ -26,6 +26,9 @@ all-HPUX:
 all-SOLARIS:
 	( BIG5ENC=big5 make -f Rules make-big5 )
 
+all-DARWIN:
+	( BIG5ENC=big5 make -f Rules make-big5 )
+
 
 install: all install-$(OS_TYPE)
 
