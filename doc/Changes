@@ -1,4 +1,4 @@
-xcin-2.5.2.3:  2001/02/
+xcin-2.5.2.3:  2001/03/12
 ------------------------------
 1. Fix bug in bimsphone for multiple-phrases choosing.
    Thanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>.
@@ -19,6 +19,9 @@ xcin-2.5.2.3:  2001/02/
 
 6. Update xcin/cin/big5/jyutping0.cin.
    Thanks to <roger.so@sw-linux.com>
+
+7. Fix bug in xcintool/set_locale.c: return the setting of environment
+   variables when locale setting false.
 
 
 xcin-2.5.2.2:  2001/01/02

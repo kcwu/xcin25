@@ -27,6 +27,7 @@
 #  define _INCLUDE_XOPEN_SOURCE
 #endif
 
+#include <stdlib.h>
 #include <locale.h>
 #include <string.h>
 #include <ctype.h>
@@ -55,6 +56,13 @@ locale_setting(char **lc_ctype, char **lc_messages, char **encoding,
 
     locale = setlocale(LC_CTYPE, "");
     if (! locale) {
+	locale = getenv("LC_ALL");
+	if (! locale)
+	    locale = getenv("LC_CTYPE");
+	if (! locale)
+	    locale = getenv("LANG");
+	if (! locale)
+	    locale = "C";
 	perr(exitcode, 
 	     N_("C locale \"%s\" is not supported by your system.\n"), locale);
 	locale = NULL;

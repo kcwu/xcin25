@@ -378,7 +378,7 @@ set_locale.c:68: (Each undeclared identifier is reported only once
 set_locale.c:68: for each function it appears in.)
 make[3]: *** [set_locale.o] Error 1
 
-有一種可能情況是您適圖在較舊的 GNU/Linux 系統上安裝 xcin-2.5.2.1，例如使用
+有一種可能情況是您試圖在較舊的 GNU/Linux 系統上安裝 xcin-2.5.2.1，例如使用
 glibc-2.1.2 及以前的系統。因為這一版的 xcin 使用了 nl_langinfo() 的函式
 呼叫，而在較老舊的 glibc 系統上這個函式的實作並沒有完全。解決的方式為修
 改 xcin-2.5/config.h 檔，將這一行
