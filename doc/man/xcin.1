@@ -10,26 +10,26 @@ xcin \- X window Chinese INput XIM server
 .fB
 
 .SH DESCRIPTION
-XCIN is a XIM (X Input Method) server which is widely used in Taiwan to perform
+XCIN is an XIM (X Input Method) server which is widely used in Taiwan to perform
 Chinese input under X Window system. It is originally developed by Edward Der-Hua Liu (Oct. 1994)
 and many other programmers in early days; while now it is supported by the XCIN Project.
 
 New XCIN design follows the Xi18N standard and locale mechanism. You should have locale
 supported in your system C library and installed before you run xcin.
-You also need the libtabe, a input method table, and Berkeley DB2 library to run xcin.
-XCIN allows you to input the Chinese characters to a X client which supports XIM
+You also need the libtabe, an input method table library, and Berkeley DB2 library to run xcin.
+XCIN allows you to input the Chinese characters to an X client which supports XIM
 mechanism too.
 
-Currently, XCIN project supports big5(used in Taiwan), big5hkscs(used in Hong Kong) 
-and gb2312(used in China) character set/encodings. The input method currently support
-
+Currently, XCIN project supports big5 (used in Taiwan), big5hkscs (used in Hong Kong) 
+and gb2312 (used in China) character set/encodings. The input methods currently supported are:
+.TP
 big5 character set:
 cj simplex phone bimspinyin bimsphone jyutping 
 array30 jyutping0 zh_hex
-
+.TP
 big5hkscs character set:
 cj zh_hex
-
+.TP
 gb2312 character set:
 pinyin shuangpin jtcj_gb wubizixing phonegb2
 array30 zh_hex
@@ -65,7 +65,7 @@ HP-UX
 [ \-x ] : register XIM server name to Xlib.
 
 .SH FILES
-XCIN search the configuration file, the rcfile, in the following order.
+XCIN searches the configuration file, the rcfile, in the following order.
 
 .TP
 $HOME/.xcin/xcinrc  
@@ -224,11 +224,18 @@ Please refer to the command "locale -a".
 .TP
 XMODIFIERS	
 A usual locale name contains a definite format as following:
-for example: 
-under bash: XMODIFIERS="@im=<name>"; export XMODIFIERS
+.BR
+If the locale is zh_TW.Big5, the value is xcin. Otherwise,
+.BR
+the value is xcin-$locale
+.RE
+              for example: 
+              under bash: XMODIFIERS="@im=xcin-zh_CN.GB2312"
+                          export XMODIFIERS
+              under csh : setenv XMODIFIERS @im=xcin
 
 .SH SEE ALSO
-locale(1) locale(5) locale(7), localedef(1) setlocale(3)
+locale(1), locale(5), locale(7), localedef(1), setlocale(3)
 
 cin2tab(1)
 
