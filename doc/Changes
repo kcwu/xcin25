@@ -1,4 +1,4 @@
-xcin-2.5.3-pre3:  2001/12
+xcin-2.5.3-pre3:  2004/09/21
 ------------------------------
 1. xcin will check the input-focus window when first IC created.
 
@@ -89,6 +89,18 @@ xcin-2.5.3-pre3:  2001/12
 
 30. Add 64-bit patch from SuSE.
     Thanks to Mike FABIAN <mfabian@suse.de>.
+
+31. Fix gen_inp HINT_TSI and HINT_SELECT on utf8 encoding.
+    xcinrc enable HINT_TSI and HINT_SELECT by default.
+
+32. Add new Makefile target 'installheader' 
+
+33. Workaround for FreeBSD which doesn't install library.la
+
+34. Add 4corner.cin, daibuun.cin, hakka.cin, tcj.cin, wm2.cin
+    Thanks to <chaoweilun@pcmail.com.tw>
+
+35. Support toggle of bims tsiguess feature, which disabled by default
 
 
 xcin-2.5.3-pre2:  2001/12/02

@@ -31,6 +31,7 @@ xcin_datap	= $(xcin_modp)/tab
 xcin_rcp	= $(program_prefix)@with_xcin_rcdir@
 xcin_manp	= $(program_prefix)@mandir@
 xcin_msgp	= $(program_prefix)@with_locale_dir@
+xcin_incp	= $(program_prefix)@includedir@/xcin
 tabe_data	= @tabe_data@
 
 #
