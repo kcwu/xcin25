@@ -286,11 +286,20 @@ send_spot_loc(void)
     XFree(preedit_attr);
 
 #if 0
+    {
 	XIMPreeditState preedit_state = XIMPreeditUnKnown;
 	preedit_attr = XVaCreateNestedList(0,
 			XNPreeditState, &preedit_state, 0);
 	XGetICValues(ic, XNPreeditAttributes, preedit_attr, NULL);
+	XFree(preedit_attr);
 	printf("preedit_state = %u\n", (unsigned)preedit_state);
+
+	preedit_state = XIMPreeditDisable;
+	preedit_attr = XVaCreateNestedList(0,
+			XNPreeditState, preedit_state, 0);
+	XSetICValues(ic, XNPreeditAttributes, preedit_attr, NULL);
+	XFree(preedit_attr);
+    }
 #endif
 }
 

@@ -418,6 +418,10 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	ic_rec->ic_value_set |= flag;					\
     }
 
+extern int change_IM(IC *ic, int inp_num);
+extern int xim_connect(IC *ic);
+extern int xim_disconnect(IC *ic);
+
 void
 ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 /*  For details, see Xlib Ref, Chap 11.6  */
@@ -490,18 +494,20 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
             ic_rec->pre_attr.line_space = *(CARD32 *)pre_attr->value;
 	else if (match (XNPreeditState, pre_attr)) {
 	    XIMPreeditState preedit_state;
-	    preedit_state = *(CARD32 *)pre_attr->value;
+	    preedit_state = *(XIMPreeditState *)pre_attr->value;
 	    if (preedit_state == XIMPreeditDisable) {
 		if ((ic->imc->inp_state & IM_CINPUT) ||
-		    (ic->imc->inp_state & IM_2BYTES))
-		    perr(XCINMSG_WARNING,
-			_("XIM client request disabling preediting.\n"));
+		    (ic->imc->inp_state & IM_2BYTES)) {
+		    change_IM(ic, -1);
+		    xim_disconnect(ic);
+		}
 	    }
 	    else if (preedit_state == XIMPreeditEnable) {
 		if (! (ic->imc->inp_state & IM_CINPUT) &&
-		    ! (ic->imc->inp_state & IM_2BYTES))
-		    perr(XCINMSG_WARNING,
-			_("XIM client request enabling preediting.\n"));
+		    ! (ic->imc->inp_state & IM_2BYTES)) {
+		    if (change_IM(ic, ic->imc->inp_num) == True)
+			xim_connect(ic);
+		}
 	    }
 	    else if (preedit_state == XIMPreeditUnKnown)
 		DebugLog(3, ("ic_set: preedit_state = XIMPreeditUnKnown.\n"));

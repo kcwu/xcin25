@@ -114,8 +114,8 @@ commit_string(IC *ic, char *str)
     commit_buf.slen += cch_len;
 }
 
-static int
-xim_connect(XIMS ims, IC *ic)
+int
+xim_connect(IC *ic)
 {
     IMPreeditStateStruct call_data;
 
@@ -129,7 +129,7 @@ xim_connect(XIMS ims, IC *ic)
     return IMPreeditStart(ims, (XPointer)&call_data);
 }
 
-static int
+int
 xim_disconnect(IC *ic)
 {
     IMTriggerNotifyStruct call_data;
@@ -244,7 +244,7 @@ call_xim_end(IC *ic, int ic_delete, int clear)
 	imc->inp_state &= ~(IM_CINPUT | IM_XIMFOCUS);
 }
 
-static int
+int
 change_IM(IC *ic, int inp_num)
 {
     static int first_call;
@@ -486,7 +486,7 @@ xim_set_focus_handler(XIMS ims, IMChangeFocusStruct *call_data, int *icid)
     if ((ic->ic_state & IC_NEWIC)) {
 	if ((xccore->xcin_mode & XCIN_RUN_IM_FOCUS) ||
 	    (xccore->xcin_mode & XCIN_RUN_2B_FOCUS)) {
-	    if (xim_connect(ims, ic) == True) {
+	    if (xim_connect(ic) == True) {
 		if ((xccore->xcin_mode & XCIN_RUN_IM_FOCUS))
 		    change_IM(ic, xccore->im_focus);
 		if ((xccore->xcin_mode & XCIN_RUN_2B_FOCUS))
@@ -498,7 +498,7 @@ xim_set_focus_handler(XIMS ims, IMChangeFocusStruct *call_data, int *icid)
     if ((xccore->xcin_mode & XCIN_SINGLE_IMC)) {
 	if ((ic->imc->inp_state & IM_CINPUT) ||
 	    (ic->imc->inp_state & IM_2BYTES))
-	    xim_connect(ims, ic);
+	    xim_connect(ic);
 	else
 	    xim_disconnect(ic);
 	ic->imc->ic_rec = &(ic->ic_rec);
@@ -572,7 +572,7 @@ xim_trigger_handler(XIMS ims, IMTriggerNotifyStruct *call_data, int *icid)
 	get_trigger_key(call_data->key_index/3, &major_code, &minor_code);
 	switch (major_code) {
 	case FKEY_ZHEN:				/* ctrl+space: default IM */
-	    if (! change_IM(ic, ic->imc->inp_num))
+	    if (change_IM(ic, ic->imc->inp_num) == False)
 	        xim_disconnect(ic);
 	    break;
 	case FKEY_2BSB:				/* shift+space: sb/2b */
@@ -592,7 +592,7 @@ xim_trigger_handler(XIMS ims, IMTriggerNotifyStruct *call_data, int *icid)
 		xim_disconnect(ic);
 	    break;
 	case FKEY_IMN:				/* ctrl+alt+?: select IM */
-	    if (! change_IM(ic, minor_code))
+	    if (change_IM(ic, minor_code) == False)
 	        xim_disconnect(ic);
 	    break;
 	case FKEY_QPHRASE:
