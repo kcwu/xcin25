@@ -1004,8 +1004,8 @@ Optional Packages:
   --with-extra-prefix=PATH  set the extra prefix for external packages.
   --with-extra-inc=PATH     set the extra include dir.
   --with-extra-lib=PATH     set the extra library dir.
-  --with-db-inc=PATH        set the include dir of Berkeley DB2/3.
-  --with-db-lib=PATH        set the library dir of Berkeley DB2/3.
+  --with-db-inc=PATH        set the include dir of Berkeley DB2/3/4.
+  --with-db-lib=PATH        set the library dir of Berkeley DB2/3/4.
   --with-tabe-inc=PATH      set the include dir of libtabe.
   --with-tabe-lib=PATH      set the library dir of libtabe.
   --with-intl-inc=PATH      set the include dir of libintl (gettext).
@@ -13161,7 +13161,7 @@ echo "${ECHO_T}Please use --with-iconv-lib to configure." >&6
 fi
 
 LIBS="$OLD_LIBS"
-for f in db db3; do
+for f in db4 db3 db; do
     as_ac_Lib=`echo "ac_cv_lib_$f''_db_create" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for db_create in -l$f" >&5
 echo $ECHO_N "checking for db_create in -l$f... $ECHO_C" >&6
@@ -13227,7 +13227,7 @@ fi
     test $found = y && break
 done
 if test $found = n; then
-    for f in db db2; do
+    for f in db2 db; do
 	as_ac_Lib=`echo "ac_cv_lib_$f''_db_open" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for db_open in -l$f" >&5
 echo $ECHO_N "checking for db_open in -l$f... $ECHO_C" >&6

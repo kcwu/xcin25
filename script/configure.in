@@ -55,12 +55,12 @@ AC_ARG_WITH(extra_lib,
     [  --with-extra-lib=PATH     set the extra library dir.])
 
 AC_ARG_WITH(db_inc,
-    [  --with-db-inc=PATH        set the include dir of Berkeley DB2/3.],
+    [  --with-db-inc=PATH        set the include dir of Berkeley DB2/3/4.],
     [  test x$withval != x && with_db_inc="-I$withval" ],
     [  with_db_inc='' ])
 
 AC_ARG_WITH(db_lib,
-    [  --with-db-lib=PATH        set the library dir of Berkeley DB2/3.],
+    [  --with-db-lib=PATH        set the library dir of Berkeley DB2/3/4.],
     [  test x$withval != x && test_db_lib="-L$withval" ],
     [  test_db_lib='' ])
 
@@ -450,16 +450,16 @@ if test $found = n; then
 fi
 
 dnl-----------------------------------------------------------------------
-dnl Checks for Berkeley DB2/3 library.
+dnl Checks for Berkeley DB2/3/4 library.
 dnl-----------------------------------------------------------------------
 LIBS="$OLD_LIBS"
-for f in db db3; do
+for f in db4 db3 db; do
     AC_CHECK_LIB($f, db_create,
 	[ found=y; test_db_lib="$test_db_lib -l$f" ], [ found=n ])
     test $found = y && break
 done
 if test $found = n; then
-    for f in db db2; do
+    for f in db2 db; do
 	AC_CHECK_LIB($f, db_open,
 	    [ found=y; test_db_lib="$test_db_lib -l$f" ], [ found=n ])
 	test $found = y && break

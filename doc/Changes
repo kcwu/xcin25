@@ -69,8 +69,10 @@ xcin-2.5.3-pre3:  2001/12
 23. Add UTF-8, OnTheSpot, and cj5 patches.
     Thanks to <firefly@firefly.idv.tw>
 
-24. configure: Now we chould build xcin without libtabe/libbims.
-    (when libtabe/libbims/BerkeleyDB not available)
+24. configure: 
+    a. Now we chould build xcin without libtabe/libbims.
+      (when libtabe/libbims/BerkeleyDB not available)
+    b. Add Berkeley DB4 auto-detecting.
 
 
 xcin-2.5.3-pre2:  2001/12/02
