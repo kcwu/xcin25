@@ -1,4 +1,4 @@
-xcin-2.5.2.2:  2000/12/
+xcin-2.5.2.2:  2001/01/02
 ------------------------------
 1. Remove useless character set counting code from testprog.c: create_fontset().
    Add a cursor into testprog window.
