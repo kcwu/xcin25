@@ -54,7 +54,7 @@ install_subsys:
 
 install_header:
 	if [ ! -d "$(xcin_incp)" ]; then $(INSTALL) -d $(xcin_incp); fi
-	@cd include && for f in IC.h constant.h fkey.h gui.h imodule.h module.h xcin.h xcintool.h; do ( $(LIBTOOL) --mode=install $(INSTALL_DATA) $(xcin_incp) $f ); done
+	@for f in IC.h constant.h fkey.h gui.h imodule.h module.h xcin.h xcintool.h; do ( $(LIBTOOL) --mode=install $(INSTALL_DATA) include/$$f $(xcin_incp) ); done
 
 clean:
 	rm -f $(OBJ) $(BIN) core

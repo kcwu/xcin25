@@ -93,7 +93,7 @@ xcin-2.5.3-pre3:  2004/09/21
 31. Fix gen_inp HINT_TSI and HINT_SELECT on utf8 encoding.
     xcinrc enable HINT_TSI and HINT_SELECT by default.
 
-32. Add new Makefile target 'installheader' 
+32. Add new Makefile target 'install_header' 
 
 33. Workaround for FreeBSD which doesn't install library.la
 
