@@ -3,7 +3,7 @@ top_srcdir = @top_srcdir@
 include $(top_srcdir)/Rules
 
 INC =	$(xcininc) $(intl_inc)
-SRC =	check_file.c debug.c get_line.c get_word.c load_module.c open_file.c \
+SRC =	check_file.c get_line.c get_word.c load_module.c open_file.c \
 	perr.c set_data.c set_locale.c stable_sort.c strcmp_wild.c \
 	xcin_malloc.c xcin_rc.c xcin_snprintf.c wchs_to_mbs.c
 

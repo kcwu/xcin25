@@ -11,7 +11,7 @@ IMValues.o: IMValues.c  IMdkit.h
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ IMValues.c
 i18nIMProto.o: i18nIMProto.c  FrameMgr.h
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nIMProto.c
-i18nPtHdr.o: i18nPtHdr.c  ../../../config.h FrameMgr.h IMdkit.h Xi18n.h XimProto.h XimFunc.h
+i18nPtHdr.o: i18nPtHdr.c  ../../../config.h FrameMgr.h IMdkit.h Xi18n.h XimProto.h XimFunc.h ../../../src/include/xcintool.h
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nPtHdr.c
 i18nX.o: i18nX.c  FrameMgr.h IMdkit.h Xi18n.h XimProto.h Xi18nX.h XimFunc.h
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ i18nX.c

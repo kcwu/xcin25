@@ -68,7 +68,7 @@ xim_commit(void)
 
     if (commit_buf.slen == 0)
 	return;
-    DebugLog(1, verbose, "commit str: %s\n", commit_buf.str);
+    DebugLog(1, ("commit str: %s\n", commit_buf.str));
 
     cch_str_list[0] = commit_buf.str;
     XmbTextListToTextProperty(xccore->gui.display, cch_str_list, 1,
@@ -404,14 +404,14 @@ change_simd(IC *ic)
 static int 
 xim_open_handler(XIMS ims, IMOpenStruct *call_data)
 {
-    DebugLog(2, verbose, "XIM_OPEN\n");
+    DebugLog(2, ("XIM_OPEN\n"));
     return True;
 }
 
 static int 
 xim_close_handler(XIMS ims, IMCloseStruct *call_data)
 {
-    DebugLog(2, verbose, "XIM_CLOSE\n");
+    DebugLog(2, ("XIM_CLOSE\n"));
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
@@ -429,7 +429,7 @@ xim_create_ic_handler(XIMS ims, IMChangeICStruct *call_data, int *icid)
 	return True;
     ret = ic_create(ims, call_data, xccore);
     *icid = (ret == True) ? call_data->icid : -1;
-    DebugLog(2, verbose, "XIM_CREATE_IC: icid=%d\n", *icid);
+    DebugLog(2, ("XIM_CREATE_IC: icid=%d\n", *icid));
     return ret;
 }
 
@@ -437,7 +437,7 @@ static int
 xim_destroy_ic_handler(XIMS ims, IMDestroyICStruct *call_data, int *icid)
 {
     *icid = call_data->icid;
-    DebugLog(2, verbose, "XIM_DESTORY_IC: icid=%d\n", *icid);
+    DebugLog(2, ("XIM_DESTORY_IC: icid=%d\n", *icid));
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
@@ -450,7 +450,7 @@ xim_set_focus_handler(XIMS ims, IMChangeFocusStruct *call_data, int *icid)
     IC *ic;
 
     *icid = call_data->icid;
-    DebugLog(2, verbose, "XIM_SET_IC_FOCUS: icid=%d\n", *icid);
+    DebugLog(2, ("XIM_SET_IC_FOCUS: icid=%d\n", *icid));
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
@@ -514,7 +514,7 @@ xim_unset_focus_handler(XIMS ims, IMChangeFocusStruct *call_data, int *icid)
     IC *ic;
 
     *icid = call_data->icid;
-    DebugLog(2, verbose, "XIM_UNSET_IC_FOCUS: icid=%d\n", *icid);
+    DebugLog(2, ("XIM_UNSET_IC_FOCUS: icid=%d\n", *icid));
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
@@ -548,7 +548,7 @@ xim_trigger_handler(XIMS ims, IMTriggerNotifyStruct *call_data, int *icid)
     IC *ic;
 
     *icid = call_data->icid;
-    DebugLog(2, verbose, "XIM_TRIGGER_NOTIFY: icid=%d\n", *icid);
+    DebugLog(2, ("XIM_TRIGGER_NOTIFY: icid=%d\n", *icid));
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
@@ -756,7 +756,7 @@ xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
     keyinfo_t keyinfo;
 
     *icid = call_data->icid;
-    DebugLog(2, verbose, "XIM_FORWARD_EVENT: icid=%d\n", *icid);
+    DebugLog(2, ("XIM_FORWARD_EVENT: icid=%d\n", *icid));
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
@@ -785,7 +785,7 @@ xim_set_ic_values_handler(XIMS ims, IMChangeICStruct *call_data, int *icid)
     IC *ic;
 
     *icid = call_data->icid;
-    DebugLog(2, verbose, "XIM_SET_IC_VALUES: icid=%d\n", *icid);
+    DebugLog(2, ("XIM_SET_IC_VALUES: icid=%d\n", *icid));
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
@@ -802,7 +802,7 @@ xim_get_ic_values_handler(XIMS ims, IMChangeICStruct *call_data, int *icid)
     IC *ic;
 
     *icid = call_data->icid;
-    DebugLog(2, verbose, "XIM_GET_IC_VALUES: icid=%d\n", *icid);
+    DebugLog(2, ("XIM_GET_IC_VALUES: icid=%d\n", *icid));
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
@@ -865,8 +865,7 @@ xim_sync_reply_handler(XIMS ims, IMSyncXlibStruct *call_data, int *icid)
  */
     if ((xccore->xcin_mode & XCIN_RUN_EXIT)) {
 	n_check ++;
-	DebugLog(2, verbose, "XIM_SYNC_REPLY: icid=%d, n_check=%d\n",
-		*icid, n_check);
+	DebugLog(2, ("XIM_SYNC_REPLY: icid=%d, n_check=%d\n", *icid, n_check));
 	if (n_check < MAX_XIM_SYNC_CHECK) {
 	    IC *ic = ic_find(call_data->icid);
 	    xim_close(ic);
@@ -917,23 +916,23 @@ im_protocol_handler(XIMS ims, IMProtocol *call_data)
     case XIM_SYNC_REPLY:
 	ret = xim_sync_reply_handler(ims, &(call_data->sync_xlib), &icid);
 	break;
+    case XIM_RESET_IC:
+        DebugLog(2, ("XIM_RESET_IC\n"));
+	ret = True;
+	break;
 /*
  *  Not implement yet.
  */
-    case XIM_RESET_IC:
-        DebugLog(2, verbose, "XIM_RESET_IC_FOCUS:\n");
-	ret = True;
-	break;
     case XIM_PREEDIT_START_REPLY:
-        DebugLog(2, verbose, "XIM_PREEDIT_START_REPLY\n");
+        DebugLog(2, ("XIM_PREEDIT_START_REPLY\n"));
 	ret = True;
 	break;
     case XIM_PREEDIT_CARET_REPLY:
-        DebugLog(2, verbose, "XIM_PREEDIT_CARET_REPLY\n");
+        DebugLog(2, ("XIM_PREEDIT_CARET_REPLY\n"));
 	ret = True;
 	break;
     default:
-	DebugLog(2, verbose, "XIM Unknown\n");
+	DebugLog(2, ("XIM Unknown\n"));
 	ret = False;
 	break;
     }
@@ -1109,10 +1108,10 @@ xim_close(IC *ic)
 {
     IMSyncXlibStruct pass_data;
 
-    DebugLog(2, verbose, "xim_close\n");
+    DebugLog(2, ("xim_close\n"));
     xccore->xcin_mode |= (XCIN_RUN_EXIT | XCIN_ICCHECK_OFF);
     if (ic && gui_check_window(ic->ic_rec.client_win) == True) {
-	DebugLog(2, verbose, "xim_close sent\n");
+	DebugLog(2, ("xim_close sent\n"));
 	pass_data.major_code = XIM_SYNC;
 	pass_data.minor_code = 0;
 	pass_data.connect_id = ic->connect_id;

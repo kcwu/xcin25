@@ -247,10 +247,13 @@ typedef struct {		/* common module header */
    extern int xcin_snprintf(char *str, size_t size, const char *format, ...);
 #endif
 
+#define DebugLog(defverb, action) \
+	if (defverb <= verbose) perr_debug action
 
 /* xcintool functions. */
 extern void set_perr(char *error_head);
 extern void perr(int exitcode, const char *fmt, ...);
+extern void perr_debug(const char *fmt, ...);
 extern void *xcin_malloc(size_t n_bytes, int reset);
 extern void *xcin_realloc(void *pt, size_t n_bytes);
 extern int set_lc_ctype(char *loc_name, char *loc_return, int loc_size,
@@ -289,8 +292,6 @@ extern void xcin_enclist_clean(void);
 extern int connect_iconv(int encid, int to_wch);
 extern int xcin_wcs2mbs(xch_t *mbs, xch_t *wcs);
 extern int xcin_mbs2wcs(xch_t *wcs, xch_t *mbs, int wcstype);
-
-extern void DebugLog(int deflevel, int inplevel, char *fmt, ...);
 
 
 /*

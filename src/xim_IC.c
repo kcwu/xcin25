@@ -242,6 +242,7 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
     for (i=0; i < (int)call_data->ic_attr_num; i++, ic_attr++) {
 	if (! ic_attr->name)
 	    continue;
+	DebugLog(3, ("ic_get: ic_attr: %s\n", ic_attr->name));
         if (match (XNFilterEvents, ic_attr)) {
             ic_attr->value = (void *)xcin_malloc(sizeof(CARD32), 0);
             ic_attr->value_length = sizeof(CARD32);
@@ -266,6 +267,7 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
     for (i=0; i < (int)call_data->preedit_attr_num; i++, pre_attr++) {
 	if (! pre_attr->name)
 	    continue;
+	DebugLog(3, ("ic_get: pre_attr: %s\n", pre_attr->name));
 	if (match (XNArea, pre_attr)) {
 	    pre_attr->value = (void *)xcin_malloc(sizeof(XRectangle), 0);
 	    *(XRectangle*)pre_attr->value = ic_rec->pre_attr.area;
@@ -301,7 +303,7 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	    pre_attr->value_length = sizeof(long);
 	} 
 	else if (match (XNPreeditState, pre_attr)) {
-	    pre_attr->value = (void *)xcin_malloc(sizeof(long), 0);
+	    pre_attr->value = (void *)xcin_malloc(sizeof(XIMPreeditState), 0);
 	    if ((ic->imc->inp_state & IM_CINPUT) ||
 		(ic->imc->inp_state & IM_2BYTES))
 		*(long*)pre_attr->value = XIMPreeditEnable;
@@ -331,6 +333,7 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
     for (i = 0; i < (int)call_data->status_attr_num; i++, sts_attr++) {
 	if (! sts_attr->name)
 	    continue;
+	DebugLog(3, ("ic_get: sts_attr: %s\n", sts_attr->name));
         if (match (XNArea, sts_attr)) {
             sts_attr->value = (void *)xcin_malloc(sizeof(XRectangle), 0);
             *(XRectangle*)sts_attr->value = ic->sts_attr.area;
@@ -429,6 +432,7 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
     for (i=0; i < (int)(call_data->ic_attr_num); i++, ic_attr++) {
 	if (! ic_attr->name && ! ic_attr->value)
 	    continue;
+	DebugLog(3, ("ic_set: ic_attr: %s\n", ic_attr->name));
         if (match (XNInputStyle, ic_attr)) {
 	    int j;
             ic_rec->input_style = *((INT32 *)ic_attr->value);
@@ -460,6 +464,7 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
     for (i=0; i < (int)(call_data->preedit_attr_num); i++, pre_attr++) {
 	if (! pre_attr->name && ! pre_attr->value)
 	    continue;
+	DebugLog(3, ("ic_set: pre_attr: %s\n", pre_attr->name));
         if (match (XNArea, pre_attr)) {
 	    checkset_ic_val(CLIENT_SETIC_PRE_AREA, XRectangle,
 			    ic_rec->pre_attr.area);
@@ -482,6 +487,24 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	}
         else if (match (XNLineSpace, pre_attr))
             ic_rec->pre_attr.line_space = *(CARD32 *)pre_attr->value;
+	else if (match (XNPreeditState, pre_attr)) {
+	    XIMPreeditState preedit_state;
+	    preedit_state = *(CARD32 *)pre_attr->value;
+	    if (preedit_state == XIMPreeditDisable) {
+		if ((ic->imc->inp_state & IM_CINPUT) ||
+		    (ic->imc->inp_state & IM_2BYTES))
+		    perr(XCINMSG_WARNING,
+			_("XIM client request disabling preediting.\n"));
+	    }
+	    else if (preedit_state == XIMPreeditEnable) {
+		if (! (ic->imc->inp_state & IM_CINPUT) &&
+		    ! (ic->imc->inp_state & IM_2BYTES))
+		    perr(XCINMSG_WARNING,
+			_("XIM client request enabling preediting.\n"));
+	    }
+	    else if (preedit_state == XIMPreeditUnKnown)
+		DebugLog(3, ("ic_set: preedit_state = XIMPreeditUnKnown.\n"));
+	}
 
 #ifdef XIM_COMPLETE
         else if (match (XNAreaNeeded, pre_attr))
@@ -504,6 +527,7 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
     for (i=0; i < (int)(call_data->status_attr_num); i++, sts_attr++) {
 	if (! sts_attr->name && ! sts_attr->value)
 	    continue;
+	DebugLog(3, ("ic_set: sts_attr: %s\n", sts_attr->name));
         if (match (XNArea, sts_attr))
             ic_rec->sts_attr.area = *(XRectangle *)sts_attr->value;
         else if (match (XNAreaNeeded, sts_attr))
@@ -622,14 +646,14 @@ check_ic_exist(int icid, xccore_t *xccore)
     if (current_time - last_check <= TIMECHECK_STEP)
 	return;
 
-    DebugLog(3, verbose, "Begin check: current time = %d, last check = %d\n", 
-		(int)current_time, (int)last_check);
+    DebugLog(4, ("Begin check: current time = %d, last check = %d\n", 
+		(int)current_time, (int)last_check));
 
     while (ic != NULL) {
-	DebugLog(3, verbose, "IC: id=%d, focus_w=0x%x, client_w=0x%x%s\n",
+	DebugLog(4, ("IC: id=%d, focus_w=0x%x, client_w=0x%x%s\n",
 		ic->id, (unsigned int)ic->ic_rec.focus_win, 
 		(unsigned int)ic->ic_rec.client_win, 
-		(ic==ref_ic) ? ", (ref)." : ".");
+		(ic==ref_ic) ? ", (ref)." : "."));
 	delete = 0;
 
 	if (ic == ref_ic)
@@ -640,20 +664,18 @@ check_ic_exist(int icid, xccore_t *xccore)
 	    delete = 1;
 	else if (current_time - ic->exec_time > IC_IDLE_TIME &&
 		 ic->ic_rec.client_win != 0) {
-	    DebugLog(3, verbose, 
-		    "Check IC: id=%d, window=0x%x, exec_time=%d.\n", 
-		    ic->id, (unsigned int)ic->ic_rec.client_win, 
-		    (int)ic->exec_time);
+	    DebugLog(4, ("Check IC: id=%d, window=0x%x, exec_time=%d.\n", 
+			 ic->id, (unsigned int)ic->ic_rec.client_win, 
+			 (int)ic->exec_time));
 	    ic->exec_time = current_time;
 	    if (gui_check_window(ic->ic_rec.client_win) != True)
 		delete = 1;
 	}
 
 	if (delete) {
-	    DebugLog(3, verbose, 
-		    "Delete IC: id=%d, window=0x%x, exec_time=%d.\n", 
-		    ic->id, (unsigned int)ic->ic_rec.client_win, 
-		    (int)ic->exec_time);
+	    DebugLog(4, ("Delete IC: id=%d, window=0x%x, exec_time=%d.\n", 
+			 ic->id, (unsigned int)ic->ic_rec.client_win, 
+			 (int)ic->exec_time));
 	    delete_IC(ic, last, xccore);
 	    ic = (last) ? last->next : ic_list;
 	}

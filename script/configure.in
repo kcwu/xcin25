@@ -606,4 +606,5 @@ AC_OUTPUT(Makefile:script/Makefile.in \
 	cin/big5/Makefile \
 	cin/gb/Makefile \
 	etc/Makefile \
-	po/Makefile)
+	po/Makefile \
+	doc/man/Makefile)

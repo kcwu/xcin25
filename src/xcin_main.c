@@ -545,13 +545,15 @@ void xim_terminate(void);
 
 void sighandler(int sig)
 {
-    if (sig == SIGQUIT)
-	DebugLog(1, verbose, "catch signal: SIGQUIT\n");
-    else if (sig == SIGTERM)
-	DebugLog(1, verbose, "catch signal: SIGTERM\n");
-    else
-	DebugLog(1, verbose, "catch signal: SIGINT\n");
-
+    if (sig == SIGQUIT) {
+	DebugLog(1, ("catch signal: SIGQUIT\n"));
+    }
+    else if (sig == SIGTERM) {
+	DebugLog(1, ("catch signal: SIGTERM\n"));
+    }
+    else {
+	DebugLog(1, ("catch signal: SIGINT\n"));
+    }
     if (sig == SIGQUIT)
 	return;
 

@@ -5,11 +5,11 @@
 # You need GCC and perl to generate me.
 #
 
-ascii_wb.o: ascii_wb.c  ../../../src/include/module.h ../../../src/include/xcintool.h
+ascii_wb.o: ascii_wb.c  ../../../config.h ../../../src/include/module.h ../../../src/include/xcintool.h
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ ascii_wb.c
-keymap.o: keymap.c  ../../../src/include/module.h ../../../src/include/xcintool.h
+keymap.o: keymap.c  ../../../config.h ../../../src/include/module.h ../../../src/include/xcintool.h
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ keymap.c
-charcode.o: charcode.c  ../../../src/include/module.h ../../../src/include/xcintool.h
+charcode.o: charcode.c  ../../../config.h ../../../src/include/module.h ../../../src/include/xcintool.h
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ charcode.c
 qphrase.o: qphrase.c  ../../../config.h ../../../src/include/xcintool.h ../../../src/include/module.h
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ qphrase.c

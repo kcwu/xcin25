@@ -13,8 +13,8 @@ OBJ = $(SRC:.c=.lo)
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(LIBTOOL) --mode=link $(CC) -module -o $(TARGET) $(OBJ) \
-		-rpath $(moddir)
+	$(LIBTOOL) --mode=link $(CC) -module -avoid-version -o $(TARGET) \
+		$(OBJ) -rpath $(moddir)
 include .depend
 
 depend:

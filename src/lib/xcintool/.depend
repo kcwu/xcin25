@@ -5,10 +5,8 @@
 # You need GCC and perl to generate me.
 #
 
-check_file.lo: check_file.c  ../../../config.h ../../../src/include/xcintool.h
+check_file.lo: check_file.c  ../../../config.h ../../../src/include/constant.h ../../../src/include/xcintool.h
 	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ check_file.c
-debug.lo: debug.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ debug.c
 get_line.lo: get_line.c  ../../../config.h ../../../src/include/xcintool.h
 	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ get_line.c
 get_word.lo: get_word.c  ../../../config.h ../../../src/include/xcintool.h

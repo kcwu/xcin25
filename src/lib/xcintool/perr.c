@@ -72,3 +72,13 @@ perr(int msgcode, const char *fmt,...)
     if (exitcode)
         exit(exitcode);
 }
+
+void
+perr_debug(const char *fmt,...)
+{
+    va_list ap;
+    fprintf(stderr, "DEBUG: ");
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+}

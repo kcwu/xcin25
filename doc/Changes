@@ -13,6 +13,17 @@ xcin-2.5.3-pre2:  2001/
 4. Change xim.c: xim_commit(), commit_string(): to collect strings and commit
    at once.
 
+5. Change DebugLog() calling interface.
+
+6. xim_IC.c: ic_set_values: case XNPreeditState handling, for mozilla.
+   Thanks to <ada2@netscape.net>, Kuang-che Wu <kcwu@ck.tp.edu.tw>.
+
+7. Change IM modules .so to be without version numbers.
+   Thanks to Rui-Xiang Guo <rxg@ms25.url.com.tw>.
+
+8. Add the first xcin man page: xcin.1.
+   Thanks to <cyril_huang@yahoo.com>.
+
 
 xcin-2.5.3-pre1:  2001/10/19
 ------------------------------

@@ -16,14 +16,16 @@ install:
 	( cd etc; ${MAKE} install )
 	( cd cin; ${MAKE} install )
 	( cd po;  ${MAKE} install )
+	( cd doc/man; ${MAKE} install )
 
 clean:
 	( cd src; ${MAKE} clean )
 distclean:
-	( cd src; ${MAKE} distclean )
+	( cd src; $(MAKE) distclean )
 	( cd cin; $(MAKE) distclean )
 	( cd etc; $(MAKE) distclean )
 	( cd po;  $(MAKE) distclean )
+	( cd doc/man; $(MAKE) distclean )
 	rm -f config.cache config.h config.log config.status libtool
 	rm -f Rules Makefile
 
