@@ -117,7 +117,7 @@ telecode.tab.$(BIG5HKENC): telecode.cin sys.tab.$(BIG5HKENC)
 sys.tab.$(UTF8ENC): sys.cin.utf-8
 	$(build) -r $(xcinrc) -l $(UTF8ENC) -o $@ sys.cin.utf-8
 	for f in *.cin ; do \
-	    iconv --verbose -c -f BIG5HKSCS -t UTF-8 $$f -o $$f.$(UTF8ENC) ;\
+	    iconv -c -f BIG5HKSCS -t UTF-8 $$f > $$f.$(UTF8ENC) || true;\
 	done
 	cp -f bims_pinyin.cin bims_pinyin.cin.utf-8
 array30.tab.$(UTF8ENC): array30.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
@@ -157,7 +157,7 @@ bims_pinyin.tab.$(UTF8ENC): bims_pinyin.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
 	$(build) -r $(xcinrc) -l $(UTF8ENC) \
 		-s sys.tab.$(UTF8ENC) -o $@ bims_pinyin.cin.$(UTF8ENC)
 default.phr.$(UTF8ENC): default.phr
-	iconv -f big5 -t utf8 default.phr > default.phr.$(UTF8ENC)
+	iconv -f big5 -t utf-8 default.phr > default.phr.$(UTF8ENC)
 
 install_big5:
 	if [ ! -d $(xcin_datap)/$(BIG5ENC) ]; then \

@@ -12,7 +12,7 @@ all-LINUX:
 	( BIG5ENC=big5 BIG5HKENC=big5hkscs UTF8ENC=utf-8 make -f Rules make-big5 make-big5hkscs make-utf8 )
 
 all-FREEBSD:
-	( BIG5ENC=big5 make -f Rules make-big5 )
+	( BIG5ENC=big5 UTF8ENC=utf-8 make -f Rules make-big5 make-utf8 )
 
 all-OPENBSD:
 	( BIG5ENC=big5 make -f Rules make-big5 )
@@ -33,7 +33,7 @@ install-LINUX:
 	( BIG5ENC=big5 BIG5HKENC=big5hkscs UTF8ENC=utf-8 make -f Rules install_big5 install_big5hkscs install_utf8 )
 
 install-FREEBSD:
-	( BIG5ENC=big5 make -f Rules install_big5 )
+	( BIG5ENC=big5 UTF8ENC=utf-8 make -f Rules install_big5 install_utf8 )
 
 install-OPENBSD:
 	( BIG5ENC=big5 make -f Rules install_big5 )

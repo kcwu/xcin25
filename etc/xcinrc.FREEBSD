@@ -32,7 +32,7 @@
 (define DIFF_BEEP		"YES")
 (define KEYBOARD_TRANSLATE	"NO")
 
-(define LOCALE	'(zh_TW.Big5 zh_CN.EUC))
+(define LOCALE	'(zh_TW.Big5 zh_CN.EUC zh_TW.UTF-8))
 
 ;
 ;  XIM Input Style Adjustments.
@@ -104,6 +104,54 @@
         ; The following has effect only when AUTO_SELECTION is NO
           (AUTO_UPCHAR          YES)))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;  This is the global configuration of the zh_TW.UTF-8 locale
+;
+(define zh_TW.UTF-8
+  '((DEFAULT_IM         "cj5")
+    (DEFAULT_IM_MODULE  "gen_inp")
+    (DEFAULT_IM_SINMD   "DEFAULT")
+    (PHRASE             "default.phr")
+    (CINPUT             (cj5 simplex5 phone jyutping bimspinyin bimsphone
+                         array30 jyutping0 zh_hex))
+    (FONTSET            "-arphic-medium-*-24-*-iso10646-1,-*-medium-*-24-*")
+    (OVERSPOT_FONTSET   "-arphic-medium-*-16-*-iso10646-1,-*-medium-*-16-*")))
+
+(define cj5@utf-8
+        '((SETKEY               1)))
+
+(define simplex5@utf-8
+        '((SETKEY               2)))
+
+(define phone@utf-8
+        '((SETKEY               3)
+          (END_KEY              YES)
+          (BEEP_DUPCHAR         YES)))
+
+(define jyutping@utf-8
+        '((SETKEY               4)
+          (END_KEY              YES)
+          (BEEP_DUPCHAR         YES)))
+
+(define bimsphone@utf-8
+        '((SETKEY               6)
+          (MODULE               "bimsphone")))
+
+(define bimspinyin@utf-8
+        '((SETKEY               7)
+          (MODULE               "bimsphone")))
+
+(define array30@utf-8
+        '((SETKEY               8)
+          (BEEP_DUPCHAR         YES)
+          (DISABLE_SEL_LIST     "w")
+          (KEYSTROKE_REMAP      "t:0xaaba;T:0xaaba;")))
+
+(define jyutping0@utf-8
+        '((SETKEY               9)
+          (BEEP_DUPCHAR         YES)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
