@@ -459,8 +459,10 @@ overspot_win_draw(gui_t *gui, winlist_t *win, IM_Context_t *imc, int flag)
 	x = draw_multich(gui, win, x, y, &(imc->inpinfo));
 	break;
     case DRAW_EMPTY:
-	if ((imc->inp_state & IM_CINPUT))
+	if ((imc->inp_state & IM_CINPUT)) {
+	    x = draw_preedit(gui, win, x, y, imc->inpinfo.s_keystroke);
 	    x = draw_cch_publish(gui, win, x, y, imc);
+	}
 	break;
     default:
 	break;
@@ -495,7 +497,7 @@ gui_overspot_draw(gui_t *gui, winlist_t *win)
 	if ((display_mode & OVERSPOT_DRAW_EMPTY))
 	    flag = DRAW_EMPTY;
 	if ((imc->inp_state & IM_XIMFOCUS)) {
-	    if ((imc->inpinfo.guimode & GUIMOD_LISTCHAR))
+	    if (imc->inpinfo.n_lcch && (imc->inpinfo.guimode & GUIMOD_LISTCHAR))
 		flag = DRAW_LCCH;
 	    else if (imc->inpinfo.n_mcch) {
 		if ((imc->inpinfo.guimode & GUIMOD_SELKEYSPOT))
