@@ -13,7 +13,6 @@ if [ ! -z "$perl" ]; then
             (/[\\]/) ? printf("\\\\") : printf("$str[$i+1]");
             $i++; }
         else { printf("$str[$i]"); } } }' | msgfmt -o $1 -
-
 else
     echo "Warning: Your GNU Gettext is too old such that I have to fix"
     echo "Warning: my origianl po files.  However, perl program is not"
