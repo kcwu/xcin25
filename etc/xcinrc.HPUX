@@ -205,7 +205,8 @@
     (DEFAULT_IM_MODULE	"gen_inp")
     (DEFAULT_IM_SINMD	"DEFAULT")
     (PHRASE		"default.phr")
-    (CINPUT             (cj zh_hex))
+    (CINPUT             (cj simplex phone jyutping bimsphone bimspinyin
+			 array30 jyutping0 zh_hex))
     (FONTSET		"-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-big5hkscs-0")
     (OVERSPOT_FONTSET	"NONE")))
 ;
@@ -214,34 +215,34 @@
 (define cj@hkbig5
 	'((SETKEY		1)))
 
-(define simplex@big5hkscs
+(define simplex@hkbig5
 	'((SETKEY		2)))
 
-(define phone@big5hkscs
+(define phone@hkbig5
 	'((SETKEY		3)
 	  (END_KEY		YES)
 	  (BEEP_DUPCHAR		YES)))
 
-(define jyutping@big5hkscs
+(define jyutping@hkbig5
 	'((SETKEY		4)
 	  (END_KEY		YES)
 	  (BEEP_DUPCHAR		YES)))
 
-(define bimsphone@big5hkscs
+(define bimsphone@hkbig5
 	'((SETKEY		6)
 	  (MODULE		"bimsphone")))
 
-(define bimspinyin@big5hkscs
+(define bimspinyin@hkbig5
 	'((SETKEY		7)
 	  (MODULE		"bimsphone")))
 
-(define array30@big5hkscs
+(define array30@hkbig5
 	'((SETKEY		8)
 	  (BEEP_DUPCHAR		YES)
 	  (DISABLE_SEL_LIST	"w")
 	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba")))
 
-(define jyutping0@big5hkscs
+(define jyutping0@hkbig5
 	'((SETKEY		9)
 	  (END_KEY		YES)
 	  (BEEP_DUPCHAR		YES)))

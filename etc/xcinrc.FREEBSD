@@ -183,7 +183,7 @@
 (define jtcj_gb@euc
 	'((SETKEY		3)))
 
-(define phonegb2@gb2312
+(define phonegb2@euc
 	'((SETKEY		4)
 	  (END_KEY		YES)
 	  (BEEP_DUPCHAR		YES)))
