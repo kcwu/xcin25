@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     For any question or suggestion, please mail to xcin mailing-list:
-    xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
+    xcin@linux.org.tw.
 */      
 
 #ifdef HAVE_CONFIG_H
@@ -201,7 +201,6 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 	preconvert("«÷­µ", cfd.inp_cname, 4);
     }
     else {
-	//char *outptr = cfd.inp_cname;
         cfd.inp_cname = (char *)xcin_malloc(2*bimsp_codeset+1, 1);
 	preconvert("µü­µ", cfd.inp_cname, 4);
     }

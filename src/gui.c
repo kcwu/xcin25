@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     For any question or suggestion, please mail to xcin mailing-list:
-    xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
+    xcin@linux.org.tw.
 */
 
 #include "config.h"
@@ -33,7 +33,7 @@ winlist_t *xcin_mainwin_init(gui_t *gui, xccore_t *xccore);
 winlist_t *xcin_mainwin2_init(gui_t *gui, xccore_t *xccore);
 winlist_t *gui_overspot_init(gui_t *gui, xccore_t *xccore);
 winlist_t *gui_menusel_init(gui_t *gui, int imid, greq_win_t *gw);
-// Add By Firefly(firefly@firefly.idv.tw)
+/* Add By Firefly(firefly@firefly.idv.tw) */
 winlist_t *gui_onspot_init(gui_t *gui, xccore_t *xccore);
 void gui_overspot_check_client(gui_t *gui, int icid);
 void gui_overspot_delete_client(gui_t *gui, int icid);
@@ -313,84 +313,6 @@ gui_check_input_focus(xccore_t *xccore, Window win)
 
 /*----------------------------------------------------------------------------
 
-	GUI Monitoring the XIM client windows. 
-
-----------------------------------------------------------------------------*/
-/*
-struct mw_s {
-    Window win;
-    int icid;
-    xmode_t flag;
-};
-
-#define MW_LENTH	64
-static struct mw_s *mw;
-static int mw_edx, mw_len;
-
-void
-gui_set_monitor(Window w, xmode_t flag, int icid)
-{
-    int i, idx=-1;
-
-    for (i=0; i<mw_edx; i++) {
-	if (idx == -1 && mw[i].win == (Window)0)
-	    idx = i;
-	if (mw[i].win == w) {
-	    mw[i].flag |= flag;
-	    return;
-	}
-    }
-    if (idx == -1) {
-	if (mw_edx >= mw_len) {
-	    mw_len += MW_LENTH;
-	    mw = xcin_realloc(mw, sizeof(struct mw_s)*mw_len);
-	    for (i=mw_edx; i<mw_len; i++)
-		mw[i].win = (Window)0;
-	}
-	idx = mw_edx;
-	mw_edx ++;
-    }
-    XSelectInput(gui->display, w, StructureNotifyMask);
-    mw[idx].win = w;
-    mw[idx].icid = icid;
-    mw[idx].flag = flag;
-}
-
-static void
-gui_unset_monitor(Window w, xccore_t *xccore)
-{
-    int i;
-
-    for (i=0; i<mw_edx; i++) {
-	if (mw[i].win == w &&
-	    (mw[i].flag & WIN_MONITOR_CLIENT)) {
-	    ic_destroy(mw[i].icid, xccore);
-	    mw[i].win = (Window)0;
-	    mw[i].icid = 0;
-	    mw[i].flag = 0;
-	    if (i == mw_edx-1 && mw_edx > 0)
-		mw_edx --;
-	    break;
-	}
-    }
-}
-
-static void
-gui_check_monitor(XConfigureEvent *event)
-{
-    int i;
-
-    for (i=0; i<mw_edx; i++) {
-	if (mw[i].win == event->window &&
-	    (mw[i].flag & WIN_MONITOR_OVERSPOT)) {
-	    gui_overspot_check_client(gui, mw[i].icid);
-	    break;
-	}
-    }
-}
-*/
-/*----------------------------------------------------------------------------
-
 	GUI Initialization & Main loop
 
 ----------------------------------------------------------------------------*/
@@ -447,7 +369,7 @@ gui_init(xccore_t *xccore)
     else
 	gui->mainwin  = xcin_mainwin_init(gui, xccore);
     gui->overspot_win = gui_overspot_init(gui, xccore);
-    // Add by Firefly(firefly@firefly.idv.tw)
+    /* Add by Firefly(firefly@firefly.idv.tw) */
     gui->onspot_win = gui_onspot_init(gui, xccore);
     gui->winchange |= WIN_CHANGE_IM;
 }
@@ -486,20 +408,10 @@ gui_loop(xccore_t *xccore)
 	    break;
 	case ConfigureNotify:
 	    win = gui_search_win(event.xconfigure.window);
-/*
-	    if (! win)
-		gui_check_monitor(&(event.xconfigure));
-	    else if (win->win_attrib_func)
-*/
 	    if (win->win_attrib_func)
 		win->win_attrib_func(gui, win, &(event.xconfigure),
 				(xccore->xcin_mode & XCIN_KEEP_POSITION));
 	    break;
-/*
-	case DestroyNotify:
-	    gui_unset_monitor(event.xdestroywindow.window, xccore);
-	    break;
-*/
 	case ClientMessage:
 	    if (event.xclient.format == 32 && 
 		event.xclient.data.l[0] == gui->wm_del_win)
@@ -603,7 +515,7 @@ gui_update_winlist(xccore_t *xccore)
     }
     if (gui->overspot_win)
 	gui->overspot_win->win_draw_func(gui, gui->overspot_win);
-    // Add by Firefly(firefly@firefly.idv.tw)
+    /* Add by Firefly(firefly@firefly.idv.tw) */
     if (gui->onspot_win)
 	gui->onspot_win->win_draw_func(gui, gui->onspot_win);
     if ((gui->winchange & WIN_CHANGE_IM)) {

@@ -80,6 +80,10 @@ xcin-2.5.3-pre3:  2001/12
 26. Port xcin to Cygwin.
     Thanks to weijr <weijr@magic.b81.org>.
 
+27. Fix bug in gui_onspot_init(): It should call XCreateSimpleWindow().
+
+28. Clean out the un-useful codes of GUI-MONITOR.
+
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
 1. Fix memory leakage problem in IMdkit: i18nIc.c.

@@ -1,4 +1,22 @@
 /*
+    Copyright (C) 1999 by  XCIN TEAM
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    For any question or suggestion, please mail to xcin mailing-list:
+    xcin@linux.org.tw.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -364,10 +382,22 @@ gui_onspot_init(gui_t *gui, xccore_t *xccore)
     strcpy(inpn_2bytes, gui->inpn_2bytes);
 
     win = gui_new_win();
-    win->data = (void *)xccore;
+    win->wtype = WTYPE_ONSPOT;
+    win->imid  = 0;
+
+    win->c_width  = 1;
+    win->c_height = 1;
+    win->width    = 10;
+    win->height   = 10;
+    win->pos_x    = 1;
+    win->pos_y    = 1;
+    win->data     = (void *)xccore;
     win->win_draw_func    = gui_onspot_draw;
     win->win_attrib_func  = NULL;
     win->win_destroy_func = NULL;
+    win->window = XCreateSimpleWindow(gui->display, gui->root,
+		win->pos_x, win->pos_y, win->width, win->height, 1,
+		gui->fg_color, gui->bg_color);
     XSelectInput(gui->display, win->window, (ExposureMask|StructureNotifyMask));
     if (strcasecmp(xccore->irc->onspot_preedit_mode, "NONE") == 0)
 	preedit_mode = 0;

@@ -74,7 +74,7 @@ typedef enum
 
 /* Convenient macro */
 #define _FRAME(a) {a, NULL}
-#define __PTR(p)   {PTR_ITEM, (void *)p}
+#define _PTR(p)   {PTR_ITEM, (void *)p}
 /* PADDING's usage of data field
  * B15-B8  : Shows the number of effective items.
  * B7-B0   : Shows padding unit.  ex) 04 shows 4 unit padding.

@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     For any question or suggestion, please mail to xcin mailing-list:
-    xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
+    xcin@linux.org.tw.
 */      
 
 #ifdef HAVE_CONFIG_H
@@ -327,7 +327,7 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
 	cf->tsidb = NULL;
 #else
     if (cfd.mode & (INP_MODE_HINTSEL | INP_MODE_HINTTSI)) {
-        perr(XCINMSG_WARNING,
+	perr(XCINMSG_WARNING,
 	    N_("gen_inp: xcin complied without libtabe, HINTTSI & HINTSEL disabled.\n"));
     }
 #endif

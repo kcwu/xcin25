@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     For any question or suggestion, please mail to xcin mailing-list:
-    xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
+    xcin@linux.org.tw.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -42,7 +42,7 @@
 #define DRAW_LCCH	4
 
 static xmode_t display_mode;
-// Modify by Firefly(firefly@firefly.idv.tw)
+/* Modify by Firefly(firefly@firefly.idv.tw) */
 static char inpn_english[101];
 static char inpn_sbyte[101];
 static char inpn_2bytes[101];
@@ -233,13 +233,6 @@ overspot_win_adjust(gui_t *gui, winlist_t *win,
     Window w, junkwin;
 
     w = (ic_rec->focus_win) ? ic_rec->focus_win : ic_rec->client_win;
-/*
-    if (oc[idx]->pos_update == 1) {
-	XTranslateCoordinates(gui->display, w, gui->root,
-		0, 0, &(oc[idx]->pos_x), &(oc[idx]->pos_y), &junkwin);
-	oc[idx]->pos_update = 0;
-    }
-*/
     XTranslateCoordinates(gui->display, w, gui->root,
 		0, 0, &(oc[idx]->pos_x), &(oc[idx]->pos_y), &junkwin);
     if (errstatus != 0) {
@@ -250,7 +243,7 @@ overspot_win_adjust(gui_t *gui, winlist_t *win,
     ic_rec->ic_value_update &= ~CLIENT_SETIC_PRE_AREA;
     new_x = oc[idx]->pos_x +
 	    ic_rec->pre_attr.spot_location.x + ic_rec->pre_attr.area.x;
-    // Modify by Firefly(firefly@firefly.idv.tw)
+    /* Modify by Firefly(firefly@firefly.idv.tw) */
     new_y = oc[idx]->pos_y +
 	    ic_rec->pre_attr.spot_location.y + ic_rec->pre_attr.area.y;
     if (new_x + winlen > gui->display_width)
@@ -299,21 +292,15 @@ overspot_draw_multich(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
     }
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
-/*
-	if ((len = wch_mblen(selkey))) {
-*/
 	if (selkey->wch != (wchar_t)0) {
-	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    /* Modify by Firefly(firefly@firefly.idv.tw) */
 	    len = strlen(selkey->s);
 	    XmbDrawImageString(gui->display, win->window, font->fontset,
 			gc[spot_GC_idx], x, y, (char *)selkey->s, len);
 	    x += (XmbTextEscapement(font->fontset, (char *)selkey->s, len) + 2);
         }
         for (j=0; j<n; j++, cch++) {
-/*
-	    if (! (len = wch_mblen(cch))) {
-*/
-	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    /* Modify by Firefly(firefly@firefly.idv.tw) */
 	    len = strlen(cch->s);
 	    if (cch->wch == (wchar_t)0) {
 		toggle_flag = -1;
@@ -394,25 +381,19 @@ overspot_draw_multichBW(gui_t *gui, winlist_t *win, font_t *font , GC *gc,
     bufidx ++;
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
-/*
-	if ((len = wch_mblen(selkey))) {
-*/
 	if (selkey->wch != (wchar_t)0) {
-	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    /* Modify by Firefly(firefly@firefly.idv.tw) */
 	    len = strlen(selkey->s);
 	    nwchs_to_mbs(buf+bufidx, selkey, 1, BUFSIZE-bufidx);
 	    strncat(buf, " ", BUFSIZE-bufidx-len);
 	    bufidx += (len + 1);
 	}
 	for (j=0; j<n; j++, cch++) {
-/*
-	    if (! (len = wch_mblen(cch))) {
-*/
 	    if (cch->wch == (wchar_t)0) {
 		toggle_flag = -1;
 		break;
 	    }
-	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    /* Modify by Firefly(firefly@firefly.idv.tw) */
 	    len = strlen(cch->s);
 	    nwchs_to_mbs(buf+bufidx, cch, 1, BUFSIZE-bufidx);
 	    bufidx += len;
@@ -500,10 +481,7 @@ draw_lcch(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
 		font->fontset, gc[GC_idx], x, y, buf, len);
 	    x += XmbTextEscapement(font->fontset, buf, len);
 	}
-/*
-	len = wch_mblen(tmp);
-*/
-	// Modify by Firefly(firefly@firefly.idv.tw)
+	/* Modify by Firefly(firefly@firefly.idv.tw) */
 	len = strlen(tmp->s);
 	XmbDrawImageString(gui->display, win->window, font->fontset, 
 		gc[GCM_idx], x, y, (char *)tmp->s, len);
@@ -573,10 +551,7 @@ draw_inpname(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
 	    s++;
 	}
 	if (! inpn) {
-/*
-	    extract_char(imc->inpinfo.inp_cname, buf, sizeof(buf));
-*/
-	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    /* Modify by Firefly(firefly@firefly.idv.tw) */
 	    strcpy(buf, imc->inpinfo.inp_cname);
 	    inpn = buf;
 	}
@@ -738,12 +713,7 @@ gui_overspot_init(gui_t *gui, xccore_t *xccore)
 	display_mode |= OVERSPOT_USE_USRFONTSET;
     if ((xccore->xcin_mode & XCIN_OVERSPOT_WINONLY))
 	display_mode |= OVERSPOT_DRAW_EMPTY;
-/*
-    extract_char(gui->inpn_english, inpn_english, 11);
-    extract_char(gui->inpn_sbyte, inpn_sbyte, 11);
-    extract_char(gui->inpn_2bytes, inpn_2bytes, 11);
-*/
-    // Modify by Firefly(firefly@firefly.idv.tw)
+    /* Modify by Firefly(firefly@firefly.idv.tw) */
     strcpy(inpn_english, gui->inpn_english);
     strcpy(inpn_sbyte, gui->inpn_sbyte);
     strcpy(inpn_2bytes, gui->inpn_2bytes);

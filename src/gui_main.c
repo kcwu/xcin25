@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     For any question or suggestion, please mail to xcin mailing-list:
-    xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
+    xcin@linux.org.tw.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -129,11 +129,8 @@ win_draw_multich(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
 
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
-/*
-	if ((len = wch_mblen(selkey))) {
-*/
 	if (selkey->wch != (wchar_t)0) {
-	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    /* Modify by Firefly(firefly@firefly.idv.tw) */
 	    len = strlen(selkey->s);
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[spot_GC_idx], x, y, (char *)selkey->s, len);
@@ -141,14 +138,11 @@ win_draw_multich(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
 			(char *)selkey->s, len) + 5);
 	}
 	for (j=0; j<n; j++, cch++) {
-/*
-	    if (! (len = wch_mblen(cch))) {
-*/
 	    if (cch->wch == (wchar_t)0) {
 		toggle_flag = -1;
 		break;
 	    }
-	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    /* Modify by Firefly(firefly@firefly.idv.tw) */
 	    len = strlen(cch->s);
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[GC_idx], x, y, (char *)cch->s, len);
@@ -233,10 +227,7 @@ win_draw_listcch(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
                 win->font->fontset, win->wingc[GC_idx], x, y, str, len);
 	    x += XmbTextEscapement(win->font->fontset, str, len);
 	}
-/*
-	len = wch_mblen(tmp);
-*/
-	// Modify by Firefly(firefly@firefly.idv.tw)
+	/* Modify by Firefly(firefly@firefly.idv.tw) */
 	len = strlen(tmp->s);
         XmbDrawImageString(gui->display, win->window,
             win->font->fontset, win->wingc[GCM_idx], x, y, (char *)tmp->s, len);

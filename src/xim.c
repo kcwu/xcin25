@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     For any question or suggestion, please mail to xcin mailing-list:
-    xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
+    xcin@linux.org.tw.
 */      
 
 #ifdef HAVE_CONFIG_H
@@ -36,7 +36,7 @@
 #include "xcin.h"
 
 static xccore_t *xccore;
-// Modify by Firefly(firefly@firefly.idv.tw)
+/* Modify by Firefly(firefly@firefly.idv.tw) */
 XIMS ims;
 
 void gui_update_winlist(xccore_t *xccore);
@@ -135,7 +135,7 @@ xim_disconnect(IC *ic)
     if (! (ic->ic_state & IC_CONNECT))
 	return True;
 
-    // Add by Firefly(firefly.idv.tw)
+    /* Add by Firefly(firefly.idv.tw) */
     if (ic->ic_rec.input_style == XIMSTY_OnSpot)
     {
 	XIMFeedback feedback[1] = {0};
@@ -171,7 +171,7 @@ xim_disconnect(IC *ic)
 	IMCallCallback (ims, (XPointer)&s_data);
 	ic->status_is_start = False;
     }
-    //---- End of add
+    /*---- End of add */
     call_data.connect_id = (CARD16)(ic->connect_id);
     call_data.icid = (CARD16)(ic->id);
     ic->ic_state &= ~IC_CONNECT;
@@ -1014,7 +1014,7 @@ im_style_t im_styles[] = {
     {"Root", 		XIMSTY_Root,		(ubyte_t)0},
     {"OverTheSpot",	XIMSTY_OverSpot,	(ubyte_t)0},
 /*    {"OffTheSpot",	XIMSTY_OffSpot,		(ubyte_t)0},	*/
-    // Modify by Firefly(firefly@firefly.idv.tw)
+/* Modify by Firefly(firefly@firefly.idv.tw) */
     {"OnTheSpot",	XIMSTY_OnSpot,		(ubyte_t)0},
     {NULL,		(XIMStyle)0,		(ubyte_t)0}
 };

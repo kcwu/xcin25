@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     For any question or suggestion, please mail to xcin mailing-list:
-    xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
+    xcin@linux.org.tw.
 */
 
 #ifndef  _WINLIST_H
@@ -41,6 +41,7 @@ typedef struct {
 #define WTYPE_MAIN		0
 #define WTYPE_GUIREQ		1
 #define WTYPE_OVERSPOT		2
+#define WTYPE_ONSPOT		3
 
 #define WMODE_MAP		1
 #define	WMODE_EXIT		2
@@ -74,10 +75,6 @@ struct winlist_s {
 #define WIN_CHANGE_BELL		0x0010
 #define WIN_CHANGE_BELL2	0x0020
 #define WIN_CHANGE_BELLALL	0x00f0
-
-#define WIN_MONITOR_CLIENT	0x0001
-#define WIN_MONITOR_FOCUS	0x0002
-#define WIN_MONITOR_OVERSPOT	0x0004
 
 struct gui_s {
     Display *display;

@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     For any question or suggestion, please mail to xcin mailing-list:
-    xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
+    xcin@linux.org.tw.
 */      
 
 #ifdef HAVE_CONFIG_H
@@ -301,7 +301,7 @@ read_core_config(void)
 	set_data(&(xcin_core.xcin_mode), RC_IFLAG, value,
 			XCIN_KEYBOARD_TRANS, 0);
 
-    // Add by Firefly(firefly@firefly.idv.tw)
+    /* Add by Firefly(firefly@firefly.idv.tw) */
     cmd[0] = "ONSPOT_PREEDIT_MODE";
     if (get_resource(xrc, cmd, value, 256, 1))
         set_data(xcin_core.irc->onspot_preedit_mode, RC_STRARR, value, 0, 

@@ -456,22 +456,10 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	else if (match (XNClientWindow, ic_attr)) {
 	    checkset_ic_val(CLIENT_SETIC_CLIENTW, Window, ic_attr,
 			    ic_rec->client_win);
-/*
-	    if (ic_rec->ic_value_update & CLIENT_SETIC_CLIENTW) {
-		ic_rec->ic_value_update &= ~CLIENT_SETIC_CLIENTW;
-		gui_set_monitor(ic_rec->client_win, WIN_MONITOR_CLIENT, ic->id);
-	    }
-*/
 	}
         else if (match (XNFocusWindow, ic_attr)) {
 	    checkset_ic_val(CLIENT_SETIC_FOCUSW, Window, ic_attr,
 			    ic_rec->focus_win);
-/*
-	    if (ic_rec->ic_value_update & CLIENT_SETIC_FOCUSW) {
-		ic_rec->ic_value_update &= ~CLIENT_SETIC_FOCUSW;
-		gui_set_monitor(ic_rec->client_win, WIN_MONITOR_FOCUS, ic->id);
-	    }
-*/
 	}
 #ifdef XIM_COMPLETE
 	else if (match (XNResourceName, ic_attr))
@@ -597,10 +585,6 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	    win = ic_rec->client_win;
 	if (win) {
 	    ic_rec->ic_value_update &= ~CLIENT_SETIC_INPSTY;
-/*
-	    if (ic_rec->input_style == XIMSTY_OverSpot)
-		gui_set_monitor(win, WIN_MONITOR_OVERSPOT, ic->id);
-*/
 	    if ((xccore->xcin_mode & XCIN_RUN_INIT) && xccore->ic==NULL &&
 		gui_check_input_focus(xccore, win) == True) {
 /*
@@ -830,9 +814,10 @@ check_ic_exist(int icid, xccore_t *xccore)
 	if (ic == ref_ic)
 	    ic->exec_time = current_time;
         else if (ic->ic_rec.focus_win && 
-		 ic->ic_rec.focus_win == ref_ic->ic_rec.focus_win)
+		 ic->ic_rec.focus_win == ref_ic->ic_rec.focus_win) {
 	/* each IC should has its distinct window */
 	    delete = 1;
+	}
 	else if (current_time - ic->exec_time > IC_IDLE_TIME &&
 		 ic->ic_rec.client_win != 0) {
 	    DebugLog(3, ("Check IC: id=%d, window=0x%x, exec_time=%d.\n", 
