@@ -763,6 +763,9 @@ xim_get_ic_values_handler(XIMS ims, IMChangeICStruct *call_data, int *icid)
     *icid = call_data->icid;
     DebugLog(2, verbose, "XIM_GET_IC_VALUES: icid=%d\n", *icid);
 
+    if ((xccore->xcin_mode & XCIN_RUN_EXIT))
+	return True;
+
     if (! (ic = ic_find(call_data->icid)))
 	return False;
     ic_get_values(ic, call_data, xccore);

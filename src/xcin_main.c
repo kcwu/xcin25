@@ -555,7 +555,10 @@ void sighandler(int sig)
     if (sig == SIGQUIT)
 	return;
 
-    xcin_core.xcin_mode |= XCIN_RUN_KILL;
+    if (xcin_core.ic != NULL && (xcin_core.ic->ic_state & IC_FOCUS))
+	xcin_core.xcin_mode |= XCIN_RUN_KILL;
+    else
+	exit(0);
 }
 
 int
