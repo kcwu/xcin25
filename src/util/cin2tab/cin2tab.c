@@ -50,6 +50,8 @@ struct cin {
 #include "gencin.h"
 #include "bimscin.h"
 
+int verbose;
+
 extern void syscin(cintab_t *cintab);
 extern void gencin(cintab_t *cintab);
 extern void bimscin(cintab_t *cintab);
@@ -273,7 +275,7 @@ main(int argc, char **argv)
     while ((rev = getopt(argc, argv, "v:hr:s:l:o:")) != EOF) {
         switch (rev) {
 	case 'v':
-	    cintab.xrc.verbose = atoi(optarg);
+	    verbose = atoi(optarg);
 	    break;
 	case 'h':
 	    print_usage();

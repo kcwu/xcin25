@@ -58,26 +58,45 @@ static char inpn_2bytes[11];
 
 ----------------------------------------------------------------------------*/
 
-static void
+static int
 overspot_location(gui_t *gui, winlist_t *win, 
 		  ic_rec_t *ic_rec, int *pos_x, int *pos_y)
 {
-    int new_x, new_y;
+    int new_x, new_y, need_update=0;
     Window junkwin;
 
-    new_x = ic_rec->pre_attr.spot_location.x + ic_rec->pre_attr.area.x;
-    new_y = ic_rec->pre_attr.spot_location.y + ic_rec->pre_attr.area.y + 15;
-    if (ic_rec->focus_win)
-	XTranslateCoordinates(gui->display, ic_rec->focus_win, gui->root,
-		new_x, new_y, pos_x, pos_y, &junkwin);
-    else
-	XTranslateCoordinates(gui->display, ic_rec->client_win, gui->root,
-		new_x, new_y, pos_x, pos_y, &junkwin);
+    if (ic_rec->ic_value_update & CLIENT_SETIC_PRE_SPOTLOC) {
+	ic_rec->ic_value_update &= ~CLIENT_SETIC_PRE_SPOTLOC;
+	need_update = 1;
+    }
+    if (ic_rec->ic_value_update & CLIENT_SETIC_PRE_AREA) {
+	ic_rec->ic_value_update &= ~CLIENT_SETIC_PRE_AREA;
+	need_update = 1;
+    }
+    if (need_update) {
+	new_x = ic_rec->pre_attr.spot_location.x + ic_rec->pre_attr.area.x;
+	new_y = ic_rec->pre_attr.spot_location.y + ic_rec->pre_attr.area.y + 15;
+	if (ic_rec->focus_win)
+	    XTranslateCoordinates(gui->display, ic_rec->focus_win, gui->root,
+		    new_x, new_y, pos_x, pos_y, &junkwin);
+	else
+	    XTranslateCoordinates(gui->display, ic_rec->client_win, gui->root,
+		    new_x, new_y, pos_x, pos_y, &junkwin);
+	if (errstatus) {
+	    errstatus = 0;
+	    return False;
+	}
 
-    if (*pos_x + win->width > gui->display_width)
-	*pos_x = gui->display_width - win->width;
-    if (*pos_y + win->height > gui->display_height)
-	*pos_y = *pos_y - 40 - win->height;
+	if (*pos_x + win->width > gui->display_width)
+	    *pos_x = gui->display_width - win->width;
+	if (*pos_y + win->height > gui->display_height)
+	    *pos_y = *pos_y - 40 - win->height;
+    }
+    else {
+	*pos_x = win->pos_x;
+	*pos_y = win->pos_y;
+    }
+    return True;
 }
 
 static void
@@ -85,7 +104,8 @@ overspot_win_adjust(gui_t *gui, winlist_t *win, ic_rec_t *ic_rec, int winlen)
 {
     int new_x, new_y;
 
-    overspot_location(gui, win, ic_rec, &new_x, &new_y);
+    if (overspot_location(gui, win, ic_rec, &new_x, &new_y) == False)
+	return;
     if (new_x != win->pos_x || new_y != win->pos_y || winlen != win->width) {
 	win->pos_x = new_x;
 	win->pos_y = new_y;

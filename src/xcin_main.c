@@ -39,6 +39,8 @@
 #include "fkey.h"
 #include "util/cin2tab/syscin.h"
 
+int verbose, errstatus;
+
 static xccore_t xcin_core;		/* XCIN kernel data. */
 
 void gui_init(xccore_t *xccore);
@@ -135,7 +137,7 @@ command_switch(int argc, char **argv)
 	    xrc->default_dir = optarg;
 	    break;
 	case 'v':
-	    xrc->verbose = atoi(optarg);
+	    verbose = atoi(optarg);
 	    break;
         case '?':
             perr(XCINMSG_ERROR, N_("unknown option  -%c.\n"), optopt);
@@ -544,11 +546,11 @@ void xim_terminate(void);
 void sighandler(int sig)
 {
     if (sig == SIGQUIT)
-	DebugLog(1, xcin_core.xcin_rc.verbose, "catch signal: SIGQUIT\n");
+	DebugLog(1, verbose, "catch signal: SIGQUIT\n");
     else if (sig == SIGTERM)
-	DebugLog(1, xcin_core.xcin_rc.verbose, "catch signal: SIGTERM\n");
+	DebugLog(1, verbose, "catch signal: SIGTERM\n");
     else
-	DebugLog(1, xcin_core.xcin_rc.verbose, "catch signal: SIGINT\n");
+	DebugLog(1, verbose, "catch signal: SIGINT\n");
 
     if (sig == SIGQUIT)
 	return;

@@ -298,6 +298,13 @@ x_set_color(char *color_name)
     return  color.pixel;
 }
 
+static int errhandle(Display *disp,XErrorEvent *xevent)
+{
+/*  need more works on error handle ... */
+    errstatus = 1;
+    return 1;
+}
+
 void
 gui_init(xccore_t *xccore)
 {
@@ -306,6 +313,7 @@ gui_init(xccore_t *xccore)
     if (! (gui->display = XOpenDisplay(xccore->irc->display_name)))
 	perr(XCINMSG_ERROR, N_("cannot open display: %s\n"), 
 			    xccore->irc->display_name);
+    (void) XSetErrorHandler(errhandle);
     gui->screen = DefaultScreen(gui->display);
     gui->colormap = DefaultColormap(gui->display, gui->screen);
     gui->display_width = DisplayWidth(gui->display, gui->screen);
@@ -492,7 +500,7 @@ gui_update_winlist(xccore_t *xccore)
 	    gui->mainwin = xcin_mainwin_init(gui, xccore);
 	update_gui_request(xccore->ic, xccore->icp);
 	update_gui_overspot(xccore->ic, xccore->icp, xccore->xcin_mode);
-	xccore->ic->ic_rec.ic_value_update = 0;
+/*	xccore->ic->ic_rec.ic_value_update = 0; */
     }
     if ((gui->winchange & WIN_CHANGE_IM)) {
 	if (gui->mainwin)

@@ -52,6 +52,9 @@
 extern "C" {
 #endif
 
+/* Global status variables. */
+extern int verbose, errstatus;
+
 #if !defined(True) || !defined(False)
 #undef  True
 #undef  False
@@ -204,7 +207,6 @@ typedef struct {
 typedef struct {
     int argc;			/* Command line arguement list */
     char **argv;
-    int verbose;		/* Debug message level */
     locale_t locale;            /* Locale name. */
     char *usrhome;		/* User home directory. */
     char *default_dir;          /* Default module directory. */

@@ -132,7 +132,7 @@ imc_find(int imid)
 
 /*----------------------------------------------------------------------------
 
-	New IC and Delete IC functions.
+	New IC, Delete IC, and Find IC functions.
 
 ----------------------------------------------------------------------------*/
 
@@ -203,19 +203,6 @@ delete_IC(IC *ic, IC *last, xccore_t *xccore)
 	delete_IMC(ic->imc);
 }
 
-
-/*----------------------------------------------------------------------------
-
-	External functions.
-
-----------------------------------------------------------------------------*/
-
-/* 
- * prototype:  match(char *attr, XICAttribute *attr_list);
- */
-#define match(attr, attr_list) \
-	( ( strcmp((attr), (attr_list)->name) == 0 ) ? 1 : 0 )
-
 IC *
 ic_find(CARD16 icid)
 {
@@ -228,6 +215,19 @@ ic_find(CARD16 icid)
     }
     return NULL;
 }
+
+
+/*----------------------------------------------------------------------------
+
+	ic_get_values(): Get IC values from xcin.
+
+----------------------------------------------------------------------------*/
+
+/* 
+ * prototype:  match(char *attr, XICAttribute *attr_list);
+ */
+#define match(attr, attr_list) \
+	( ( strcmp((attr), (attr_list)->name) == 0 ) ? 1 : 0 )
 
 void
 ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
@@ -378,6 +378,39 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
     return;
 }
 
+
+/*----------------------------------------------------------------------------
+
+	ic_set_values(): Set IC values into xcin.
+
+	Here we should carefully check if the value is really changed or
+	not, and update it in xcin only when it is really changed.
+
+----------------------------------------------------------------------------*/
+
+#define checkset_ic_val(flag, type, val) 				\
+    if (ic_rec->ic_value_set & flag) {					\
+	if (memcmp(&(val), pre_attr->value, sizeof(type)) != 0) {	\
+	    ic_rec->ic_value_update |= flag;				\
+	    val = *(type *)pre_attr->value;				\
+	}								\
+    }									\
+    else {								\
+	ic_rec->ic_value_set |= flag;					\
+    }
+
+#define checkset_ic_str(flag, str)					\
+    if ((ic_rec->ic_value_set & flag) && str) {				\
+	if (strcmp(str, pre_attr->value) != 0) {			\
+	    free(str);							\
+	    ic_rec->ic_value_update |= flag;				\
+	    str = (char *)strdup(pre_attr->value);			\
+	}								\
+    }									\
+    else {								\
+	ic_rec->ic_value_set |= flag;					\
+    }
+
 void
 ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 /*  For details, see Xlib Ref, Chap 11.6  */
@@ -425,35 +458,25 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	if (! pre_attr->name && ! pre_attr->value)
 	    continue;
         if (match (XNArea, pre_attr)) {
-	    ic_rec->ic_value_set    |= CLIENT_SETIC_PRE_AREA;
-	    ic_rec->ic_value_update |= CLIENT_SETIC_PRE_AREA;
-	    ic_rec->pre_attr.area = *(XRectangle *)pre_attr->value;
+	    checkset_ic_val(CLIENT_SETIC_PRE_AREA, XRectangle,
+			    ic_rec->pre_attr.area);
 	}
         else if (match (XNSpotLocation, pre_attr)) {
-	    ic_rec->ic_value_set    |= CLIENT_SETIC_PRE_SPOTLOC;
-	    ic_rec->ic_value_update |= CLIENT_SETIC_PRE_SPOTLOC;
-	    ic_rec->pre_attr.spot_location = *(XPoint *)pre_attr->value;
+	    checkset_ic_val(CLIENT_SETIC_PRE_SPOTLOC, XPoint,
+			    ic_rec->pre_attr.spot_location);
 	}
         else if (match (XNFontSet, pre_attr)) {
-            if (ic_rec->pre_attr.base_font != NULL) {
-		if (strcmp(ic_rec->pre_attr.base_font, pre_attr->value)==0)
-		    continue;
-		else
-		    XFree(ic_rec->pre_attr.base_font);
-	    }
-	    ic_rec->ic_value_set    |= CLIENT_SETIC_PRE_FONTSET;
-	    ic_rec->ic_value_update |= CLIENT_SETIC_PRE_FONTSET;
-            ic_rec->pre_attr.base_font = (char *)strdup(pre_attr->value);
+	    checkset_ic_str(CLIENT_SETIC_PRE_FONTSET,
+			    ic_rec->pre_attr.base_font);
+
         } 
         else if (match (XNForeground, pre_attr)) {
-	    ic_rec->ic_value_set    |= CLIENT_SETIC_PRE_FGCOLOR;
-	    ic_rec->ic_value_update |= CLIENT_SETIC_PRE_FGCOLOR;
-            ic_rec->pre_attr.foreground = *(CARD32 *)pre_attr->value;
+	    checkset_ic_val(CLIENT_SETIC_PRE_FGCOLOR, CARD32,
+			    ic_rec->pre_attr.foreground);
 	}
         else if (match (XNBackground, pre_attr)) {
-	    ic_rec->ic_value_set    |= CLIENT_SETIC_PRE_BGCOLOR;
-	    ic_rec->ic_value_update |= CLIENT_SETIC_PRE_BGCOLOR;
-            ic_rec->pre_attr.background = *(CARD32 *)pre_attr->value;
+	    checkset_ic_val(CLIENT_SETIC_PRE_BGCOLOR, CARD32,
+			    ic_rec->pre_attr.background);
 	}
         else if (match (XNLineSpace, pre_attr))
             ic_rec->pre_attr.line_space = *(CARD32 *)pre_attr->value;
