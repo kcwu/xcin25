@@ -466,9 +466,9 @@ if test $found = n; then
     done
 fi
 if test $found = n; then
-    AC_MSG_RESULT([You need Berkeley DB2/3 to compile bimsphone module.])
-    AC_MSG_RESULT([Please use --with-db-lib to configure.])
-    exit 1
+    AC_MSG_RESULT([Berkeley DB is not available.])
+    AC_MSG_RESULT([bimsphone and some features of gen_inp are disabled.])
+    without_tabe=yes
 fi
 
 dnl-----------------------------------------------------------------------
@@ -492,38 +492,60 @@ LDFLAGS="$OLD_LDFLAGS $libs"
 dnl-----------------------------------------------------------------------
 dnl Checks for tabe & bims libraries.
 dnl-----------------------------------------------------------------------
-AC_MSG_CHECKING([tabe data files])
-if test x$with_tabe_lib = x; then
-    tabe_data="$with_extra_prefix/lib/tabe/"
-else
-    tabe_data=`echo $with_tabe_lib | sed 's|^\(.*\)/lib$|\1/lib/tabe/|'`
+if test x$without_tabe = x; then
+    AC_MSG_CHECKING([tabe data files])
+    if test x$with_tabe_lib = x; then
+	tabe_data="$with_extra_prefix/lib/tabe/"
+    else
+	tabe_data=`echo $with_tabe_lib | sed 's|^\(.*\)/lib$|\1/lib/tabe/|'`
+    fi
+    if test ! -f $tabe_data/tsi.db; then
+	tabe_data=''
+	AC_MSG_RESULT([not found])
+    else
+	AC_MSG_RESULT([$tabe_data])
+    fi
+    AC_SUBST(tabe_data)
 fi
-if test ! -f $tabe_data/tsi.db; then
-    tabe_data=''
-    AC_MSG_RESULT([not found])
-else
-    AC_MSG_RESULT([$tabe_data])
-fi
-AC_SUBST(tabe_data)
 
 LIBS="$OLD_LIBS"
 CPPFLAGS="$CPPFLAGS $x_includes"
-AC_CHECK_LIB(tabe, tabeTsiDBOpen, , 
-    [ AC_MSG_RESULT([You need libtabe to compile bimsphone module.])
-      AC_MSG_RESULT([Please use --with-tabe-lib to configure.])
-      exit 1], [ $test_db_lib ])
+dnl Note, check header before library, for correct HAVE_* symbol
+if test x$without_tabe = x; then
+    AC_CHECK_HEADERS(tabe.h, ,
+	[ AC_MSG_RESULT([tabe.h is not available.])
+	  AC_MSG_RESULT([bimsphone and some features of gen_inp are disabled.])
+	  without_tabe=yes ])
+fi
 
-AC_CHECK_HEADERS(bims.h, ,
-    [ AC_MSG_RESULT([bims.h is not available.])
-      AC_MSG_RESULT([Please use --with-tabe-inc to configure.])
-      exit 1 ])
+if test x$without_tabe = x; then
+    AC_CHECK_LIB(tabe, tabeTsiDBOpen, , 
+	[ AC_MSG_RESULT([libtabe is not available.])
+	  AC_MSG_RESULT([bimsphone and some features of gen_inp are disabled.])
+	  without_tabe=yes], [ $test_db_lib ])
+fi
 
-AC_CHECK_LIB(bims, bimsInit, ,
-    [ AC_MSG_RESULT([You need libbims to compile bimsphone module.])
-      AC_MSG_RESULT([Please use --with-tabelib to configure.])
-      exit 1], [ -ltabe $test_db_lib ])
-test_bims_lib="$test_tabe_lib -lbims"
-test_tabe_lib="$test_tabe_lib -ltabe"
+if test x$without_tabe = x && test x$without_bims = x; then
+    AC_CHECK_HEADERS(bims.h, ,
+	[ AC_MSG_RESULT([bims.h is not available.])
+	  AC_MSG_RESULT([bimsphone is disabled.])
+	  without_bims=yes ])
+fi
+
+if test x$without_tabe = x && test x$without_bims = x; then
+    AC_CHECK_LIB(bims, bimsInit, ,
+	[ AC_MSG_RESULT([You need libbims to compile bimsphone module.])
+	  AC_MSG_RESULT([bimsphone is disabled.])
+	  without_bims=yes ], [ -ltabe $test_db_lib ])
+fi
+
+if test x$without_tabe = x; then
+    test_tabe_lib="$test_tabe_lib -ltabe"
+fi
+if test x$without_tabe = x && test x$without_bims = x; then
+    test_bims_lib="$test_tabe_lib -lbims"
+    build_bimsphone=bimsphone
+fi
 
 dnl-----------------------------------------------------------------------
 dnl Set proper paths of libraries.
@@ -557,6 +579,7 @@ if test x$with_iconv_lib = x; then
 else
     with_iconv_lib="$test_iconv_lib -rpath $with_iconv_lib"
 fi
+extra_modules="$build_bimsphone"
 
 AC_SUBST(with_extra_inc)
 AC_SUBST(with_extra_lib)
@@ -571,6 +594,7 @@ AC_SUBST(with_intl_inc)
 AC_SUBST(with_intl_lib)
 AC_SUBST(with_iconv_inc)
 AC_SUBST(with_iconv_lib)
+AC_SUBST(extra_modules)
 
 dnl-----------------------------------------------------------------------
 dnl Output Makefiles and config.h

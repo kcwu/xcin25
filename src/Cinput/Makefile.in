@@ -1,4 +1,4 @@
-SUBSYS = zh_hex gen_inp bimsphone
+SUBSYS = zh_hex gen_inp @extra_modules@
 OTHERS = im_comm
 
 .PHONY: depend subdirs clean distclean install

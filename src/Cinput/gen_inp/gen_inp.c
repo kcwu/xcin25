@@ -26,7 +26,9 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
+#ifdef HAVE_LIBTABE
 #include <tabe.h>
+#endif
 #include "xcintool.h"
 #include "module.h"
 #include "gen_inp.h"
@@ -304,6 +306,7 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
 	    cf->mode |= INP_MODE_ENDKEY;
     }
 
+#ifdef HAVE_LIBTABE
     if (cfd.mode & (INP_MODE_HINTSEL | INP_MODE_HINTTSI)) {
 	snprintf(sub_path, 256, "tab/%s", xrc->locale.encoding);
 	if (check_datafile(ftsi, sub_path, xrc, truefn, 256) == True) {
@@ -322,6 +325,11 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
     }
     else
 	cf->tsidb = NULL;
+#else
+    if (cfd.mode & (INP_MODE_HINTSEL | INP_MODE_HINTTSI)) {
+        printf("xcin complied without libtabe, HINTTSI & HINTSEL disabled.\n");
+    }
+#endif
 
     return ret;
 }
@@ -367,7 +375,11 @@ gen_inp_xim_init(void *conf, inpinfo_t *inpinfo)
 	    inpinfo->s_selkey[i+1].s[0] = cf->header.selkey[i];
     }
     inpinfo->n_mcch = 0;
+#ifdef WITH_LIBTABE
     i = (cf->tsidb) ? HINTSZ : inpinfo->n_selkey;
+#else
+    i = inpinfo->n_selkey;
+#endif
     inpinfo->mcch = xcin_malloc(i * sizeof(wch_t), 1);
     inpinfo->mcch_grouping = NULL;
     inpinfo->mcch_pgstate = MCCH_ONEPG;
@@ -1155,6 +1167,7 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 
 ----------------------------------------------------------------------------*/
 
+#ifdef HAVE_LIBTABE
 static void
 record_commit(gen_inp_iccf_t *iccf, char *cmtstr)
 {
@@ -1374,6 +1387,7 @@ gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
     }
     return ret;
 }
+#endif
 
 
 
@@ -1448,7 +1462,11 @@ module_t module_ptr = {
     gen_inp_init,				/* init */
     gen_inp_xim_init,				/* xim_init */
     gen_inp_xim_end,				/* xim_end */
+#ifdef HAVE_LIBTABE
     gen_inp_keystroke_wrap,			/* keystroke */
+#else
+    gen_inp_keystroke,				/* keystroke */
+#endif
     gen_inp_show_keystroke,			/* show_keystroke */
     NULL					/* terminate */
 };

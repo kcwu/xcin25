@@ -69,7 +69,9 @@ typedef struct {
     icode_idx_t *icidx;
     ichar_t *ichar;
 
+#ifdef HAVE_LIBTABE
     struct TsiDB *tsidb;	/* tsi db */
+#endif
 } gen_inp_conf_t;
 
 #define HINTSZ	100
@@ -81,12 +83,14 @@ typedef struct {
     int *mkey_list;
     unsigned int n_mcch_list, mcch_hidx, mcch_eidx, n_mkey_list;
 
+#ifdef HAVE_LIBTABE
     char commithistory[HINTSZ];	/* committed words */
     int showtsiflag;		/* show tsi flag */
     int nreltsi;
     char reltsi[HINTSZ];	/* related tsi */
     int tsiindex[HINTSZ];	/* index of tsi */
     ubyte_t tsigroup[HINTSZ];	/* group of tsi */
+#endif
 } gen_inp_iccf_t;
 
 
