@@ -1,4 +1,4 @@
-xcin-2.5.3-pre1:  2001/
+xcin-2.5.3-pre1:  2001/10/19
 ------------------------------
 1. Fix bug in qphrase.c/qphrase_init() for insufficient buffer size.
 
