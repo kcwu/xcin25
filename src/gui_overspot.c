@@ -625,7 +625,7 @@ gui_overspot_init(gui_t *gui, IM_Context_t *imc, xmode_t xcin_mode)
 	XSetWindowBackground(gui->display, 
 		       win->window, imc->ic_rec->pre_attr.background);
 	win->n_gc = 2;
-	win->wingc = malloc(sizeof(GC) * win->n_gc);
+	win->wingc = xcin_malloc(sizeof(GC)*win->n_gc, 0);
 
 	win->wingc[GC_idx] = XCreateGC(gui->display, win->window, 0, NULL);
 	XSetForeground(gui->display, win->wingc[GC_idx], 
@@ -641,7 +641,7 @@ gui_overspot_init(gui_t *gui, IM_Context_t *imc, xmode_t xcin_mode)
     }
     else {
 	win->n_gc = 5;
-	win->wingc = malloc(sizeof(GC) * win->n_gc);
+	win->wingc = xcin_malloc(sizeof(GC)*win->n_gc, 0);
 
 	win->wingc[GC_idx] = XCreateGC(gui->display, win->window, 0, NULL);
 	XSetForeground(gui->display, win->wingc[GC_idx], gui->fg_color);

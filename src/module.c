@@ -114,7 +114,7 @@ creat_module(module_t *templet, char *objenc)
     imodp->version = templet->module_header.version;
     imodp->comments = templet->module_header.comments;
     imodp->module_type = templet->module_header.module_type;
-    imodp->conf = calloc(1, templet->conf_size);
+    imodp->conf = xcin_malloc(templet->conf_size, 1);
     imodp->init = templet->init;
     imodp->xim_init = templet->xim_init;
     imodp->xim_end = templet->xim_end;
@@ -181,7 +181,7 @@ IM_register(int idx, char *modname, char *objname, char *encoding)
     }
     else {
 	len = strlen(objname) + strlen(encoding) + 2;
-	imp->objname = malloc(len);
+	imp->objname = xcin_malloc(len, 0);
 	sprintf(imp->objname, "%s@%s", objname, encoding);
 	imp->with_enc = (ubyte_t)0;
     }

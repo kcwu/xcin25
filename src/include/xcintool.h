@@ -252,6 +252,7 @@ typedef struct {		/* common module header */
 extern void set_perr(char *error_head);
 extern void perr(int exitcode, const char *fmt, ...);
 extern void *xcin_malloc(size_t n_bytes, int reset);
+extern void *xcin_realloc(void *pt, size_t n_bytes);
 extern int set_lc_ctype(char *loc_name, char *loc_return, int loc_size,
 		char *enc_return, int enc_size, int exitcode);
 extern int set_lc_messages(char *loc_name, char *loc_return, int loc_size);

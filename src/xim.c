@@ -67,7 +67,7 @@ xim_commit(IC *ic, char *str)
         cch_len = strlen(str);
         if (ic->imc->cch_size < cch_len+1) {
 	    ic->imc->cch_size = cch_len+1;
-	    ic->imc->cch = realloc(ic->imc->cch, ic->imc->cch_size);
+	    ic->imc->cch = xcin_realloc(ic->imc->cch, ic->imc->cch_size);
         }
         strcpy(ic->imc->cch, str);
     }
@@ -339,7 +339,7 @@ call_simd(IC *ic)
 
     if (imc->skey_size < skey_len+1) {
 	imc->skey_size = skey_len+1;
-	imc->sinmd_keystroke = realloc(
+	imc->sinmd_keystroke = xcin_realloc(
 		imc->sinmd_keystroke, imc->skey_size * sizeof(wch_t));
     }
     memcpy(imc->sinmd_keystroke, skey, (skey_len+1)*sizeof(wch_t));
@@ -477,7 +477,6 @@ xim_set_focus_handler(XIMS ims, IMChangeFocusStruct *call_data, int *icid)
     }
     else
 	xccore->gui.winchange |= WIN_CHANGE_REDRAW;
-/*	xccore->gui.winchange |= WIN_CHANGE_FOCUS;	*/
     return True;
 }
 
@@ -510,7 +509,6 @@ xim_unset_focus_handler(XIMS ims, IMChangeFocusStruct *call_data, int *icid)
     ic->ic_state &= ~(IC_FOCUS);
     if (! (xccore->xcin_mode & XCIN_SINGLE_IMC))
 	xccore->gui.winchange |= WIN_CHANGE_REDRAW;
-/*	xccore->gui.winchange |= WIN_CHANGE_FOCUS;	*/
     return True;
 }
 

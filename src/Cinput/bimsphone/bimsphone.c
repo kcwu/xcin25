@@ -357,7 +357,7 @@ check_winsize(inpinfo_t *inpinfo, phone_iccf_t *iccf)
 	if (inpinfo->lcch)
 	    free(inpinfo->lcch);
 	iccf->lcch_size = size+1;
-        inpinfo->lcch = calloc(iccf->lcch_size, sizeof(wch_t));
+        inpinfo->lcch = xcin_malloc(iccf->lcch_size * sizeof(wch_t), 1);
     }
 }
 
@@ -394,7 +394,7 @@ editing_status(phone_conf_t *cf, inpinfo_t *inpinfo, phone_iccf_t *iccf)
 	len = strlen(str) / 2;
 	if (len >= iccf->lcch_size) {
 	    iccf->lcch_size = len+1;
-	    inpinfo->lcch = realloc(inpinfo->lcch, (len+1)*sizeof(wch_t));
+	    inpinfo->lcch = xcin_realloc(inpinfo->lcch, (len+1)*sizeof(wch_t));
 	}
 	inpinfo->n_lcch = big5_mbs_wcs(inpinfo->lcch, str, len+1);
 	free(str);
@@ -415,7 +415,8 @@ editing_status(phone_conf_t *cf, inpinfo_t *inpinfo, phone_iccf_t *iccf)
 	if (iccf->lcchg_size <= seg[0]) {
 	    free(inpinfo->lcch_grouping);
 	    iccf->lcchg_size = seg[0] + 1;
-	    inpinfo->lcch_grouping = malloc(iccf->lcch_size * sizeof(ubyte_t));
+	    inpinfo->lcch_grouping =
+		xcin_malloc(iccf->lcch_size*sizeof(ubyte_t), 0);
 	}
 	for (len=0; len<seg[0]+1; len++)
 	    inpinfo->lcch_grouping[len] = (ubyte_t)seg[len];
@@ -662,7 +663,7 @@ phone_xim_init(void *conf, inpinfo_t *inpinfo)
     phone_iccf_t *iccf;
     int i, selmap = (int)(cf->selmap);
 
-    inpinfo->iccf = calloc(1, sizeof(phone_iccf_t));
+    inpinfo->iccf = xcin_malloc(sizeof(phone_iccf_t), 1);
     iccf = (phone_iccf_t *)inpinfo->iccf;
 
     inpinfo->inp_cname = cf->inp_cname;
@@ -701,7 +702,8 @@ perr(XCINMSG_IERROR, "cdp pinyin null!!\n");
 	inpinfo->guimode = GUIMOD_LISTCHAR;
 	check_winsize(inpinfo, iccf);
 	iccf->lcchg_size = iccf->lcch_size + 1;
-        inpinfo->lcch_grouping = calloc(iccf->lcchg_size, sizeof(ubyte_t));
+        inpinfo->lcch_grouping =
+		xcin_malloc(iccf->lcchg_size*sizeof(ubyte_t), 1);
     }
     else {
 	inpinfo->guimode = 0;

@@ -254,7 +254,7 @@ gui_menusel_init(gui_t *gui, int imid, greq_win_t *gw)
 			CWOverrideRedirect, &win_attr);
 /*  Setup GC  */
     win->n_gc = 3;
-    win->wingc = malloc(sizeof(GC) * win->n_gc);
+    win->wingc = xcin_malloc(sizeof(GC)*win->n_gc, 0);
 
     win->wingc[GC_idx] = XCreateGC(gui->display, win->window, 0, NULL);
     XSetForeground(gui->display, win->wingc[GC_idx], gui->fg_color);

@@ -171,12 +171,12 @@ read_yinmap(cintab_t *cintab)
     char cmd[64], arg[64];
 
     pinpho_size = PINPHO_SIZE;
-    pinpho = malloc(pinpho_size * sizeof(pinpho_t));
+    pinpho = xcin_malloc(pinpho_size * sizeof(pinpho_t), 0);
 
     while (cmd_arg(cmd, 64, arg, 64, NULL)) {
 	if (pinyin.pinno >= pinpho_size) {
 	    pinpho_size += PINPHO_SIZE;
-	    pinpho = realloc(pinpho, pinpho_size * sizeof(pinpho_t));
+	    pinpho = xcin_realloc(pinpho, pinpho_size * sizeof(pinpho_t));
 	}
 	if (! strcmp(cmd, "%yinmap")) {
 	    if (! strcmp(arg, "end"))
@@ -189,7 +189,7 @@ read_yinmap(cintab_t *cintab)
 	encode_zhuyin(cintab, pinpho+pinyin.pinno, arg);
 	pinyin.pinno ++;
     }
-    phopin = malloc(pinyin.pinno * sizeof(pinpho_t));
+    phopin = xcin_malloc(pinyin.pinno * sizeof(pinpho_t), 0);
     memcpy(phopin, pinpho, pinyin.pinno * sizeof(pinpho_t));
 
     stable_sort(pinpho, pinyin.pinno, sizeof(pinpho_t), pinpho_cmp);

@@ -218,7 +218,7 @@ win_draw_listcch(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
 	str_size = len+1;
 	if (str)
 	    free(str);
-	str = calloc(str_size, sizeof(char));
+	str = xcin_malloc(str_size*sizeof(char), 1);
     }
 
     edit_pos = inpinfo->edit_pos;
@@ -473,7 +473,7 @@ set_wm_property(gui_t *gui, winlist_t *win, xcin_rc_t *xrc,
     XWMHints wm_hints;
     XClassHint class_hints;
 
-    win_name = malloc(128);
+    win_name = xcin_malloc(128, 0);
     snprintf(win_name, 128, "xcin %s", XCIN_VERSION);
     if (! XStringListToTextProperty(&win_name, 1, &windowName) ||
     	! XStringListToTextProperty(&icon_name, 1, &iconName))
@@ -517,7 +517,7 @@ static void
 set_GC(gui_t *gui, winlist_t *win)
 {
     win->n_gc = 5;
-    win->wingc = malloc(sizeof(GC) * win->n_gc);
+    win->wingc = xcin_malloc(sizeof(GC)*win->n_gc, 0);
 
     win->wingc[GC_idx] = XCreateGC(gui->display, win->window, 0, NULL);
     XSetForeground(gui->display, win->wingc[GC_idx], gui->fg_color);

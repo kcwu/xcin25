@@ -323,8 +323,8 @@ make_trigger_keys(XIMTriggerKeys *trigger_keys)
 
     if (n_types == 0)
 	n_types = sizeof(funckey)/sizeof(fkey_t) - 1;
-    tkey = malloc(sizeof(XIMTriggerKey) * trigger_keys_size);
-    tkeylist = malloc(sizeof(tkeylist_t) * trigger_keys_size);
+    tkey = xcin_malloc(sizeof(XIMTriggerKey) * trigger_keys_size, 0);
+    tkeylist = xcin_malloc(sizeof(tkeylist_t) * trigger_keys_size, 0);
 
     impose_trigger_key(FKEY_ZHEN, 0);
     impose_trigger_key(FKEY_2BSB, 1);
@@ -337,8 +337,9 @@ make_trigger_keys(XIMTriggerKeys *trigger_keys)
     while (*np != (numlist_t)-1) {
 	if (n_keys >= trigger_keys_size-1) {
 	    trigger_keys_size += 20;
-	    tkey = realloc(tkey, sizeof(XIMTriggerKey) * trigger_keys_size);
-	    tkeylist = realloc(tkeylist, sizeof(tkeylist_t) * trigger_keys_size);
+	    tkey = xcin_realloc(tkey, sizeof(XIMTriggerKey)*trigger_keys_size);
+	    tkeylist = xcin_realloc(tkeylist,
+			sizeof(tkeylist_t)*trigger_keys_size);
 	}
 
 	switch (*np) {
@@ -363,8 +364,9 @@ make_trigger_keys(XIMTriggerKeys *trigger_keys)
     while (*qp) {
 	if (n_keys >= trigger_keys_size-1) {
 	    trigger_keys_size += 20;
-	    tkey = realloc(tkey, sizeof(XIMTriggerKey) * trigger_keys_size);
-	    tkeylist = realloc(tkeylist, sizeof(tkeylist_t) * trigger_keys_size);
+	    tkey = xcin_realloc(tkey, sizeof(XIMTriggerKey)*trigger_keys_size);
+	    tkeylist = xcin_realloc(tkeylist,
+			sizeof(tkeylist_t)*trigger_keys_size);
 	}
 	str[0] = *qp;
 	shift = ((funckey[FKEY_QPHRASE].modifier & ShiftMask)) ? 1 : 0;

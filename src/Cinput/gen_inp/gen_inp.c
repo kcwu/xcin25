@@ -65,9 +65,9 @@ loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
 
     n  = cf->header.n_icode;
     nn = cf->ccinfo.total_char;
-    cf->icidx = malloc(sizeof(icode_idx_t) * n);
-    cf->ichar = malloc(sizeof(ichar_t) * nn);
-    cf->ic1 = malloc(sizeof(icode_t) * n);
+    cf->icidx = xcin_malloc(sizeof(icode_idx_t) * n, 0);
+    cf->ichar = xcin_malloc(sizeof(ichar_t) * nn, 0);
+    cf->ic1 = xcin_malloc(sizeof(icode_t) * n, 0);
     if (!n || !nn ||
 	fread(cf->icidx, sizeof(icode_idx_t), n, fp) != n ||
 	fread(cf->ichar, sizeof(ichar_t), nn, fp) != nn ||
@@ -81,7 +81,7 @@ loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
 	ret = 0;
     }
     if (ret && cf->header.icode_mode == ICODE_MODE2) {
-        cf->ic2 = malloc(sizeof(icode_t) * n);
+        cf->ic2 = xcin_malloc(sizeof(icode_t) * n, 0);
 	if (fread(cf->ic2, sizeof(icode_t), n, fp) != n) {
 	    if (n)
 		free(cf->ic2);
@@ -110,7 +110,7 @@ setup_kremap(gen_inp_conf_t *cf, char *value)
 	s++;
     }
     cf->n_kremap = i;
-    cf->kremap = malloc(sizeof(kremap_t) * i);
+    cf->kremap = xcin_malloc(sizeof(kremap_t) * i, 0);
 
     s = sp = value;
     for (i=0; i<cf->n_kremap; i++) {
@@ -308,7 +308,7 @@ gen_inp_xim_init(void *conf, inpinfo_t *inpinfo)
     gen_inp_iccf_t *iccf;
     int i;
 
-    inpinfo->iccf = calloc(1, sizeof(gen_inp_iccf_t));
+    inpinfo->iccf = xcin_malloc(sizeof(gen_inp_iccf_t), 1);
     iccf = (gen_inp_iccf_t *)inpinfo->iccf;
 
     inpinfo->inp_cname = cf->inp_cname;
@@ -318,23 +318,24 @@ gen_inp_xim_init(void *conf, inpinfo_t *inpinfo)
 			GUIMOD_SINMDLINE1 : 0;
 
     inpinfo->keystroke_len = 0;
-    inpinfo->s_keystroke = calloc(INP_CODE_LENGTH+1, sizeof(wch_t));
-    inpinfo->suggest_skeystroke = calloc(INP_CODE_LENGTH+1, sizeof(wch_t));
+    inpinfo->s_keystroke = xcin_malloc((INP_CODE_LENGTH+1)*sizeof(wch_t), 1);
+    inpinfo->suggest_skeystroke =
+		xcin_malloc((INP_CODE_LENGTH+1)*sizeof(wch_t), 1);
 
     if (! (cf->mode & INP_MODE_SELKEYSHIFT)) {
 	inpinfo->n_selkey = cf->header.n_selkey;
-	inpinfo->s_selkey = calloc(inpinfo->n_selkey, sizeof(wch_t));
+	inpinfo->s_selkey = xcin_malloc(inpinfo->n_selkey*sizeof(wch_t), 1);
 	for (i=0; i<SELECT_KEY_LENGTH && i<cf->header.n_selkey; i++)
 	    inpinfo->s_selkey[i].s[0] = cf->header.selkey[i];
     }
     else {
 	inpinfo->n_selkey = cf->header.n_selkey+1;
-	inpinfo->s_selkey = calloc(inpinfo->n_selkey, sizeof(wch_t));
+	inpinfo->s_selkey = xcin_malloc(inpinfo->n_selkey*sizeof(wch_t), 1);
 	for (i=0; i<SELECT_KEY_LENGTH && i<cf->header.n_selkey; i++)
 	    inpinfo->s_selkey[i+1].s[0] = cf->header.selkey[i];
     }
     inpinfo->n_mcch = 0;
-    inpinfo->mcch = calloc(inpinfo->n_selkey, sizeof(wch_t));
+    inpinfo->mcch = xcin_malloc(inpinfo->n_selkey*sizeof(wch_t), 1);
     inpinfo->mcch_grouping = NULL;
     inpinfo->mcch_pgstate = MCCH_ONEPG;
 
@@ -467,13 +468,13 @@ pick_cch_wild(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, int *head, byte_t dir,
 
     size = cf->header.n_icode;
     ks_size = cf->header.n_max_keystroke + 1;
-    ks = malloc(ks_size);
+    ks = xcin_malloc(ks_size, 0);
     n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
     dir = (dir > 0) ? (byte_t)1 : (byte_t)-1;
 
     if (iccf->n_mkey_list)
 	free(iccf->mkey_list);
-    iccf->mkey_list = malloc(mcch_size * sizeof(int));
+    iccf->mkey_list = xcin_malloc(mcch_size*sizeof(int), 0);
 
     for (i=0, idx = *head; idx>=0 && idx<size && i<=mcch_size; idx+=dir) {
 	klist[0] = cf->ic1[idx];
@@ -568,11 +569,11 @@ match_keystroke_normal(gen_inp_conf_t *cf,
      *  Search for all the chars with the same keystroke.
      */
     mcch_size = inpinfo->n_selkey;
-    mcch = malloc(mcch_size * sizeof(wch_t));
+    mcch = xcin_malloc(mcch_size*sizeof(wch_t), 0);
     do {
 	if (mcch_size <= n_ich) {
 	    mcch_size *= 2;
-	    mcch = realloc(mcch, mcch_size * sizeof(wch_t));
+	    mcch = xcin_realloc(mcch, mcch_size * sizeof(wch_t));
 	}
 	if (! ccode_to_char(cf->icidx[idx], mcch[n_ich].s, WCH_SIZE))
 	    return 0;
@@ -638,7 +639,7 @@ get_correct_skeystroke(gen_inp_conf_t *cf,
 	return;
     }
     ks_size = cf->header.n_max_keystroke + 1;
-    ks = malloc(ks_size);
+    ks = xcin_malloc(ks_size, 0);
     n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
 
     klist[0] = cf->ic1[i];

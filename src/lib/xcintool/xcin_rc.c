@@ -119,7 +119,7 @@ get_resource(xcin_rc_t *xrc, char **cmd_list,
     if (n_cmd_list == 1) {
 	if (strlen(cmd_list[0]) >= buf_size - 1) {
 	    buf_size *= 2;
-	    buf = realloc(buf, buf_size);
+	    buf = xcin_realloc(buf, buf_size);
 	}
 	strcpy(buf, cmd_list[0]);
     }
@@ -132,7 +132,7 @@ get_resource(xcin_rc_t *xrc, char **cmd_list,
 	    tmplen = snprintf(tmp, 1024, "(cadr (assq '%s ", cmd_list[i]);
 	    if (slen + tmplen - 1 > buf_size) {
 		buf_size *= 2;
-		buf = realloc(buf, buf_size);
+		buf = xcin_realloc(buf, buf_size);
 		buf[slen] = '\0';
 	    }
 	    strcat(buf, tmp);
@@ -141,7 +141,7 @@ get_resource(xcin_rc_t *xrc, char **cmd_list,
 	tmplen = (n_cmd_list - 1) * 2;
 	if (slen + strlen(cmd_list[0]) - tmplen - 1 > buf_size) {
 	    buf_size *= 2;
-	    buf = realloc(buf, buf_size);
+	    buf = xcin_realloc(buf, buf_size);
 	    buf[slen] = '\0';
 	}
 	for (i=0; i<tmplen; i++)

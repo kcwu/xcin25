@@ -49,8 +49,8 @@ load_pinyin_data(FILE *fp, char *truefn, phone_conf_t *cf)
     }
     n = pinyin.pinno;
 
-    pinpho = malloc(sizeof(pinpho_t) * n);
-    phopin = malloc(sizeof(pinpho_t) * n);
+    pinpho = xcin_malloc(sizeof(pinpho_t) * n, 0);
+    phopin = xcin_malloc(sizeof(pinpho_t) * n, 0);
     if (fread(pinpho, sizeof(pinpho_t), n, fp) != n ||
 	fread(phopin, sizeof(pinpho_t), n, fp) != n) {
 	perr(XCINMSG_WARNING, N_("bimsphone: %s: reading error.\n"), truefn);
@@ -59,7 +59,7 @@ load_pinyin_data(FILE *fp, char *truefn, phone_conf_t *cf)
 	return False;
     }
 
-    cf->pinyin = calloc(1, sizeof(ipinyin_t));
+    cf->pinyin = xcin_malloc(sizeof(ipinyin_t), 1);
     cf->pinyin->pinno = n;
     strcpy((char *)cf->pinyin->tone, (char *)pinyin.tone);
     strcpy((char *)cf->pinyin->zhu, (char *)pinyin.zhu);

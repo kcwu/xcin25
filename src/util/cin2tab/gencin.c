@@ -165,8 +165,8 @@ cin_chardef(char *arg, cintab_t *cintab)
 	     cintab->fname_cin, cintab->lineno);
 
     cch_size = ccinfo.total_char;
-    cch = cchar = calloc(cch_size, sizeof(cin_char_t));
-    idx = calloc(cch_size, sizeof(byte_t));
+    cch = cchar = xcin_malloc(cch_size*sizeof(cin_char_t), 1);
+    idx = xcin_malloc(cch_size*sizeof(byte_t), 1);
 
     while ((ret=cmd_arg(cmd1, 64, arg1, 64, arg2, 2, NULL))) {
         if (! arg1[0])
@@ -174,7 +174,7 @@ cin_chardef(char *arg, cintab_t *cintab)
 		cintab->fname_cin, cintab->lineno);
 	if (th.n_icode >= cch_size) {
 	    cch_size += ccinfo.total_char;
-	    cchar = realloc(cchar, cch_size * sizeof(cin_char_t));
+	    cchar = xcin_realloc(cchar, cch_size * sizeof(cin_char_t));
 	    cch = cchar + th.n_icode;
 	}
 	if (! strcmp("%chardef", cmd1) && ! strcmp("end", arg1))
@@ -217,11 +217,11 @@ cin_chardef(char *arg, cintab_t *cintab)
      */
     stable_sort(cchar, th.n_icode, sizeof(cin_char_t), icode_cmp);
 
-    ichar = malloc(cch_size * sizeof(ichar_t));
-    icode_idx = calloc(sizeof(icode_idx_t), th.n_icode);
-    icode1 = calloc(th.n_icode, sizeof(icode_t));
+    ichar = xcin_malloc(cch_size * sizeof(ichar_t), 1);
+    icode_idx = xcin_malloc(sizeof(icode_idx_t)*th.n_icode, 1);
+    icode1 = xcin_malloc(th.n_icode*sizeof(icode_t), 1);
     if (ret == ICODE_MODE2)
-        icode2 = calloc(th.n_icode, sizeof(icode_t));
+        icode2 = xcin_malloc(th.n_icode*sizeof(icode_t), 1);
     memset(idx, 0, ccinfo.total_char);
 
     for (i=0; i<cch_size; i++)

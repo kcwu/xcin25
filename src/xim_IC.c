@@ -60,10 +60,10 @@ new_IMC(int icid, int single_imc)
 	if (imc_free != NULL) {
             imc = imc_free;
             imc_free = imc_free->next;
+	    memset(imc, 0, sizeof(IM_Context_t));
 	}
 	else
-	    imc = (IM_Context_t *)malloc(sizeof(IM_Context_t));
-	memset(imc, 0, sizeof(IM_Context_t));
+	    imc = (IM_Context_t *)xcin_malloc(sizeof(IM_Context_t), 1);
 	if (imc_list)
 	    imc_list->prev = imc;
 	imc->next = imc_list;
@@ -72,8 +72,7 @@ new_IMC(int icid, int single_imc)
     }
     else {
 	if (! imc_list) {
-	    imc = (IM_Context_t *)malloc(sizeof(IM_Context_t));
-	    memset(imc, 0, sizeof(IM_Context_t));
+	    imc = (IM_Context_t *)xcin_malloc(sizeof(IM_Context_t), 1);
 	    imc_list = imc;
 	    create = 1;
 	}
@@ -83,9 +82,9 @@ new_IMC(int icid, int single_imc)
 
     if (create) {
 	imc->id = icid;
-	imc->sinmd_keystroke = calloc(10, sizeof(wch_t));
+	imc->sinmd_keystroke = xcin_malloc(10*sizeof(wch_t), 1);
 	imc->skey_size = 10;
-	imc->cch = calloc(WCH_SIZE + 1, sizeof(char));
+	imc->cch = xcin_malloc((WCH_SIZE+1)*sizeof(char), 1);
 	imc->cch_size = WCH_SIZE + 1;
     }
     imc->icid = icid;
@@ -150,13 +149,13 @@ new_IC(int single_imc)
         rec = ic_free;
         ic_free = ic_free->next;
 	new_icid = rec->id;
+	memset(rec, 0, sizeof(IC));
     } 
     else {
-        rec = (IC *)malloc(sizeof(IC));
+        rec = (IC *)xcin_malloc(sizeof(IC), 1);
 	icid ++;
 	new_icid = icid;
     }
-    memset(rec, 0, sizeof(IC));
     rec->id  = new_icid;
     rec->imc = new_IMC(new_icid, single_imc);
 
@@ -244,17 +243,17 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	if (! ic_attr->name)
 	    continue;
         if (match (XNFilterEvents, ic_attr)) {
-            ic_attr->value = (void *)malloc(sizeof(CARD32));
+            ic_attr->value = (void *)xcin_malloc(sizeof(CARD32), 0);
             ic_attr->value_length = sizeof(CARD32);
 	    *(CARD32*)ic_attr->value = KeyPressMask;
         }
 	else if (match (XNInputStyle, ic_attr)) {
-	    ic_attr->value = (void *)malloc(sizeof(INT32));
+	    ic_attr->value = (void *)xcin_malloc(sizeof(INT32), 0);
 	    ic_attr->value_length = sizeof(INT32);
 	    *(INT32*)ic_attr->value = ic_rec->input_style;
 	}
 	else if (match (XNSeparatorofNestedList, ic_attr)) {
-	    ic_attr->value = (void *)malloc(sizeof(CARD16));
+	    ic_attr->value = (void *)xcin_malloc(sizeof(CARD16), 0);
 	    ic_attr->value_length = sizeof(CARD16);
 	    *(CARD16*)ic_attr->value = 0;
 	}
@@ -268,12 +267,12 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	if (! pre_attr->name)
 	    continue;
 	if (match (XNArea, pre_attr)) {
-	    pre_attr->value = (void *)malloc(sizeof(XRectangle));
+	    pre_attr->value = (void *)xcin_malloc(sizeof(XRectangle), 0);
 	    *(XRectangle*)pre_attr->value = ic_rec->pre_attr.area;
 	    pre_attr->value_length = sizeof(XRectangle);
 	}
 	else if (match (XNSpotLocation, pre_attr)) {
-	    pre_attr->value = (void *)malloc(sizeof(XPoint));
+	    pre_attr->value = (void *)xcin_malloc(sizeof(XPoint), 0);
 	    *(XPoint*)pre_attr->value = ic_rec->pre_attr.spot_location;
 	    pre_attr->value_length = sizeof(XPoint);
         } 
@@ -284,7 +283,7 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	    if (ic_rec->pre_attr.base_font)
 		base_len = (CARD16)strlen(ic_rec->pre_attr.base_font);
 	    total_len = sizeof(CARD16) + (CARD16)base_len + 1;
-	    pre_attr->value = (void *)malloc(total_len);
+	    pre_attr->value = (void *)xcin_malloc(total_len, 0);
 	    p = (char *)pre_attr->value;
 	    memmove(p, &base_len, sizeof(CARD16));
 	    p += sizeof(CARD16);
@@ -292,17 +291,17 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	    pre_attr->value_length = total_len;
         } 
 	else if (match (XNForeground, pre_attr)) {
-	    pre_attr->value = (void *)malloc(sizeof(long));
+	    pre_attr->value = (void *)xcin_malloc(sizeof(long), 0);
 	    *(long*)pre_attr->value = xccore->gui.fg_color;
 	    pre_attr->value_length = sizeof(long);
         } 
 	else if (match (XNBackground, pre_attr)) {
-	    pre_attr->value = (void *)malloc(sizeof(long));
+	    pre_attr->value = (void *)xcin_malloc(sizeof(long), 0);
 	    *(long*)pre_attr->value = xccore->gui.bg_color;
 	    pre_attr->value_length = sizeof(long);
 	} 
 	else if (match (XNPreeditState, pre_attr)) {
-	    pre_attr->value = (void *)malloc(sizeof(long));
+	    pre_attr->value = (void *)xcin_malloc(sizeof(long), 0);
 	    if ((ic->imc->inp_state & IM_CINPUT) ||
 		(ic->imc->inp_state & IM_2BYTES))
 		*(long*)pre_attr->value = XIMPreeditEnable;
@@ -310,14 +309,14 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 		*(long*)pre_attr->value = XIMPreeditDisable;
 	}
 	else if (match (XNLineSpace, pre_attr)) {
-            pre_attr->value = (void *)malloc(sizeof(long));
+            pre_attr->value = (void *)xcin_malloc(sizeof(long), 0);
             *(long*)pre_attr->value = ic_rec->pre_attr.line_space;
             pre_attr->value_length = sizeof(long);
         }
 
 #ifdef XIM_COMPLETE
 	else if (match (XNAreaNeeded, pre_attr)) {
-	    pre_attr->value = (void *)malloc(sizeof(XRectangle));
+	    pre_attr->value = (void *)xcin_malloc(sizeof(XRectangle), 0);
 	    *(XRectangle*)pre_attr->value = ic_rec->pre_attr.area_needed;
 	    pre_attr->value_length = sizeof(XRectangle);
         } 
@@ -333,12 +332,12 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	if (! sts_attr->name)
 	    continue;
         if (match (XNArea, sts_attr)) {
-            sts_attr->value = (void *)malloc(sizeof(XRectangle));
+            sts_attr->value = (void *)xcin_malloc(sizeof(XRectangle), 0);
             *(XRectangle*)sts_attr->value = ic->sts_attr.area;
             sts_attr->value_length = sizeof(XRectangle);
         } 
 	else if (match (XNAreaNeeded, sts_attr)) {
-            sts_attr->value = (void *)malloc(sizeof(XRectangle));
+            sts_attr->value = (void *)xcin_malloc(sizeof(XRectangle), 0);
             *(XRectangle*)sts_attr->value = ic->sts_attr.area_needed;
             sts_attr->value_length = sizeof(XRectangle);
         } 
@@ -347,7 +346,7 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
             int total_len = sizeof(CARD16) + (CARD16)base_len;
             char *p;
 
-            sts_attr->value = (void *)malloc(total_len);
+            sts_attr->value = (void *)xcin_malloc(total_len, 0);
             p = (char *)sts_attr->value;
             memmove(p, &base_len, sizeof(CARD16));
             p += sizeof(CARD16);
@@ -355,17 +354,17 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
             sts_attr->value_length = total_len;
         } 
 	else if (match (XNForeground, sts_attr)) {
-            sts_attr->value = (void *)malloc(sizeof(long));
+            sts_attr->value = (void *)xcin_malloc(sizeof(long), 0);
             *(long*)sts_attr->value = ic->sts_attr.foreground;
             sts_attr->value_length = sizeof(long);
         } 
 	else if (match (XNBackground, sts_attr)) {
-            sts_attr->value = (void *)malloc(sizeof(long));
+            sts_attr->value = (void *)xcin_malloc(sizeof(long), 0);
             *(long*)sts_attr->value = ic->sts_attr.background;
             sts_attr->value_length = sizeof(long);
         } 
 	else if (match (XNLineSpace, sts_attr)) {
-            sts_attr->value = (void *)malloc(sizeof(long));
+            sts_attr->value = (void *)xcin_malloc(sizeof(long), 0);
             *(long*)sts_attr->value = ic->sts_attr.line_space;
             sts_attr->value_length = sizeof(long);
         }

@@ -565,7 +565,7 @@ main(int argc, char **argv)
     signal(SIGTERM, sighandler);
     signal(SIGINT,  sighandler);
 
-    xcin_core.irc = calloc(sizeof(inner_rc_t), 1);
+    xcin_core.irc = xcin_malloc(sizeof(inner_rc_t), 1);
 /*
  *  Option piroity:  command line > environment variable > user rcfile.
  */

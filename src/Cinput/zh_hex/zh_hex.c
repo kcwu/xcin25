@@ -124,14 +124,14 @@ zh_hex_xim_init(void *conf, inpinfo_t *inpinfo)
 {
     zh_hex_conf_t *cf = (zh_hex_conf_t *)conf;
 
-    inpinfo->iccf = calloc(1, sizeof(zh_hex_iccf_t));
+    inpinfo->iccf = xcin_malloc(sizeof(zh_hex_iccf_t), 1);
     inpinfo->inp_cname = (char *)cf->inp_cname;
     inpinfo->inp_ename = cf->inp_ename;
     inpinfo->area3_len = 8;
     inpinfo->guimode = 0;
 
     inpinfo->keystroke_len = 0;
-    inpinfo->s_keystroke = calloc(KEY_CODE_LEN+1, sizeof(wch_t));
+    inpinfo->s_keystroke = xcin_malloc((KEY_CODE_LEN+1)*sizeof(wch_t), 1);
     inpinfo->suggest_skeystroke = NULL;
 
     inpinfo->n_selkey = 0;

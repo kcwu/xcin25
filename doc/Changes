@@ -44,6 +44,11 @@ xcin-2.5.3-pre1:  2001/
 	bimsphone now contain "DB_pool *dp[BIMSP_LAST]" for pinyin and
 	zhuyin modes. Each mode can only be loaded once.
 
+12. Add patch of XSetErrorHandler().
+	Thanks to <kevin@vega.idv.tw>.
+    Change the xcin termination policy. See xim.c: xim_sync_reply_handler()
+	for details.
+
 
 xcin-2.5.2.3:  2001/03/12
 ------------------------------

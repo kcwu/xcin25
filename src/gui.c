@@ -137,7 +137,7 @@ gui_create_fontset(char *base_font, int verb)
         }
     }
     if (ff == NULL)
-	ff = malloc(sizeof(ifont_t));
+	ff = xcin_malloc(sizeof(ifont_t), 0);
     ff->next = fontlist;
     ff->prev = NULL;
     fontlist = ff;
@@ -231,10 +231,10 @@ gui_new_win(void)
     if (free_win) {
 	win = free_win;
 	free_win = free_win->next;
+	memset(win, 0, sizeof(winlist_t));
     }
     else
-	win = malloc(sizeof(winlist_t));
-    memset(win, 0, sizeof(winlist_t));
+	win = xcin_malloc(sizeof(winlist_t), 1);
     win->next = winlist;
     winlist = win;
 
