@@ -154,6 +154,8 @@ gui_overspot_delete_client(gui_t *gui, int icid)
     }
     if (! (display_mode & OVERSPOT_USE_USRFONTSET))
 	gui_free_fontset(oc[idx]->font);
+    if (idx == oc_edx-1 && oc_edx > 1)
+	oc_edx --;
     oc[idx]->icid = (x_uint16)0;
 }
 
@@ -163,15 +165,17 @@ overspot_register_ic(gui_t *gui, winlist_t *win, int icid, ic_rec_t *ic_rec)
     Window w, junkwin;
     int i, idx;
 
-    for (idx=0; idx<oc_len; idx++) {
+    for (idx=0; idx<oc_edx; idx++) {
 	if (oc[idx] == NULL || oc[idx]->icid == 0)
 	    break;
     }
-    if (idx >= oc_len) {
-	oc_len += OC_LENTH;
-	oc = xcin_realloc(oc, sizeof(struct ov_cli_s)*oc_len);
-	for (i=oc_edx; i<oc_len; i++)
-	    oc[i] = NULL;
+    if (idx >= oc_edx) {
+	if (oc_edx >= oc_len) {
+	    oc_len += OC_LENTH;
+	    oc = xcin_realloc(oc, sizeof(struct ov_cli_s)*oc_len);
+	    for (i=oc_edx; i<oc_len; i++)
+		oc[i] = NULL;
+	}
 	oc_edx ++;
     }
     if (oc[idx] == NULL)
@@ -661,12 +665,11 @@ gui_overspot_draw(gui_t *gui, winlist_t *win)
 	return;
 
     imc = ic->imc;
-    idx = search_struct_oc(ic->id);
+    if ((idx = search_struct_oc(ic->id)) < 0)
+	idx = overspot_register_ic(gui, win, ic->id, &(ic->ic_rec));
+
     if ((imc->inp_state & IM_XIMFOCUS) || (imc->inp_state & IM_2BFOCUS)) {
-	if (idx >= 0)
-	    overspot_check_ic(gui, idx, &(ic->ic_rec));
-	else
-	    idx = overspot_register_ic(gui, win, ic->id, &(ic->ic_rec));
+	overspot_check_ic(gui, idx, &(ic->ic_rec));
 	win->height = win->c_height * oc[idx]->font->ef_height + 5;
 
 	if ((display_mode & OVERSPOT_DRAW_EMPTY))

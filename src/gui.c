@@ -353,8 +353,9 @@ gui_unset_monitor(Window w, xccore_t *xccore)
 	    mw[i].win = (Window)0;
 	    mw[i].icid = 0;
 	    mw[i].flag = 0;
-	    if (i == mw_edx-1)
+	    if (i == mw_edx-1 && mw_edx > 0)
 		mw_edx --;
+	    break;
 	}
     }
 }
@@ -467,11 +468,11 @@ gui_loop(xccore_t *xccore)
 	    break;
 	case ConfigureNotify:
 	    win = gui_search_win(event.xconfigure.window);
-	    if (win && win->win_attrib_func)
+	    if (! win)
+		gui_check_monitor(&(event.xconfigure));
+	    else if (win->win_attrib_func)
 		win->win_attrib_func(gui, win, &(event.xconfigure),
 				(xccore->xcin_mode & XCIN_KEEP_POSITION));
-	    else
-		gui_check_monitor(&(event.xconfigure));
 	    break;
 	case DestroyNotify:
 	    gui_unset_monitor(event.xdestroywindow.window, xccore);
