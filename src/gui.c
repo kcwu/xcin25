@@ -31,9 +31,12 @@
 
 winlist_t *xcin_mainwin_init(gui_t *gui, xccore_t *xccore);
 winlist_t *xcin_mainwin2_init(gui_t *gui, xccore_t *xccore);
+winlist_t *gui_overspot_init(gui_t *gui, xccore_t *xccore);
 winlist_t *gui_menusel_init(gui_t *gui, int imid, greq_win_t *gw);
-winlist_t *gui_overspot_init(gui_t *gui, IM_Context_t *imc, xmode_t xcin_mode);
+void gui_overspot_check_client(gui_t *gui, int icid);
+void gui_overspot_delete_client(gui_t *gui, int icid);
 void xim_terminate(void);
+int ic_destroy(int icid, xccore_t *xccore);
 
 static gui_t *gui;
 
@@ -298,6 +301,79 @@ gui_check_window(Window window)
 
 /*----------------------------------------------------------------------------
 
+	GUI Monitoring the XIM client windows. 
+
+----------------------------------------------------------------------------*/
+
+struct mw_s {
+    Window win;
+    int icid;
+    xmode_t flag;
+};
+
+#define MW_LENTH	64
+static struct mw_s *mw;
+static int mw_edx, mw_len;
+
+void
+gui_set_monitor(Window w, int monitor_overspot, int icid)
+{
+    int i, idx=-1;
+
+    for (i=0; i<mw_edx; i++) {
+	if (idx == -1 && mw[i].win == (Window)0)
+	    idx = i;
+	if (mw[i].win == w)
+	    return;
+    }
+    if (idx == -1) {
+	if (mw_edx >= mw_len) {
+	    mw_len += MW_LENTH;
+	    mw = xcin_realloc(mw, sizeof(struct mw_s)*mw_len);
+	    for (i=mw_edx; i<mw_len; i++)
+		mw[i].win = (Window)0;
+	}
+	idx = mw_edx;
+	mw_edx ++;
+    }
+    XSelectInput(gui->display, w, StructureNotifyMask);
+    mw[idx].win = w;
+    mw[idx].icid = icid;
+    mw[idx].flag = monitor_overspot;
+}
+
+static void
+gui_unset_monitor(Window w, xccore_t *xccore)
+{
+    int i;
+
+    for (i=0; i<mw_edx; i++) {
+	if (mw[i].win == w) {
+	    ic_destroy(mw[i].icid, xccore);
+	    mw[i].win = (Window)0;
+	    mw[i].icid = 0;
+	    mw[i].flag = 0;
+	    if (i == mw_edx-1)
+		mw_edx --;
+	}
+    }
+}
+
+static void
+gui_check_monitor(XConfigureEvent *event)
+{
+    int i;
+
+    for (i=0; i<mw_edx; i++) {
+	if (mw[i].win == event->window && mw[i].flag) {
+	    gui_overspot_check_client(gui, mw[i].icid);
+	    break;
+	}
+    }
+}
+
+/*----------------------------------------------------------------------------
+
 	GUI Initialization & Main loop
 
 ----------------------------------------------------------------------------*/
@@ -353,6 +429,7 @@ gui_init(xccore_t *xccore)
 	gui->mainwin2 = xcin_mainwin2_init(gui, xccore);
     else
 	gui->mainwin  = xcin_mainwin_init(gui, xccore);
+    gui->overspot_win = gui_overspot_init(gui, xccore);
     gui->winchange |= WIN_CHANGE_IM;
 }
 
@@ -362,7 +439,7 @@ gui_loop(xccore_t *xccore)
     XEvent event;
     winlist_t *win;
 
-    while(1) {
+    while (1) {
 	if ((xccore->xcin_mode & XCIN_RUN_EXITALL)) {
 	    xim_terminate();
 	    IM_free_all();
@@ -393,6 +470,11 @@ gui_loop(xccore_t *xccore)
 	    if (win && win->win_attrib_func)
 		win->win_attrib_func(gui, win, &(event.xconfigure),
 				(xccore->xcin_mode & XCIN_KEEP_POSITION));
+	    else
+		gui_check_monitor(&(event.xconfigure));
+	    break;
+	case DestroyNotify:
+	    gui_unset_monitor(event.xdestroywindow.window, xccore);
 	    break;
 	case ClientMessage:
 	    if (event.xclient.format == 32 && 
@@ -457,27 +539,6 @@ update_gui_request(IC *ic, IC *icp)
 }
 
 static void
-update_gui_overspot(IC *ic, IC *icp, xmode_t xcin_mode)
-{
-    winlist_t *win;
-
-    if ((gui->winchange & WIN_CHANGE_FOCUS) && icp &&
-	icp->ic_rec.input_style == XIMSTY_OverSpot &&
-	(win = gui_search_win(icp->imc->overspot_win)))
-	gui_winmap_change(win, 0);
-
-    if (ic->ic_rec.input_style == XIMSTY_OverSpot) {
-	if ((win = gui_search_win(ic->imc->overspot_win)))
-	    win->win_draw_func(gui, win);
-	else {
-	    ic->imc->ic_rec = &(ic->ic_rec);
-	    win = gui_overspot_init(gui, ic->imc, xcin_mode);
-	    ic->imc->overspot_win = win->window;
-	}
-    }
-}
-
-static void
 gui_bell(xmode_t xcin_mode)
 {
     static int bell_pitch;
@@ -515,9 +576,9 @@ gui_update_winlist(xccore_t *xccore)
 	if (xccore->ic->ic_rec.input_style == XIMSTY_Root && ! gui->mainwin)
 	    gui->mainwin = xcin_mainwin_init(gui, xccore);
 	update_gui_request(xccore->ic, xccore->icp);
-	update_gui_overspot(xccore->ic, xccore->icp, xccore->xcin_mode);
-/*	xccore->ic->ic_rec.ic_value_update = 0; */
     }
+    if (gui->overspot_win)
+	gui->overspot_win->win_draw_func(gui, gui->overspot_win);
     if ((gui->winchange & WIN_CHANGE_IM)) {
 	if (gui->mainwin)
 	    gui->mainwin->win_draw_func(gui, gui->mainwin);

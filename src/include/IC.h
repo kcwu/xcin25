@@ -63,11 +63,14 @@ typedef struct {
 } StatusAttributes;
 #endif
 
-#define CLIENT_SETIC_PRE_AREA		0x00000001
-#define CLIENT_SETIC_PRE_SPOTLOC	0x00000002
-#define CLIENT_SETIC_PRE_FONTSET	0x00000004
-#define CLIENT_SETIC_PRE_FGCOLOR	0x00000008
-#define CLIENT_SETIC_PRE_BGCOLOR	0x00000010
+#define CLIENT_SETIC_CLIENTW		0x00000001
+#define CLIENT_SETIC_FOCUSW		0x00000002
+#define CLIENT_SETIC_INPSTY		0x00000004
+#define CLIENT_SETIC_PRE_AREA		0x00000100
+#define CLIENT_SETIC_PRE_SPOTLOC	0x00000200
+#define CLIENT_SETIC_PRE_FONTSET	0x00000400
+#define CLIENT_SETIC_PRE_FGCOLOR	0x00000800
+#define CLIENT_SETIC_PRE_BGCOLOR	0x00001000
 
 typedef struct {
     xmode_t		ic_value_set;	/* IC value set by the client */
@@ -120,7 +123,6 @@ struct _IMC {
 
     int			n_gwin;		/* IM GUI request window recorder. */
     greq_win_t		gwin[MAX_GREQ_CNT];
-    Window		overspot_win;	/* OverTheSpot candidate window. */
 
     IM_Context_t       *next;
     IM_Context_t       *prev;

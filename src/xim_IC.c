@@ -112,8 +112,6 @@ delete_IMC(IM_Context_t *imc)
 	free(imc->cch);
     if (imc->sinmd_keystroke)
 	free(imc->sinmd_keystroke);
-    if (imc->overspot_win)
-	gui_freewin(imc->overspot_win);
 }
 
 IM_Context_t *
@@ -169,7 +167,10 @@ delete_IC(IC *ic, IC *last, xccore_t *xccore)
 {
     int clear = ((xccore->xcin_mode & XCIN_SINGLE_IMC)) ? 0 : 1;
     ic_rec_t *ic_rec = &(ic->ic_rec);
+    void gui_overspot_delete_client(gui_t *gui, int icid);
 
+    if (ic_rec->input_style == XIMSTY_OverSpot)
+	gui_overspot_delete_client(&(xccore->gui), ic->id);
 /* 
  *  The IC is eventually being deleted, so don't process any IMKEY send back.
  */
@@ -391,29 +392,29 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 
 ----------------------------------------------------------------------------*/
 
-#define checkset_ic_val(flag, type, val) 				\
+#define checkset_ic_val(flag, type, attr, val) 				\
     if (ic_rec->ic_value_set & flag) {					\
-	if (memcmp(&(val), pre_attr->value, sizeof(type)) != 0) {	\
-	    val = *(type *)pre_attr->value;				\
+	if (memcmp(&(val), (attr)->value, sizeof(type)) != 0) {		\
+	    val = *(type *)(attr)->value;				\
 	    ic_rec->ic_value_update |= flag;				\
 	}								\
     }									\
     else {								\
-	val = *(type *)pre_attr->value;					\
+	val = *(type *)(attr)->value;					\
 	ic_rec->ic_value_update |= flag;				\
 	ic_rec->ic_value_set |= flag;					\
     }
 
-#define checkset_ic_str(flag, str)					\
+#define checkset_ic_str(flag, attr, str)				\
     if ((ic_rec->ic_value_set & flag) && str) {				\
-	if (strcmp(str, pre_attr->value) != 0) {			\
+	if (strcmp(str, (attr)->value) != 0) {				\
 	    free(str);							\
-	    str = (char *)strdup(pre_attr->value);			\
+	    str = (char *)strdup((attr)->value);			\
 	    ic_rec->ic_value_update |= flag;				\
 	}								\
     }									\
     else {								\
-	str = (char *)strdup(pre_attr->value);				\
+	str = (char *)strdup((attr)->value);				\
 	ic_rec->ic_value_update |= flag;				\
 	ic_rec->ic_value_set |= flag;					\
     }
@@ -440,8 +441,8 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	DebugLog(3, ("ic_set: ic_attr: %s\n", ic_attr->name));
         if (match (XNInputStyle, ic_attr)) {
 	    int j;
-            ic_rec->input_style = *((INT32 *)ic_attr->value);
-
+	    checkset_ic_val(CLIENT_SETIC_INPSTY, INT32, ic_attr,
+			    ic_rec->input_style);
 	    for (j=0; j < xccore->input_styles.count_styles &&
 		      ic_rec->input_style != 
 			xccore->input_styles.supported_styles[j]; j++);
@@ -451,10 +452,14 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 		ic_rec->input_style = XIMSTY_Root;
 	    }
         }
-	else if (match (XNClientWindow, ic_attr))
-            ic_rec->client_win = *(Window *)ic_attr->value;
-        else if (match (XNFocusWindow, ic_attr))
-            ic_rec->focus_win = *(Window *)ic_attr->value;
+	else if (match (XNClientWindow, ic_attr)) {
+	    checkset_ic_val(CLIENT_SETIC_CLIENTW, Window, ic_attr,
+			    ic_rec->client_win);
+	}
+        else if (match (XNFocusWindow, ic_attr)) {
+	    checkset_ic_val(CLIENT_SETIC_FOCUSW, Window, ic_attr,
+			    ic_rec->focus_win);
+	}
 #ifdef XIM_COMPLETE
 	else if (match (XNResourceName, ic_attr))
 	    ic->resource_name = (char *)strdup((char *)ic_attr->value);
@@ -471,23 +476,23 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	    continue;
 	DebugLog(3, ("ic_set: pre_attr: %s\n", pre_attr->name));
         if (match (XNArea, pre_attr)) {
-	    checkset_ic_val(CLIENT_SETIC_PRE_AREA, XRectangle,
+	    checkset_ic_val(CLIENT_SETIC_PRE_AREA, XRectangle, pre_attr,
 			    ic_rec->pre_attr.area);
 	}
         else if (match (XNSpotLocation, pre_attr)) {
-	    checkset_ic_val(CLIENT_SETIC_PRE_SPOTLOC, XPoint,
+	    checkset_ic_val(CLIENT_SETIC_PRE_SPOTLOC, XPoint, pre_attr,
 			    ic_rec->pre_attr.spot_location);
 	}
         else if (match (XNFontSet, pre_attr)) {
-	    checkset_ic_str(CLIENT_SETIC_PRE_FONTSET,
+	    checkset_ic_str(CLIENT_SETIC_PRE_FONTSET, pre_attr,
 			    ic_rec->pre_attr.base_font);
         } 
         else if (match (XNForeground, pre_attr)) {
-	    checkset_ic_val(CLIENT_SETIC_PRE_FGCOLOR, CARD32,
+	    checkset_ic_val(CLIENT_SETIC_PRE_FGCOLOR, CARD32, pre_attr,
 			    ic_rec->pre_attr.foreground);
 	}
         else if (match (XNBackground, pre_attr)) {
-	    checkset_ic_val(CLIENT_SETIC_PRE_BGCOLOR, CARD32,
+	    checkset_ic_val(CLIENT_SETIC_PRE_BGCOLOR, CARD32, pre_attr,
 			    ic_rec->pre_attr.background);
 	}
         else if (match (XNLineSpace, pre_attr))
@@ -567,19 +572,41 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 		N_("ic_set: unknown IC sts_attr: %s\n"), sts_attr->name);
     }
 #endif
+
+    if (ic_rec->ic_value_update & CLIENT_SETIC_INPSTY) {
+	if (ic_rec->input_style == XIMSTY_OverSpot) {
+	    if (ic_rec->ic_value_update & CLIENT_SETIC_FOCUSW) {
+		gui_set_monitor(ic_rec->focus_win, 1, ic->id);
+		ic_rec->ic_value_update &= ~CLIENT_SETIC_FOCUSW;
+		ic_rec->ic_value_update &= ~CLIENT_SETIC_INPSTY;
+	    }
+	    else if (ic_rec->ic_value_update & CLIENT_SETIC_FOCUSW) {
+		gui_set_monitor(ic_rec->client_win, 1, ic->id);
+		ic_rec->ic_value_update &= ~CLIENT_SETIC_FOCUSW;
+		ic_rec->ic_value_update &= ~CLIENT_SETIC_INPSTY;
+	    }
+	}
+	else {
+	    ic_rec->ic_value_update &= ~CLIENT_SETIC_INPSTY;
+	    gui_set_monitor(ic_rec->client_win, 0, ic->id);
+	}
+    }
 }
 
 int 
 ic_create(XIMS ims, IMChangeICStruct *call_data, xccore_t *xccore)
 {
     IC *ic;
+    int single_imc = (xccore->xcin_mode & XCIN_SINGLE_IMC);
  
-    if (! (ic = new_IC((xccore->xcin_mode & XCIN_SINGLE_IMC))))
+    if (! (ic = new_IC(single_imc)))
         return False;
 
     ic->connect_id = call_data->connect_id;
     call_data->icid = ic->id;
 
+    if (! single_imc)
+	ic->imc->ic_rec = &(ic->ic_rec);
     if ((xccore->xcin_mode & XCIN_IM_FOCUS))
 	ic->imc->inp_num = xccore->im_focus;
     else
@@ -592,12 +619,12 @@ ic_create(XIMS ims, IMChangeICStruct *call_data, xccore_t *xccore)
 }
 
 int 
-ic_destroy(XIMS ims, IMDestroyICStruct *call_data, xccore_t *xccore)
+ic_destroy(int icid, xccore_t *xccore)
 {
     IC *ic, *last=NULL;
 
     for (ic=ic_list; ic!=NULL; last=ic, ic=ic->next) {
-	if (ic->id == call_data->icid) {
+	if (ic->id == icid) {
 	    delete_IC(ic, last, xccore);
 	    return  True;
 	}
@@ -623,75 +650,6 @@ ic_clean_all(CARD16 connect_id, xccore_t *xccore)
         }
     }
     return (clean_count) ? True : False;
-}
-
-/*---------------------------------------------------------------------------
-
-	Garbage Collection
-
----------------------------------------------------------------------------*/
-
-#ifdef DEBUG
-#define TIMECHECK_STEP    10
-#define IC_IDLE_TIME      20
-#else
-#define TIMECHECK_STEP    300
-#define IC_IDLE_TIME      600
-#endif
-
-void
-check_ic_exist(int icid, xccore_t *xccore)
-{
-    static time_t last_check;
-    IC *ic = ic_list, *last = NULL, *ref_ic;
-    time_t current_time;
-    int delete;
-
-    if (icid == -1 || (ref_ic = ic_find(icid)) == NULL)
-	return;
-    current_time = time(NULL);
-    if (current_time - last_check <= TIMECHECK_STEP)
-	return;
-
-    DebugLog(4, ("Begin check: current time = %d, last check = %d\n", 
-		(int)current_time, (int)last_check));
-
-    while (ic != NULL) {
-	DebugLog(4, ("IC: id=%d, focus_w=0x%x, client_w=0x%x%s\n",
-		ic->id, (unsigned int)ic->ic_rec.focus_win, 
-		(unsigned int)ic->ic_rec.client_win, 
-		(ic==ref_ic) ? ", (ref)." : "."));
-	delete = 0;
-
-	if (ic == ref_ic)
-	    ic->exec_time = current_time;
-	else if (ic->ic_rec.focus_win && 
-		 ic->ic_rec.focus_win == ref_ic->ic_rec.focus_win)
-	/* each IC should has its distinct window */
-	    delete = 1;
-	else if (current_time - ic->exec_time > IC_IDLE_TIME &&
-		 ic->ic_rec.client_win != 0) {
-	    DebugLog(4, ("Check IC: id=%d, window=0x%x, exec_time=%d.\n", 
-			 ic->id, (unsigned int)ic->ic_rec.client_win, 
-			 (int)ic->exec_time));
-	    ic->exec_time = current_time;
-	    if (gui_check_window(ic->ic_rec.client_win) != True)
-		delete = 1;
-	}
-
-	if (delete) {
-	    DebugLog(4, ("Delete IC: id=%d, window=0x%x, exec_time=%d.\n", 
-			 ic->id, (unsigned int)ic->ic_rec.client_win, 
-			 (int)ic->exec_time));
-	    delete_IC(ic, last, xccore);
-	    ic = (last) ? last->next : ic_list;
-	}
-	else {
-	    last = ic;
-	    ic = ic->next;
-	}
-    }
-    last_check = current_time;
 }
 
 /*---------------------------------------------------------------------------

@@ -30,6 +30,16 @@ xcin-2.5.3-pre2:  2001/
 10. Fix xim_IC.c: ic_get_values: bug for XNPreeditState.
     Thanks to <katakai@japan.sun.com>. 
 
+11. Redesign gui_overspot:
+    a. Use the single gui_overspot window for all the clients.
+    b. Monitor the XConfigureEvent & XDestroyNotifyEvent for all the clients.
+    c. Get client window position only when XConfigureEvent comes.
+    d. Delete the check_ic_exist().
+
+12. Bug fix for gen_inp.c: HINTTSI: absorb ESC, BackSpace, Delete, and modifier
+    keys, such that the HINTTSI window will close when these keys pressed.
+
+
 xcin-2.5.3-pre1:  2001/10/19
 ------------------------------
 1. Fix bug in qphrase.c/qphrase_init() for insufficient buffer size.

@@ -215,6 +215,7 @@ im_callback(Display *display, XPointer client_data, XPointer call_data)
 	    }
 	}
     }
+/*  OverTheSpot  */
     if (style == (XIMPreeditPosition | XIMStatusNothing)) {
 	spot.x = 5;
 	spot.y = 2*ef_height + 3*(ef_ascent+5);
@@ -226,6 +227,8 @@ im_callback(Display *display, XPointer client_data, XPointer call_data)
 				XNArea, &local_win_rect,
 				XNSpotLocation, &spot,
 				XNFontSet, fontset,
+				XNForeground, WhitePixel(display, screen),
+				XNBackground, BlackPixel(display, screen),
 				NULL);
     }
 

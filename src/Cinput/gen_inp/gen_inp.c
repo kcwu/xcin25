@@ -1274,40 +1274,45 @@ gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
     gen_inp_iccf_t *iccf = (gen_inp_iccf_t *)inpinfo->iccf;
     KeySym keysym = keyinfo->keysym;
     char *keystr = keyinfo->keystr;
-    unsigned int ret, i;
+    unsigned int i, ret=IMKEY_ABSORB, hint_processing=0;
 
     if (! cf->tsidb) 
-	return gen_inp_keystroke(conf,inpinfo,keyinfo);
+	return gen_inp_keystroke(conf, inpinfo, keyinfo);
 
     if (cf->mode & INP_MODE_HINTTSI) {
-	if(iccf->showtsiflag) {
-	    inpinfo->n_mcch=0;
-	    inpinfo->mcch_grouping=NULL;
-	}
-    }
-    if ((cf->mode & INP_MODE_HINTTSI) &&
-	iccf->showtsiflag &&
-	(keyinfo->keystate & Mod1Mask) &&	/* alt-Num or alt-space */
-	(('1'<=keystr[0] && keystr[0]<='9') || 
-	 ((cf->mode & INP_MODE_SPACEAUTOUP) && keysym == XK_space))) {
-	int choice=-1;
+	if (iccf->showtsiflag) {
+	    inpinfo->n_mcch = 0;
+	    inpinfo->mcch_grouping = NULL;
 
-	ret = IMKEY_ABSORB;
-	if (keysym == XK_space)
-	    choice = 1;
-	else if (keystr[0] >= '1' && keystr[0] <= '9')
-	    choice = (int)(keystr[0] - '0');
-	if (cf->mode & INP_MODE_SELKEYSHIFT)
-	    choice ++;
-	if (choice >= 1 && choice <= iccf->nreltsi) {
-	    strncpy(cch_s, iccf->reltsi+iccf->tsiindex[choice-1], 
-		    iccf->tsigroup[choice]*2);
-	    cch_s[iccf->tsigroup[choice]*2] = 0;
-	    inpinfo->cch = cch_s;
-	    ret |= IMKEY_COMMIT;
+	    if ((keyinfo->keystate & Mod1Mask) &&	/* alt-Num/space */
+		(('1'<=keystr[0] && keystr[0]<='9') || 
+		 ((cf->mode & INP_MODE_SPACEAUTOUP) && keysym==XK_space))) {
+		int choice=-1;
+
+		if (keysym == XK_space)
+		    choice = 1;
+		else if (keystr[0] >= '1' && keystr[0] <= '9')
+		    choice = (int)(keystr[0] - '0');
+		if (cf->mode & INP_MODE_SELKEYSHIFT)
+		    choice ++;
+		if (choice >= 1 && choice <= iccf->nreltsi) {
+		    strncpy(cch_s, iccf->reltsi+iccf->tsiindex[choice-1], 
+			    iccf->tsigroup[choice]*2);
+		    cch_s[iccf->tsigroup[choice]*2] = 0;
+		    inpinfo->cch = cch_s;
+		    ret |= IMKEY_COMMIT;
+		}
+		hint_processing = 1;
+	    }
+	    else if (keysym==XK_Escape || keysym==XK_BackSpace ||
+		     keysym==XK_Delete ||
+		     keysym==XK_Shift_L || keysym==XK_Shift_R ||
+		     keysym==XK_Control_L || keysym==XK_Control_R) {
+		hint_processing = 1;
+	    }
 	}
     }
-    else
+    if (hint_processing == 0)
 	ret = gen_inp_keystroke(conf, inpinfo, keyinfo);
 
     if (ret & IMKEY_COMMIT)

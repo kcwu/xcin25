@@ -222,9 +222,6 @@ read_core_config(void)
     cmd[0] = "XKILL_DISABLE";
     if (get_resource(xrc, cmd, value, 256, 1))
 	set_data(&(xcin_core.xcin_mode), RC_IFLAG, value, XCIN_XKILL_OFF, 0);
-    cmd[0] = "ICCHECK_DISABLE";
-    if (get_resource(xrc, cmd, value, 256, 1))
-	set_data(&(xcin_core.xcin_mode), RC_IFLAG, value, XCIN_ICCHECK_OFF, 0);
     cmd[0] = "SINGLE_IM_CONTEXT";
     if (get_resource(xrc, cmd, value, 256, 1))
 	set_data(&(xcin_core.xcin_mode), RC_IFLAG, value, XCIN_SINGLE_IMC, 0);
@@ -382,7 +379,7 @@ read_core_config_locale(void)
 	perr(XCINMSG_ERROR, fmt, cmd[0], cmd[1]);
 
     cmd[1] = "OVERSPOT_FONTSET";
-    if (get_resource_long(xrc, cmd, value, 256, 2, ',') && strcmp(value, "NONE"))
+    if (get_resource_long(xrc, cmd, value, 256, 2, ',') && strcmp(value,"NONE"))
 	set_data(&(xcin_core.gui.overspot_font), RC_STRING, value, 0, 0);
 
     cmd[1] = "PHRASE";

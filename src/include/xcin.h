@@ -34,16 +34,15 @@
 #define XCIN_SHOW_CINPUT        0x00000002      /* sinmd is set to be default */
 #define XCIN_XKILL_OFF          0x00000004      /* disable xkill */
 #define XCIN_IM_FOCUS           0x00000008      /* IM focus on */
-#define XCIN_ICCHECK_OFF	0x00000010	/* disable IC check */
-#define XCIN_SINGLE_IMC		0x00000020	/* single inpinfo for all IC */
-#define XCIN_KEEP_POSITION	0x00000040	/* keep position enable */
-#define XCIN_NO_WM_CTRL		0x00000080	/* disable WM contral */
-#define XCIN_OVERSPOT_USRCOLOR	0x00000100	/* use client color setting */
-#define XCIN_OVERSPOT_FONTSET	0x00000200	/* use user specified fontset */
-#define XCIN_MAINWIN2		0x00000400	/* start mainwin 2 */
-#define XCIN_DIFF_BEEP		0x00000800	/* enable different beep */
-#define XCIN_OVERSPOT_WINONLY	0x00001000	/* only start OverSpot window */
-#define XCIN_KEYBOARD_TRANS	0x00002000	/* translation keyboard layout*/
+#define XCIN_SINGLE_IMC		0x00000010	/* single inpinfo for all IC */
+#define XCIN_KEEP_POSITION	0x00000020	/* keep position enable */
+#define XCIN_NO_WM_CTRL		0x00000040	/* disable WM contral */
+#define XCIN_OVERSPOT_USRCOLOR	0x00000080	/* use client color setting */
+#define XCIN_OVERSPOT_FONTSET	0x00000100	/* use user specified fontset */
+#define XCIN_MAINWIN2		0x00000200	/* start mainwin 2 */
+#define XCIN_DIFF_BEEP		0x00000400	/* enable different beep */
+#define XCIN_OVERSPOT_WINONLY	0x00000800	/* only start OverSpot window */
+#define XCIN_KEYBOARD_TRANS	0x00001000	/* translation keyboard layout*/
 #define XCIN_RUN_IM_FOCUS       0x00100000      /* run time IM focus on */
 #define XCIN_RUN_2B_FOCUS	0x00200000	/* run time 2B focus on */
 #define XCIN_RUN_EXIT		0x00400000	/* xcin is now exiting */
