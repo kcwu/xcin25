@@ -33,7 +33,7 @@ all-OPENBSD:
 	( GB2312ENC=euc make -f Rules make-gb2312 )
 
 all-NETBSD:
-	( GB2312ENC=euc make -f Rules make-gb2312 )
+	( GB2312ENC=euccn make -f Rules make-gb2312 )
 
 all-HPUX:
 	( GB2312ENC=hp15cn make -f Rules make-gb2312 )
@@ -54,7 +54,7 @@ install-OPENBSD:
 	( GB2312ENC=euc make -f Rules install_gb2312 )
 
 install-NETBSD:
-	( GB2312ENC=euc make -f Rules install_gb2312 )
+	( GB2312ENC=euccn make -f Rules install_gb2312 )
 
 install-HPUX:
 	( GB2312ENC=hp15cn make -f Rules install_gb2312 )

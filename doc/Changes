@@ -27,6 +27,9 @@ xcin-2.5.3-pre1:  2001/
    c. add a shared lib: libxcin: xcintool+siod+charset.
    d. work around for both GNU gettext >= 0.10.36 and <= 0.10.35.
 
+8. Add NetBSD porting patches.
+   Thanks to Rui-Xiang Guo <rxg@ms25.url.com.tw>.
+
 
 xcin-2.5.2.3:  2001/03/12
 ------------------------------

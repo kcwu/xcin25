@@ -112,7 +112,9 @@ xcin 系統中，並引進、實驗新的設計概念與中文處理技術，同時也希望藉此修正
 
    b. FreeBSD / GCC:  i386  (FreeBSD-4.0 / 使用 ELF 的系統)
 
-   c. HP-UX / ANSI-C compiler:  32-bits HP workstation
+   c. NetBSD / GCC:  i386
+
+   d. HP-UX / ANSI-C compiler:  PA-RISC 32-bits
 
    至於 Solaris 以及 OpenBSD 的移植仍在進行中，需要大家多多測試與回報。
 
@@ -359,6 +361,9 @@ D. 套件內容:
 
    FreeBSD:	$(BIG5):	big5
 		$(GB2312):	euc
+
+   NetBSD:	$(BIG5):	big5
+		$(GB2312):	euccn
 
    HP-UX:	$(BIG5):	big5
 		$(BIG5HKSCS):	hkbig5

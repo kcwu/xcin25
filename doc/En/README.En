@@ -68,7 +68,9 @@ Features of xcin-2.5 includes:
 
    b. FreeBSD / GCC:  i386  (FreeBSD-4.0 / with ELF support)
 
-   c. HP-UX / ANSI-C compiler:  32-bits HP workstation
+   c. NetBSD / GCC:  i386
+
+   d. HP-UX / ANSI-C compiler:  PA-RISC 32-bits
 
    For the support and porting to Solaris and OpenBSD is under progress
    and needs more tests and feedbacks.
@@ -304,6 +306,9 @@ D. Contents of the package:
 
    FreeBSD:	$(BIG5):	big5
 		$(GB2312):	euc
+
+   NetBSD:	$(BIG5):	big5
+		$(GB2312):	euccn
 
    HP-UX:	$(BIG5):	big5
 		$(BIG5HKSCS):	hkbig5
