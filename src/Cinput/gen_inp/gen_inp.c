@@ -628,8 +628,7 @@ match_keystroke_wild(gen_inp_conf_t *cf,
     *s = '\0';
 
     keys2codes(icode, 2, iccf->keystroke);
-    idx = bsearch_char(cf->ic1, cf->ic2, icode[0], icode[1], 
-			cf->header.n_icode, md, 1);
+    idx = bsearch_char(cf->ic, icode, cf->header.n_icode, md, 1);
     *s = tmpch;
     iccf->mcch_hidx = idx;		/* refer to head index of cf->icidx */
 
