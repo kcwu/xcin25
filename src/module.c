@@ -30,14 +30,14 @@
 #include "xcintool.h"
 #include "imodule.h"
 
-struct _immod_list_s {
-    module_t *modp;
-    int ref;
-    struct _immod_list_s *next;
-};
+typedef struct {
+    char *modname;
+    char *objname;
+    imodule_t *imodp;
+    int with_enc;
+} im_t;
 
-static struct _immod_list_s *immod;
-static cinput_t cinput[MAX_INP_ENTRY];
+static im_t IM[MAX_IM_ENTRY];
 
 /*---------------------------------------------------------------------------
 
@@ -46,10 +46,16 @@ static cinput_t cinput[MAX_INP_ENTRY];
 ---------------------------------------------------------------------------*/
 
 static int
-check_module(module_t *modp, char *ldso_name)
+check_module(module_t *modp, char *objenc)
 {
-    char *str=NULL;
+    char *str=NULL, **objn, objname[64];
+    int check_ok=0;
 
+    if (modp == NULL)
+	return False;
+/*
+ *  Check for necessary symbols.
+ */
     if (! modp->conf_size)
 	str = "conf_size";
     else if (! modp->init)
@@ -62,43 +68,48 @@ check_module(module_t *modp, char *ldso_name)
 	str = "keystroke";
     else if (! modp->show_keystroke)
 	str = "show_keystroke";
-
     if (str) {
 	perr(XCINMSG_IWARNING,
 	    N_("undefined symbol \"%s\" in module \"%s\", ignore.\n"),
-	    str, ldso_name);
+	    str, modp->module_header.name);
 	return  False;
     }
-    return  True;
-}
-
-
-static struct _immod_list_s *
-load_IM_module(char *modname, xcin_rc_t *xrc)
-{
-    module_t *modp;
-    struct _immod_list_s *mlist;
-
-    modp = (module_t *)load_module(modname,MTYPE_IM,MODULE_VERSION,xrc,NULL);
-    if (modp == NULL || check_module(modp, modname) == False) {
-	unload_module((mod_header_t *)modp);
-	return NULL;
+/*
+ *  Check for the valid objname.
+ */
+    strncpy(objname, objenc, 64);
+    if ((str = strrchr(objname, '@')))
+	*str = '\0';
+    objn = modp->valid_objname;
+    if (! objn) {
+	if (strcmp_wild(modp->module_header.name, objname) == 0)
+	    check_ok = 1;
     }
-    mlist = xcin_malloc(sizeof(struct _immod_list_s), 0);
-    mlist->modp = modp;
-    mlist->ref  = 0;
-    mlist->next = immod;
-    immod = mlist;
-
-    return mlist;
+    else {
+	while (*objn) {
+	    if(strcmp_wild(*objn, objname) == 0) {
+		check_ok = 1;
+		break;
+	    }
+	    objn ++;
+	}
+    }
+    if (check_ok == 0) {
+	perr(XCINMSG_WARNING,
+	    N_("invalid objname \"%s\" for module \"%s\", ignore.\n"),
+	    objname, modp->module_header.name);
+	return False;
+    }
+    return True;
 }
 
-static imodule_t * 
-creat_module(module_t *templet, char *objname)
+static imodule_t *
+creat_module(module_t *templet, char *objenc)
 {
     imodule_t *imodp;
 
     imodp = xcin_malloc(sizeof(imodule_t), 1);
+    imodp->modp = (void *)templet;
     imodp->name = templet->module_header.name;
     imodp->version = templet->module_header.version;
     imodp->comments = templet->module_header.comments;
@@ -111,66 +122,35 @@ creat_module(module_t *templet, char *objname)
     imodp->show_keystroke = templet->show_keystroke;
     imodp->terminate = templet->terminate;
 
-    imodp->objname = (objname) ? (char *)strdup(objname) : imodp->name; 
+    imodp->objname = (objenc) ? (char *)strdup(objenc) : imodp->name; 
 
-    return  imodp;
+    return imodp;
 }
 
-imodule_t *
-load_IM(char *modname, char *objenc, xcin_rc_t *xrc)
+static imodule_t *
+IM_load(char *modname, char *objenc, xcin_rc_t *xrc)
 {
-    struct _immod_list_s *mlist=immod;
+    module_t *modp;
     imodule_t *imodp;
-    char **objn, objname[64], *s;
-    int i;
-/*
- *  See that if the desired module with obj_name has been created.
- */
-    for (i=0; i<MAX_INP_ENTRY; i++) {
-	if (cinput[i].inpmod &&
-	    !strcmp(cinput[i].inpmod->name, modname) &&
-	    !strcmp(cinput[i].inpmod->objname, objenc))
-	    return  cinput[i].inpmod;
+    int load_ok=1;
+
+    modp = (module_t *)load_module(modname,MTYPE_IM,MODULE_VERSION,xrc,NULL);
+    if (check_module(modp, objenc) == False)
+	load_ok = 0;
+    else {
+	imodp = creat_module(modp, objenc);
+	if (imodp->init(imodp->conf, objenc, xrc) != True) {
+	    free(imodp->conf);
+	    free(imodp);
+	    load_ok = 0;
+	}
     }
-/*
- *  Search the templet.
- */
-    strncpy(objname, objenc, 64);
-    if ((s = strrchr(objname, '@')))
-	*s = '\0';
-    while (mlist) {
-	if (strcmp(modname, mlist->modp->module_header.name) != 0) {
-	    mlist = mlist->next;
-	    continue;
-	}
-	objn = mlist->modp->valid_objname;
-	if (! objn) {
-	    if (! strcmp_wild(mlist->modp->module_header.name, objname))
-		break;
-	}
-	else {
-	    while (*objn) {
-	        if(! strcmp_wild(*objn, objname))
-		    break;
-	        objn ++;
-	    }
-	    if (*objn)
-		break;
-	}
-	mlist = mlist->next;
-    }
-/*
- *  Load modules from dynamic libs and run module init.
- */
-    if (! mlist && (mlist = load_IM_module(modname, xrc)) == NULL)
-	return NULL;
-    imodp = creat_module(mlist->modp, objenc);
-    if (imodp->init(imodp->conf, objenc, xrc) != True) {
-	free(imodp->conf);
-	free(imodp);
+    if (load_ok == 0) {
+	perr(XCINMSG_WARNING,
+	    N_("cannot load IM: %s, ignore.\n"), objenc);
+	unload_module((mod_header_t *)modp);
 	return NULL;
     }
-    mlist->ref ++;
     return imodp;
 }
 
@@ -180,70 +160,125 @@ load_IM(char *modname, char *objenc, xcin_rc_t *xrc)
 
 ----------------------------------------------------------------------------*/
 
-cinput_t *
-get_cinput(int idx)
+int
+IM_register(int idx, char *modname, char *objname, char *encoding)
 {
-    cinput_t *cp = cinput + idx;
+    im_t *imp;
+    int len;
 
-    if (cp->modname && cp->objname)
-	return cp;
-    else
-	return NULL;
+    if (idx < 0 || idx >= MAX_IM_ENTRY)
+	return False;
+
+    imp = IM + idx;
+    if (imp->modname)
+	free(imp->modname);
+    if (imp->objname)
+	free(imp->objname);
+    imp->modname = (char *)strdup(modname);
+    if (strrchr(objname, '@')) {
+	imp->objname = (char *)strdup(objname);
+	imp->with_enc = (ubyte_t)1;
+    }
+    else {
+	len = strlen(objname) + strlen(encoding) + 2;
+	imp->objname = malloc(len);
+	sprintf(imp->objname, "%s@%s", objname, encoding);
+	imp->with_enc = (ubyte_t)0;
+    }
+    return True;
 }
 
-cinput_t *
-get_cinput_next(int idx, int *idx_ret)
+int
+IM_check_registered(int idx)
+{
+    if (idx < 0 || idx >= MAX_IM_ENTRY)
+	return False;
+    if (IM[idx].modname && IM[idx].objname)
+	return True;
+    else
+	return False;
+}
+
+imodule_t *
+IM_get(int idx, xcin_rc_t *xrc)
+{
+    im_t *imp = IM + idx;
+
+    if (idx < 0 || idx >= MAX_IM_ENTRY)
+	return NULL;
+    if (imp->modname && imp->objname && imp->imodp == NULL)
+	imp->imodp = IM_load(imp->modname, imp->objname, xrc);
+    if (imp->imodp == NULL)
+	IM_free(idx);
+    return imp->imodp;
+}
+
+imodule_t *
+IM_get_next(int idx, int *idx_ret, xcin_rc_t *xrc)
 {
     int i, j;
-    cinput_t *cp;
+    im_t *imp;
 
-    for (j=0, i=idx, cp=cinput+idx; j<MAX_INP_ENTRY; j++, i++, cp++) {
-	if (i >= MAX_INP_ENTRY) {
-	    cp = cinput;
+    if (idx < 0 || idx >= MAX_IM_ENTRY)
+	return NULL;
+
+    *idx_ret = -1;
+    for (j=0, i=idx, imp=IM+idx; j<MAX_IM_ENTRY; j++, i++, imp++) {
+	if (i >= MAX_IM_ENTRY) {
+	    imp = IM;
 	    i = 0;
 	}
-	if (cp->modname && cp->objname) {
+	if (imp->modname && imp->objname) {
 	    *idx_ret = i;
-            return cp;
+            break;
 	}
     }
-    *idx_ret = -1;
-    return NULL;
+    if (*idx_ret != -1 && imp->modname && imp->objname && imp->imodp == NULL)
+	imp->imodp = IM_load(imp->modname, imp->objname, xrc);
+    if (imp->imodp == NULL)
+	IM_free(*idx_ret);
+    return imp->imodp;
 }
 
-cinput_t *
-get_cinput_prev(int idx, int *idx_ret)
+imodule_t *
+IM_get_prev(int idx, int *idx_ret, xcin_rc_t *xrc)
 {
     int i, j;
-    cinput_t *cp;
+    im_t *imp;
 
-    for (j=0, i=idx, cp=cinput+idx; j<MAX_INP_ENTRY; j++, i--, cp--) {
+    if (idx < 0 || idx >= MAX_IM_ENTRY)
+	return NULL;
+
+    *idx_ret = -1;
+    for (j=0, i=idx, imp=IM+idx; j<MAX_IM_ENTRY; j++, i--, imp--) {
 	if (i < 0) {
-	    cp = cinput + MAX_INP_ENTRY - 1;
-	    i = MAX_INP_ENTRY - 1;
+	    imp = IM + MAX_IM_ENTRY - 1;
+	    i = MAX_IM_ENTRY - 1;
 	}
-	if (cp->modname && cp->objname) {
+	if (imp->modname && imp->objname) {
 	    *idx_ret = i;
-            return cp;
+	    break;
 	}
     }
-    *idx_ret = -1;
-    return NULL;
+    if (*idx_ret != -1 && imp->modname && imp->objname && imp->imodp == NULL)
+	imp->imodp = IM_load(imp->modname, imp->objname, xrc);
+    if (imp->imodp == NULL)
+	IM_free(*idx_ret);
+    return imp->imodp;
 }
 
 numlist_t *
-get_cinput_numlist(void)
+IM_get_numlist(void)
 {
-    static numlist_t numlist[13] = {(numlist_t)-1};
+    static numlist_t numlist[MAX_IM_ENTRY+1] = {(numlist_t)-1};
     numlist_t *s=numlist;
-    cinput_t *cp;
     int i;
 
     if (numlist[0] != (numlist_t)-1)
 	return numlist;
 
-    for (i=0, cp=cinput; i<MAX_INP_ENTRY; i++, cp++) {
-	if (cp->modname && cp->objname) {
+    for (i=0; i<MAX_IM_ENTRY; i++) {
+	if (IM[i].modname && IM[i].objname) {
 	    *s = (numlist_t)i;
 	    s++;
 	}
@@ -253,35 +288,11 @@ get_cinput_numlist(void)
     return numlist;
 }
 
-cinput_t *
-set_cinput(int idx, char *modname, char *objname, char *encoding)
-{
-    cinput_t *cp = cinput + idx;
-    int len;
-
-    if (cp->modname)
-	free(cp->modname);
-    if (cp->objname)
-	free(cp->objname);
-    cp->modname = (char *)strdup(modname);
-    if (strrchr(objname, '@')) {
-	cp->objname = (char *)strdup(objname);
-	cp->with_enc = (ubyte_t)1;
-    }
-    else {
-	len = strlen(objname) + strlen(encoding) + 2;
-	cp->objname = malloc(len);
-	sprintf(cp->objname, "%s@%s", objname, encoding);
-	cp->with_enc = (ubyte_t)0;
-    }
-    return cp;
-}
-
-cinput_t *
-search_cinput(char *objname, char *encoding, int *idx_ret)
+imodule_t *
+IM_search(char *objname, char *encoding, int *idx_ret, xcin_rc_t *xrc)
 {
     int i;
-    cinput_t *cp;
+    im_t *imp;
     char objenc[100];
 
     if (strrchr(objname, '@'))
@@ -289,46 +300,67 @@ search_cinput(char *objname, char *encoding, int *idx_ret)
     else
 	snprintf(objenc, 100, "%s@%s", objname, encoding);
 
-    for (i=0, cp=cinput; i<MAX_INP_ENTRY; i++, cp++) {
-	if (cp->objname && ! strcmp(cp->objname, objenc)) {
+    *idx_ret = -1;
+    for (i=0, imp=IM; i<MAX_IM_ENTRY; i++, imp++) {
+	if (imp->objname && ! strcmp(imp->objname, objenc)) {
 	    *idx_ret = i;
-	    return cp;
+	    break;
 	}
     }
-    *idx_ret = -1;
-    return NULL;
+    if (*idx_ret != -1 && imp->modname && imp->objname && imp->imodp == NULL)
+	imp->imodp = IM_load(imp->modname, imp->objname, xrc);
+    if (imp->imodp == NULL)
+	IM_free(*idx_ret);
+    return imp->imodp;
 }
 
 void 
-free_cinput(cinput_t *cp)
+IM_free(int idx)
 {
-    if (cp->modname) {
-	free(cp->modname);
-	cp->modname = NULL;
+    im_t *imp;
+
+    if (idx < 0 || idx >= MAX_IM_ENTRY)
+	return;
+
+    imp = IM+idx;
+    if (imp->modname) {
+	free(imp->modname);
+	imp->modname = NULL;
     }
-    if (cp->objname) {
-	free(cp->objname);
-	cp->objname = NULL;
+    if (imp->objname) {
+	free(imp->objname);
+	imp->objname = NULL;
     }
-    if (cp->inpmod) {
-	free(cp->inpmod->conf);
-	free(cp->inpmod);
-	cp->inpmod = NULL;
+    if (imp->imodp) {
+	if (imp->imodp->terminate)
+	    imp->imodp->terminate(imp->imodp->conf);
+	unload_module((mod_header_t *)imp->imodp->modp);
+	free(imp->imodp->conf);
+	free(imp->imodp);
+	imp->imodp = NULL;
     }
+}
+
+void
+IM_free_all(void)
+{
+    int i;
+    for (i=0; i<MAX_IM_ENTRY; i++)
+	IM_free(i);
 }
 
 int
 get_objenc(char *objname, objenc_t *objenc)
 {
     int i;
-    cinput_t *cp;
+    im_t *imp;
     char *s;
 
-    for (i=0, cp=cinput; i<MAX_INP_ENTRY; i++, cp++) {
-	if (cp->objname && ! strcmp(cp->objname, objname))
+    for (i=0, imp=IM; i<MAX_IM_ENTRY; i++, imp++) {
+	if (imp->objname && ! strcmp(imp->objname, objname))
 	    break;
     }
-    if (i >= MAX_INP_ENTRY)
+    if (i >= MAX_IM_ENTRY)
 	return -1;
 
     strncpy(objenc->objname, objname, 50);
@@ -336,21 +368,9 @@ get_objenc(char *objname, objenc_t *objenc)
     *s = '\0';
     strncpy(objenc->encoding, s+1, 50);
 
-    if (cp->with_enc)
+    if (imp->with_enc)
 	strncpy(objenc->objloadname, objname, 100);
     else
 	strncpy(objenc->objloadname, objenc->objname, 100);
     return 0;
-}
-
-void
-cinput_terminate(void)
-{
-    int i;
-    cinput_t *cp;
-
-    for (i=0, cp=cinput; i<MAX_INP_ENTRY; i++, cp++) {
-	if (cp->inpmod && cp->inpmod->terminate)
-	    cp->inpmod->terminate(cp->inpmod->conf);
-    }
 }

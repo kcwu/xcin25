@@ -397,7 +397,7 @@ read_core_config_locale(void)
 }
 
 static void
-read_core_config_cinput(void)
+read_core_config_IM(void)
 {
     char *cmd[2], value[256], *s, *s1, objname[100], objenc[100];
     char *fmt = N_("%s:\n\tIM section \"%s\": %s: value not specified.\n");
@@ -421,17 +421,18 @@ read_core_config_cinput(void)
 
 	/* setkey should be uniquely defined */
 	set_data(&setkey, RC_INT, value, 0, 0);
-	if (setkey < 0 || setkey > MAX_INP_ENTRY || get_cinput(setkey))
-	    perr(XCINMSG_ERROR, fmt, xcin_core.xcin_rc.rcfile, objname, cmd[1]);
+	if (setkey < 0 || setkey > MAX_IM_ENTRY ||
+	    IM_check_registered(setkey) == True)
+	    perr(XCINMSG_ERROR,_(fmt),xcin_core.xcin_rc.rcfile,objname,cmd[1]);
 
 	cmd[1] = "MODULE";
         if (get_resource(xrc, cmd, value, 256, 2)) {
             if ((s = strrchr(value, '.')) && !strcmp(s, ".so"))
 		*s = '\0';
-	    set_cinput(setkey, value, cmd[0], locale->encoding);
+	    IM_register(setkey, value, cmd[0], locale->encoding);
 	}
 	else
-	    set_cinput(setkey, xcin_core.irc->default_im_mod_name, 
+	    IM_register(setkey, xcin_core.irc->default_im_mod_name, 
 		       cmd[0], locale->encoding);
     }
 }
@@ -486,77 +487,49 @@ void load_syscin(void)
 }
 
 static void
-load_default_cinput(void)
+load_default_IM(void)
 {
     int idx;
-    cinput_t *cp;
+    imodule_t *imodp=NULL;
 /*
  *  Try to load the default input method.
  */
-    if (! (cp = search_cinput(xcin_core.irc->default_im_name, 
-		xcin_core.xcin_rc.locale.encoding, &idx)))
-	perr(XCINMSG_WARNING, N_("not valid %s: %s, ignore\n"),
-		"DEFAULT_IM", xcin_core.irc->default_im_name);
-    else {
-        if (! (cp->inpmod = load_IM(cp->modname, cp->objname, 
-		&(xcin_core.xcin_rc)))) {
-	    perr(XCINMSG_WARNING, 
-		N_("error loading IM: %s, ignore.\n"), cp->objname);
-	    free_cinput(cp);
-	}
-	else {
-	    xcin_core.im_focus = xcin_core.default_im = (inp_state_t)idx;
-	    return;
-	}
+    imodp = IM_search(xcin_core.irc->default_im_name, 
+	    xcin_core.xcin_rc.locale.encoding, &idx, &(xcin_core.xcin_rc));
+    if (imodp) {
+	xcin_core.im_focus = xcin_core.default_im = (inp_state_t)idx;
+	return;
     }
-
 /*
  *  If false, try to load any specified input method.
  */
-    while (1) {
-	if (! (cp = get_cinput_next(0, &idx)))
-	    perr(XCINMSG_ERROR, N_("no valid input method loaded.\n"));
-
-        if (! (cp->inpmod = load_IM(cp->modname, cp->objname, 
-		&(xcin_core.xcin_rc)))) {
-	    perr(XCINMSG_WARNING, 
-		N_("error loading IM: %s, ignore.\n"), cp->objname);
-	    free_cinput(cp);
-	}
-	else {
-	    strncpy(xcin_core.irc->default_im_name, cp->objname,
+    imodp = IM_get_next(0, &idx, &(xcin_core.xcin_rc));
+    if (imodp) {
+	strncpy(xcin_core.irc->default_im_name, imodp->objname,
 		sizeof(xcin_core.irc->default_im_name));
-	    xcin_core.im_focus = xcin_core.default_im = (inp_state_t)idx;
-	    break;
-	}
+	xcin_core.im_focus = xcin_core.default_im = (inp_state_t)idx;
     }
+    else
+	perr(XCINMSG_ERROR, N_("no valid input method loaded.\n"));
 }
     
 static void
 load_default_sinmd(void)
 {
     int idx;
-    cinput_t *cp;
+    imodule_t *imodp=NULL;
 /*
- *  Check the default show_cinput.
+ *  Check the default im_sinmd.
  */
     if (! strcmp(xcin_core.irc->default_im_sinmd_name, "DEFAULT"))
 	xcin_core.xcin_mode |= XCIN_SHOW_CINPUT;
     else {
-	if ((cp = search_cinput(xcin_core.irc->default_im_sinmd_name, 
-			xcin_core.xcin_rc.locale.encoding, &idx))) {
-	    if (cp->inpmod || 
-		(cp->inpmod = load_IM(cp->modname, cp->objname, 
-			&(xcin_core.xcin_rc)))) {
-		xcin_core.default_im_sinmd = (inp_state_t)idx;
-	        return;
-	    }
-	    else
-	        free_cinput(cp);
-	}
-	perr(XCINMSG_WARNING, N_("error loading IM: %s, ignore.\n"),
-		xcin_core.irc->default_im_sinmd_name);
-	xcin_core.xcin_mode |= XCIN_SHOW_CINPUT;
+	imodp = IM_search(xcin_core.irc->default_im_sinmd_name, 
+	    xcin_core.xcin_rc.locale.encoding, &idx, &(xcin_core.xcin_rc));
+	if (imodp)
+	    xcin_core.default_im_sinmd = (inp_state_t)idx;
+	else
+	    xcin_core.xcin_mode |= XCIN_SHOW_CINPUT;
     }
 }
 
@@ -583,7 +556,7 @@ void sighandler(int sig)
     xim_close();
     if ((xcin_core.xcin_mode & XCIN_RUN_EXITALL)) {
 	xim_terminate();
-	cinput_terminate();
+	IM_free_all();
 	exit(0);
     }
 }
@@ -602,10 +575,10 @@ main(int argc, char **argv)
     command_switch(argc, argv);
     read_core_config();
     read_core_config_locale();
-    read_core_config_cinput();
+    read_core_config_IM();
 
     load_syscin();
-    load_default_cinput();
+    load_default_IM();
     load_default_sinmd();
     qphrase_init(&(xcin_core.xcin_rc), xcin_core.irc->phrase_fn);
     gui_init(&xcin_core);

@@ -332,7 +332,7 @@ make_trigger_keys(XIMTriggerKeys *trigger_keys)
     impose_trigger_key(FKEY_CIRRIM, 3);
     n_keys += 4;
 
-    np = get_cinput_numlist();
+    np = IM_get_numlist();
     str[1] = '\0';
     while (*np != (numlist_t)-1) {
 	if (n_keys >= trigger_keys_size-1) {

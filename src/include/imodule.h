@@ -24,7 +24,7 @@
 
 #include "module.h"
 
-#define MAX_INP_ENTRY	12	/* Number of input method capability */
+#define MAX_IM_ENTRY	12	/* Number of input method capability */
 
 /*---------------------------------------------------------------------------
 
@@ -34,6 +34,7 @@
 
 typedef struct imodule_s  imodule_t;
 struct imodule_s {
+    void *modp;
     char *name;
     char *version;
     char *comments;
@@ -51,23 +52,17 @@ struct imodule_s {
     int (*terminate) (void *conf);
 };
 
-typedef struct {
-    char *modname;
-    char *objname;
-    imodule_t *inpmod;
-    int with_enc;
-} cinput_t;
-
 typedef char numlist_t;
 
-extern imodule_t *load_IM(char *modname, char *objenc, xcin_rc_t *xrc);
-extern cinput_t *get_cinput(int idx);
-extern cinput_t *get_cinput_next(int idx, int *idx_ret);
-extern cinput_t *get_cinput_prev(int idx, int *idx_ret);
-extern cinput_t *set_cinput(int idx,char *modname,char *objenc,char *encoding);
-extern cinput_t *search_cinput(char *objname, char *encoding, int *idx_ret);
-extern void free_cinput(cinput_t *cp);
-extern numlist_t *get_cinput_numlist(void);
-extern void cinput_terminate(void);
+extern int IM_register(int idx, char *modname, char *objname, char *encoding);
+extern int IM_check_registered(int idx);
+extern imodule_t *IM_get(int idx, xcin_rc_t *xrc);
+extern imodule_t *IM_get_next(int idx, int *idx_ret, xcin_rc_t *xrc);
+extern imodule_t *IM_get_prev(int idx, int *idx_ret, xcin_rc_t *xrc);
+extern numlist_t *IM_get_numlist(void);
+extern imodule_t *IM_search(char *objname, char *encoding, int *idx_ret, xcin_rc_t *xrc);
+extern void IM_free(int idx);
+extern void IM_free_all(void);
+extern int get_objenc(char *objname, objenc_t *objenc);
 
 #endif

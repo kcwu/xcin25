@@ -359,7 +359,7 @@ gui_loop(xccore_t *xccore)
     while(1) {
 	if ((xccore->xcin_mode & XCIN_RUN_EXITALL)) {
 	    xim_terminate();
-	    cinput_terminate();
+	    IM_free_all();
 	    exit(0);
 	}
         XNextEvent(gui->display, &event);

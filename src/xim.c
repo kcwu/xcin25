@@ -225,28 +225,16 @@ static int
 change_IM(IC *ic, int inp_num)
 {
     static int first_call;
-    cinput_t *cp;
     imodule_t *imodp=NULL;
     int reset_inpinfo, nextim_english=0;
     IM_Context_t *imc = ic->imc;
 /*
- *  Check if the module of the desired cinput has been loaded or not.
+ *  Check if the module of the desired IM has been loaded or not.
  */
-    if (inp_num >= 0 && inp_num < MAX_INP_ENTRY) {
-	if (! (cp = get_cinput(inp_num)))
-	    return False;
-
-        if (! cp->inpmod && ! (cp->inpmod = load_IM(cp->modname, 
-		cp->objname, &(xccore->xcin_rc)))) {
-	    perr(XCINMSG_WARNING, 
-		N_("cannot load IM: %s, ignore.\n"), cp->objname);
-	    free_cinput(cp);
-	    return False;
-	}
-	imodp = cp->inpmod;
-    }
-    else
+    if (inp_num < 0 || inp_num >= MAX_IM_ENTRY)
 	nextim_english = 1;
+    else if (! (imodp = IM_get(inp_num, &(xccore->xcin_rc))))
+	return False;
 
     if (first_call == 0) {
 	/* in order to let xim_init() take effect */
@@ -279,15 +267,8 @@ change_IM(IC *ic, int inp_num)
 /*
  *  Initialize the new IM for this IC.
  */
-    if (imodp) {
-        imc->imodp = imodp;
-        imc->inp_num = inp_num;
-    }
-    else {
-	cp = get_cinput(xccore->default_im);
-	imc->imodp = cp->inpmod;
-	imc->inp_num = xccore->default_im;
-    }
+    imc->imodp = imodp;
+    imc->inp_num = inp_num;
     if ((xccore->xcin_mode & XCIN_IM_FOCUS)) {
 	xccore->xcin_mode |= XCIN_RUN_IM_FOCUS;
 	xccore->im_focus = imc->inp_num;
@@ -301,8 +282,7 @@ change_IM(IC *ic, int inp_num)
 	imc->sinp_num = imc->inp_num;
     }
     else {
-	cp = get_cinput(xccore->default_im_sinmd);
-	imc->s_imodp = cp->inpmod;
+	imc->s_imodp = IM_get(xccore->default_im_sinmd, &(xccore->xcin_rc));
 	imc->sinp_num = xccore->default_im_sinmd;
     }
     return True;
@@ -315,10 +295,10 @@ circular_change_IM(IC *ic, int direction)
     inp_state_t inpnum;
 
     inpnum = ((ic->imc->inp_state & IM_CINPUT)) ? 
-			ic->imc->inp_num : MAX_INP_ENTRY;
-    for (i=0, j=inpnum+direction; i<MAX_INP_ENTRY+1; i++, j+=direction) {
-	if (j > MAX_INP_ENTRY || j < 0)
-	    j += ( (j < 0) ? (MAX_INP_ENTRY+1) : -(MAX_INP_ENTRY+1) );
+			ic->imc->inp_num : MAX_IM_ENTRY;
+    for (i=0, j=inpnum+direction; i<MAX_IM_ENTRY+1; i++, j+=direction) {
+	if (j > MAX_IM_ENTRY || j < 0)
+	    j += ( (j < 0) ? (MAX_IM_ENTRY+1) : -(MAX_IM_ENTRY+1) );
 	if (change_IM(ic, j))
 	    return;
     }
@@ -374,25 +354,17 @@ static void
 change_simd(IC *ic)
 {
     int idx;
-    cinput_t *cp;
+    imodule_t *imodp;
     IM_Context_t *imc = ic->imc;
 
     do {
-	if ((cp = get_cinput_next(imc->sinp_num+1, &idx))) {
-	    if (! cp->inpmod && ! (cp->inpmod = load_IM(cp->modname, 
-			cp->objname, &(xccore->xcin_rc)))) {
-		perr(XCINMSG_WARNING, 
-			N_("cannot load IM: %s, ignore.\n"), cp->objname);
-		free_cinput(cp);
-	    }
-	    else
-	        break;
-	}
+	if ((imodp = IM_get_next(imc->sinp_num+1, &idx, &(xccore->xcin_rc))))
+	    break;
     } while (idx != imc->sinp_num);
 
     if (idx != imc->sinp_num) {
         imc->sinp_num = idx;
-        imc->s_imodp = cp->inpmod;
+        imc->s_imodp = imodp;
         xccore->default_im_sinmd = (inp_state_t)idx;
 	xccore->gui.winchange |= WIN_CHANGE_IM;
         xccore->xcin_mode &= ~XCIN_SHOW_CINPUT;
