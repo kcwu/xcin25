@@ -83,8 +83,8 @@ print_usage(void)
 	"          -d: set X Display.\n"
 	"          -x: register XIM server name to Xlib.\n"
 	"          -r: set user specified rcfile.\n"
-	"	   -U: set user xcin data directory.\n"
-	"	   -D: set default xcin data directory.\n"
+	"          -U: set user xcin data directory.\n"
+	"          -D: set default xcin data directory.\n"
 	"          -v: set debug level to n.\n\n"));
     perr(XCINMSG_EMPTY,
      N_("Useful environment variables:  $XCIN_RCFILE.\n\n"));

@@ -132,7 +132,8 @@ load_module(char *modname, int mod_type, char *version,
 
     if (err) {
 #ifdef	HAVE_DLOPEN
-        perr(XCINMSG_IWARNING, "dlerror: %s\n", dlerror());
+	char *errstr = dlerror();
+        perr(XCINMSG_IWARNING, "dlerror: %s\n", errstr);
 #endif
 	ld = NULL;
     }

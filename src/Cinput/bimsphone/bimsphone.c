@@ -45,12 +45,17 @@ static int keymaplist[N_KEYMAPS]={
 
 int load_pinyin_data(FILE *fp, char *truefn, phone_conf_t *cf);
 char *pho2pinyinw(ipinyin_t *pf, char *phostring);
-int pinyin_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
+int pinyin_keystroke(DB_pool cdp, phone_conf_t *cf, phone_iccf_t *iccf,
 		inpinfo_t *inpinfo, keyinfo_t *keyinfo, int *rval2);
 
-#ifdef DEBUG
-extern int verbose;
-#endif
+enum {
+    BIMSP_ZHUYIN,
+    BIMSP_PINYIN,
+    BIMSP_LAST
+};
+
+static DB_pool *dp[BIMSP_LAST], cdp;
+static int bimsp_zhuyin_noauto;
 
 /*----------------------------------------------------------------------------
 
@@ -133,6 +138,22 @@ phone_resource(phone_conf_t *cf, xcin_rc_t *xrc, char *objname,
 	set_data(&(cf->mode), RC_IFLAG, value, BIMSPH_MODE_AUTOUPCH, 0);
 }
 
+static void
+clean_exit(phone_conf_t *cf)
+{
+    if (cf->inp_cname)
+	free(cf->inp_cname);
+    if (cf->inp_ename)
+	free(cf->inp_ename);
+    if (cf->pinyin) {
+	if (cf->pinyin->pinpho)
+	    free(cf->pinyin->pinpho);
+	if (cf->pinyin->phopin)
+	    free(cf->pinyin->phopin);
+	free(cf->pinyin);
+    }
+}
+
 static int
 phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 {
@@ -155,6 +176,7 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
     }
     else
 	cfd.inp_cname = (char *)strdup("ª`­µ");
+
     phone_resource(&cfd, xrc, "bimsphone_default", ftsi, fyin, fpinyin);
     phone_resource(&cfd, xrc, objenc.objloadname, ftsi, fyin, fpinyin);
 
@@ -174,9 +196,36 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 	if ((cfd.mode & BIMSPH_MODE_AUTOSEL))
 	    cf->mode |= BIMSPH_MODE_AUTOSEL;
 	cf->keymap = cfd.keymap;
+
+	if (cf->mode & BIMSPH_MODE_AUTOSEL) {
+	    if (dp[BIMSP_ZHUYIN] != NULL) {
+		perr(XCINMSG_WARNING,
+		    _("bimsphone: zhuyin mode with auto-selection is"
+		      "already loaded, ignore.\n"));
+		clean_exit(cf);
+		return False;
+	    }
+	}
+	else {
+	    if (bimsp_zhuyin_noauto != 0) {
+		perr(XCINMSG_WARNING,
+		    _("bimsphone: zhuyin mode without auto-selection is"
+		      "already loaded, ignore.\n"));
+		clean_exit(cf);
+		return False;
+	    }
+	    bimsp_zhuyin_noauto = 1;
+	}
     }
     else {
 	char truefn[256], sub_path[256];
+
+	if (dp[BIMSP_PINYIN] != NULL) {
+	    perr(XCINMSG_WARNING,
+		_("bimsphone: pinyin mode is already loaded, ignore.\n"));
+	    clean_exit(cf);
+	    return False;
+	}
 
 	/* For PinYin mode, always fix to Auto-Selection. */
 	cf->mode |= BIMSPH_MODE_AUTOSEL;
@@ -192,10 +241,13 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 	    perr(XCINMSG_WARNING, 
 		N_("bimsphone: %s: cannot open pinyin data file: %s.\n"),
 		objenc.objloadname, fpinyin);
+	    clean_exit(cf);
 	    return False;
 	}
-	if (load_pinyin_data(fp, truefn, cf) == False)
+	if (load_pinyin_data(fp, truefn, cf) == False) {
+	    clean_exit(cf);
 	    return False;
+	}
     }
 /*
  *  Further auto-selection setup.
@@ -208,12 +260,14 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 	    perr(XCINMSG_WARNING, 
 		N_("bimsphone: %s: cannot open data file: %s\n"),
 		objenc.objloadname, ftsi);
+	    clean_exit(cf);
 	    return False;
 	}
 	if (check_datafile(fyin, sub_path, xrc, yin_fname, 256) == False) {
 	    perr(XCINMSG_WARNING, 
 		N_("bimsphone: %s: cannot open data file: %s\n"),
 		objenc.objloadname, fyin);
+	    clean_exit(cf);
 	    return False;
 	}
 
@@ -226,10 +280,15 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 	else
 	    cf->n_selphr = 0;
 
-	if (bimsInit(tsi_fname, yin_fname) == 0)
-	    return True;
-	else
+	if ((cdp = bimsInit(tsi_fname, yin_fname)) == NULL) {
+	    clean_exit(cf);
 	    return False;
+	}
+	if (cf->mode & BIMSPH_MODE_PINYIN)
+	    dp[BIMSP_PINYIN] = cdp;
+	else
+	    dp[BIMSP_ZHUYIN] = cdp;
+	return True;
     }
     else {
 	if ((cfd.mode & BIMSPH_MODE_AUTOUPCH))
@@ -269,7 +328,7 @@ commit_string(inpinfo_t *inpinfo, phone_iccf_t *iccf, int n_chars)
 
     if (str)
 	free(str);
-    str = (char *)bimsFetchText(inpinfo->imid, n_chars);
+    str = (char *)bimsFetchText(cdp, inpinfo->imid, n_chars);
     inpinfo->cch = str;
 }
 
@@ -608,10 +667,18 @@ phone_xim_init(void *conf, inpinfo_t *inpinfo)
 
     inpinfo->inp_cname = cf->inp_cname;
     inpinfo->inp_ename = cf->inp_ename;
-    if (! (cf->mode & BIMSPH_MODE_PINYIN))
+    if (! (cf->mode & BIMSPH_MODE_PINYIN)) {
 	inpinfo->area3_len = N_MAX_KEYCODE_ZUYIN * 2 + 2;
-    else
+	cdp = dp[BIMSP_ZHUYIN];
+if (cdp == NULL)
+perr(XCINMSG_IERROR, "cdp zhuyin null!!\n");
+    }
+    else {
 	inpinfo->area3_len = N_MAX_KEYCODE_PINYIN + 2;
+	cdp = dp[BIMSP_PINYIN];
+if (cdp == NULL)
+perr(XCINMSG_IERROR, "cdp pinyin null!!\n");
+    }
 
     inpinfo->keystroke_len = 0;
     inpinfo->s_keystroke = iccf->s_keystroke;
@@ -701,7 +768,7 @@ enter_selection(phone_conf_t *cf, unsigned int bimsid)
 	int state = bimsQueryState(bimsid);
 
 	if (state != BC_STATE_SELECTION_TSI) {
-	    if (bimsToggleTsiSelection(bimsid) == 0)
+	    if (bimsToggleTsiSelection(cdp, bimsid) == 0)
 		return 1;
         }
 	if (bimsToggleZhiSelection(bimsid) == 0)
@@ -787,12 +854,12 @@ bims_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
 	inpinfo->mcch[0].wch = (wchar_t)0;
 	if ((cf->mode & BIMSPH_MODE_PINYIN)) {
 	    int rval2;
-	    rval = pinyin_keystroke(cf, iccf, inpinfo, keyinfo, &rval2);
+	    rval = pinyin_keystroke(cdp, cf, iccf, inpinfo, keyinfo, &rval2);
 	    if (rval2 != IMKEY_IGNORE)
 		return rval2;
 	}
 	else
-	    rval = bimsFeedKey(inpinfo->imid, keysym);
+	    rval = bimsFeedKey(cdp, inpinfo->imid, keysym);
 
         switch (rval) {
         case BC_VAL_COMMIT:
@@ -816,7 +883,7 @@ bims_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
         rval = determine_selection(cf, inpinfo, iccf, state, keysym, NULL);
         if (rval != -1) {
 	    if (rval > 0)
-		bimsPindownByNumber(inpinfo->imid, rval-1);
+		bimsPindownByNumber(cdp, inpinfo->imid, rval-1);
 	    inpinfo->n_mcch = 0;
 	    inpinfo->mcch[0].wch = (wchar_t)0;
 	    bimsToggleEditing(inpinfo->imid);
@@ -857,7 +924,7 @@ simple_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
 
 	inpinfo->n_mcch = 0;
 	inpinfo->mcch[0].wch = (wchar_t)0;
-	rval = bimsFeedKey(inpinfo->imid, keyinfo->keysym);
+	rval = bimsFeedKey(cdp, inpinfo->imid, keyinfo->keysym);
 	if (bimsToggleZhiSelection(inpinfo->imid) == BC_VAL_IGNORE) {
 	    switch (rval) {
 	    case BC_VAL_COMMIT:
@@ -921,7 +988,7 @@ simple_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
 	    if (rval > 0) {
 		int sel_num = (rval-1) % cf->n_selkey;
 		if (keyinfo->keysym != sel[cf->selmap]->keysym[sel_num]) {
-		    bimsFeedKey(inpinfo->imid, keyinfo->keysym);
+		    bimsFeedKey(cdp, inpinfo->imid, keyinfo->keysym);
 		    editing_status(cf, inpinfo, iccf);
 		}
 		return IMKEY_COMMIT;
@@ -954,34 +1021,27 @@ phone_show_keystroke(void *conf, simdinfo_t *simdinfo)
     static wch_t keystroke_list[5];
     phone_conf_t *cf = (phone_conf_t *)conf;
     char *str, *str1;
-    struct TsiDB **tdb;
-    struct TsiYinDB **ydb;
     struct TsiInfo zhi;
-    int n_db, i;
 
-    if (simdinfo->cch_publish.wch && (n_db=bimsReturnDBPool(&tdb, &ydb)) > 0) {
+    if (simdinfo->cch_publish.wch) {
 	keystroke_list[0].wch = (wchar_t)0;
 	zhi.tsi = simdinfo->cch_publish.s;
 	zhi.refcount = 0;
 	zhi.yinnum = 0;
 	zhi.yindata = NULL;
-	for (i=0; i<n_db; i++) {
-	    if (tabeTsiInfoLookupZhiYin(tdb[i], &zhi) == 0) {
-    		simdinfo->s_keystroke = keystroke_list;
-		str = (char *)tabeYinToZuYinSymbolSequence(zhi.yindata[0]);
+        str = (char *)bimstabeZhiToYin(cdp, &zhi);
+	if (str != NULL) {
+    	    simdinfo->s_keystroke = keystroke_list;
+	    str = (char *)tabeYinToZuYinSymbolSequence(zhi.yindata[0]);
 
-		if ((cf->mode & BIMSPH_MODE_PINYIN))
-		    str1 = pho2pinyinw(cf->pinyin, str);
-		else
-		    str1 = str;
-		if (str1)
-		    big5_mbs_wcs(keystroke_list, str1, 5);
-		free(str);
-		break;
-	    }
+	    if ((cf->mode & BIMSPH_MODE_PINYIN))
+		str1 = pho2pinyinw(cf->pinyin, str);
+	    else
+		str1 = str;
+	    if (str1)
+		big5_mbs_wcs(keystroke_list, str1, 5);
+	    free(str);
 	}
-	free(tdb);
-	free(ydb);
 	if (keystroke_list[0].wch != (wchar_t)0)
 	    return True;
     }

@@ -39,7 +39,10 @@ xcin-2.5.3-pre1:  2001/
 
 10. Merge new xcintool/, xcintool.h.
     Redesign IM module loading archetecture.
-    Porting for libtabe changes.
+
+11. Porting for libtabe changes:
+	bimsphone now contain "DB_pool *dp[BIMSP_LAST]" for pinyin and
+	zhuyin modes. Each mode can only be loaded once.
 
 
 xcin-2.5.2.3:  2001/03/12

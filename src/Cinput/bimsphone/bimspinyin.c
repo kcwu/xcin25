@@ -30,7 +30,6 @@
 #include "bimsphone.h"
 #include "bims.h"
 
-
 int
 load_pinyin_data(FILE *fp, char *truefn, phone_conf_t *cf)
 {
@@ -255,7 +254,7 @@ pho2pinyinw(ipinyin_t *pf, char *phostring)
 
 
 int
-pinyin_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
+pinyin_keystroke(DB_pool cdp, phone_conf_t *cf, phone_iccf_t *iccf,
 		 inpinfo_t *inpinfo, keyinfo_t *keyinfo, int *rval2)
 {
     char ch;
@@ -272,7 +271,7 @@ pinyin_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
 	    return BC_VAL_IGNORE;
 	}
 	else
-	    return bimsFeedKey(inpinfo->imid, keyinfo->keysym);
+	    return bimsFeedKey(cdp, inpinfo->imid, keyinfo->keysym);
     }
     else if (keyinfo->keysym == XK_Escape) {
 	inpinfo->keystroke_len = 0;
@@ -282,7 +281,7 @@ pinyin_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
 	return BC_VAL_IGNORE;
     }
     else if (keyinfo->keystr_len != 1)
-	return bimsFeedKey(inpinfo->imid, keyinfo->keysym);;
+	return bimsFeedKey(cdp, inpinfo->imid, keyinfo->keysym);;
 
     ch = keyinfo->keystr[0];
     if (ch == ' ')
@@ -308,13 +307,13 @@ pinyin_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
 	    len = strlen(phonemap);
 	    for (i=0; i<len && i<3; i++) {
 		keysym = keysym_ascii(phonemap[i]);
-		bimsFeedKey(inpinfo->imid, keysym);
+		bimsFeedKey(cdp, inpinfo->imid, keysym);
 	    }
 	    if (tone_idx == 0)
-		rval = bimsFeedKey(inpinfo->imid, XK_space);
+		rval = bimsFeedKey(cdp, inpinfo->imid, XK_space);
 	    else {
 		keysym = keysym_ascii(zozy_ekey[36+tone_idx]);
-		rval = bimsFeedKey(inpinfo->imid, keysym);
+		rval = bimsFeedKey(cdp, inpinfo->imid, keysym);
 	    }
 
 	    zhuyin_str = (char *)bimsQueryZuYinString(inpinfo->imid);
