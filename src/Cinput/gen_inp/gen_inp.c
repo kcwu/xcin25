@@ -1235,8 +1235,10 @@ guess_next(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf,
     histend = iccf->commithistory+HINTSZ;
     tsi.tsi = (ZhiStr)tsi_str;
     for(match=TSISZ-1; match>=1; match--) {	/* Max Tsi len = TSISZ-1 */
-	strncpy(tsi_str, histend-match*2, 1024);
-	if (HINTSZ < match || tsi_str[0]=='\0')
+	if (match*2+1 > 1024 || match > HINTSZ)
+	    continue;
+	strncpy(tsi_str, histend-match*2, match*2+1);
+	if (tsi_str[0]=='\0')
 	    continue;
 
 	for (guess=TSISZ-1-match; guess>=1; guess--) {
