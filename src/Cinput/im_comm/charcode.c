@@ -137,6 +137,15 @@ mbtowch(wch_t *wch, const char *wch_str, int nbytes)
 }
 
 int
+wchlen(const wch_t *wch)
+{
+    int len=0;
+    while(len<WCH_SIZE && wch->s[len]!='\0')
+	len++;
+    return len;
+}
+
+int
 match_encoding(wch_t *wch)
 {
     int enc_schema;

@@ -266,6 +266,7 @@ extern void codes2keys(unsigned int *klist, int n_klist, char *keystroke, int ke
 extern void ccode_init(charcode_t *ccp, int n);
 extern void ccode_info(ccode_info_t *info);
 extern int mbtowch(wch_t *wch, const char *wch_str, int nbytes);
+extern int wchlen(const wch_t *wch);
 extern int match_encoding(wch_t *wch);
 extern int ccode_to_idx(wch_t *wch);
 extern int ccode_to_char(int idx, unsigned char *mbs, int mbs_size);
