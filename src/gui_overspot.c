@@ -241,6 +241,10 @@ overspot_win_adjust(gui_t *gui, winlist_t *win,
 */
     XTranslateCoordinates(gui->display, w, gui->root,
 		0, 0, &(oc[idx]->pos_x), &(oc[idx]->pos_y), &junkwin);
+    if (errstatus != 0) {
+	errstatus = 0;
+	return;
+    }
     ic_rec->ic_value_update &= ~CLIENT_SETIC_PRE_SPOTLOC;
     ic_rec->ic_value_update &= ~CLIENT_SETIC_PRE_AREA;
     new_x = oc[idx]->pos_x +

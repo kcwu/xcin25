@@ -62,6 +62,10 @@
  *
  *   6. If any interfaces have been removed since the last public release,
  *      then set AGE to 0.
+ *
+ *   7. Everytime when AGE is set to 0, one may need to decrease the
+ *      CURRENT to CURRENT-AGE+1 (the value before it is set to zero).
+ *				-- suggested by T.H.Hsieh --
  */
 
 #define CURRENT_VER	0
