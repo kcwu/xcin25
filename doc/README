@@ -324,12 +324,13 @@ D. 套件內容:
         c. cj.tab:		倉頡輸入法表格。
 	d. phone.tab:		注音輸入法表格。
         e. pinyin.tab:		拼音輸入法表格。
-        f. simplex.tab:		簡易輸入法表格。
-	g. bims_pinyin.tab:	bimspinyin 的注音、拼音對照表。
-	h. jyutping.tab:	粵語拼音輸入法表格。
-	i. jyutping0.tab:	粵語拼音輸入法表格 (沒有音調)。
-	j. telecode.tab:	電報碼輸入法表格。
-	k. default.phr:		qphrase 資料檔。
+        f. pinyin0.tab:		拼音輸入法表格 (沒有音調)。
+        g. simplex.tab:		簡易輸入法表格。
+	h. bims_pinyin.tab:	bimspinyin 的注音、拼音對照表。
+	i. jyutping.tab:	粵語拼音輸入法表格。
+	j. jyutping0.tab:	粵語拼音輸入法表格 (沒有音調)。
+	k. telecode.tab:	電報碼輸入法表格。
+	l. default.phr:		qphrase 資料檔。
 
    $(BIG5HKSCS)/:
 	a. sys.tab:		big5hkscs 內碼資訊檔。

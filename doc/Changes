@@ -14,6 +14,9 @@ xcin-2.5.3-pre1:  2001/
 4. Add telecode.cin.
    Thanks to <ljm@ljm.qqjane.net>
 
+5. Add pinyin0.cin in big5 encoding.
+   Converted from pinyin.cin in gb encoding via zh-autoconvert_0.3.13-1.
+
 
 xcin-2.5.2.3:  2001/03/12
 ------------------------------

@@ -4,6 +4,7 @@ big5 = 		sys.tab.$(BIG5ENC) \
 		cj.tab.$(BIG5ENC) \
 		phone.tab.$(BIG5ENC) \
 		pinyin.tab.$(BIG5ENC) \
+		pinyin0.tab.$(BIG5ENC) \
 		simplex.tab.$(BIG5ENC) \
 		jyutping.tab.$(BIG5ENC) \
 		jyutping0.tab.$(BIG5ENC) \
@@ -36,6 +37,9 @@ phone.tab.$(BIG5ENC): phone.cin sys.tab.$(BIG5ENC)
 pinyin.tab.$(BIG5ENC): pinyin.cin sys.tab.$(BIG5ENC)
 	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ pinyin.cin
+pinyin0.tab.$(BIG5ENC): pinyin0.cin sys.tab.$(BIG5ENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ pinyin0.cin
 simplex.tab.$(BIG5ENC): simplex.cin sys.tab.$(BIG5ENC)
 	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ simplex.cin

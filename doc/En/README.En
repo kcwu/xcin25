@@ -268,12 +268,13 @@ D. Contents of the package:
 	c. cj.tab:		ChangJei input method.
 	d. phone.tab:		ZhuYin input method.
 	e. pinyin.tab:		PinYin input method.
-	f. simplex.tab:		Simple input method.
-	g. bims_pinyin.tab:	The ZhuYin-PinYin mapping table for bimspinyin.
-	h. jyutping.tab:	Jyut-Pinyin input method.
-	i. jyutping0.tab:	Jyut-Pinyin input method (no tone).
-	j. telecode.tab:	Telephony code input method.
-	k. default.phr:		Data for qphrase.
+	f. pinyin0.tab:		PinYin input method (no tone).
+	g. simplex.tab:		Simple input method.
+	h. bims_pinyin.tab:	The ZhuYin-PinYin mapping table for bimspinyin.
+	i. jyutping.tab:	Jyut-Pinyin input method.
+	j. jyutping0.tab:	Jyut-Pinyin input method (no tone).
+	k. telecode.tab:	Telephony code input method.
+	l. default.phr:		Data for qphrase.
 
    $(BIG5HKSCS)/:
 	a. sys.tab:		big5hkscs encoding information.
