@@ -83,6 +83,20 @@ static LISP myread(void)
 
 ---------------------------------------------------------------------------*/
 
+
+/* _______________ source comment from <pyeh@phys.ntu.edu.tw> _______________ 
+ *
+ *  read_resource
+ * 
+ *  Read the given xcinrc file into the Scheme engine siod.
+ *  Exit xcin if any error occurred.
+ *
+ *  Input:
+ *       char * rcfile      The xcinrc filename.
+ *
+ *  Return:
+ *       void
+ */
 static void
 read_resource(char *rcfile)
 {
@@ -107,6 +121,26 @@ read_resource(char *rcfile)
 
 static char isep=' ';
 
+
+
+/* ____________________________________________________________________________ 
+ *
+ *  get_resource
+ * 
+ *  Get the value of a resource defined in xcinrc file.
+ *
+ *  Input:
+ *       xcin_rc_t * xrc    the main xcinrc structure
+ *       char ** cmd_list   array of command strings (multi-level is allowed)
+ *       int v_size         max length of value
+ *       int n_cmd_list     depth of command level
+ *
+ *  Output:
+ *       char * value       the value of the resource
+ *
+ *  Return:
+ *       int                True if resource is found, False otherwise
+ */
 int
 get_resource(xcin_rc_t *xrc, char **cmd_list,
 	     char *value, int v_size, int n_cmd_list)
@@ -178,6 +212,26 @@ get_resource(xcin_rc_t *xrc, char **cmd_list,
     }
 }
 
+
+/* ____________________________________________________________________________ 
+ *
+ *  get_resource_long
+ * 
+ *  Get the value of a resource defined in xcinrc file, with seprator specified.
+ *
+ *  Input:
+ *       xcin_rc_t * xrc    the main xcinrc structure
+ *       char ** cmd_list   array of command strings (multi-level is allowed)
+ *       int v_size         max length of value
+ *       int n_cmd_list     depth of command level
+ *       int sep            separator
+ *
+ *  Output:
+ *       char * value       the value of the resource
+ *
+ *  Return:
+ *       int                True if resource is found, False otherwise
+ */
 int
 get_resource_long(xcin_rc_t *xrc, char **cmd_list,
 		  char *value, int v_size, int n_cmd_list, int sep)
@@ -221,6 +275,24 @@ find_rcfile(char *rcfn, int rcfn_size, char *user_home, char *user_dir)
     perr(XCINMSG_ERROR, _("rcfile not found.\n"));
 }
 
+
+
+/* ____________________________________________________________________________ 
+ *
+ *  read_xcinrc
+ * 
+ *  Find and read an xcinrc file into memory.
+ *  Exit xcin if any error occurred.
+ *
+ *  Input:
+ *       char * rcfile      A hint of xcinrc filename.
+ *
+ *  Output:
+ *       xcin_rc_t * xrc    The xcinrc structure in memory.
+ *
+ *  Return:
+ *       void
+ */
 void
 read_xcinrc(xcin_rc_t *xrc, char *rcfile)
 /*

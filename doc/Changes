@@ -47,6 +47,9 @@ xcin-2.5.3-pre3:  2001/12
 
 16. Add memory leak patch from James Su <suzhe@gnuchina.org>.
 
+17. Add comments of source codes from <pyeh@phys.ntu.edu.tw>.
+
+
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
 1. Fix memory leakage problem in IMdkit: i18nIc.c.
