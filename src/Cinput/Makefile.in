@@ -17,5 +17,5 @@ distclean:
 	@for d in $(SUBSYS) $(OTHERS); do ( cd $$d; $(MAKE) distclean ); done
 	rm -f Makefile
 
-install:
-	@for d in $(SUBSYS) $(OTHERS); do ( cd $$d; $(MAKE) install ); done
+install: all
+	@for d in $(SUBSYS); do ( cd $$d; $(MAKE) install ); done
