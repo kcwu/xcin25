@@ -453,13 +453,13 @@ dnl-----------------------------------------------------------------------
 dnl Checks for Berkeley DB2/3/4 library.
 dnl-----------------------------------------------------------------------
 LIBS="$OLD_LIBS"
-for f in db4 db3 db; do
+for f in db db3 db4; do
     AC_CHECK_LIB($f, db_create,
 	[ found=y; test_db_lib="$test_db_lib -l$f" ], [ found=n ])
     test $found = y && break
 done
 if test $found = n; then
-    for f in db2 db; do
+    for f in db db2; do
 	AC_CHECK_LIB($f, db_open,
 	    [ found=y; test_db_lib="$test_db_lib -l$f" ], [ found=n ])
 	test $found = y && break
@@ -557,17 +557,24 @@ if test x$x_libraries = x; then
 else
     x_libraries="-L$x_libraries -lX11 -lXext -rpath $x_libraries"
 fi
-if test x$with_db_lib = x; then
-    with_db_lib="$test_db_lib"
-else
-    with_db_lib="$test_db_lib -rpath $with_db_lib"
-fi
-if test x$with_tabe_lib = x; then
-    with_bims_lib="$test_bims_lib"
-    with_tabe_lib="$test_tabe_lib"
-else
-    with_bims_lib="$test_bims_lib -rpath $with_tabe_lib"
-    with_tabe_lib="$test_tabe_lib -rpath $with_tabe_lib"
+if test x$without_tabe = x; then
+    if test x$with_db_lib = x; then
+	with_db_lib="$test_db_lib"
+    else
+	with_db_lib="$test_db_lib -rpath $with_db_lib"
+    fi
+    if test x$with_tabe_lib = x; then
+	with_tabe_lib="$test_tabe_lib"
+    else
+	with_tabe_lib="$test_tabe_lib -rpath $with_tabe_lib"
+    fi
+    if test x$without_bims = x; then
+	if test x$with_tabe_lib = x; then
+	    with_bims_lib="$test_bims_lib"
+	else
+	    with_bims_lib="$test_bims_lib -rpath $with_tabe_lib"
+	fi
+    fi
 fi
 if test x$with_intl_lib = x; then
     with_intl_lib="$test_intl_lib"
