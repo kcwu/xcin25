@@ -354,6 +354,8 @@ gen_inp_xim_end(void *conf, inpinfo_t *inpinfo)
 
     if (iccf->n_mcch_list)
 	free(iccf->mcch_list);
+    if (iccf->n_mkey_list)
+	free(iccf->mkey_list);
     free(inpinfo->iccf);
     free(inpinfo->s_keystroke);
     free(inpinfo->suggest_skeystroke);
@@ -398,6 +400,10 @@ reset_keystroke(inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
     if (iccf->n_mcch_list) {
 	free(iccf->mcch_list);
 	iccf->n_mcch_list = 0;
+    }
+    if (iccf->n_mkey_list) {
+	free(iccf->mkey_list);
+	iccf->n_mkey_list = 0;
     }
 }
 
@@ -453,7 +459,7 @@ bsearch_char(icode_t *ic1, icode_t *ic2,
 }
 
 static int
-pick_cch_wild(gen_inp_conf_t *cf, int *head, byte_t dir, char *keystroke, 
+pick_cch_wild(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, int *head, byte_t dir,
 		wch_t *mcch, unsigned int mcch_size, unsigned int *n_mcch)
 {
     unsigned int i, size, klist[2];
@@ -466,15 +472,20 @@ pick_cch_wild(gen_inp_conf_t *cf, int *head, byte_t dir, char *keystroke,
     n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
     dir = (dir > 0) ? (byte_t)1 : (byte_t)-1;
 
+    if (iccf->n_mkey_list)
+	free(iccf->mkey_list);
+    iccf->mkey_list = malloc(mcch_size * sizeof(int));
+
     for (i=0, idx = *head; idx>=0 && idx<size && i<=mcch_size; idx+=dir) {
 	klist[0] = cf->ic1[idx];
 	if (cf->header.icode_mode == ICODE_MODE2)
 	    klist[1] = cf->ic2[idx];
 	codes2keys(klist, n_klist, ks, ks_size);
 
-	if (strcmp_wild(keystroke, ks) == 0) {
+	if (strcmp_wild(iccf->keystroke, ks) == 0) {
 	    if (i < mcch_size) {
 		ccode_to_char(cf->icidx[idx], mcch[i].s, WCH_SIZE);
+		iccf->mkey_list[i] = idx;
 		*head = idx;
 		i ++;
 	    }
@@ -484,6 +495,7 @@ pick_cch_wild(gen_inp_conf_t *cf, int *head, byte_t dir, char *keystroke,
     }
     free(ks);
     *n_mcch = i;
+    iccf->n_mkey_list = i;
     return r;
 }
 
@@ -516,14 +528,13 @@ match_keystroke_wild(gen_inp_conf_t *cf,
     keys2codes(icode, 2, iccf->keystroke);
     idx = bsearch_char(cf->ic1, cf->ic2, icode[0], icode[1], 
 			cf->header.n_icode, md, 1);
-    iccf->bsearch_idx = idx;
     *s = tmpch;
     iccf->mcch_hidx = idx;		/* refer to head index of cf->icidx */
 
     /*
      *  Pick up the remaining chars;
      */
-    if (pick_cch_wild(cf, &idx, 1, iccf->keystroke,
+    if (pick_cch_wild(cf, iccf, &idx, 1,
 	    inpinfo->mcch, inpinfo->n_selkey, &n_mcch) == 0)
         inpinfo->mcch_pgstate = MCCH_ONEPG;
     else 
@@ -553,7 +564,6 @@ match_keystroke_normal(gen_inp_conf_t *cf,
     if ((idx = bsearch_char(cf->ic1, cf->ic2, 
 		icode[0], icode[1], size, md, 0)) == -1)
 	return 0;
-    iccf->bsearch_idx = idx;
 
     /*
      *  Search for all the chars with the same keystroke.
@@ -616,30 +626,27 @@ match_keystroke(gen_inp_conf_t *cf, inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 
 static void
 get_correct_skeystroke(gen_inp_conf_t *cf,
-		inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, wch_t *cch)
+		inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, int idx, wch_t *cch)
 {
-    unsigned int i, j, size, klist[2];
+    unsigned int i=0, j, klist[2];
     int n_klist, ks_size, keycode;
-    wch_t ch;
     char *ks;
 
-    size = cf->header.n_icode;
+    if (idx < iccf->n_mkey_list)
+	i = iccf->mkey_list[idx];
+    else {
+	inpinfo->suggest_skeystroke[0].wch = (wchar_t)0;
+	return;
+    }
     ks_size = cf->header.n_max_keystroke + 1;
     ks = malloc(ks_size);
     n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
 
-    for (i=iccf->bsearch_idx; i>=0 && i<size; i++) {
-	ccode_to_char(cf->icidx[i], ch.s, WCH_SIZE);
-	if (ch.wch == cch->wch) {
-	    klist[0] = cf->ic1[i];
-	    if (cf->header.icode_mode == ICODE_MODE2)
-		klist[1] = cf->ic2[i];
-	    codes2keys(klist, n_klist, ks, ks_size);
-	    if (strcmp_wild(iccf->keystroke, ks) == 0)
-		break;
-	}
-    }
-    if (ch.wch == cch->wch) {
+    klist[0] = cf->ic1[i];
+    if (cf->header.icode_mode == ICODE_MODE2)
+	klist[1] = cf->ic2[i];
+    codes2keys(klist, n_klist, ks, ks_size);
+    if (strcmp_wild(iccf->keystroke, ks) == 0) {
 	for (j=0; ks[j] != '\0'; j++) {
 	    keycode = key2code(ks[j]);
 	    inpinfo->suggest_skeystroke[j].wch =
@@ -654,7 +661,7 @@ get_correct_skeystroke(gen_inp_conf_t *cf,
 
 static void
 commit_char(gen_inp_conf_t *cf,
-	    inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, wch_t *cch)
+	    inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, int idx, wch_t *cch)
 {
     static char cch_s[WCH_SIZE+1];
     char *s=NULL;
@@ -670,7 +677,7 @@ commit_char(gen_inp_conf_t *cf,
 	    inpinfo->suggest_skeystroke[i].wch = inpinfo->s_keystroke[i].wch;
     }
     else
-	get_correct_skeystroke(cf, inpinfo, iccf, cch);
+	get_correct_skeystroke(cf, inpinfo, iccf, idx, cch);
     inpinfo->keystroke_len = 0;
     inpinfo->s_keystroke[0].wch = (wchar_t)0;
     inpinfo->n_mcch = 0;
@@ -690,7 +697,7 @@ commit_keystroke(gen_inp_conf_t *cf, inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 	int i;
 	for (i=0; i<cf->n_kremap; i++) {
 	    if (strcmp(iccf->keystroke, cf->kremap[i].keystroke) == 0) {
-		commit_char(cf, inpinfo, iccf, &(cf->kremap[i].wch));
+		commit_char(cf, inpinfo, iccf, i, &(cf->kremap[i].wch));
 		return IMKEY_COMMIT;
 	    }
 	}
@@ -698,7 +705,7 @@ commit_keystroke(gen_inp_conf_t *cf, inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 
     if (match_keystroke(cf, inpinfo, iccf)) {
         if (inpinfo->n_mcch == 1) {
-            commit_char(cf, inpinfo, iccf, inpinfo->mcch);
+            commit_char(cf, inpinfo, iccf, 1, inpinfo->mcch);
             return IMKEY_COMMIT;
         }
         else {
@@ -740,7 +747,7 @@ mcch_choosech(gen_inp_conf_t *cf,
             return 0;
     }
     wch.wch = inpinfo->mcch[idx].wch;
-    commit_char(cf, inpinfo, iccf, &wch);
+    commit_char(cf, inpinfo, iccf, idx, &wch);
     reset_keystroke(inpinfo, iccf);
 
     return 1;
@@ -793,7 +800,7 @@ fillpage(gen_inp_conf_t *cf, inpinfo_t *inpinfo,
 	    if (inpinfo->mcch_pgstate == MCCH_BEGIN ||
 	        inpinfo->mcch_pgstate == MCCH_MIDDLE) {
 		hidx = eidx = iccf->mcch_eidx + 1;
-        	r = pick_cch_wild(cf, &eidx, 1, iccf->keystroke, inpinfo->mcch, 
+        	r = pick_cch_wild(cf, iccf, &eidx, 1, inpinfo->mcch, 
 			inpinfo->n_selkey, (unsigned int *)&n_mcch);
 	    }
 	    else
@@ -803,7 +810,7 @@ fillpage(gen_inp_conf_t *cf, inpinfo_t *inpinfo,
 	    if (inpinfo->mcch_pgstate == MCCH_END ||
 	        inpinfo->mcch_pgstate == MCCH_MIDDLE) {
 		hidx = eidx = iccf->mcch_hidx - 1;
-        	r = pick_cch_wild(cf, &hidx, -1, iccf->keystroke,
+        	r = pick_cch_wild(cf, iccf, &hidx, -1,
 	        	mcch, inpinfo->n_selkey, (unsigned int *)&n_mcch);
 	        for (i=0, j=n_mcch-1; j>=0; i++, j--)
 		    inpinfo->mcch[i].wch = mcch[j].wch;

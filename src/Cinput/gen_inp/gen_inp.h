@@ -72,8 +72,8 @@ typedef struct {
     char keystroke[INP_CODE_LENGTH+1];
     unsigned short mode;
     wch_t *mcch_list;
-    unsigned int n_mcch_list, mcch_hidx, mcch_eidx;
-    unsigned int bsearch_idx;
+    int *mkey_list;
+    unsigned int n_mcch_list, mcch_hidx, mcch_eidx, n_mkey_list;
 } gen_inp_iccf_t;
 
 
