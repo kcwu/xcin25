@@ -15,7 +15,7 @@ LC_MESG = zh_TW
 all: $(BIN)
 
 $(BIN): $(OBJ)
-	$(CC) -o $@ $(OBJ) $(LIB)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJ) $(LIB)
 include .depend
 
 depend:
