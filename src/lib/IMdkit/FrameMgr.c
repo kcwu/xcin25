@@ -245,6 +245,17 @@ void FrameMgrInitWithData (FrameMgr fm,
 
 void FrameMgrFree (FrameMgr fm)
 {
+    FrameIter p, cur;
+
+    p = fm->iters;
+    cur = p;
+
+    while (p)
+    {
+	p = p->next;
+	Xfree (cur);
+	cur = p;
+    }
     FrameInstFree (fm->fi);
     Xfree (fm);
 }

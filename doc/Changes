@@ -45,6 +45,8 @@ xcin-2.5.3-pre3:  2001/12
 
 15. Toggle off default setting BEEP_DUPCHAR of some modules.
 
+16. Add memory leak patch from James Su <suzhe@gnuchina.org>.
+
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
 1. Fix memory leakage problem in IMdkit: i18nIc.c.

@@ -619,6 +619,10 @@ static void GetIMValueFromName (Xi18n i18n_core,
             /*endfor*/
             memmove (buf, data, total_size);
             FrameMgrFree (fm);
+
+	    /* ADDED BY SUZHE */
+	    free (data);
+	    /* ADDED BY SUZHE */
         }
         /*endif*/
     }
