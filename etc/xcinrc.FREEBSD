@@ -2,6 +2,7 @@
 ;  Xcin resource file for FreeBSD.
 ;
 ;  By T.H.Hsieh.
+;
 
 ;
 ;  Directories.
@@ -37,10 +38,11 @@
 ;
 ;  XIM Input Style Adjustments.
 ;
-(define INPUT_STYLE		'(Root OverTheSpot))
+(define INPUT_STYLE		'(Root OverTheSpot OnTheSpot))
 (define OVERSPOT_USE_USRCOLOR	"YES")
 (define OVERSPOT_USE_USRFONTSET "YES")
 (define OVERSPOT_WINDOW_ONLY	"NO")
+(define ONSPOT_PREEDIT_MODE     "REVERSE")
 
 ;
 ;  Special Trigger Keys.
@@ -241,5 +243,6 @@
 	  (MODULE		zh_hex)
 	  (INP_CNAME_big5	"0xa4ba+0xbd58")
 	  (INP_CNAME_euc	"0xc4da+0xc2eb")
+	  (INP_CNAME_utf-8	"0xe585a7+0xe7a2bc")
 	  (BEEP_WRONG		YES)))
 

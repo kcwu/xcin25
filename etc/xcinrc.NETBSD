@@ -2,6 +2,7 @@
 ;  Xcin resource file for NetBSD system.
 ;
 ;  By T.H.Hsieh.
+;
 
 ;
 ;  Directories.
@@ -32,15 +33,16 @@
 (define DIFF_BEEP		"YES")
 (define KEYBOARD_TRANSLATE	"NO")
 
+(define LOCALE  '(zh_TW.Big5 zh_CN.eucCN))
+
 ;
 ;  XIM Input Style Adjustments.
 ;
-(define INPUT_STYLE		'(Root OverTheSpot))
+(define INPUT_STYLE		'(Root OverTheSpot OnTheSpot))
 (define OVERSPOT_USE_USRCOLOR	"YES")
 (define OVERSPOT_USE_USRFONTSET "YES")
 (define OVERSPOT_WINDOW_ONLY	"NO")
-
-(define LOCALE  '(zh_TW.Big5 zh_CN.eucCN))
+(define ONSPOT_PREEDIT_MODE     "REVERSE")
 
 ;
 ;  Special Trigger Keys.

@@ -29,6 +29,7 @@
 (define SINGLE_IM_CONTEXT	"NO")
 (define IM_FOCUS_ON		"NO")
 (define KEEP_POSITION_ON	"NO")
+(define DISABLE_WM_CTRL		"NO")
 (define DIFF_BEEP		"YES")
 (define KEYBOARD_TRANSLATE	"NO")
 

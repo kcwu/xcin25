@@ -38,10 +38,11 @@
 ;
 ;  XIM Input Style Adjustments.
 ;
-(define INPUT_STYLE		'(Root OverTheSpot))
+(define INPUT_STYLE		'(Root OverTheSpot OnTheSpot))
 (define OVERSPOT_USE_USRCOLOR	"YES")
 (define OVERSPOT_USE_USRFONTSET "YES")
 (define OVERSPOT_WINDOW_ONLY	"NO")
+(define ONSPOT_PREEDIT_MODE     "REVERSE")
 
 ;
 ;  Special Trigger Keys.
@@ -182,7 +183,7 @@
 (define jtcj_gb@hp15CN
 	'((SETKEY		3)))
 
-(define phonegb2@gb2312
+(define phonegb2@hp15CN
 	'((SETKEY		4)
 	  (END_KEY		YES)))
 
@@ -230,7 +231,7 @@
 (define array30@hkbig5
 	'((SETKEY		8)
 	  (DISABLE_SEL_LIST	"w")
-	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba")))
+	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba;")))
 
 (define jyutping0@hkbig5
 	'((SETKEY		9)
@@ -257,8 +258,8 @@
 	'((SETKEY		0)
 	  (MODULE		zh_hex)
 	  (INP_CNAME_big5	"0xa4ba+0xbd58")
-	  (INP_CNAME_big5hkscs	"0xa4ba+0xbd58")
-	  (INP_CNAME_gb2312	"0xc4da+0xc2eb")
+	  (INP_CNAME_hkbig5	"0xa4ba+0xbd58")
+	  (INP_CNAME_hp15CN	"0xc4da+0xc2eb")
 	  (INP_CNAME_gbk	"0xc4da+0xc2eb")
 	  (BEEP_WRONG		YES)))
 

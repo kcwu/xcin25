@@ -2,6 +2,7 @@
 ;  Xcin resource file for UNKNOWN system.
 ;
 ;  By T.H.Hsieh.
+;
 
 ;
 ;  Directories.
@@ -32,15 +33,16 @@
 (define DIFF_BEEP		"YES")
 (define KEYBOARD_TRANSLATE	"NO")
 
+(define LOCALE  '(zh_TW.Big5 zh_CN.EUC))
+
 ;
 ;  XIM Input Style Adjustments.
 ;
-(define INPUT_STYLE		'(Root OverTheSpot))
+(define INPUT_STYLE		'(Root OverTheSpot OnTheSpot))
 (define OVERSPOT_USE_USRCOLOR	"YES")
 (define OVERSPOT_USE_USRFONTSET "YES")
 (define OVERSPOT_WINDOW_ONLY	"NO")
-
-(define LOCALE  '(zh_TW.Big5 zh_CN.EUC))
+(define ONSPOT_PREEDIT_MODE     "REVERSE")
 
 ;
 ;  Special Trigger Keys.
@@ -115,7 +117,7 @@
     (DEFAULT_IM_SINMD	"DEFAULT")
     (PHRASE		"default.phr")
     (CINPUT		(cj simplex phone bimspinyin bimsphone jyutping
-			 array30 zh_hex))
+			 array30 jyutping0 zh_hex))
     (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-big5-0")
     (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-16-*-big5-0")))
 ;
@@ -135,18 +137,21 @@
 	'((SETKEY		4)
 	  (END_KEY		YES)))
 
-(define bimspinyin@big5
-	'((SETKEY		5)
-	  (MODULE		"bimsphone")))
-
 (define bimsphone@big5
 	'((SETKEY		6)
+	  (MODULE		"bimsphone")))
+
+(define bimspinyin@big5
+	'((SETKEY		7)
 	  (MODULE		"bimsphone")))
 
 (define array30@big5
 	'((SETKEY		8)
 	  (DISABLE_SEL_LIST	"w")
 	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba;")))
+
+(define jyutping0@big5
+	'((SETKEY		9)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -172,6 +177,10 @@
 
 (define jtcj_gb@euc
 	'((SETKEY		3)))
+
+(define phonegb2@euc
+	'((SETKEY		4)
+	  (END_KEY		YES)))
 
 (define wubizixing@euc
 	'((SETKEY		5)))
