@@ -43,6 +43,7 @@
 #define XCIN_MAINWIN2		0x00000400	/* start mainwin 2 */
 #define XCIN_DIFF_BEEP		0x00000800	/* enable different beep */
 #define XCIN_OVERSPOT_WINONLY	0x00001000	/* only start OverSpot window */
+#define XCIN_KEYBOARD_TRANS	0x00002000	/* translation keyboard layout*/
 #define XCIN_RUN_IM_FOCUS       0x00100000      /* run time IM focus on */
 #define XCIN_RUN_2B_FOCUS	0x00200000	/* run time 2B focus on */
 #define XCIN_RUN_EXIT		0x00400000	/* xcin is now exiting */

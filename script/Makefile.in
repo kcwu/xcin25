@@ -48,6 +48,6 @@ distclean:
 	( cd cin; $(MAKE) distclean )
 	( cd etc; $(MAKE) distclean )
 	( cd po;  $(MAKE) distclean )
-	rm -f config.cache config.h config.log config.status Makefile ${links}
-	rm -rf $(sys_inc)/Ximd
+	rm -f config.cache config.h config.log config.status libtool Makefile
+	rm -rf $(sys_inc)/Ximd ${links}
 

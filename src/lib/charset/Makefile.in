@@ -1,0 +1,40 @@
+CC          = @CC@
+CFLAGS      = @CFLAGS@
+CPPFLAGS    = @CPPFLAGS@
+DEFS        = @DEFS@
+@SET_MAKE@
+
+extra_inc   = @with_extra_inc@
+extra_lib   = @with_extra_lib@
+srcdir      = @srcdir@
+top_srcdir  = @top_srcdir@
+LIBTOOL     = $(top_srcdir)/libtool
+
+xcininc = -I$(top_srcdir)/src/include
+INC     = $(xcininc) $(extra_inc)
+
+SRC  =	enclist.c charset.c utf8.c big5.c big5hkscs.c gb2312.c gbk.c
+OBJ  =	$(SRC:.c=.lo)
+
+all: $(OBJ)
+
+enclist.lo: enclist.c charset.h ../../include/xcintool.h ../../include/config.h
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ enclist.c
+charset.lo: charset.c charset.h ../../include/xcintool.h ../../include/config.h
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ charset.c
+utf8.lo: utf8.c charset.h ../../include/xcintool.h ../../include/config.h
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ utf8.c
+big5.lo: big5.c charset.h ../../include/xcintool.h ../../include/config.h
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ big5.c
+big5hkscs.lo: big5hkscs.c charset.h ../../include/xcintool.h ../../include/config.h
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ big5hkscs.c
+gb2312.lo: gb2312.c charset.h ../../include/xcintool.h ../../include/config.h
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ gb2312.c
+gbk.lo: gbk.c charset.h ../../include/xcintool.h ../../include/config.h
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ gbk.c
+
+.PHONY: clean distclean
+clean:
+	rm -f $(OBJ) *.o core
+distclean: clean
+	rm -rf Makefile .depend .libs

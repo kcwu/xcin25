@@ -1,26 +1,68 @@
 #
 # This is Makefile.in for autoconf configure program.
 #
-LN_S = @LN_S@
+CC		= @CC@
+CFLAGS		= @CFLAGS@
+CPPFLAGS	= @CPPFLAGS@
+DEFS		= @DEFS@
+LDFLAGS		= @LDFLAGS@
+LN_S            = @LN_S@
+RANLIB          = @RANLIB@
+INSTALL         = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA    = @INSTALL_DATA@
 @SET_MAKE@
 
-SUBSYS = xcintool siod IMdkit
+program_prefix	= @program_prefix@
+exec_prefix	= @exec_prefix@
+srcdir		= @srcdir@
+top_srcdir	= @top_srcdir@
+libdir		= @libdir@
+libpath 	= ${program_prefix}${libdir}
+LIBTOOL		= $(top_srcdir)/libtool
 
-all: subsys
+# LXCIN_OBJ	= xcintool/*.lo charset/*.lo siod/*.lo
+LXCIN_OBJ	= xcintool/*.lo siod/*.lo
+LXCIN_NAME	= libxcin.la
+SUBSYS		= $(LXCIN_NAME) build_IMdkit
 
-subsys:
-	@for i in $(SUBSYS); do ( cd $$i && $(MAKE) ); done
+RELEASE_VER	= @RELEASE_VER@
+CURRENT_VER	= @CURRENT_VER@
+REVISION_VER	= @REVISION_VER@
+AGE_VER		= @AGE_VER@
 
-.PHONY: install clean distclean depend
+.PHONY: install clean distclean depend make_subdir $(LXCIN_NAME) build_IMdkit
+all: $(SUBSYS)
+
+$(LXCIN_NAME): make_subdir
+	( OBJS=`ls $(LXCIN_OBJ)`; \
+	  $(LIBTOOL) --mode=link $(CC) -o $@ $$OBJS -rpath $(libdir) \
+		-version-info $(CURRENT_VER):$(REVISION_VER):$(AGE_VER) )
+
+make_subdir:
+	( cd xcintool; $(MAKE) )
+#	( cd charset; $(MAKE) )
+	( cd siod; $(MAKE) )
+	
+build_IMdkit:
+	( cd IMdkit; $(MAKE) )
+
+install: all install
+
 install:
-
-depend:
-	for d in $(SUBSYS); do ( cd $$d; touch .depend; $(MAKE) depend ); done
+	if [ ! -d ${libdir} ]; then ${INSTALL} -d ${libpath}; fi
+	$(LIBTOOL) --mode=install $(INSTALL_DATA) ${LXCIN_NAME} ${libpath}
 
 clean:
-	for d in $(SUBSYS); do ( cd $$d; $(MAKE) clean ); done
-	rm -f lib*.a *.so* core
+	( cd xcintool; $(MAKE) clean )
+	( cd charset; $(MAKE) clean )
+	( cd siod; $(MAKE) clean )
+	( cd IMdkit; $(MAKE) clean )
+	rm -rf lib*.a lib*.la core
 
 distclean:
-	for d in $(SUBSYS); do ( cd $$d; $(MAKE) distclean ); done
-	rm -f lib*.a *.so* core Makefile
+	( cd xcintool; $(MAKE) distclean )
+	( cd charset; $(MAKE) distclean )
+	( cd siod; $(MAKE) distclean )
+	( cd IMdkit; $(MAKE) distclean )
+	rm -rf lib*.a lib*.la core Makefile .libs

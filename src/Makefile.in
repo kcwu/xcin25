@@ -9,20 +9,17 @@ LDFLAGS         = @LDFLAGS@
 INSTALL	        = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
-ld_shareexe 	= @ld_shareexe@
 @SET_MAKE@
 
 x_includes      = @x_includes@
 x_libraries     = @x_libraries@
-extra_inc	= @extra_include@
-extra_lib	= @extra_library@
-dl_lib		= @dl_library@
-locale_lib      = @locale_lib@
-intl_lib	= @intl_library@
-tabe_lib	= @tabe_library@
-db_lib		= @db_library@
-linktabe	= @linktabe@
-# socket_lib	= @socket_lib@
+extra_inc	= @with_extra_inc@
+extra_lib	= @with_extra_lib@
+dl_lib		= @with_dl_lib@
+locale_lib      = @with_locale_lib@
+intl_lib	= @with_intl_lib@
+db_lib		= @with_db_lib@
+socket_lib	= @with_socket_lib@
 
 #
 # XCIN installation path.
@@ -32,11 +29,12 @@ srcdir		= @srcdir@
 top_srcdir	= @top_srcdir@
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
+LIBTOOL		= $(top_srcdir)/libtool
 
 xcin_binp	= $(program_prefix)@bindir@
-xcin_libp	= $(program_prefix)@xcin_dir@
-xcin_datap	= ${xcin_libp}/tab
-xcin_rcp	= $(program_prefix)@xcin_rcdir@
+xcin_libp	= $(program_prefix)@with_xcin_dir@
+xcin_datap	= $(xcin_libp)/tab
+xcin_rcp	= $(program_prefix)@with_xcin_rcdir@
 xcin_manp	= $(program_prefix)@mandir@
 
 #
@@ -45,28 +43,25 @@ xcin_manp	= $(program_prefix)@mandir@
 xcininc = -I${top_srcdir}/src/include
 xcinlib = -L${top_srcdir}/src/lib
 
-INC = ${x_includes} ${xcininc} ${extra_inc}
-LIB = ${extra_lib} ${xcinlib} -lXimd -lim_comm -lxcintool -lsiod ${linktabe} \
-      ${x_libraries} ${locale_lib} ${dl_lib} ${intl_lib} -lm
+INC	= ${x_includes} ${xcininc} ${extra_inc}
+LIB	= ${extra_lib} ${xcinlib} -lXimd -lim_comm lib/libxcin.la \
+	  ${x_libraries} ${locale_lib} ${dl_lib} ${intl_lib} -lm
 
-BIN    = xcin
-SRC    = xcin_main.c module.c gui.c xim.c xim_IC.c fkey.c gui_main.c \
-	 gui_menusel.c gui_overspot.c gui_main2.c
-OBJ    = xcin_main.o module.o gui.o xim.o xim_IC.o fkey.o gui_main.o \
-	 gui_menusel.o gui_overspot.o gui_main2.o
-SUBSYS = lib Cinput
-UTIL   = util
+BIN	= xcin
+SRC	= xcin_main.c module.c gui.c xim.c xim_IC.c fkey.c gui_main.c \
+	  gui_menusel.c gui_overspot.c gui_main2.c
+OBJ	= $(SRC:.c=.o)
+SUBSYS	= lib Cinput
+UTIL	= util
 
 #
 # Compiling Rules.
 #
-.c.o:
-	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ $<
-
 all: $(BIN) util_bin
 
 $(BIN): subsys $(OBJ)
-	$(CC) $(ld_shareexe) -o $@ $(OBJ) $(LIB)
+	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) -export-dynamic \
+		$(INC) $(DEFS) -o $(BIN) $(OBJ) $(LIB)
 
 subsys:
 	@for d in ${SUBSYS}; do ( cd $$d; ${MAKE} ); done
@@ -76,48 +71,57 @@ util_bin:
 
 fkey.o: fkey.c include/xcintool.h include/config.h include/fkey.h \
   include/imodule.h include/module.h include/Ximd/IMdkit.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ fkey.c
 
 gui.o: gui.c include/gui.h include/xcintool.h \
   include/xcin.h include/IC.h include/Ximd/IMdkit.h include/Ximd/Xi18n.h \
   include/Ximd/XimProto.h include/imodule.h include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui.c
 
 gui_main.o: gui_main.c include/constant.h include/config.h include/xcintool.h \
   include/xcin.h include/gui.h include/IC.h include/Ximd/IMdkit.h \
   include/Ximd/Xi18n.h include/Ximd/XimProto.h include/imodule.h \
   include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_main.c
 
 gui_main2.o: gui_main2.c include/constant.h include/config.h include/xcintool.h\
   include/xcin.h include/gui.h include/IC.h include/Ximd/IMdkit.h \
   include/Ximd/Xi18n.h include/Ximd/XimProto.h include/imodule.h \
   include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_main2.c
 
 gui_menusel.o: gui_menusel.c include/constant.h include/config.h \
   include/xcintool.h include/gui.h include/IC.h include/Ximd/IMdkit.h \
   include/Ximd/Xi18n.h include/Ximd/XimProto.h include/imodule.h \
   include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_menusel.c
 
 gui_overspot.o: gui_overspot.c include/constant.h include/config.h \
   include/xcintool.h include/xcin.h include/gui.h include/IC.h \
   include/Ximd/IMdkit.h include/Ximd/Xi18n.h include/Ximd/XimProto.h \
   include/imodule.h include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_overspot.c
 
 module.o: module.c include/config.h include/xcintool.h include/imodule.h \
   include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ module.c
 
 xcin_main.o: xcin_main.c include/constant.h include/config.h \
   include/xcintool.h include/xcin.h include/gui.h include/IC.h \
   include/Ximd/IMdkit.h include/Ximd/Xi18n.h include/Ximd/XimProto.h \
   include/imodule.h include/module.h include/fkey.h include/syscin.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ xcin_main.c
 
 xim.o: xim.c include/Ximd/IMdkit.h include/Ximd/Xi18n.h \
   include/Ximd/XimProto.h include/config.h include/constant.h \
   include/xcintool.h include/fkey.h include/imodule.h include/module.h \
   include/xcin.h include/gui.h include/IC.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ xim.c
 
 xim_IC.o: xim_IC.c include/Ximd/IMdkit.h include/Ximd/Xi18n.h \
   include/Ximd/XimProto.h include/config.h include/xcintool.h include/xcin.h \
   include/gui.h include/IC.h include/imodule.h include/module.h
-
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ xim_IC.c
 
 
 .PHONY: install clean distclean subsys
@@ -130,7 +134,7 @@ install_path:
 	if [ ! -d "$(xcin_datap)" ]; then $(INSTALL) -d $(xcin_datap); fi
 
 install_xcin: $(BIN)
-	$(INSTALL_PROGRAM) $(BIN) $(xcin_binp)
+	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $(BIN) $(xcin_binp)
 
 install_subsys:
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} install ); done
@@ -140,6 +144,6 @@ clean:
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} clean ); done
 distclean:
 	rm -f $(OBJ) $(BIN) core
-	rm -f Makefile .depend
+	rm -rf Makefile .depend .libs
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} distclean ); done
 

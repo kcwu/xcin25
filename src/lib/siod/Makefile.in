@@ -1,5 +1,5 @@
 #
-#  $Id: Makefile.in,v 1.1 2000/12/09 01:57:11 thhsieh Exp $
+#  $Id: Makefile.in,v 1.2 2001/08/21 06:07:22 thhsieh Exp $
 #
 CC          = @CC@
 CFLAGS      = @CFLAGS@
@@ -13,33 +13,24 @@ srcdir      = @srcdir@
 top_srcdir  = @top_srcdir@
 prefix      = @prefix@
 exec_prefix = @exec_prefix@
+LIBTOOL     = $(top_srcdir)/libtool
 
-xcininc = -I$(top_srcdir)/src/include
-TARGET  = libsiod.a
+xcininc	    = -I$(top_srcdir)/src/include
+SRC         = slib.c sliba.c 
+OBJ         = $(SRC:.c=.lo)
+INC         = $(xcininc)
 
-SRC =	slib.c sliba.c 
-INC =   $(xcininc)
-OBJ = 	slib.o sliba.o
+all: $(OBJ)
 
+slib.lo: slib.c siod.h siodp.h ../../include/config.h
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(INC) $(DEFS) -c -o $@ slib.c
 
-.c.o:
-	$(CC) $(CFLAGS) $(INC) $(DEFS) -c -o $@ $<
-
-all: $(TARGET)
-
-$(TARGET): $(OBJ)
-	ar -rc $@ $(OBJ)
-	if [ -n "$(RANLIB)" ]; then $(RANLIB) $(TARGET); fi
-	rm -f ../$(TARGET)
-	( cd ..; $(LN_S) siod/$(TARGET) . )
-
-slib.o: slib.c siod.h siodp.h ../../include/config.h
-
-sliba.o: sliba.c siod.h siodp.h
+sliba.lo: sliba.c siod.h siodp.h
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(INC) $(DEFS) -c -o $@ sliba.c
 
 
 .PHONY: clean distclean
 clean:
-	rm -f $(OBJ) $(TARGET) core
+	rm -f $(OBJ) *.o core
 distclean: clean
-	rm -f Makefile .depend
+	rm -rf Makefile .depend .libs

@@ -20,6 +20,13 @@ xcin-2.5.3-pre1:  2001/
 6. Add keyboard layout translation patch.
    Thanks to dupre <dupre@lifo.univ-orleans.fr>.
 
+7. Add libtool for portable shared lib building.
+   a. remove configure option: --disable-bimsphone, --disable-shared
+      (we always need libtabe/Berkeley db & shared lib platform.)
+   b. add Berkeley DB3 auto-detecting.
+   c. add a shared lib: libxcin: xcintool+siod+charset.
+   d. need GNU gettext >= 0.10.37.
+
 
 xcin-2.5.2.3:  2001/03/12
 ------------------------------

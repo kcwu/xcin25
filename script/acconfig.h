@@ -20,11 +20,26 @@
 /* Define for building the dynamic loadable IM-modules */
 #undef USE_DYNAMIC
 
-/* Define for dlopen() function */
+/* Define for dlopen() function (ELF) */
 #undef HAVE_DLOPEN
+
+/* Define for shl_load() function (HP-UX) */
+#undef HAVE_SHL_LOAD
 
 /* Define for gettext() function */
 #undef HAVE_GETTEXT
+
+/* Define for iconv() function */
+#undef HAVE_ICONV
+
+/* Define for XCIN_DEFAULT_DIR variable */
+#undef XCIN_DEFAULT_DIR
+
+/* Define for XCIN_DEFAULT_RCDIR variable */
+#undef XCIN_DEFAULT_RCDIR
+
+/* Define for XCIN_MSGLOCAT variable */
+#undef XCIN_MSGLOCAT
 
 /* Define for Linux system */
 #undef LINUX

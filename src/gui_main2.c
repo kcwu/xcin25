@@ -264,12 +264,14 @@ x_set_geometry(gui_t *gui, winlist_t *win, char *value, Bool *negx, Bool *negy)
 static void 
 set_wm_property(gui_t *gui, winlist_t *win, Bool negative_x, Bool negative_y)
 {
-    char *win_name = XCIN_VERSION, *icon_name = "xcin";
+    char *win_name, *icon_name = "xcin";
     XTextProperty windowName, iconName;
     XSizeHints size_hints;
     XWMHints wm_hints;
     XClassHint class_hints;
 
+    win_name = malloc(128);
+    snprintf(win_name, 128, "xcin %s", XCIN_VERSION);
     if (! XStringListToTextProperty(&win_name, 1, &windowName) ||
     	! XStringListToTextProperty(&icon_name, 1, &iconName))
 	perr(XCINMSG_IERROR, N_("string text property error.\n"));
@@ -305,6 +307,7 @@ set_wm_property(gui_t *gui, winlist_t *win, Bool negative_x, Bool negative_y)
 		&wm_hints, &class_hints);
     XFree(windowName.value);
     XFree(iconName.value);
+    free(win_name);
 }
 
 static void 

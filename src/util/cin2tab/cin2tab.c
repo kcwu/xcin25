@@ -214,7 +214,7 @@ print_usage(void)
     int i;
 
     perr(XCINMSG_EMPTY, 
-	 N_("CIN2TAB version (%s)\n"
+	 N_("CIN2TAB version (xcin %s)\n"
 	    "Usage: cin2tab [-v] [-r <rcfile>] [-s <sysfn>] [-l <encoding>]\n"
 	    "               [-o output] <cin_fn>\n\n"
 	    "Supported module header names:\n\t"),

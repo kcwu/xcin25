@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-08-28 22:07+0800\n"
+"POT-Creation-Date: 2001-04-29 12:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,151 +14,147 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: ENCODING\n"
 
-#: testprog.c:120
+#: testprog.c:128
 msgid "destroy_callback_func\n"
 msgstr ""
 
-#: testprog.c:139
+#: testprog.c:147
 msgid "Cannot open the connection to XIM server.\n"
 msgstr ""
 
-#: testprog.c:167
+#: testprog.c:175
 msgid "input method doesn't support any style\n"
 msgstr ""
 
-#: testprog.c:175
+#: testprog.c:183
 #, c-format
 msgid "XIM server support input_style = %s\n"
 msgstr ""
 
-#: testprog.c:181
+#: testprog.c:189
 #, c-format
 msgid "XIM server support unknown input_style = %x\n"
 msgstr ""
 
-#: testprog.c:192 testprog.c:205
+#: testprog.c:200 testprog.c:213
 #, c-format
 msgid "Use input style: %s\n"
 msgstr ""
 
-#: testprog.c:197
+#: testprog.c:205
 #, c-format
 msgid "The input style %s is not supported.\n"
 msgstr ""
 
-#: testprog.c:234
+#: testprog.c:242
 msgid "Cannot create XIC.\n"
 msgstr ""
 
-#: testprog.c:249
+#: testprog.c:257
 msgid "XSetLocaleModifiers false.\n"
 msgstr ""
 
-#: testprog.c:254
+#: testprog.c:262
 msgid "XRegisterIMInstantiateCallback false.\n"
 msgstr ""
 
-#: testprog.c:289
+#: testprog.c:297
 msgid "Unprinted char.\n"
 msgstr ""
 
-#: testprog.c:293
+#: testprog.c:301
 #, c-format
 msgid "Get char: %s\n"
 msgstr ""
 
-#: testprog.c:399
+#: testprog.c:407
 msgid "string text property error.\n"
 msgstr ""
 
-#: testprog.c:441
+#: testprog.c:454
 msgid "Error: you should specify the fontset.\n"
 msgstr ""
 
-#: testprog.c:470
+#: testprog.c:465
 msgid "Error: cannot create fontset.\n"
 msgstr ""
 
-#: testprog.c:475
-msgid "Error: fonts not consistant to fontset.\n"
-msgstr ""
-
-#: testprog.c:494
+#: testprog.c:485
 msgid "XOpenDisplay false.\n"
 msgstr ""
 
-#: testprog.c:516
+#: testprog.c:507
 msgid "This is the Xi18n test program."
 msgstr ""
 
-#: testprog.c:553
+#: testprog.c:550
 msgid "setlocale LC_CTYPE false.\n"
 msgstr ""
 
-#: testprog.c:558
+#: testprog.c:574
 msgid "setlocale LC_MESSAGES false.\n"
 msgstr ""
 
-#: testprog.c:567
+#: testprog.c:583
 msgid "XSupportsLocale false.\n"
 msgstr ""
 
-#: testprog.c:577
+#: testprog.c:593
 msgid "Use \"-h\" option to see help.\n"
 msgstr ""
 
-#: testprog.c:581
+#: testprog.c:597
 msgid "Usage: testprog -fontset <fontset> -im <im_name> -pt <im_style>\n"
 msgstr ""
 
-#: testprog.c:582
+#: testprog.c:598
 msgid "Example:\n"
 msgstr ""
 
-#: testprog.c:583
+#: testprog.c:599
 msgid "  export LC_CTYPE=<locale name>.\n"
 msgstr ""
 
-#: testprog.c:584
+#: testprog.c:600
 msgid "  export LC_MESSAGES=<locale name>.\n"
 msgstr ""
 
-#: testprog.c:585
+#: testprog.c:601
 msgid "  export XMODIFIERS=\"@im=<im_name>\".\n"
 msgstr ""
 
-#: testprog.c:586
+#: testprog.c:602
 msgid "  zh_TW.Big5 fontset: \"-*-big5-0,-*-iso8859-1\".\n"
 msgstr ""
 
-#: testprog.c:587
+#: testprog.c:603
 msgid "  zh_CN.GB2312 fontset: \"-*-gb2312.1980-0,-*-iso8859-1\".\n"
 msgstr ""
 
-#: testprog.c:617
+#: testprog.c:633
 msgid "Event: Expose.\n"
 msgstr ""
 
-#: testprog.c:622
+#: testprog.c:638
 msgid "Event: GraphicsExpose.\n"
 msgstr ""
 
-#: testprog.c:627
+#: testprog.c:643
 msgid "Event: ConfigureNotify.\n"
 msgstr ""
 
-#: testprog.c:633
+#: testprog.c:649
 msgid "Event: FocusIN.\n"
 msgstr ""
 
-#: testprog.c:641
+#: testprog.c:657
 msgid "Event: FocusOut.\n"
 msgstr ""
 
-#: testprog.c:648
+#: testprog.c:664
 msgid "Event: KeyPress.\n"
 msgstr ""
 
-#: testprog.c:657
+#: testprog.c:673
 msgid "Event: ClientMessage.\n"
 msgstr ""

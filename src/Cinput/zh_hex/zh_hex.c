@@ -315,11 +315,7 @@ static char zh_hex_comments[] = N_(
 	"This module is free software, as part of xcin system.\n");
 
 
-#ifdef USE_DYNAMIC
 module_t module_ptr = {
-#else
-module_t zh_hex_module_ptr = {
-#endif
     "zh_hex",					/* name */
     MODULE_VERSION,				/* version */
     zh_hex_comments,				/* comments */

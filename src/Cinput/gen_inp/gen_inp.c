@@ -1170,11 +1170,7 @@ static char gen_inp_comments[] = N_(
 	"your Chinese input requirements.\n\n"
 	"This module is free software, as part of xcin system.\n");
 
-#ifdef USE_DYNAMIC
 module_t module_ptr = {
-#else
-module_t gen_inp_module_ptr = {
-#endif
     "gen_inp",					/* name */
     MODULE_VERSION,				/* version */
     gen_inp_comments,				/* comments */

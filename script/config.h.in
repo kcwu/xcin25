@@ -1,4 +1,4 @@
-/* script/config.h.in.  Generated automatically from configure.in by autoheader.  */
+/* script/config.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
 
 /* Define to empty if the keyword does not work.  */
 #undef const
@@ -14,6 +14,9 @@
 
 /* Define if your system has a working fnmatch function.  */
 #undef HAVE_FNMATCH
+
+/* Define if the `long double' type works.  */
+#undef HAVE_LONG_DOUBLE
 
 /* Define if your struct stat has st_blksize.  */
 #undef HAVE_ST_BLKSIZE
@@ -69,11 +72,26 @@
 /* Define if the debug option is enabled. */
 #undef DEBUG
 
-/* Define for building the dynamic loadable IM-modules */
-#undef USE_DYNAMIC
+/* Define for dlopen() function (ELF) */
+#undef HAVE_DLOPEN
+
+/* Define for shl_load() function (HP-UX) */
+#undef HAVE_SHL_LOAD
 
 /* Define for gettext() function */
 #undef HAVE_GETTEXT
+
+/* Define for iconv() function */
+#undef HAVE_ICONV
+
+/* Define for XCIN_DEFAULT_DIR variable */
+#undef XCIN_DEFAULT_DIR
+
+/* Define for XCIN_DEFAULT_RCDIR variable */
+#undef XCIN_DEFAULT_RCDIR
+
+/* Define for XCIN_MSGLOCAT variable */
+#undef XCIN_MSGLOCAT
 
 /* Define for Linux system */
 #undef LINUX
@@ -93,6 +111,24 @@
 /* Define for HP-UX system */
 #undef HPUX
 
+/* The number of bytes in a char.  */
+#undef SIZEOF_CHAR
+
+/* The number of bytes in a int.  */
+#undef SIZEOF_INT
+
+/* The number of bytes in a int *.  */
+#undef SIZEOF_INT_P
+
+/* The number of bytes in a long.  */
+#undef SIZEOF_LONG
+
+/* The number of bytes in a long long.  */
+#undef SIZEOF_LONG_LONG
+
+/* The number of bytes in a short.  */
+#undef SIZEOF_SHORT
+
 /* Define if you have the dlopen function.  */
 #undef HAVE_DLOPEN
 
@@ -104,6 +140,9 @@
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
+
+/* Define if you have the iconv function.  */
+#undef HAVE_ICONV
 
 /* Define if you have the mkdir function.  */
 #undef HAVE_MKDIR
@@ -123,8 +162,14 @@
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
 
+/* Define if you have the shl_load function.  */
+#undef HAVE_SHL_LOAD
+
 /* Define if you have the snprintf function.  */
 #undef HAVE_SNPRINTF
+
+/* Define if you have the socket function.  */
+#undef HAVE_SOCKET
 
 /* Define if you have the strcspn function.  */
 #undef HAVE_STRCSPN
@@ -150,11 +195,20 @@
 /* Define if you have the uname function.  */
 #undef HAVE_UNAME
 
+/* Define if you have the <bims.h> header file.  */
+#undef HAVE_BIMS_H
+
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
 
 /* Define if you have the <fcntl.h> header file.  */
 #undef HAVE_FCNTL_H
+
+/* Define if you have the <iconv.h> header file.  */
+#undef HAVE_ICONV_H
+
+/* Define if you have the <libintl.h> header file.  */
+#undef HAVE_LIBINTL_H
 
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H

@@ -11,11 +11,11 @@ prefix      = @prefix@
 exec_prefix = @exec_prefix@
 
 xcin_binp   = $(program_prefix)@bindir@
-xcin_libp   = $(program_prefix)@xcin_dir@
+xcin_libp   = $(program_prefix)@with_xcin_dir@
 xcin_datap  = ${xcin_libp}/tab
-xcin_rcp    = $(program_prefix)@xcin_rcdir@
+xcin_rcp    = $(program_prefix)@with_xcin_rcdir@
 xcin_manp   = $(program_prefix)@mandir@
-xcin_msgp   = $(program_prefix)@xcin_msgdir@
+xcin_msgp   = $(program_prefix)@with_locale_dir@
 
 
 LC_MESG = zh_TW

@@ -22,7 +22,7 @@
 #ifndef  _CONSTANT_H
 #define  _CONSTANT_H
 
-#define  XCIN_VERSION  		"xcin 2.5.2.3"
+#define  XCIN_VERSION  		"2.5.3-pre1"
 
 #ifndef  XCIN_DEFAULT_RCDIR
 #define  XCIN_DEFAULT_RCDIR	"/usr/local/etc"
@@ -40,5 +40,32 @@
 #define  MIN_WIN_WIDTH		40	/* Min window width. */
 #define  MIN_WIN_WIDTH2		10	/* Min window2 width. */
 #define  MAX_WIN_WIDTH		100	/* Max window width. */
+
+/*
+ * Internal interface numbers (quotted from `info libtool')
+ *
+ *   1. Start with version information of `0:0:0' for each libtool library.
+ *
+ *   2. Update the version information only immediately before a public
+ *      release of your software.  More frequent updates are unnecessary,
+ *      and only guarantee that the current interface number gets larger
+ *      faster.
+ *
+ *   3. If the library source code has changed at all since the last
+ *      update, then increment REVISION (`C:R:A' becomes `C:r+1:A').
+ *
+ *   4. If any interfaces have been added, removed, or changed since the
+ *      last update, increment CURRENT, and set REVISION to 0.
+ *
+ *   5. If any interfaces have been added since the last public release,
+ *      then increment AGE.
+ *
+ *   6. If any interfaces have been removed since the last public release,
+ *      then set AGE to 0.
+ */
+
+#define CURRENT_VER	0
+#define REVISION_VER	0
+#define AGE_VER		0
 
 #endif

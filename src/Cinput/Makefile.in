@@ -1,8 +1,7 @@
 LN_S = @LN_S@
 @SET_MAKE@
 
-SUBSYS = zh_hex gen_inp @extra_modules@
-SUBALL = zh_hex gen_inp bimsphone
+SUBSYS = zh_hex gen_inp bimsphone
 OTHERS = im_comm
 
 all: subdirs
@@ -17,7 +16,7 @@ clean:
 
 distclean:
 	for d in $(SUBSYS) $(OTHERS); do ( cd $$d; $(MAKE) distclean ); done
-	for d in $(SUBALL); do rm -f $$d/Makefile; done
+	for d in $(SUBSYS); do rm -f $$d/Makefile; done
 	rm -f Makefile .depend
 
 install:

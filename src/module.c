@@ -27,13 +27,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef USE_DYNAMIC
-#  ifdef HAVE_DLOPEN
-#    include <dlfcn.h>
-#    define load_mod_dynamic load_mod_ldso
-#  endif
-#else
-#  define load_mod_dynamic load_mod_static
+#ifdef HAVE_DLOPEN
+#  include <dlfcn.h>
+#  define load_mod_dynamic load_mod_ldso
 #endif
 
 #include "xcintool.h"
@@ -86,8 +82,6 @@ check_module(module_t *modp, char *ldso_name)
     return  True;
 }
 
-
-#ifdef USE_DYNAMIC
 
 #ifdef HAVE_DLOPEN
 static tmodule_t *
@@ -154,60 +148,6 @@ load_mod_ldso(char *modname, int mod_type, xcin_rc_t *xc)
 }
 #endif
 
-#else
-extern module_t zh_hex_module_ptr;
-extern module_t gen_inp_module_ptr;
-extern module_t bimsphone_module_ptr;
-
-static module_t *static_modules[] = {
-    &zh_hex_module_ptr,
-    &gen_inp_module_ptr,
-#ifdef HAVE_LIBTABE
-    &bimsphone_module_ptr,
-#endif
-    NULL
-};
-
-static tmodule_t *
-load_mod_static(char *modname, int mod_type, xcin_rc_t *xc)
-{
-    int i;
-    tmodule_t *tmodp;
-
-    for (i=0; static_modules[i] != NULL; i++) {
-	if (! strcmp(static_modules[i]->name, modname))
-	    break;
-    }
-    if (static_modules[i] == NULL || 
-	! check_module(static_modules[i], modname))
-	return NULL;
-
-    tmodp = calloc(1, sizeof(tmodule_t));
-    tmodp->ldso = static_modules[i];
-    tmodp->name = static_modules[i]->name;
-    tmodp->version = static_modules[i]->version;
-    tmodp->comments = static_modules[i]->comments;
-    tmodp->valid_objname = static_modules[i]->valid_objname;
-    tmodp->module_type = static_modules[i]->module_type;
-    tmodp->conf_size = static_modules[i]->conf_size;
-    tmodp->init = static_modules[i]->init;
-    tmodp->xim_init = static_modules[i]->xim_init;
-    tmodp->xim_end = static_modules[i]->xim_end;
-    tmodp->keystroke = static_modules[i]->keystroke;
-    tmodp->show_keystroke = static_modules[i]->show_keystroke;
-    tmodp->terminate = static_modules[i]->terminate;
-
-    if (! mod_templet)
-        mod_templet = tmodp;
-    else {
-        mod_templet->prev->next = tmodp;
-        tmodp->prev = mod_templet->prev;
-    }
-    mod_templet->prev = tmodp;
-
-    return  tmodp;
-}
-#endif
 
 static imodule_t * 
 creat_module(tmodule_t *templet, char *objname)
@@ -284,11 +224,7 @@ load_module(char *modname, char *objenc, int mod_type, xcin_rc_t *xc)
  *  Load modules from dynamic libs and run module init.
  */
     if (! tmodp)
-#ifdef USE_DYNAMIC
 	tmodp = load_mod_dynamic(modname, mod_type, xc);
-#else
-	tmodp = load_mod_static(modname, mod_type, xc);
-#endif
     imodp = creat_module(tmodp, objenc);
 
     if (! imodp)
@@ -317,11 +253,7 @@ module_comment(char *modname, xcin_rc_t *xc)
 {
     tmodule_t *tmodp;
 
-#ifdef USE_DYNAMIC
     if ((tmodp = load_mod_dynamic(modname, MOD_CINPUT, xc))) {
-#else
-    if ((tmodp = load_mod_static(modname, MOD_CINPUT, xc))) {
-#endif
 	perr(XCINMSG_NORMAL, N_("module \"%s\":"), modname);
 	if (tmodp->comments)
 	    perr(XCINMSG_EMPTY, "\n\n%s\n", tmodp->comments);

@@ -11,11 +11,11 @@ GNU_GETTEXT	= @GNU_GETTEXT@
 
 x_includes      = @x_includes@
 x_libraries     = @x_libraries@
-extra_inc	= @extra_include@
-extra_lib	= @extra_library@
-locale_lib      = @locale_lib@
-intl_inc	= @intl_include@
-intl_lib	= @intl_library@
+extra_inc	= @with_extra_inc@
+extra_lib	= @with_extra_lib@
+locale_lib      = @with_locale_lib@
+intl_inc	= @with_intl_inc@
+intl_lib	= @with_intl_lib@
 
 #
 # XCIN installation path.

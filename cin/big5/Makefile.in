@@ -12,12 +12,12 @@ prefix      = @prefix@
 exec_prefix = @exec_prefix@
 
 xcin_binp   = $(program_prefix)@bindir@
-xcin_libp   = $(program_prefix)@xcin_dir@
+xcin_libp   = $(program_prefix)@with_xcin_dir@
 xcin_datap  = ${xcin_libp}/tab
-xcin_rcp    = $(program_prefix)@xcin_rcdir@
+xcin_rcp    = $(program_prefix)@with_xcin_rcdir@
 xcin_manp   = $(program_prefix)@mandir@
 
-cin2tab = $(top_srcdir)/src/util/cin2tab/cin2tab
+cin2tab = $(top_srcdir)/libtool --mode=execute $(top_srcdir)/src/util/cin2tab/cin2tab
 xcinrc  = $(top_srcdir)/etc/xcinrc
 
 .PHONY: install clean distclean

@@ -999,11 +999,7 @@ static char phone_comments[] = N_(
 	"for Chinese input.\n\n"
 	"This module is free software, as part of xcin system.\n");
 
-#ifdef USE_DYNAMIC
 module_t module_ptr = {
-#else
-module_t bimsphone_module_ptr = {
-#endif
     "bimsphone",				/* name */
     MODULE_VERSION,				/* version */
     phone_comments,				/* comments */

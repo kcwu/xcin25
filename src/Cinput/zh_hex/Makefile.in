@@ -8,60 +8,49 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA    = @INSTALL_DATA@
 LN_S 		= @LN_S@
 RANLIB		= @RANLIB@
-cf_sharelib	= @cf_sharelib@
-ld_sharelib	= @ld_sharelib@
-slib_ext	= @slib_ext@
-module_build	= @module_build@
 @SET_MAKE@
 
 x_includes      = @x_includes@
 x_libraries     = @x_libraries@
-extra_inc	= @extra_include@
-extra_lib	= @extra_library@
+extra_inc	= @with_extra_inc@
+extra_lib	= @with_extra_lib@
 
 program_prefix	= @program_prefix@
 srcdir		= @srcdir@
 top_srcdir	= @top_srcdir@
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
+LIBTOOL		= $(top_srcdir)/libtool
 
 xcin_binp	= $(program_prefix)@bindir@
-xcin_libp	= $(program_prefix)@xcin_dir@
+xcin_libp	= $(program_prefix)@with_xcin_dir@
 xcin_datap	= ${xcin_libp}/tab
-xcin_rcp	= $(program_prefix)@xcin_rcdir@
+xcin_rcp	= $(program_prefix)@with_xcin_rcdir@
 xcin_manp	= $(program_prefix)@mandir@
 
-xcininc = -I$(top_srcdir)/src/include
-INC     = $(xcininc) $(x_includes)
-TARGET  = zh_hex.$(slib_ext)
-
+xcininc		= -I$(top_srcdir)/src/include
+INC		= $(xcininc) $(x_includes)
+TARGET		= zh_hex.la
 
 SRC = zh_hex.c
-OBJ = zh_hex.o
+OBJ = $(SRC:.c=.lo)
 
-.c.o:
-	$(CC) -c $(cf_sharelib) $(CFLAGS) $(DEFS) $(INC) -o $@ $<
-
-all: $(module_build)
+all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(ld_sharelib) -o $(TARGET) $(OBJ)
+	$(LIBTOOL) --mode=link $(CC) -module -o $(TARGET) $(OBJ) \
+		-rpath $(xcin_libp)
 
-linkobj: $(OBJ)
-	(cd ../im_comm; \
-	 rm -f zh_hex.o; \
-	 ln -s ../zh_hex/zh_hex.o .)
-
-zh_hex.o: zh_hex.c ../../include/xcintool.h ../../include/config.h \
-	../../include/module.h zh_hex.h
-
+zh_hex.lo: zh_hex.c ../../include/xcintool.h ../../include/config.h \
+  ../../include/module.h zh_hex.h
+	$(LIBTOOL) --mode=compile \
+		$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ zh_hex.c
 
 .PHONY: clean distclean
 clean:
-	rm -f $(OBJ) $(TARGET) core *.a
+	rm -f $(OBJ) $(TARGET) core *.o
 distclean: clean
-	rm -f Makefile .depend
+	rm -rf Makefile .depend .libs
 install: $(module_build)
-	if [ -f $(TARGET) ]; then \
-	    $(INSTALL_PROGRAM) $(TARGET) $(xcin_libp); fi
+	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(TARGET) $(xcin_libp)
 

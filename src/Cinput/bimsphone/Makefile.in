@@ -8,71 +8,64 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA    = @INSTALL_DATA@
 RANLIB		= @RANLIB@
 LN_S 		= @LN_S@
-cf_sharelib	= @cf_sharelib@
-ld_sharelib	= @ld_sharelib@
-slib_ext	= @slib_ext@
-module_build	= @module_build@
 @SET_MAKE@
 
 x_includes      = @x_includes@
 x_libraries     = @x_libraries@
-extra_inc	= @extra_include@
-extra_lib	= @extra_library@
-tabe_lib	= @tabe_library@
-tabe_inc	= @tabe_include@
-db_inc		= @db_include@
-db_lib		= @db_library@
+extra_inc	= @with_extra_inc@
+extra_lib	= @with_extra_lib@
+tabe_lib	= @with_tabe_lib@
+tabe_inc	= @with_tabe_inc@
+db_inc		= @with_db_inc@
+db_lib		= @with_db_lib@
 
 program_prefix	= @program_prefix@
 srcdir		= @srcdir@
 top_srcdir	= @top_srcdir@
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
+LIBTOOL		= $(top_srcdir)/libtool
 
 xcin_binp	= $(program_prefix)@bindir@
-xcin_libp	= $(program_prefix)@xcin_dir@
+xcin_libp	= $(program_prefix)@with_xcin_dir@
 xcin_datap	= ${xcin_libp}/tab
-xcin_rcp	= $(program_prefix)@xcin_rcdir@
+xcin_rcp	= $(program_prefix)@with_xcin_rcdir@
 xcin_manp	= $(program_prefix)@mandir@
 
 xcininc = -I$(top_srcdir)/src/include
 xcinlib = -L${top_srcdir}/src/lib
 INC     = $(xcininc) $(x_includes) $(extra_inc) $(tabe_inc) $(db_inc)
 LIB     = $(xcinlib) $(extra_lib) $(tabe_lib) $(db_lib)
-TARGET  = bimsphone.$(slib_ext)
+TARGET  = bimsphone.la
 
 
 SRC = bimsphone.c bimspinyin.c
-OBJ = bimsphone.o bimspinyin.o
+OBJ = $(SRC:.c=.lo)
 
-.c.o:
-	$(CC) -c $(cf_sharelib) $(CFLAGS) $(INC) $(DEFS) -o $@ $<
 
-all: $(module_build)
+all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(ld_sharelib) -o $(TARGET) $(OBJ) $(LIB)
+	$(LIBTOOL) --mode=link $(CC) -module -o $(TARGET) $(OBJ) $(LIB) \
+		-rpath $(xcin_libp)
 
-linkobj: $(OBJ)
-	(cd ../im_comm; \
-	 rm -f bimsphone.o bimspinyin.o; \
-	 ln -s ../bimsphone/bimsphone.o .; \
-	 ln -s ../bimsphone/bimspinyin.o .)
-
-bimsphone.o: bimsphone.c ../../include/xcintool.h ../../include/module.h \
+bimsphone.lo: bimsphone.c ../../include/xcintool.h ../../include/module.h \
   bimsphone.h ../../include/constant.h ../../include/config.h
+	$(LIBTOOL) --mode=compile \
+		$(CC) -c $(CFLAGS) $(INC) $(DEFS) -o $@ bimsphone.c
 
-bimspinyin.o: bimspinyin.c ../../include/module.h ../../include/xcintool.h \
+bimspinyin.lo: bimspinyin.c ../../include/module.h ../../include/xcintool.h \
   bimsphone.h ../../util/cin2tab/bimscin.h ../../include/constant.h \
   ../../include/config.h 
+	$(LIBTOOL) --mode=compile \
+		$(CC) -c $(CFLAGS) $(INC) $(DEFS) -o $@ bimspinyin.c
 
 
 .PHONY: clean distclean
 clean:
-	rm -f $(OBJ) $(TARGET) core *.a
+	rm -f $(OBJ) *.o $(TARGET) core *.a
 distclean: clean
-	rm -f Makefile .depend
+	rm -rf Makefile .depend .libs
 install: $(module_build)
-	if [ -f $(TARGET) ]; then \
-	    $(INSTALL_PROGRAM) $(TARGET) $(xcin_libp); fi
+	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(TARGET) $(xcin_libp)
 
