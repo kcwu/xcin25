@@ -557,8 +557,11 @@ void sighandler(int sig)
 
     if (xcin_core.ic != NULL && (xcin_core.ic->ic_state & IC_FOCUS))
 	xcin_core.xcin_mode |= XCIN_RUN_KILL;
-    else
+    else {
+	xim_terminate();
+	IM_free_all();
 	exit(0);
+    }
 }
 
 int
