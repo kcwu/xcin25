@@ -25,6 +25,7 @@
 (define MAINWIN2_GEOMETRY	"27x1+200-1")
 (define XCIN_HIDE   		"NO")
 (define XKILL_DISABLE		"NO")
+(define ICCHECK_DISABLE		"NO")
 (define SINGLE_IM_CONTEXT	"NO")
 (define IM_FOCUS_ON		"NO")
 (define KEEP_POSITION_ON	"NO")

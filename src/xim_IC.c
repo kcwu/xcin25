@@ -789,3 +789,72 @@ greq_query(int imid, int *n_greq, int **reqid_list_return)
     *reqid_list_return = reqid_list;
 }
 
+/*---------------------------------------------------------------------------
+
+        Garbage Collection
+
+---------------------------------------------------------------------------*/
+
+#ifdef DEBUG
+#define TIMECHECK_STEP    10
+#define IC_IDLE_TIME      20
+#else
+#define TIMECHECK_STEP    300
+#define IC_IDLE_TIME      600
+#endif
+
+void
+check_ic_exist(int icid, xccore_t *xccore)
+{
+    static time_t last_check;
+    IC *ic = ic_list, *last = NULL, *ref_ic;
+    time_t current_time;
+    int delete;
+
+    if (icid == -1 || (ref_ic = ic_find(icid)) == NULL)
+	return;
+    current_time = time(NULL);
+    if (current_time - last_check <= TIMECHECK_STEP)
+	return;
+
+    DebugLog(1, ("Begin check: current time = %d, last check = %d\n", 
+		(int)current_time, (int)last_check));
+
+    while (ic != NULL) {
+	DebugLog(3, ("IC: id=%d, focus_w=0x%x, client_w=0x%x%s\n",
+		ic->id, (unsigned int)ic->ic_rec.focus_win, 
+		(unsigned int)ic->ic_rec.client_win, 
+		(ic==ref_ic) ? ", (ref)." : "."));
+	delete = 0;
+
+	if (ic == ref_ic)
+	    ic->exec_time = current_time;
+        else if (ic->ic_rec.focus_win && 
+		 ic->ic_rec.focus_win == ref_ic->ic_rec.focus_win)
+	/* each IC should has its distinct window */
+	    delete = 1;
+	else if (current_time - ic->exec_time > IC_IDLE_TIME &&
+		 ic->ic_rec.client_win != 0) {
+	    DebugLog(3, ("Check IC: id=%d, window=0x%x, exec_time=%d.\n", 
+		    ic->id, (unsigned int)ic->ic_rec.client_win, 
+		    (int)ic->exec_time));
+	    ic->exec_time = current_time;
+	    if (gui_check_window(ic->ic_rec.client_win) != True)
+		delete = 1;
+        }
+
+	if (delete) {
+	    DebugLog(3, ("Delete IC: id=%d, window=0x%x, exec_time=%d.\n", 
+		    ic->id, (unsigned int)ic->ic_rec.client_win, 
+		    (int)ic->exec_time));
+	    delete_IC(ic, last, xccore);
+	    ic = (last) ? last->next : ic_list;
+	}
+	else {
+	    last = ic;
+	    ic = ic->next;
+	}
+    }
+    last_check = current_time;
+}
+

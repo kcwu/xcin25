@@ -44,6 +44,7 @@ int ic_destroy(int icid, xccore_t *xccore);
 int ic_clean_all(CARD16 connect_id, xccore_t *xccore);
 void ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore);
 void ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore);
+void check_ic_exist(int icid, xccore_t *xccore);
 
 /*----------------------------------------------------------------------------
 
@@ -936,6 +937,8 @@ im_protocol_handler(XIMS ims, IMProtocol *call_data)
 	xccore->xcin_mode &= ~XCIN_RUN_KILL;
 	xim_close(xccore->ic);
     }
+    if (! (xccore->xcin_mode & XCIN_ICCHECK_OFF))
+	check_ic_exist(icid, xccore);
     gui_update_winlist(xccore);
     return ret;
 }
@@ -1104,7 +1107,7 @@ xim_close(IC *ic)
     IMSyncXlibStruct pass_data;
 
     DebugLog(2, ("xim_close\n"));
-    xccore->xcin_mode |= XCIN_RUN_EXIT;
+    xccore->xcin_mode |= (XCIN_RUN_EXIT | XCIN_ICCHECK_OFF);
     if (ic && gui_check_window(ic->ic_rec.client_win) == True) {
 	DebugLog(2, ("xim_close sent\n"));
 	pass_data.major_code = XIM_SYNC;
