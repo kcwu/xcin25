@@ -769,14 +769,14 @@ xim_get_ic_values_handler(XIMS ims, IMChangeICStruct *call_data, int *icid)
     return True;
 }
 
+#define MAX_XIM_SYNC_CHECK	5
+
 static int
 xim_sync_reply_handler(XIMS ims, IMSyncXlibStruct *call_data, int *icid)
 {
     static int n_check=0;
 
     *icid = call_data->icid;
-    DebugLog(2, verbose, "XIM_SYNC_REPLY: icid=%d, n_check=%d\n",
-		*icid, n_check);
 /*
  *  This is the main controlling process to terminate xcin, which is a really
  *  involved and complicated process.
@@ -821,12 +821,14 @@ xim_sync_reply_handler(XIMS ims, IMSyncXlibStruct *call_data, int *icid)
  */
     if ((xccore->xcin_mode & XCIN_RUN_EXIT)) {
 	n_check ++;
-	if (n_check >= 2)
-	    xccore->xcin_mode |= XCIN_RUN_EXITALL;
-	else {
+	DebugLog(2, verbose, "XIM_SYNC_REPLY: icid=%d, n_check=%d\n",
+		*icid, n_check);
+	if (n_check < MAX_XIM_SYNC_CHECK) {
 	    IC *ic = ic_find(call_data->icid);
 	    xim_close(ic);
 	}
+	else
+	    xccore->xcin_mode |= XCIN_RUN_EXITALL;
     }
     return True;
 }
