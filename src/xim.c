@@ -136,7 +136,6 @@ xim_disconnect(IC *ic)
 
     if (! (ic->ic_state & IC_CONNECT))
 	return True;
-    xim_commit();
     call_data.connect_id = (CARD16)(ic->connect_id);
     call_data.icid = (CARD16)(ic->id);
     ic->ic_state &= ~IC_CONNECT;
@@ -196,7 +195,6 @@ process_IMKEY(IC *ic, keyinfo_t *keyinfo, unsigned int ret)
 	    ret &= ~IMKEY_IGNORE;
 	}
     }
-    xim_commit();
 
     if (! (ret & IMKEY_IGNORE)) {
 	/* The key will not be processed further more, and will not be
@@ -598,8 +596,10 @@ xim_trigger_handler(XIMS ims, IMTriggerNotifyStruct *call_data, int *icid)
 	        xim_disconnect(ic);
 	    break;
 	case FKEY_QPHRASE:
-	    if ((str = qphrase_str(minor_code, QPHR_TRIGGER)))
+	    if ((str = qphrase_str(minor_code, QPHR_TRIGGER))) {
 		commit_string(ic, str);
+		xim_commit();
+	    }
 	    xim_disconnect(ic);
 	}
         return True;
@@ -613,32 +613,13 @@ xim_trigger_handler(XIMS ims, IMTriggerNotifyStruct *call_data, int *icid)
 #endif
 
 static int
-xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
+forward_keys_handler(IC *ic, keyinfo_t *keyinfo)
 {
-    XKeyEvent *kev;
     unsigned int ret;
-    keyinfo_t keyinfo;
     int major_code, minor_code;
-    IC *ic=NULL;
     IM_Context_t *imc;
 
-    *icid = call_data->icid;
-    DebugLog(2, verbose, "XIM_FORWARD_EVENT: icid=%d\n", *icid);
-
-    if ((xccore->xcin_mode & XCIN_RUN_EXIT))
-	return True;
-    if (! (ic = ic_find(call_data->icid)))
-	return False;
-    if (call_data->event.type != KeyPress)
-        return True;    		/* doesn't matter */
     imc = ic->imc;
-
-    kev = &call_data->event.xkey;
-    keyinfo.keystate = kev->state;
-    keyinfo.keystr_len = XLookupString(kev, keyinfo.keystr, 16, 
-					&(keyinfo.keysym), NULL);
-    keyinfo.keystr[(keyinfo.keystr_len >= 0) ? keyinfo.keystr_len : 0] = 0;
-
 /*
  *  Keycode translation for different layout of keyboards.
  *
@@ -659,26 +640,25 @@ xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
  *  same moment.
  */
     if ((xccore->xcin_mode & XCIN_KEYBOARD_TRANS)) {
-	if (! (keyinfo.keystate & ShiftMask &&
-	       keyinfo.keystate & AltGrMask) &&
-	    keyinfo.keysym > 32 && keyinfo.keysym < 127 &&
-	    keyinfo.keystr_len) {
+	if (! (keyinfo->keystate & ShiftMask &&
+	       keyinfo->keystate & AltGrMask) &&
+	    keyinfo->keysym > 32 && keyinfo->keysym < 127 &&
+	    keyinfo->keystr_len) {
 	    if (strstr("',-./0123456789;=[\\]`abcdefghijklmnopqrstuvwxyz",
-			keyinfo.keystr) != NULL) {
-		keyinfo.keystate &= ~ShiftMask;
-		keyinfo.keystate &= ~AltGrMask;
+			keyinfo->keystr) != NULL) {
+		keyinfo->keystate &= ~ShiftMask;
+		keyinfo->keystate &= ~AltGrMask;
 	    }
 	    else {
-		keyinfo.keystate |=  ShiftMask;
-		keyinfo.keystate &= ~AltGrMask;
+		keyinfo->keystate |=  ShiftMask;
+		keyinfo->keystate &= ~AltGrMask;
 	    }
 	}
     }
-
 /*
  *  Process the special key binding.
  */
-    if (search_funckey(keyinfo.keysym, keyinfo.keystate,
+    if (search_funckey(keyinfo->keysym, keyinfo->keystate,
 		&major_code, &minor_code)) {
 	char *str;
 	switch (major_code) {
@@ -738,34 +718,64 @@ xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
 	    break;
 	}
 	if (! (imc->inp_state & IM_CINPUT) && ! (imc->inp_state & IM_2BYTES))
-	    xim_disconnect(ic);
-	return True;
+	    return 0;
+	return 1;
     }
 
 /*
- *  Forward key to IM.
+ *  Forward key to the IM module.
  */
     if ((imc->inp_state & IM_CINPUT)) {
         imc->inpinfo.xcin_wlen = (xccore->gui.mainwin != NULL) ? 
 		xccore->gui.mainwin->c_width : 0;
 	imc->inpinfo.zh_ascii = ((imc->inp_state & IM_2BYTES)) ?
 		(ubyte_t)1 : (ubyte_t)0;
-        ret = imc->imodp->keystroke(imc->imodp->conf,&(imc->inpinfo),&keyinfo);
+        ret = imc->imodp->keystroke(imc->imodp->conf,&(imc->inpinfo), keyinfo);
 	call_simd(ic);
-	if ((process_IMKEY(ic, &keyinfo, ret)))
-	    return True;
+	if (process_IMKEY(ic, keyinfo, ret) == True)
+	    return 1;
     }
     if ((imc->inp_state & IM_2BYTES)) {
 	char *cch;
-	if ((keyinfo.keystate & Mod1Mask) != Mod1Mask &&
-	    (keyinfo.keystate & ControlMask) != ControlMask &&
-            (cch = fullchar_keystroke(&(imc->inpinfo), keyinfo.keysym))) {
+	if ((keyinfo->keystate & Mod1Mask) != Mod1Mask &&
+	    (keyinfo->keystate & ControlMask) != ControlMask &&
+            (cch = fullchar_keystroke(&(imc->inpinfo), keyinfo->keysym))) {
 	    commit_string(ic, cch);
-	    xim_commit();
-	    return True;
+	    return 1;
 	}
     }
-    IMForwardEvent(ims, (XPointer)call_data);
+    return -1;
+}
+
+static int
+xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
+{
+    IC *ic=NULL;
+    int ret;
+    XKeyEvent *kev;
+    keyinfo_t keyinfo;
+
+    *icid = call_data->icid;
+    DebugLog(2, verbose, "XIM_FORWARD_EVENT: icid=%d\n", *icid);
+
+    if ((xccore->xcin_mode & XCIN_RUN_EXIT))
+	return True;
+    if (! (ic = ic_find(call_data->icid)))
+	return False;
+    if (call_data->event.type != KeyPress)
+        return True;    		/* doesn't matter */
+
+    kev = &call_data->event.xkey;
+    keyinfo.keystate = kev->state;
+    keyinfo.keystr_len = XLookupString(kev, keyinfo.keystr, 16, 
+					&(keyinfo.keysym), NULL);
+    keyinfo.keystr[(keyinfo.keystr_len >= 0) ? keyinfo.keystr_len : 0] = 0;
+    ret = forward_keys_handler(ic, &keyinfo);
+    xim_commit();
+    if (ret == 0)
+	xim_disconnect(ic);
+    else if (ret == -1)
+	IMForwardEvent(ims, (XPointer)call_data);
     return True;
 }
 
