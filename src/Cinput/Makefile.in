@@ -18,4 +18,4 @@ distclean:
 	rm -f Makefile
 
 install:
-	@for d in $(SUBSYS); do ( cd $$d; $(MAKE) install ); done
+	@for d in $(SUBSYS) $(OTHERS); do ( cd $$d; $(MAKE) install ); done
