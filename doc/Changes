@@ -29,10 +29,9 @@ xcin-2.5.2.2:  2000/12/
 	GUIMOD_SELKEYSPOT bit of inpinfo.guimode).
    Fix bug in bimsphone: Turn off GUIMOD_SELKEYSPOT when mcch selection OK.
 
-9. Documents update.
+9. Fix the wrong ZhuYin in phone.cin: "¬¦" should be "£t£¶4"
 
-10. Add .cvsignore in all xcin sub-dirs.
-    Thanks to Chun-Chung Chen <cjj@u.washington.edu>.
+10. Documents update.
 
 
 xcin-2.5.2.1:  2000/10/30
