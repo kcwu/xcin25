@@ -31,6 +31,9 @@ xcin-2.5.3-pre3:  2001/12
 10. Fix missing chars in big5/pinyin.cin & pinyin0.cin.
     Thanks to Geoffrey Lee <snailtalk@linux-mandrake.com>.
 
+11. Fix gui_main.c: lcch listing problem.
+    Thanks to Ken Shan <ken@digitas.harvard.edu>.
+
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------

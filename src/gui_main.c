@@ -234,7 +234,7 @@ win_draw_listcch(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
 /*
 	len = wch_mblen(tmp);
 */
-	len = 4;
+	len = (tmp->s[1] != '\0') ? 2 : 1;
         XmbDrawImageString(gui->display, win->window,
             win->font->fontset, win->wingc[GCM_idx], x, y, (char *)tmp->s, len);
 	x += XmbTextEscapement(win->font->fontset, (char *)tmp->s, len);
