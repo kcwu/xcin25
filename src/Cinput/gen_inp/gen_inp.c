@@ -630,17 +630,18 @@ get_correct_skeystroke(gen_inp_conf_t *cf,
 
     for (i=iccf->bsearch_idx; i>=0 && i<size; i++) {
 	ccode_to_char(cf->icidx[i], ch.s, WCH_SIZE);
-	if (ch.wch == cch->wch)
-	    break;
+	if (ch.wch == cch->wch) {
+	    klist[0] = cf->ic1[i];
+	    if (cf->header.icode_mode == ICODE_MODE2)
+		klist[1] = cf->ic2[i];
+	    codes2keys(klist, n_klist, ks, ks_size);
+	    if (strcmp_wild(iccf->keystroke, ks) == 0)
+		break;
+	}
     }
     if (ch.wch == cch->wch) {
-	klist[0] = cf->ic1[i];
-	if (cf->header.icode_mode == ICODE_MODE2)
-	    klist[1] = cf->ic2[i];
-	codes2keys(klist, n_klist, iccf->keystroke, ks_size);
-
-	for (j=0; iccf->keystroke[j] != '\0'; j++) {
-	    keycode = key2code(iccf->keystroke[j]);
+	for (j=0; ks[j] != '\0'; j++) {
+	    keycode = key2code(ks[j]);
 	    inpinfo->suggest_skeystroke[j].wch =
 			cf->header.keyname[keycode].wch;
 	}
@@ -648,6 +649,7 @@ get_correct_skeystroke(gen_inp_conf_t *cf,
     }
     else
 	inpinfo->suggest_skeystroke[0].wch = (wchar_t)0;
+    free(ks);
 }
 
 static void
