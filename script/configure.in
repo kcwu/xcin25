@@ -392,7 +392,7 @@ AC_CHECK_HEADERS(iconv.h, ,
 AC_CHECK_FUNCS(iconv, [ found=y ], [ found=n ])
 if test $found = n; then
     for f in iconv giconv; do
-	AC_CHECK_LIB($f, gettext,
+	AC_CHECK_LIB($f, iconv,
 	    [ found=y; AC_DEFINE(HAVE_ICONV)
 	      with_iconv_lib="$with_iconv_lib -l$f" ], [ found=n ])
 	test $found = y && break
