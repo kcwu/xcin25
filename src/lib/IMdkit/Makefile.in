@@ -3,7 +3,7 @@ top_srcdir  = @top_srcdir@
 include $(top_srcdir)/Rules
 
 TARGET  = libXimd.a
-INC     = $(x_includes) $(xcininc)
+INC     = $(x_includes) $(xcininc) $(intl_inc)
 
 SRC =	FrameMgr.c IMValues.c i18nIMProto.c i18nPtHdr.c i18nX.c IMConn.c \
 	i18nAttr.c i18nIc.c IMMethod.c i18nClbk.c i18nMethod.c i18nUtil.c
