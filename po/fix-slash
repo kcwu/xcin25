@@ -1,0 +1,17 @@
+while (defined($_ = <stdin>)) {
+    $#str = -1;
+    @str = split(//);
+
+    for ($i=0; $i<=$#str; $i++) {
+	$_ = $str[$i];
+	if (/[\x80-\xff]/ && $i<=$#str-1) {
+	    printf("$str[$i]");
+	    $_ = $str[$i+1];
+	    (/[\\]/) ? printf("\\\\") : printf("$str[$i+1]");
+	    $i++;
+	}
+	else {
+	    printf("$str[$i]");
+	}
+    }
+}

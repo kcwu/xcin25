@@ -2,6 +2,7 @@ INSTALL         = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA    = @INSTALL_DATA@
 GNU_GETTEXT     = @GNU_GETTEXT@
+OLD_GNU_GETTEXT = @OLD_GNU_GETTEXT@
 @SET_MAKE@
 
 program_prefix = @program_prefix@
@@ -30,7 +31,11 @@ install:
 		msgpath=$(xcin_msgp)/$$l/LC_MESSAGES; \
 		if [ ! -d $$msgpath ]; then \
 	            $(INSTALL) -d $$msgpath; fi; \
-	        msgfmt -o $$msgpath/xcin.mo xcin-$$l.po; \
+		if [ "$(OLD_GNU_GETTEXT)" = 0 ]; then \
+		    msgfmt -o $$msgpath/xcin.mo xcin-$$l.po; \
+		else \
+		    ./run-fix $$msgpath/xcin.mo < xcin-$$l.po; \
+		fi \
 	    done; \
 	fi
 

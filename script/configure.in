@@ -329,6 +329,7 @@ dnl-----------------------------------------------------------------------
 dnl Checks for gettext.
 dnl-----------------------------------------------------------------------
 AC_CHECK_PROG(GNU_GETTEXT, gettext, 1, 0)
+OLD_GNU_GETTEXT=0
 if test x$GNU_GETTEXT = x1; then
     need_gettext_ver1=0
     need_gettext_ver2=10
@@ -341,15 +342,15 @@ if test x$GNU_GETTEXT = x1; then
     gettext_ver3=`echo $gettext_ver | awk 'BEGIN{FS="."} {print $3}'`
     res1=`expr $gettext_ver1 - $need_gettext_ver1`
     case $res1 in
-    -*) GNU_GETTEXT=0
+    -*) OLD_GNU_GETTEXT=1
 	;;
      0) res2=`expr $gettext_ver2 - $need_gettext_ver2`
 	case $res2 in
-	-*) GNU_GETTEXT=0
+	-*) OLD_GNU_GETTEXT=1
 	    ;;
 	 0) res3=`expr $gettext_ver3 - $need_gettext_ver3`
 	    case $res3 in
-	    -*) GNU_GETTEXT=0
+	    -*) OLD_GNU_GETTEXT=1
 		;;
 	    esac
 	    ;;
@@ -357,11 +358,12 @@ if test x$GNU_GETTEXT = x1; then
 	;;
     esac
     AC_MSG_RESULT([GNU Gettext found version $gettext_ver.])
-    if test x$GNU_GETTEXT = x0; then
-	AC_MSG_RESULT([however, version $need_gettext_ver or above is needed.])
-    fi
+dnl if test x$GNU_GETTEXT = x0; then
+dnl	AC_MSG_RESULT([however, version $need_gettext_ver or above is needed.])
+dnl fi
 fi
 AC_SUBST(GNU_GETTEXT)
+AC_SUBST(OLD_GNU_GETTEXT)
 
 LIBS="$OLD_LIBS"
 AC_CHECK_HEADERS(libintl.h, [ found=y ], [ found=n ])

@@ -25,7 +25,7 @@ xcin-2.5.3-pre1:  2001/
       (we always need libtabe/Berkeley db & shared lib platform.)
    b. add Berkeley DB3 auto-detecting.
    c. add a shared lib: libxcin: xcintool+siod+charset.
-   d. need GNU gettext >= 0.10.37.
+   d. work around for both GNU gettext >= 0.10.36 and <= 0.10.35.
 
 
 xcin-2.5.2.3:  2001/03/12
