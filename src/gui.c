@@ -33,6 +33,8 @@ winlist_t *xcin_mainwin_init(gui_t *gui, xccore_t *xccore);
 winlist_t *xcin_mainwin2_init(gui_t *gui, xccore_t *xccore);
 winlist_t *gui_overspot_init(gui_t *gui, xccore_t *xccore);
 winlist_t *gui_menusel_init(gui_t *gui, int imid, greq_win_t *gw);
+// Add By Firefly(firefly@firefly.idv.tw)
+winlist_t *gui_onspot_init(gui_t *gui, xccore_t *xccore);
 void gui_overspot_check_client(gui_t *gui, int icid);
 void gui_overspot_delete_client(gui_t *gui, int icid);
 void xim_terminate(void);
@@ -445,6 +447,8 @@ gui_init(xccore_t *xccore)
     else
 	gui->mainwin  = xcin_mainwin_init(gui, xccore);
     gui->overspot_win = gui_overspot_init(gui, xccore);
+    // Add by Firefly(firefly@firefly.idv.tw)
+    gui->onspot_win = gui_onspot_init(gui, xccore);
     gui->winchange |= WIN_CHANGE_IM;
 }
 
@@ -599,6 +603,9 @@ gui_update_winlist(xccore_t *xccore)
     }
     if (gui->overspot_win)
 	gui->overspot_win->win_draw_func(gui, gui->overspot_win);
+    // Add by Firefly(firefly@firefly.idv.tw)
+    if (gui->onspot_win)
+	gui->onspot_win->win_draw_func(gui, gui->onspot_win);
     if ((gui->winchange & WIN_CHANGE_IM)) {
 	if (gui->mainwin)
 	    gui->mainwin->win_draw_func(gui, gui->mainwin);

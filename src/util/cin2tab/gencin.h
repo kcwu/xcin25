@@ -26,11 +26,12 @@
 #include "constant.h"
 #include "module.h"
 
-#define GENCIN_VERSION  "20000827"
+#define GENCIN_VERSION  "20040102"
 
 /* For input-code char definition. */
 typedef unsigned int	icode_t;
-typedef unsigned short	icode_idx_t;
+// Modify by Firefly(firefly@firefly.idv.tw)
+typedef unsigned int	icode_idx_t;
 typedef icode_idx_t 	ichar_t;
 
 #define VERLEN			20	/* Version buffer size */

@@ -145,6 +145,9 @@ struct _IC {
     xmode_t		ic_state;	/* status of the IC */
     ic_rec_t		ic_rec;		/* the IC resource setting by client */
     IM_Context_t       *imc;		/* the IM Context */
+    int			preedit_is_start;/* firefly */
+    int			status_is_start;/* firefly */
+    int			length;		/* firefly */
     IC		       *next;
 };
 

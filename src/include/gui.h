@@ -97,6 +97,8 @@ struct gui_s {
     XFontStruct *indexfont;
     char *inpn_english, *inpn_sbyte, *inpn_2bytes;
     winlist_t *mainwin, *mainwin2, *overspot_win;
+    // Add by Firefly(firefly@firefly.idv.tw)
+    winlist_t *onspot_win;
     xmode_t winchange;
 };
 

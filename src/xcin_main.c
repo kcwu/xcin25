@@ -300,6 +300,15 @@ read_core_config(void)
     if (get_resource(xrc, cmd, value, 256, 1))
 	set_data(&(xcin_core.xcin_mode), RC_IFLAG, value,
 			XCIN_KEYBOARD_TRANS, 0);
+
+    // Add by Firefly(firefly@firefly.idv.tw)
+    cmd[0] = "ONSPOT_PREEDIT_MODE";
+    if (get_resource(xrc, cmd, value, 256, 1))
+        set_data(xcin_core.irc->onspot_preedit_mode, RC_STRARR, value, 0, 
+			sizeof(xcin_core.irc->onspot_preedit_mode));
+    else
+        set_data(xcin_core.irc->onspot_preedit_mode, RC_STRARR, "", 0, 
+			sizeof(xcin_core.irc->onspot_preedit_mode));
 }
 
 static void

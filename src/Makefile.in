@@ -11,7 +11,7 @@ LIB	= ${xcinlib} -lXimd -lim_comm lib/libxcin.la \
 
 BIN	= xcin
 SRC	= xcin_main.c module.c gui.c xim.c xim_IC.c fkey.c gui_main.c \
-	  gui_menusel.c gui_overspot.c gui_main2.c
+	  gui_menusel.c gui_overspot.c gui_main2.c gui_onspot.c
 OBJ	= $(SRC:.c=.o)
 SUBSYS	= lib Cinput
 UTIL	= util

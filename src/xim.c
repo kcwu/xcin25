@@ -36,7 +36,8 @@
 #include "xcin.h"
 
 static xccore_t *xccore;
-static XIMS ims;
+// Modify by Firefly(firefly@firefly.idv.tw)
+XIMS ims;
 
 void gui_update_winlist(xccore_t *xccore);
 int ic_create(XIMS ims, IMChangeICStruct *call_data, xccore_t *xccore);
@@ -133,6 +134,44 @@ xim_disconnect(IC *ic)
 
     if (! (ic->ic_state & IC_CONNECT))
 	return True;
+
+    // Add by Firefly(firefly.idv.tw)
+    if (ic->ic_rec.input_style == XIMSTY_OnSpot)
+    {
+	XIMFeedback feedback[1] = {0};
+	IMPreeditCBStruct p_data;
+	IMStatusCBStruct s_data;
+	XIMText text;
+
+	text.length = 0;
+	text.string.multi_byte = "";
+	text.feedback = feedback;
+	text.encoding_is_wchar = False;
+ 
+	p_data.major_code = XIM_PREEDIT_DRAW;
+	p_data.connect_id = ic->connect_id;
+	p_data.icid = ic->id;
+	p_data.todo.draw.caret = XIMIsInvisible;
+	p_data.todo.draw.chg_first = 0;
+	p_data.todo.draw.chg_length = ic->length;
+	p_data.todo.draw.text = &text;
+	IMCallCallback(ims, (XPointer)&p_data);
+	ic->length = 0;
+	p_data.major_code = XIM_PREEDIT_DONE;
+	IMCallCallback (ims, (XPointer)&p_data);
+	ic->preedit_is_start = False;
+	
+	s_data.major_code = XIM_STATUS_DRAW;
+	s_data.connect_id = ic->connect_id;
+	s_data.icid       = ic->id;
+	s_data.todo.draw.type = XIMTextType;
+	s_data.todo.draw.data.text = &text;
+	IMCallCallback(ims, (XPointer)&s_data);
+	s_data.major_code = XIM_STATUS_DONE;
+	IMCallCallback (ims, (XPointer)&s_data);
+	ic->status_is_start = False;
+    }
+    //---- End of add
     call_data.connect_id = (CARD16)(ic->connect_id);
     call_data.icid = (CARD16)(ic->id);
     ic->ic_state &= ~IC_CONNECT;
@@ -975,7 +1014,8 @@ im_style_t im_styles[] = {
     {"Root", 		XIMSTY_Root,		(ubyte_t)0},
     {"OverTheSpot",	XIMSTY_OverSpot,	(ubyte_t)0},
 /*    {"OffTheSpot",	XIMSTY_OffSpot,		(ubyte_t)0},	*/
-/*    {"OnTheSpot",	XIMSTY_OnSpot,		(ubyte_t)0},	*/
+    // Modify by Firefly(firefly@firefly.idv.tw)
+    {"OnTheSpot",	XIMSTY_OnSpot,		(ubyte_t)0},
     {NULL,		(XIMStyle)0,		(ubyte_t)0}
 };
 

@@ -133,7 +133,8 @@ win_draw_multich(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
 	if ((len = wch_mblen(selkey))) {
 */
 	if (selkey->wch != (wchar_t)0) {
-	    len = (selkey->s[1] != '\0') ? 2 : 1;
+	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    len = strlen(selkey->s);
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[spot_GC_idx], x, y, (char *)selkey->s, len);
 	    x += (XmbTextEscapement(win->font->fontset, 
@@ -147,7 +148,8 @@ win_draw_multich(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
 		toggle_flag = -1;
 		break;
 	    }
-	    len = (cch->s[1] != '\0') ? 2 : 1;
+	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    len = strlen(cch->s);
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[GC_idx], x, y, (char *)cch->s, len);
 	    x += XmbTextEscapement(win->font->fontset, (char *)cch->s, len);
@@ -234,7 +236,8 @@ win_draw_listcch(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
 /*
 	len = wch_mblen(tmp);
 */
-	len = (tmp->s[1] != '\0') ? 2 : 1;
+	// Modify by Firefly(firefly@firefly.idv.tw)
+	len = strlen(tmp->s);
         XmbDrawImageString(gui->display, win->window,
             win->font->fontset, win->wingc[GCM_idx], x, y, (char *)tmp->s, len);
 	x += XmbTextEscapement(win->font->fontset, (char *)tmp->s, len);

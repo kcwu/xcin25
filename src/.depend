@@ -25,3 +25,5 @@ gui_overspot.o: gui_overspot.c  ../config.h ../src/include/constant.h ../src/inc
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_overspot.c
 gui_main2.o: gui_main2.c  ../config.h ../src/include/constant.h ../src/include/xcintool.h ../src/include/gui.h ../src/include/xcin.h ../src/include/IC.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/imodule.h ../src/include/module.h
 	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_main2.c
+gui_onspot.o: gui_onspot.c  ../config.h ../src/include/constant.h ../src/include/xcintool.h ../src/include/xcin.h ../src/include/gui.h ../src/include/IC.h ../src/lib/IMdkit/IMdkit.h ../src/lib/IMdkit/Xi18n.h ../src/lib/IMdkit/XimProto.h ../src/include/imodule.h ../src/include/module.h
+	$(CC) -c $(CFLAGS) $(DEFS) $(INC) -o $@ gui_onspot.c

@@ -1,0 +1,117 @@
+%sys
+#
+# This is the system constant string cin file of xcin-2.5.
+# 
+# keyname		big5-char
+
+INPN_ENGLISH		英數
+INPN_SBYTE		半形
+INPN_2BYTES		全形
+
+ASCII_space		0xa140
+ASCII_exclam		！
+ASCII_quotedbl		”
+ASCII_numbersign	＃
+ASCII_dollar		＄
+ASCII_percent		％
+ASCII_ampersand		＆
+ASCII_apostrophe	’
+ASCII_parenleft		（
+ASCII_parenright	）
+ASCII_asterisk		＊
+ASCII_plus		＋
+ASCII_comma		，
+ASCII_minus		－
+ASCII_period		．
+ASCII_slash		╱
+ASCII_0			０
+ASCII_1			１
+ASCII_2			２
+ASCII_3			３
+ASCII_4			４
+ASCII_5			５
+ASCII_6			６
+ASCII_7			７
+ASCII_8			８
+ASCII_9			９
+ASCII_colon		：
+ASCII_semicolon		；
+ASCII_less		＜
+ASCII_equal		＝
+ASCII_greater		＞
+ASCII_question		？
+ASCII_at		＠
+ASCII_A			Ａ
+ASCII_B			Ｂ
+ASCII_C			Ｃ
+ASCII_D			Ｄ
+ASCII_E			Ｅ
+ASCII_F			Ｆ
+ASCII_G			Ｇ
+ASCII_H			Ｈ
+ASCII_I			Ｉ
+ASCII_J			Ｊ
+ASCII_K			Ｋ
+ASCII_L			Ｌ
+ASCII_M			Ｍ
+ASCII_N			Ｎ
+ASCII_O			Ｏ
+ASCII_P			Ｐ
+ASCII_Q			Ｑ
+ASCII_R			Ｒ
+ASCII_S			Ｓ
+ASCII_T			Ｔ
+ASCII_U			Ｕ
+ASCII_V			Ｖ
+ASCII_W			Ｗ
+ASCII_X			Ｘ
+ASCII_Y			Ｙ
+ASCII_Z			Ｚ
+ASCII_bracketleft	〔
+ASCII_backslash		╲
+ASCII_bracketright	〕
+ASCII_asciicircum	︿
+ASCII_underscore	ˍ
+ASCII_grave		‵
+ASCII_a			ａ
+ASCII_b			ｂ
+ASCII_c			ｃ
+ASCII_d			ｄ
+ASCII_e			ｅ
+ASCII_f			ｆ
+ASCII_g			ｇ
+ASCII_h			ｈ
+ASCII_i			ｉ
+ASCII_j			ｊ
+ASCII_k			ｋ
+ASCII_l			ｌ
+ASCII_m			ｍ
+ASCII_n			ｎ
+ASCII_o			ｏ
+ASCII_p			ｐ
+ASCII_q			ｑ
+ASCII_r			ｒ
+ASCII_s			ｓ
+ASCII_t			ｔ
+ASCII_u			ｕ
+ASCII_v			ｖ
+ASCII_w			ｗ
+ASCII_x			ｘ
+ASCII_y			ｙ
+ASCII_z			ｚ
+ASCII_braceleft		｛
+ASCII_bar		｜
+ASCII_braceright	｝
+ASCII_asciitilde	～
+
+#
+#  This is UTF-8 range for Big5 encoding
+#			  
+%charcode	begin
+plane1		0xc2-0xde
+plane1		0xe0-0xe3
+plane1		0xe4-0xe9
+plane1		0xee-0xef
+plane2		0x80-0xbf
+plane3		0x80-0xbf
+%charcode	end

@@ -25,6 +25,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <iconv.h>
+#include <langinfo.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include "xcintool.h"
@@ -48,6 +50,8 @@ char *pho2pinyinw(ipinyin_t *pf, char *phostring);
 int pinyin_keystroke(DB_pool cdp, phone_conf_t *cf, phone_iccf_t *iccf,
 		inpinfo_t *inpinfo, keyinfo_t *keyinfo, int *rval2);
 
+void preconvert(char *input, char *output, int n_char);
+	
 enum {
     BIMSP_ZHUYIN,
     BIMSP_PINYIN,
@@ -56,6 +60,9 @@ enum {
 
 static DB_pool dp[BIMSP_LAST], cdp;
 static int bimsp_zhuyin_noauto;
+#define XCIN_BYTE_NATIVE   2
+#define XCIN_BYTE_UTF8     3
+static int bimsp_codeset;
 
 /*----------------------------------------------------------------------------
 
@@ -169,6 +176,7 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
     char ftsi[256], fyin[256], fusertsi[256], fuseryin[256], fpinyin[256];
     objenc_t objenc;
     FILE *fp;
+    char *codeset;
 
     memset(&cfd, 0, sizeof(phone_conf_t));
     cfd.n_selkey = 9;
@@ -176,15 +184,27 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
     cfd.page_key = (ubyte_t)BIMSPH_PGKEY3;
     ftsi[0] = fyin[0] = fusertsi[0] = fuseryin[0] = fpinyin[0] = '\0';
 
+    /* Because libtabe uses BIG-5 encoding for all its structure
+       so we need to check if it is UTF-8 locale and do any conv */
+    codeset=nl_langinfo(CODESET);
+    if ( ! strcasecmp(codeset,"UTF-8") )
+	bimsp_codeset=XCIN_BYTE_UTF8;
+    else
+	bimsp_codeset=XCIN_BYTE_NATIVE;
+    
     if (get_objenc(objname, &objenc) == -1)
 	return False;
     if (! strncmp(objenc.objname, "bimspinyin", 10)) {
 	cf->mode |= BIMSPH_MODE_PINYIN;
-	cfd.inp_cname = (char *)strdup("拼音");
-    }
-    else
-	cfd.inp_cname = (char *)strdup("注音");
 
+	cfd.inp_cname = (char *)xcin_malloc(2*bimsp_codeset+1, 1);
+	preconvert("拼音", cfd.inp_cname, 4);
+    }
+    else {
+	//char *outptr = cfd.inp_cname;
+        cfd.inp_cname = (char *)xcin_malloc(2*bimsp_codeset+1, 1);
+	preconvert("詞音", cfd.inp_cname, 4);
+    }
     phone_resource(&cfd, xrc, "bimsphone_default",
 			ftsi, fyin, fusertsi, fuseryin, fpinyin);
     phone_resource(&cfd, xrc, objenc.objloadname,
@@ -337,6 +357,22 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 ----------------------------------------------------------------------------*/
 
 static int
+bimsp_mbs_wcs(wch_t *wcs, char *mbs, int wcs_len)
+{
+    int len,i;
+    char *s;
+
+    for (s=mbs, len=0; *s && len<wcs_len-1; s+=bimsp_codeset, len++) {
+	wcs[len].wch = (wchar_t)0;
+	for(i=0; i<bimsp_codeset; i++)
+	    wcs[len].s[i] = *(s+i);
+    }
+    wcs[len].wch = (wchar_t)0;
+
+    return len;
+}
+/*
+static int
 big5_mbs_wcs(wch_t *wcs, char *mbs, int wcs_len)
 {
     int len;
@@ -350,27 +386,40 @@ big5_mbs_wcs(wch_t *wcs, char *mbs, int wcs_len)
     wcs[len].wch = (wchar_t)0;
 
     return len;
-}
+}*/
 
 static void
 commit_string(inpinfo_t *inpinfo, phone_iccf_t *iccf, int n_chars)
 {
     static char *str=NULL;
+    static char *output=NULL;
 
     if (str)
 	free(str);
+    if (output)
+	free(output);
     str = (char *)bimsFetchText(cdp, inpinfo->imid, n_chars);
-    inpinfo->cch = str;
+
+    output = (char *)xcin_malloc(strlen(str)/2*bimsp_codeset+1, 1);
+    preconvert(str, output, strlen(str));
+    inpinfo->cch = output;
 }
 
 static void
 s_commit_string(inpinfo_t *inpinfo, char *s)
 {
-    static char str[3];
+    static char str[4];
 
-    str[0] = s[0];
-    str[1] = s[1];
-    str[2] = '\0';
+    if(bimsp_codeset == XCIN_BYTE_UTF8){
+        str[0] = s[0];
+        str[1] = s[1];
+        str[2] = s[2];
+        str[3] = '\0';
+    } else {
+        str[0] = s[0];
+        str[1] = s[1];
+        str[2] = '\0';
+    }
     inpinfo->cch = str;
 }
 
@@ -401,8 +450,13 @@ publish_composed_cch(phone_conf_t *cf, inpinfo_t *inpinfo, wch_t *wch)
     if ((str = (char *)bimsQueryLastZuYinString(inpinfo->imid))) {
 	str1 = ((cf->mode & BIMSPH_MODE_PINYIN)) ? 
 		pho2pinyinw(cf->pinyin, str) : str;
-	if (str1)
-	    big5_mbs_wcs(inpinfo->suggest_skeystroke, str1, N_MAX_KEYCODE+1);
+	if (str1){
+            char *output = 
+		(char *)xcin_malloc(strlen(str1)/2*bimsp_codeset+1, 1);
+            preconvert(str1, output, strlen(str1));
+	    bimsp_mbs_wcs(inpinfo->suggest_skeystroke, output, N_MAX_KEYCODE+1);
+            free(output);
+	}
 	free(str);
     }
 }
@@ -413,21 +467,34 @@ editing_status(phone_conf_t *cf, inpinfo_t *inpinfo, phone_iccf_t *iccf)
     char *str;
 
     if (! (cf->mode & BIMSPH_MODE_PINYIN)) {
+	char *output;
 	str = (char *)bimsQueryZuYinString(inpinfo->imid);
-	inpinfo->keystroke_len =
-        	big5_mbs_wcs(inpinfo->s_keystroke, str, N_MAX_KEYCODE+1);
+	
+        output = (char *)xcin_malloc(strlen(str)/2*bimsp_codeset+1, 1);
+        preconvert(str, output, strlen(str));
+	inpinfo->keystroke_len = 
+            bimsp_mbs_wcs(inpinfo->s_keystroke, output, N_MAX_KEYCODE+1);
+
+	free(output);
 	free(str);
     }
 
     if ((cf->mode & BIMSPH_MODE_AUTOSEL)) {
         int len, *seg;
+	char *output;
+
 	str = (char *)bimsQueryInternalText(inpinfo->imid);
 	len = strlen(str) / 2;
 	if (len >= iccf->lcch_size) {
 	    iccf->lcch_size = len+1;
 	    inpinfo->lcch = xcin_realloc(inpinfo->lcch, (len+1)*sizeof(wch_t));
 	}
-	inpinfo->n_lcch = big5_mbs_wcs(inpinfo->lcch, str, len+1);
+	
+	output = (char *)xcin_malloc(strlen(str)/2*bimsp_codeset+1, 1);
+	preconvert(str, output, strlen(str));
+	inpinfo->n_lcch = bimsp_mbs_wcs(inpinfo->lcch, output, len+1);
+
+	free(output);
 	free(str);
 
 	if (! inpinfo->keystroke_len && inpinfo->n_lcch)
@@ -592,8 +659,13 @@ determine_selection(phone_conf_t *cf, inpinfo_t *inpinfo, phone_iccf_t *iccf,
     if (state==BC_STATE_SELECTION_ZHI) {
 	inpinfo->mcch_grouping[0] = (char)0;
 	for (i=0; i<cpnum && i+base < num; i++) {
+	    char *output;
+
 	    inpinfo->mcch[i].wch = (wchar_t)0;
-	    strncpy((char *)inpinfo->mcch[i].s, (char *)selection[base+i], 2);
+            output = (char *)xcin_malloc(
+		strlen((char *)selection[base+i])/2*bimsp_codeset+1, 1);
+            preconvert((char *)selection[base+i], output, 2);
+	    strncpy((char *)inpinfo->mcch[i].s, (char *)output, bimsp_codeset);
 	}
 	inpinfo->n_mcch = i;
     } 
@@ -606,8 +678,11 @@ determine_selection(phone_conf_t *cf, inpinfo_t *inpinfo, phone_iccf_t *iccf,
 	    if (word+tmp >= MCCH_BUFSIZE) 
 		break;
 	    for (; *str; word++, str+=2) {
+		char *output;
 		inpinfo->mcch[word].wch = (wchar_t)0;
-		strncpy((char *)inpinfo->mcch[word].s, str, 2);
+                output = (char *)xcin_malloc(strlen(str)/2*bimsp_codeset+1, 1);
+                preconvert(str, output, strlen(str));
+	        strncpy((char *)inpinfo->mcch[word].s, output, bimsp_codeset);
 	    }
 	}
 	inpinfo->n_mcch = word;
@@ -732,6 +807,28 @@ check_qphr_fallback(phone_conf_t *cf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	}
     }
     return ret;
+}
+
+/* --------------- Additional for UTF-8 support ----------------- */
+void
+preconvert(char *input, char *output, int n_char)
+{
+    if(bimsp_codeset == XCIN_BYTE_UTF8) {
+        const char *inptr = input;
+        size_t inbytesleft = n_char;
+        size_t outbytesleft = n_char/2*3 +1;
+        
+        char *outptr = output;
+    
+        iconv_t cd;
+    
+        cd = iconv_open("UTF-8", "BIG-5");
+        iconv (cd, (char **)&inptr, &inbytesleft, &outptr, &outbytesleft);
+        
+        iconv_close(cd);
+    }
+    else 
+	strncpy(output, input, n_char);
 }
 
 /*----------------------------------------------------------------------------
@@ -1021,8 +1118,14 @@ simple_keystroke(phone_conf_t *cf, phone_iccf_t *iccf,
 	}
 	else {
 	    char *str = (char *)bimsQueryLastZuYinString(inpinfo->imid);
+
+	    char *output = 
+		(char *)xcin_malloc(strlen(str)/2*bimsp_codeset+1, 1);
+            preconvert(str, output, strlen(str));
 	    inpinfo->keystroke_len =
-	        big5_mbs_wcs(inpinfo->s_keystroke, str, N_MAX_KEYCODE+1);
+	        bimsp_mbs_wcs(inpinfo->s_keystroke, output, N_MAX_KEYCODE+1);
+            free(output);
+
 	    determine_selection(cf, inpinfo, iccf, BC_STATE_SELECTION_ZHI, 
 				(KeySym)0, NULL);
 	    inpinfo->cch_publish.wch = (wchar_t)0;
@@ -1121,8 +1224,13 @@ phone_show_keystroke(void *conf, simdinfo_t *simdinfo)
 		str1 = pho2pinyinw(cf->pinyin, str);
 	    else
 		str1 = str;
-	    if (str1)
-		big5_mbs_wcs(keystroke_list, str1, 5);
+	    if (str1){
+                char *output = 
+	            (char *)xcin_malloc(strlen(str1)/2*bimsp_codeset+1, 1);
+                preconvert(str, output, strlen(str1));
+		bimsp_mbs_wcs(keystroke_list, output, 5);
+		free(output);
+	    }
 	    free(str);
 	}
 	if (keystroke_list[0].wch != (wchar_t)0)

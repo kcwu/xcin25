@@ -66,6 +66,10 @@ xcin-2.5.3-pre3:  2001/12
 22. Fix FreeBSD gb2312 encoding name from euc to euccn.
     Thanks to statue <statue.bbs@bbs.sayya.org>.
 
+23. Add UTF-8, OnTheSpot, and cj5 patches.
+    Thanks to <firefly@firefly.idv.tw>
+
+
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
 1. Fix memory leakage problem in IMdkit: i18nIc.c.

@@ -42,9 +42,10 @@
 #define DRAW_LCCH	4
 
 static xmode_t display_mode;
-static char inpn_english[11];
-static char inpn_sbyte[11];
-static char inpn_2bytes[11];
+// Modify by Firefly(firefly@firefly.idv.tw)
+static char inpn_english[101];
+static char inpn_sbyte[101];
+static char inpn_2bytes[101];
 
 #define GC_idx		0	/* Window fg_color, bg_color */
 #define GCM_idx		1	/* For spot mark: mfg_color, mbg_color */
@@ -249,8 +250,9 @@ overspot_win_adjust(gui_t *gui, winlist_t *win,
     ic_rec->ic_value_update &= ~CLIENT_SETIC_PRE_AREA;
     new_x = oc[idx]->pos_x +
 	    ic_rec->pre_attr.spot_location.x + ic_rec->pre_attr.area.x;
+    // Modify by Firefly(firefly@firefly.idv.tw)
     new_y = oc[idx]->pos_y +
-	    ic_rec->pre_attr.spot_location.y + ic_rec->pre_attr.area.y + 15;
+	    ic_rec->pre_attr.spot_location.y + ic_rec->pre_attr.area.y;
     if (new_x + winlen > gui->display_width)
 	new_x = gui->display_width - winlen - 5;
     if (new_y + win->height > gui->display_height)
@@ -301,7 +303,8 @@ overspot_draw_multich(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
 	if ((len = wch_mblen(selkey))) {
 */
 	if (selkey->wch != (wchar_t)0) {
-	    len = (selkey->s[1] != '\0') ? 2 : 1;
+	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    len = strlen(selkey->s);
 	    XmbDrawImageString(gui->display, win->window, font->fontset,
 			gc[spot_GC_idx], x, y, (char *)selkey->s, len);
 	    x += (XmbTextEscapement(font->fontset, (char *)selkey->s, len) + 2);
@@ -310,7 +313,8 @@ overspot_draw_multich(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
 /*
 	    if (! (len = wch_mblen(cch))) {
 */
-	    len = (cch->s[1] != '\0') ? 2 : 1;
+	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    len = strlen(cch->s);
 	    if (cch->wch == (wchar_t)0) {
 		toggle_flag = -1;
 		break;
@@ -394,7 +398,8 @@ overspot_draw_multichBW(gui_t *gui, winlist_t *win, font_t *font , GC *gc,
 	if ((len = wch_mblen(selkey))) {
 */
 	if (selkey->wch != (wchar_t)0) {
-	    len = (selkey->s[1] != '\0') ? 2 : 1;
+	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    len = strlen(selkey->s);
 	    nwchs_to_mbs(buf+bufidx, selkey, 1, BUFSIZE-bufidx);
 	    strncat(buf, " ", BUFSIZE-bufidx-len);
 	    bufidx += (len + 1);
@@ -407,7 +412,8 @@ overspot_draw_multichBW(gui_t *gui, winlist_t *win, font_t *font , GC *gc,
 		toggle_flag = -1;
 		break;
 	    }
-	    len = (cch->s[1] != '\0') ? 2 : 1;
+	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    len = strlen(cch->s);
 	    nwchs_to_mbs(buf+bufidx, cch, 1, BUFSIZE-bufidx);
 	    bufidx += len;
 	}
@@ -497,7 +503,8 @@ draw_lcch(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
 /*
 	len = wch_mblen(tmp);
 */
-	len = (tmp->s[1] == '\0') ? 1 : 2;
+	// Modify by Firefly(firefly@firefly.idv.tw)
+	len = strlen(tmp->s);
 	XmbDrawImageString(gui->display, win->window, font->fontset, 
 		gc[GCM_idx], x, y, (char *)tmp->s, len);
 	x += XmbTextEscapement(font->fontset, (char *)tmp->s, len);
@@ -550,8 +557,8 @@ static int
 draw_inpname(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
 	     int x, int y, IM_Context_t *imc)
 {
-    char inpname[15], *inpn=NULL, *inpb=NULL;
-    char *s, buf[9];
+    char inpname[100], *inpn=NULL, *inpb=NULL;
+    char *s, buf[100];
     int len, gc_index;
 
     inpb = ((imc->inp_state & IM_2BYTES)) ? inpn_2bytes : inpn_sbyte;
@@ -569,8 +576,8 @@ draw_inpname(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
 /*
 	    extract_char(imc->inpinfo.inp_cname, buf, sizeof(buf));
 */
-	    strncpy(buf, imc->inpinfo.inp_cname, 2);
-	    buf[2] = '\0';
+	    // Modify by Firefly(firefly@firefly.idv.tw)
+	    strcpy(buf, imc->inpinfo.inp_cname);
 	    inpn = buf;
 	}
     }
@@ -579,11 +586,11 @@ draw_inpname(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
 
     if ((display_mode & OVERSPOT_USE_USRCOLOR)) {
 	gc_index = GCLINE_idx;
-	len = snprintf(inpname, 15, "%s|%s", inpn, inpb);
+	len = snprintf(inpname, 100, "%s|%s", inpn, inpb);
     }
     else {
 	gc_index = GC_idx;
-	len = snprintf(inpname, 15, "[%s|%s]", inpn, inpb);
+	len = snprintf(inpname, 100, "[%s|%s]", inpn, inpb);
     }
     XmbDrawImageString(gui->display, win->window, font->fontset, 
 		gc[gc_index], x, y, inpname, len);
@@ -736,12 +743,10 @@ gui_overspot_init(gui_t *gui, xccore_t *xccore)
     extract_char(gui->inpn_sbyte, inpn_sbyte, 11);
     extract_char(gui->inpn_2bytes, inpn_2bytes, 11);
 */
-    strncpy(inpn_english, gui->inpn_english, 2);
-    strncpy(inpn_sbyte, gui->inpn_sbyte, 2);
-    strncpy(inpn_2bytes, gui->inpn_2bytes, 2);
-    inpn_english[2] = '\0';
-    inpn_sbyte[2] = '\0';
-    inpn_2bytes[2] = '\0';
+    // Modify by Firefly(firefly@firefly.idv.tw)
+    strcpy(inpn_english, gui->inpn_english);
+    strcpy(inpn_sbyte, gui->inpn_sbyte);
+    strcpy(inpn_2bytes, gui->inpn_2bytes);
 
     win = gui_new_win();
     win->wtype = WTYPE_OVERSPOT;

@@ -21,7 +21,7 @@
 (define ULINE_COLOR		"cyan")
 (define GRID_COLOR		"white")
 (define X_GEOMETRY  		"45x2+200-1")
-(define START_MAINWIN2		"NO")
+(define START_MAINWIN2		"YES")
 (define MAINWIN2_GEOMETRY	"27x1+200-1")
 (define XCIN_HIDE   		"NO")
 (define XKILL_DISABLE		"NO")
@@ -32,15 +32,16 @@
 (define DIFF_BEEP		"YES")
 (define KEYBOARD_TRANSLATE	"NO")
 
-(define LOCALE	'(zh_TW.Big5 zh_HK.Big5HKSCS zh_CN.GB2312 zh_CN.GBK))
+(define LOCALE	'(zh_TW.Big5 zh_HK.Big5HKSCS zh_CN.GB2312 zh_CN.GBK zh_TW.UTF-8))
 
 ;
 ;  XIM Input Style Adjustments.
 ;
-(define INPUT_STYLE		'(Root OverTheSpot))
+(define INPUT_STYLE		'(Root OverTheSpot OnTheSpot))
 (define OVERSPOT_USE_USRCOLOR	"YES")
 (define OVERSPOT_USE_USRFONTSET "YES")
 (define OVERSPOT_WINDOW_ONLY	"NO")
+(define ONSPOT_PREEDIT_MODE     "REVERSE")
 
 ;
 ;  Special Trigger Keys.
@@ -104,6 +105,54 @@
         ; The following has effect only when AUTO_SELECTION is NO
           (AUTO_UPCHAR          YES)))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;  This is the global configuration of the zh_TW.UTF-8 locale
+;
+(define zh_TW.UTF-8
+  '((DEFAULT_IM         "cj5")
+    (DEFAULT_IM_MODULE  "gen_inp")
+    (DEFAULT_IM_SINMD   "DEFAULT")
+    (PHRASE             "default.phr")
+    (CINPUT             (cj5 simplex5 phone jyutping bimspinyin bimsphone
+                         array30 jyutping0 zh_hex))
+    (FONTSET            "-*-medium-r-normal--24-0-0-0-c-0-iso10646-1,-*-medium-r-*-24-*-*")
+    (OVERSPOT_FONTSET   "-*-medium-r-normal--16-0-0-0-c-0-iso10646-1,-*-medium-r-*-16-*-*")))
+
+(define cj5@utf-8
+        '((SETKEY               1)))
+
+(define simplex5@utf-8
+        '((SETKEY               2)))
+
+(define phone@utf-8
+        '((SETKEY               3)
+          (END_KEY              YES)
+          (BEEP_DUPCHAR         YES)))
+
+(define jyutping@utf-8
+        '((SETKEY               4)
+          (END_KEY              YES)
+          (BEEP_DUPCHAR         YES)))
+
+(define bimsphone@utf-8
+        '((SETKEY               6)
+          (MODULE               "bimsphone")))
+
+(define bimspinyin@utf-8
+        '((SETKEY               7)
+          (MODULE               "bimsphone")))
+
+(define array30@utf-8
+        '((SETKEY               8)
+          (BEEP_DUPCHAR         YES)
+          (DISABLE_SEL_LIST     "w")
+          (KEYSTROKE_REMAP      "t:0xaaba;T:0xaaba;")))
+
+(define jyutping0@utf-8
+        '((SETKEY               9)
+          (BEEP_DUPCHAR         YES)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -196,8 +245,8 @@
     (PHRASE		"default.phr")
     (CINPUT             (cj simplex phone bimspinyin bimsphone jyutping
 			 array30 jyutping0 zh_hex))
-    (FONTSET		"-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-big5hkscs-0,-*-24-*-c-*-big5hkscs-0")
-    (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-medium-r-*-16-*-big5hkscs-0,-*-16-*-c-*-big5hkscs-0")))
+    (FONTSET		"-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-big5-0,-*-24-*-c-*-big5hkscs-0")
+    (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-medium-r-*-16-*-big5-0,-*-16-*-c-*-big5hkscs-0")))
 ;
 ;  Here are detailed configuration of each IM (for zh_HK.Big5HKSCS locale).
 ;

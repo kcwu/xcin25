@@ -67,6 +67,8 @@ typedef struct {
 	 uline_color[64], grid_color[64], label_color[64];
     char xim_name[64];
     char input_styles[1024];
+    // Add by Firefly(firefly@firefly.idv.tw)
+    char onspot_preedit_mode[64];
 } inner_rc_t;
 
 
