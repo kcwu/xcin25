@@ -74,6 +74,8 @@ QD.8:  我發現注音輸入法中可以連續輸入兩個 ㄅ，或者可以輸入如 ㄚㄉ 這樣的
 QD.9:  當我切換到 bimsphone 輸入法時，卻出現如下錯誤訊息，該怎麼辦呢？
        xcin: Warning: bimsphone: bimsphone@big5: cannot open data file: tsi.db
        xcin: Warning: error loading IM: bimsphone@big5, ignore.
+QD.10: 有沒有比 bimsphone 更好用的自動猜字注音輸入法呢？
+QD.11: 該如何打全形標點符號呢？
 
 E. xcin 設計相關問題:
 ---------------------
@@ -1005,6 +1007,48 @@ libtabe 的安裝路徑。那兩個檔案通常是放在這裡:
 
 將 TSI_FNAME 改成您的 tsi.db 的確實路徑，同時將 YIN_FNAME 改成您的 yin.db 的
 確實路徑。最後，重新啟動 xcin 即可。
+
+
+------------------------
+QD.10: 有沒有比 bimsphone 更好用的自動猜字注音輸入法呢？
+
+有的。這是由中研院資訊所「徐讚昇」博士指導，龔律全、陳康本先生所設計的「酷音
+輸入法」模組，提供了比 bimsphone 更好用且接近微軟平台自然輸入法的功能，是一
+個相當不錯的選擇。如果您願意嘗試，可以參觀「酷音輸入法」的網頁:
+
+	http://chewing.oio.cx/
+
+下載其程式原始碼與安裝、使用說明。
+
+
+------------------------
+QD.11: 該如何打全形標點符號呢？
+
+XCIN 遵循舊倚天中文系統的標點符號輸入方式，在預設情況下，不論您在那一種輸入
+法下，您都可以用以下的組合鍵來全形打標點符號:
+
+shift+alt+i	、
+shift+alt+o	。
+shift+alt+.	．
+shift+alt+,	，
+shift+alt+;	；
+shift+alt+'	：
+shift+alt+h	「
+shift+alt+j	」
+shift+alt+f	『
+shift+alt+g	』
+shift+alt+m	─
+shift+alt+l	│
+shift+alt+p	﹖
+
+除此之外還有很多。而這些標點符號的設定，全部放在
+
+	$xcin_prefix/lib/xcin/tab/$encoding/default.phr
+
+檔中，其中 $xcin_prefix 是您當初安裝 xcin 的路徑，可能是 /usr 或 /usr/local
+或 /usr/X11R6。而 $encoding 為內碼名稱，如 big5, gb2312 .... 等等。有關這個
+檔案的內容與設定方式，請參考 xcin/doc/modules/im_comm 的說明 (尋找 qphrase
+字眼)。
 
 
 
