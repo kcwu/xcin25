@@ -240,6 +240,9 @@
 /* Define if you have the <wchar.h> header file.  */
 #undef HAVE_WCHAR_H
 
+/* Define if you have the X11 library (-lX11).  */
+#undef HAVE_LIBX11
+
 /* Define if you have the bims library (-lbims).  */
 #undef HAVE_LIBBIMS
 

@@ -22,46 +22,6 @@ AC_SUBST(AGE_VER)
 AC_MSG_RESULT([Configuring for XCIN $RELEASE_VER ....])
 
 dnl-----------------------------------------------------------------------
-dnl Checks for Host type.
-dnl-----------------------------------------------------------------------
-LIBS="$OLD_LIBS"
-
-extra_link_flag=''
-case "$host_os" in
-    linux*)  
-	os_type=LINUX
-        AC_DEFINE(LINUX)
-	;;
-    freebsd*)
-	os_type=FREEBSD
-        AC_DEFINE(FREEBSD)
-	;;
-    hp*)
-	os_type=HPUX
-        AC_DEFINE(HPUX)
-	;;
-    openbsd*)
-	os_type=OPENBSD
-	AC_DEFINE(OPENBSD)
-	;;
-    netbsd*)
-	os_type=NETBSD
-	extra_link_flag='-Wl,-R'
-	AC_DEFINE(NETBSD)
-	;;
-    solaris*)
-	os_type=SOLARIS
-	AC_DEFINE(SOLARIS)
-	;;
-    *)
-	AC_MSG_RESULT([Warning: xcin does not support this system yet.])
-	AC_MSG_RESULT([Warning: please report this to xcin@linux.org.tw])
-	os_type=UNKNOWN
-	;;
-esac
-AC_SUBST(os_type)
-
-dnl-----------------------------------------------------------------------
 dnl xcin configure command line options.
 dnl-----------------------------------------------------------------------
 AC_ARG_ENABLE(debug,
@@ -92,8 +52,7 @@ AC_ARG_WITH(extra_inc,
     [  test x$withval != x && with_extra_inc="-I$withval" ])
 
 AC_ARG_WITH(extra_lib,
-    [  --with-extra-lib=PATH     set the extra library dir.],
-    [  test x$withval != x && with_extra_lib="-L$withval" ])
+    [  --with-extra-lib=PATH     set the extra library dir.])
 
 AC_ARG_WITH(db_inc,
     [  --with-db-inc=PATH        set the include dir of Berkeley DB2/3.],
@@ -102,12 +61,8 @@ AC_ARG_WITH(db_inc,
 
 AC_ARG_WITH(db_lib,
     [  --with-db-lib=PATH        set the library dir of Berkeley DB2/3.],
-    [  if test x$withval != x; then
-	 if test x$extra_link_flag = x; then
-	   with_db_lib="-L$withval"
-	 else
-	   with_db_lib="-L$withval $extra_link_flag$withval"; fi; fi ],
-    [  with_db_lib='' ])
+    [  test x$withval != x && test_db_lib="-L$withval" ],
+    [  test_db_lib='' ])
 
 AC_ARG_WITH(tabe_inc,
     [  --with-tabe-inc=PATH      set the include dir of libtabe.],
@@ -116,12 +71,8 @@ AC_ARG_WITH(tabe_inc,
 
 AC_ARG_WITH(tabe_lib,
     [  --with-tabe-lib=PATH      set the library dir of libtabe.],
-    [  if test x$withval != x; then
-	 if test x$extra_link_flag = x; then
-	   with_tabe_lib="-L$withval"
-	 else
-	   with_tabe_lib="-L$withval $extra_link_flag$withval"; fi; fi ],
-    [  with_tabe_lib='' ])
+    [  test x$withval != x && test_tabe_lib="-L$withval" ],
+    [  test_tabe_lib='' ])
 
 AC_ARG_WITH(intl_inc,
     [  --with-intl-inc=PATH      set the include dir of libintl (gettext).],
@@ -130,12 +81,8 @@ AC_ARG_WITH(intl_inc,
 
 AC_ARG_WITH(intl_lib,
     [  --with-intl-lib=PATH      set the library dir of libintl (gettext).],
-    [  if test x$withval != x; then
-	 if test x$extra_link_flag = x; then
-	   with_intl_lib="-L$withval"
-	 else
-	   with_intl_lib="-L$withval $extra_link_flag$withval"; fi; fi ],
-    [  with_intl_lib='' ])
+    [  test x$withval != x && test_intl_lib="-L$withval" ],
+    [  test_intl_lib='' ])
 
 AC_ARG_WITH(iconv_inc,
     [  --with-iconv-inc=PATH     set the include dir of iconv header file.],
@@ -144,12 +91,8 @@ AC_ARG_WITH(iconv_inc,
 
 AC_ARG_WITH(iconv_lib,
     [  --with-iconv-lib=PATH     set the include dir of iconv library.],
-    [  if test x$withval != x; then
-	 if test x$extra_link_flag = x; then
-	   with_iconv_lib="$withval"
-	 else
-	   with_iconv_lib="-L$withval $extra_link_flag$withval"; fi; fi ],
-    [  with_iconv_lib='' ])
+    [  test x$withval != x && test_iconv_lib="-L$withval" ],
+    [  test_iconv_lib='' ])
 
 dnl-----------------------------------------------------------------------
 dnl Setting default options
@@ -173,7 +116,7 @@ if test x$with_extra_inc = x; then
     with_extra_inc="-I$with_extra_prefix/include"
 fi
 if test x$with_extra_lib = x; then
-    with_extra_lib="-L$with_extra_prefix/lib"
+    with_extra_lib="$with_extra_prefix/lib"
 fi
 
 AC_SUBST(program_prefix)
@@ -181,13 +124,11 @@ AC_SUBST(with_xcin_rcdir)
 AC_SUBST(with_xcin_dir)
 AC_SUBST(with_locale_dir)
 AC_SUBST(with_man_dir)
-AC_SUBST(with_extra_inc)
-AC_SUBST(with_extra_lib)
 
 incs="$with_extra_inc $with_db_inc $with_tabe_inc $with_intl_inc \
       $with_iconv_inc"
-libs="$with_extra_lib $with_db_lib $with_tabe_lib $with_intl_lib \
-      $with_iconv_lib"
+libs="-L$with_extra_lib $test_db_lib $test_tabe_lib $test_intl_lib \
+      $test_iconv_lib"
 
 dnl-----------------------------------------------------------------------
 dnl Check compiler: You can specify in 'CC=<..> ./configure'
@@ -237,6 +178,42 @@ dnl-----------------------------------------------------------------------
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
+
+dnl-----------------------------------------------------------------------
+dnl Checks for Host type.
+dnl-----------------------------------------------------------------------
+case "$host_os" in
+    linux*)  
+	os_type=LINUX
+        AC_DEFINE(LINUX)
+	;;
+    freebsd*)
+	os_type=FREEBSD
+        AC_DEFINE(FREEBSD)
+	;;
+    hp*)
+	os_type=HPUX
+        AC_DEFINE(HPUX)
+	;;
+    openbsd*)
+	os_type=OPENBSD
+	AC_DEFINE(OPENBSD)
+	;;
+    netbsd*)
+	os_type=NETBSD
+	AC_DEFINE(NETBSD)
+	;;
+    solaris*)
+	os_type=SOLARIS
+	AC_DEFINE(SOLARIS)
+	;;
+    *)
+	AC_MSG_RESULT([Warning: xcin does not support this system yet.])
+	AC_MSG_RESULT([Warning: please report this to xcin@linux.org.tw])
+	os_type=UNKNOWN
+	;;
+esac
+AC_SUBST(os_type)
 
 dnl-----------------------------------------------------------------------
 dnl Checks for programs.
@@ -427,11 +404,10 @@ if test $found = y; then
     if test $found = n; then
 	AC_CHECK_LIB(intl, gettext,
 	    [ found=y; AC_DEFINE(HAVE_GETTEXT)
-	      with_intl_lib="$with_intl_lib -lintl" ])
+	      test_intl_lib="$test_intl_lib -lintl" ],
+	    [ test_intl_lib='' ])
     fi
 fi
-AC_SUBST(with_intl_inc)
-AC_SUBST(with_intl_lib)
 
 dnl-----------------------------------------------------------------------
 dnl Checks for iconv() function/library.
@@ -458,7 +434,7 @@ if test $found = n; then
 iconv_t cd = iconv_open("","");
 iconv(cd,NULL,NULL,NULL,NULL);
 iconv_close(cd);], [ found=y; AC_DEFINE(HAVE_ICONV)
-		     with_iconv_lib="$with_iconv_lib -l$f" ], [ found=n ])
+		     test_iconv_lib="$test_iconv_lib -l$f" ], [ found=n ])
 	if test $found = y; then
 	    AC_MSG_RESULT([yes])
 	    break
@@ -472,8 +448,6 @@ if test $found = n; then
     AC_MSG_RESULT([Please use --with-iconv-lib to configure.])
     exit 1
 fi
-AC_SUBST(with_iconv_inc)
-AC_SUBST(with_iconv_lib)
 
 dnl-----------------------------------------------------------------------
 dnl Checks for Berkeley DB2/3 library.
@@ -481,13 +455,13 @@ dnl-----------------------------------------------------------------------
 LIBS="$OLD_LIBS"
 for f in db db3; do
     AC_CHECK_LIB($f, db_create,
-	[ found=y; with_db_lib="$with_db_lib -l$f" ], [ found=n ])
+	[ found=y; test_db_lib="$test_db_lib -l$f" ], [ found=n ])
     test $found = y && break
 done
 if test $found = n; then
     for f in db db2; do
 	AC_CHECK_LIB($f, db_open,
-	    [ found=y; with_db_lib="$with_db_lib -l$f" ], [ found=n ])
+	    [ found=y; test_db_lib="$test_db_lib -l$f" ], [ found=n ])
 	test $found = y && break
     done
 fi
@@ -496,8 +470,6 @@ if test $found = n; then
     AC_MSG_RESULT([Please use --with-db-lib to configure.])
     exit 1
 fi
-AC_SUBST(with_db_inc)
-AC_SUBST(with_db_lib)
 
 dnl-----------------------------------------------------------------------
 dnl Checks for X11R6 library
@@ -505,21 +477,17 @@ dnl-----------------------------------------------------------------------
 LIBS="$OLD_LIBS"
 AC_PATH_X
 if test x$x_libraries != x; then
-    x_libraries="-L$x_libraries"
-    LDFLAGS="$LDFLAGS $x_libraries"
+    LDFLAGS="$LDFLAGS -L$x_libraries"
 fi
 if test x$x_includes != x; then
     x_includes="-I$x_includes"
 fi
-AC_CHECK_LIB(X11, XmbDrawImageString, 
-    [ x_libraries="$x_libraries -lX11 -lXext" ],
+AC_CHECK_LIB(X11, XmbDrawImageString, ,
     [ AC_MSG_RESULT([You need X11R6 to compile xcin.])
       AC_MSG_RESULT([Please use --x-includes and --x-libraries to configure.])
       exit 1 ])
 
 LDFLAGS="$OLD_LDFLAGS $libs"
-AC_SUBST(x_includes)
-AC_SUBST(x_libraries)
 
 dnl-----------------------------------------------------------------------
 dnl Checks for tabe & bims libraries.
@@ -529,7 +497,7 @@ if test x$with_tabe_lib = x; then
     tabe_data="$with_extra_prefix/share/tabe/tsiyin/"
 else
     tabe_data=`echo $with_tabe_lib | \
-	sed 's|^-L\(.*\)/lib$|\1/share/tabe/tsiyin/|'`
+	sed 's|^\(.*\)/lib$|\1/share/tabe/tsiyin/|'`
 fi
 if test ! -f $tabe_data/tsi.db; then
     tabe_data=''
@@ -544,7 +512,7 @@ CPPFLAGS="$CPPFLAGS $x_includes"
 AC_CHECK_LIB(tabe, tabeZhiInfoLookupYin, , 
     [ AC_MSG_RESULT([You need libtabe to compile bimsphone module.])
       AC_MSG_RESULT([Please use --with-tabe-lib to configure.])
-      exit 1], [ $with_db_lib ])
+      exit 1], [ $test_db_lib ])
 
 AC_CHECK_HEADERS(bims.h, ,
     [ AC_MSG_RESULT([bims.h is not available.])
@@ -554,11 +522,52 @@ AC_CHECK_HEADERS(bims.h, ,
 AC_CHECK_LIB(bims, bimsInit, ,
     [ AC_MSG_RESULT([You need libbims to compile bimsphone module.])
       AC_MSG_RESULT([Please use --with-tabelib to configure.])
-      exit 1], [ -ltabe $with_db_lib ])
-with_tabe_lib="$with_tabe_lib -lbims -ltabe"
+      exit 1], [ -ltabe $test_db_lib ])
+test_tabe_lib="$test_tabe_lib -lbims -ltabe"
 
+dnl-----------------------------------------------------------------------
+dnl Set proper paths of libraries.
+dnl-----------------------------------------------------------------------
+with_extra_lib="-L$with_extra_lib -rpath $with_extra_lib"
+
+if test x$x_libraries = x; then
+    x_libraries="-lX11 -lXext"
+else
+    x_libraries="-L$x_libraries -lX11 -lXext -rpath $x_libraries"
+fi
+if test x$with_db_lib = x; then
+    with_db_lib="$test_db_lib"
+else
+    with_db_lib="$test_db_lib -rpath $with_db_lib"
+fi
+if test x$with_tabe_lib = x; then
+    with_tabe_lib="$test_tabe_lib"
+else
+    with_tabe_lib="$test_tabe_lib -rpath $with_tabe_lib"
+fi
+if test x$with_intl_lib = x; then
+    with_intl_lib="$test_intl_lib"
+else
+    with_intl_lib="$test_intl_lib -rpath $with_intl_lib"
+fi
+if test x$with_iconv_lib = x; then
+    with_iconv_lib="$test_iconv_lib"
+else
+    with_iconv_lib="$test_iconv_lib -rpath $with_iconv_lib"
+fi
+
+AC_SUBST(with_extra_inc)
+AC_SUBST(with_extra_lib)
+AC_SUBST(x_includes)
+AC_SUBST(x_libraries)
+AC_SUBST(with_db_inc)
+AC_SUBST(with_db_lib)
 AC_SUBST(with_tabe_inc)
 AC_SUBST(with_tabe_lib)
+AC_SUBST(with_intl_inc)
+AC_SUBST(with_intl_lib)
+AC_SUBST(with_iconv_inc)
+AC_SUBST(with_iconv_lib)
 
 dnl-----------------------------------------------------------------------
 dnl Output Makefiles and config.h
