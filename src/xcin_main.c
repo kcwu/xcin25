@@ -407,7 +407,7 @@ static void
 read_core_config_IM(void)
 {
     char *cmd[2], value[256], *s, *s1, objname[100], objenc[100];
-    char *fmt = N_("%s:\n\tIM section \"%s\": %s: value not specified.\n");
+    char *fmt = N_("%s:\n\tIM section \"%s\": %s: %s.\n");
     xcin_rc_t *xrc = &(xcin_core.xcin_rc);
     locale_t *locale = &(xcin_core.xcin_rc.locale);
     int setkey;
@@ -423,14 +423,18 @@ read_core_config_IM(void)
 	    cmd[0] = objname;
             if (! get_resource(xrc, cmd, value, 256, 2))
 		perr(XCINMSG_ERROR, fmt, 
-		     xcin_core.xcin_rc.rcfile, objname, cmd[1]);
+		     xcin_core.xcin_rc.rcfile, objname, cmd[1],
+		     N_("value not specified"));
 	}
 
 	/* setkey should be uniquely defined */
 	set_data(&setkey, RC_INT, value, 0, 0);
-	if (setkey < 0 || setkey > MAX_IM_ENTRY ||
-	    IM_check_registered(setkey) == True)
-	    perr(XCINMSG_ERROR,_(fmt),xcin_core.xcin_rc.rcfile,objname,cmd[1]);
+	if (setkey < 0 || setkey > MAX_IM_ENTRY)
+	    perr(XCINMSG_ERROR,_(fmt),xcin_core.xcin_rc.rcfile,objname,cmd[1],
+		N_("invalid range of value"));
+	else if(IM_check_registered(setkey) == True)
+	    perr(XCINMSG_ERROR,_(fmt),xcin_core.xcin_rc.rcfile,objname,cmd[1],
+		N_("value conflict with other module"));
 
 	cmd[1] = "MODULE";
         if (get_resource(xrc, cmd, value, 256, 2)) {
