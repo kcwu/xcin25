@@ -35,6 +35,8 @@ QB.6:  我在安裝 xcin 時，configure 沒有問題，但安裝到一半卻出現以下的錯誤:
        make[3]: *** [set_locale.o] Error 1
 QB.7:  為什麼我執行 xcin 時，會跑出如下的錯誤訊息呢？
        xcin internal error: NULL xcin locale_sub_path
+QB.8:  為什麼我執行 xcin 時，會跑出如下的錯誤訊息呢？
+       xcin: error: IMOpenIM() with name "xcin" transport "X/" failed.
 
 C. xcinrc 設定相關問題:
 -----------------------
@@ -398,6 +400,25 @@ QB.7:  為什麼我執行 xcin 時，會跑出如下的錯誤訊息呢？
 另一種可能性是您的系統的 locale 環境並沒有安裝好，請您參考本文 QA.2 與
 QA.3 的說明檢查一遍。
 
+
+------------------------
+QB.8:  為什麼我執行 xcin 時，會跑出如下的錯誤訊息呢？
+       xcin: error: IMOpenIM() with name "xcin" transport "X/" failed.
+
+多半的情況是您的系統中原本已跑了一個 xcin 了，但您又用相同的 XIM
+server 名試圖再跑一個才會如此。解決的方式為: 停掉您原來已在跑的
+xcin:
+
+	ps ax | grep xcin | grep -v grep	(找出背景中執行的 xcin)
+	kill <背景中執行的 xcin 的 pid>
+
+然後再跑新的 xcin 即可。或者，使用別的 XIM server 名來跑新的 xcin:
+
+	xcin -x <XIM server 名> &
+
+請注意，若使用不同的 XIM server 名來跑的話，其他的 XIM client 也必
+須使用此 XIM server 名，如此才能與該 xcin 連線。詳見 UserGuide 的
+說明。
 
 
 C. xcinrc 設定相關問題:
