@@ -80,7 +80,8 @@ typedef icode_idx_t 	ichar_t;      /* index into icode1/icode2 array */
 /* KhoGuan add */
 #include<limits.h>
 typedef signed char tsisize_t;        /* max length of a "tsi" is 127 "zi" */
-#define  MAX_TSI_LEN         SCHAR_MAX
+/*#define  MAX_TSI_LEN         SCHAR_MAX*/
+#define  MAX_TSI_LEN         30		/* smaller length for less memory consumption before fix */
 
 #define  INVALID_ICODE_IDX      -128
 #define  FIRST_TSI_NUM          200000
