@@ -194,7 +194,7 @@ msgstr "太多的輸入模式設定: 上限=%d。\n"
 #: ../src/xim.c:995
 #, c-format
 msgid "IMOpenIM() with name \"%s\" transport \"%s\" failed.\n"
-msgstr "IMOpenIM(): XIM 名稱 \"%s\" 傳輸埠 \"%s\" 開啟錯誤。\n"
+msgstr "IMOpenIM(): XIM 名稱 \"%s\" 傳輸埠 \"%s\" 開啟錯誤。您可能已啟動過 xcin ，請檢查\n"
 
 #: ../src/xim.c:999
 #, c-format
