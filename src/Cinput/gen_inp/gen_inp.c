@@ -1192,22 +1192,6 @@ static int my_mbstowcs(gen_inp_conf_t *cf, wch_t *wcs, const char *mbs, size_t n
     return i;
 }
 
-static int my_wcstombs(gen_inp_conf_t *cf, char *mbs, const wch_t *wcs, size_t nbyte)
-{
-    int i;
-    size_t nb;
-    if(cf->codeset == XCIN_BYTE_UTF8) {
-	nb=3;
-    } else {
-	nb=2;
-    }
-    for(i=0; i<nbyte && wcs->wch; i+=nb, wcs++) {
-	memcpy(mbs+i, wcs->s, nb);
-	mbs[i+nb]='\0';
-    }
-    return i;
-}
-
 static void
 record_commit(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, char *cmtstr)
 {
@@ -1308,7 +1292,7 @@ may_next(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, wch_t word)
 	tmp[match+1].wch = '\0';
 	if(tmp[0].wch=='\0') continue;
 
-	len=my_wcstombs(cf, tmp_mbs, tmp, sizeof(tmp_mbs));
+	len=wchs_to_mbs(tmp_mbs, tmp, sizeof(tmp_mbs));
 	if(iconv_to_big5(cf, tmp_mbs, tmp_mbs_big5, sizeof(tmp_mbs_big5))!=0)
 	    continue;
 	strcpy(tsi_str, tmp_mbs_big5);
@@ -1347,9 +1331,7 @@ guess_next(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf,
 	    if (guess-match > 2)
 		continue;
 
-	    memcpy(matched_wc, histend-match, match*sizeof(wch_t));
-	    matched_wc[match].wch='\0';
-	    my_wcstombs(cf, matched_mb, matched_wc, sizeof(matched_mb));
+	    nwchs_to_mbs(matched_mb, histend-match, match, sizeof(matched_mb));
 	    if(iconv_to_big5(cf, matched_mb, matched_mb_big5, sizeof(matched_mb_big5))!=0)
 		continue;
 	    strcpy(tsi_str, matched_mb_big5);
@@ -1410,11 +1392,8 @@ gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 			choice ++;
 		}
 		if (choice >= 1 && choice <= iccf->nreltsi) {
-		    wch_t tmp[TSISZ+1];
-		    memcpy(tmp, iccf->reltsi+iccf->tsiindex[choice-1],
-			    iccf->tsigroup[choice]*sizeof(wch_t));
-		    tmp[iccf->tsigroup[choice]].wch='\0';
-		    my_wcstombs(cf, cch_s, tmp, sizeof(cch_s));
+		    nwchs_to_mbs(cch_s, iccf->reltsi+iccf->tsiindex[choice-1], 
+			    iccf->tsigroup[choice], sizeof(cch_s));
 		    inpinfo->cch = cch_s;
 		    ret |= IMKEY_COMMIT;
 		}
@@ -1450,6 +1429,8 @@ gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	    iccf->tsiindex[0] = 0;
 	    for (i=0; i<ncandi; i++) {
 		int n = iccf->nreltsi;
+		if(iccf->tsiindex[n] + candi[i].len > 15) /* TODO crash, who overflow? */
+		    break;
 		memcpy(iccf->reltsi+iccf->tsiindex[n], candi[i].str,
 		       candi[i].len*sizeof(wch_t));
 		iccf->tsigroup[n+1] = candi[i].len;
