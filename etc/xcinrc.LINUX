@@ -117,8 +117,8 @@
     (PHRASE             "default.phr")
     (CINPUT             (cj5 simplex5 phone jyutping bimspinyin bimsphone
                          array30 jyutping0 zh_hex))
-    (FONTSET            "-*-medium-r-normal--24-0-0-0-c-0-iso10646-1,-*-medium-r-*-24-*-*")
-    (OVERSPOT_FONTSET   "-*-medium-r-normal--16-0-0-0-c-0-iso10646-1,-*-medium-r-*-16-*-*")))
+    (FONTSET            "-arphic-medium-*-24-*-iso10646-1,-*-medium-*-24-*")
+    (OVERSPOT_FONTSET   "-arphic-medium-*-16-*-iso10646-1,-*-medium-*-16-*")))
 
 (define cj5@utf-8
         '((SETKEY               1)))
@@ -306,5 +306,6 @@
 	  (INP_CNAME_big5hkscs	"0xa4ba+0xbd58")
 	  (INP_CNAME_gb2312	"0xc4da+0xc2eb")
 	  (INP_CNAME_gbk	"0xc4da+0xc2eb")
+	  (INP_CNAME_utf-8	"0xe585a7+0xe7a2bc")
 	  (BEEP_WRONG		YES)))
 

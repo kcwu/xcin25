@@ -28,6 +28,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
+#include <iconv.h>
 #include "constant.h"
 #include "xcintool.h"
 #include "gui.h"
@@ -62,7 +63,12 @@ static void
 inpstate_content2(gui_t *gui, winlist_t *win, IC *ic, 
 		  xmode_t xcin_mode, inp_state_t inp_state)
 {
-    char *inpn=NULL, *inpb, *s, buf[11];
+    char *inpn=NULL, *inpb, *s, buf[32];
+    xccore_t *xccore = (xccore_t *)win->data;
+
+    iconv_t cd;
+    int inlen, outlen, len;
+    char *inbuf, *outbuf;
 
     if ((inp_state & IM_XIMFOCUS)) {
 	s = ic->imc->inpinfo.inp_cname;
@@ -74,11 +80,22 @@ inpstate_content2(gui_t *gui, winlist_t *win, IC *ic,
 	    s++;
 	}
 	if (! inpn) {
-/*
-	    extract_char(ic->imc->inpinfo.inp_cname, buf, 11);
-*/
-	    strncpy(buf, ic->imc->inpinfo.inp_cname, 2);
-	    buf[2] = '\0';
+	    cd = iconv_open("UCS4", xccore->xcin_rc.locale.encoding);
+	    if (cd == (iconv_t)-1) {
+		strncpy(buf, ic->imc->inpinfo.inp_cname, 2);
+		buf[2] = '\0';
+	    }
+	    else {
+		outbuf = buf;
+		len    = strlen(ic->imc->inpinfo.inp_cname);
+		inlen  = len;
+		outlen = 4;
+		inbuf  = ic->imc->inpinfo.inp_cname;
+		iconv(cd, &inbuf, &inlen, &outbuf, &outlen);
+		strncpy(buf, ic->imc->inpinfo.inp_cname, len-inlen);
+		buf[len-inlen] = '\0';
+		iconv_close(cd);
+	    }
 	    inpn = buf;
 	}
     }
@@ -337,18 +354,47 @@ xcin_mainwin2_init(gui_t *gui, xccore_t *xccore)
     Bool negative_x=0, negative_y=0;
     char *cmd[1], geometry[256];
 
+    iconv_t cd;
+    int inlen, outlen, len;
+    char *inbuf, *outbuf, buf[1024];
+
 /*  Initially Setup  */
-/*
-    extract_char(gui->inpn_english, xmw2.inpn_english, 11);
-    extract_char(gui->inpn_sbyte, xmw2.inpn_sbyte, 11);
-    extract_char(gui->inpn_2bytes, xmw2.inpn_2bytes, 11);
-*/
-    strncpy(xmw2.inpn_english, gui->inpn_english, 2);
-    strncpy(xmw2.inpn_sbyte, gui->inpn_sbyte, 2);
-    strncpy(xmw2.inpn_2bytes, gui->inpn_2bytes, 2);
-    xmw2.inpn_english[2] = '\0';
-    xmw2.inpn_sbyte[2] = '\0';
-    xmw2.inpn_2bytes[2] = '\0';
+    cd = iconv_open("UCS4", xccore->xcin_rc.locale.encoding);
+    if (cd == (iconv_t)-1) {
+	strncpy(xmw2.inpn_english, gui->inpn_english, 2);
+	strncpy(xmw2.inpn_sbyte, gui->inpn_sbyte, 2);
+	strncpy(xmw2.inpn_2bytes, gui->inpn_2bytes, 2);
+	xmw2.inpn_english[2] = '\0';
+	xmw2.inpn_sbyte[2] = '\0';
+	xmw2.inpn_2bytes[2] = '\0';
+    }
+    else {
+	outbuf = buf;
+	len    = strlen(gui->inpn_english);
+	inlen  = len;
+	outlen = 4;
+	inbuf  = gui->inpn_english;
+	iconv(cd, &inbuf, &inlen, &outbuf, &outlen);
+	strncpy(xmw2.inpn_english, gui->inpn_english, len-inlen);
+	xmw2.inpn_english[len-inlen] = '\0';
+
+	len    = strlen(gui->inpn_sbyte);
+	inlen  = len;
+	outlen = 4;
+	inbuf  = gui->inpn_sbyte;
+	iconv(cd, &inbuf, &inlen, &outbuf, &outlen);
+	strncpy(xmw2.inpn_sbyte, gui->inpn_sbyte, len-inlen);
+	xmw2.inpn_sbyte[len-inlen] = '\0';
+
+	len    = strlen(gui->inpn_2bytes);
+	inlen  = len;
+	outlen = 4;
+	inbuf  = gui->inpn_2bytes;
+	iconv(cd, &inbuf, &inlen, &outbuf, &outlen);
+	strncpy(xmw2.inpn_2bytes, gui->inpn_2bytes, len-inlen);
+	xmw2.inpn_2bytes[len-inlen] = '\0';
+	iconv_close(cd);
+    }
     xmw2.star_pix = XTextWidth(gui->indexfont, "*", 1);
 
     win = gui_new_win();
