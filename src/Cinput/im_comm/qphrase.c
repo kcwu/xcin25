@@ -39,7 +39,7 @@ static char true_fn[256];
 void
 qphrase_init(char *phrase_fn)
 {
-    char *s, buf[256], cmd[5], var[80];
+    char *s, buf[256], cmd[15], var[80];
     int lineno=0, key;
     qphr_t *qp = qphr;
     FILE *fp;
@@ -50,7 +50,7 @@ qphrase_init(char *phrase_fn)
 
     while (get_line(buf, 256, fp, &lineno, "#\n")) {
 	s = buf;
-	get_word(&s, cmd, 5, NULL);
+	get_word(&s, cmd, 15, NULL);
 	if (cmd[0] == '%') {
 	    if (! strcmp(cmd, "%trigger"))
 		qp = qphr;
