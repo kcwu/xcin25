@@ -95,6 +95,8 @@
         ; The following has effect only when AUTO_SELECTION is YES
           (TSI_FNAME            "%tabe_data%tsi.db")
           (YIN_FNAME            "%tabe_data%yin.db")
+	  (TSI_USERDEF_FNAME	"utsi.db")
+	  (YIN_USERDEF_FNAME	"uyin.db")
           (SPACE_SELECTION      NO)
           (PHRASE_SELECTION     YES)
           (N_SELECTION_PHR      4)

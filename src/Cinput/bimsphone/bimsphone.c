@@ -65,7 +65,8 @@ static int bimsp_zhuyin_noauto;
 
 static void
 phone_resource(phone_conf_t *cf, xcin_rc_t *xrc, char *objname,
-	       char *ftsi, char *fyin, char *fpinyin)
+	       char *ftsi, char *fyin, char *fusertsi, char *fuseryin,
+	       char *fpinyin)
 {
     char *cmd[2], value[256];
 
@@ -120,6 +121,13 @@ phone_resource(phone_conf_t *cf, xcin_rc_t *xrc, char *objname,
     if (get_resource(xrc, cmd, value, 256, 2))
 	strcpy(fyin, value);
 
+    cmd[1] = "TSI_USERDEF_FNAME";
+    if (get_resource(xrc, cmd, value, 256, 2) && strcmp(value, "NONE"))
+	strcpy(fusertsi, value);
+    cmd[1] = "YIN_USERDEF_FNAME";
+    if (get_resource(xrc, cmd, value, 256, 2) && strcmp(value, "NONE"))
+	strcpy(fuseryin, value);
+
     cmd[1] = "SPACE_SELECTION";
     if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, BIMSPH_MODE_SPACESEL, 0);
@@ -158,15 +166,15 @@ static int
 phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 {
     phone_conf_t *cf = (phone_conf_t *)conf, cfd;
+    char ftsi[256], fyin[256], fusertsi[256], fuseryin[256], fpinyin[256];
     objenc_t objenc;
-    char ftsi[256], fyin[256], fpinyin[256];
     FILE *fp;
 
     memset(&cfd, 0, sizeof(phone_conf_t));
     cfd.n_selkey = 9;
     cfd.n_selphr = 9;
     cfd.page_key = (ubyte_t)BIMSPH_PGKEY3;
-    ftsi[0] = fyin[0] = fpinyin[0] = '\0';
+    ftsi[0] = fyin[0] = fusertsi[0] = fuseryin[0] = fpinyin[0] = '\0';
 
     if (get_objenc(objname, &objenc) == -1)
 	return False;
@@ -177,9 +185,10 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
     else
 	cfd.inp_cname = (char *)strdup("ª`­µ");
 
-    phone_resource(&cfd, xrc, "bimsphone_default", ftsi, fyin, fpinyin);
-    phone_resource(&cfd, xrc, objenc.objloadname, ftsi, fyin, fpinyin);
-
+    phone_resource(&cfd, xrc, "bimsphone_default",
+			ftsi, fyin, fusertsi, fuseryin, fpinyin);
+    phone_resource(&cfd, xrc, objenc.objloadname,
+			ftsi, fyin, fusertsi, fuseryin, fpinyin);
 /*
  *  Global setup.
  */
@@ -283,6 +292,28 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 	if ((cdp = bimsInit(tsi_fname, yin_fname)) == NULL) {
 	    clean_exit(cf);
 	    return False;
+	}
+	if (fusertsi[0] && fuseryin[0]) {
+	    char fnt[256], fny[256], *ft, *fy;
+	    ft = fusertsi;
+	    fy = fuseryin;
+	    if (xrc->user_dir) {
+		if (fusertsi[0] != '/') {
+		    snprintf(fnt, 256, "%s/%s", xrc->user_dir, fusertsi);
+		    ft = fnt;
+		}
+		if (fuseryin[0] != '/') {
+		    snprintf(fny, 256, "%s/%s", xrc->user_dir, fuseryin);
+		    fy = fny;
+		}
+	    }
+	    if (bimsUserDBAppend(cdp, ft, fy) != 0) {
+		perr(XCINMSG_WARNING, 
+		    N_("bimsphone: %s: user db files open failed: %s, %s\n"),
+		    objenc.objloadname, ft, fy);
+	    }
+	    else
+		cf->mode |= BIMSPH_MODE_USRDB;
 	}
 	if (cf->mode & BIMSPH_MODE_PINYIN)
 	    dp[BIMSP_PINYIN] = cdp;
@@ -602,6 +633,46 @@ modifier_escape(phone_conf_t *cf, inpinfo_t *inpinfo,
 	    ret = (inpinfo->n_lcch) ? IMKEY_ABSORB : IMKEY_IGNORE;
 	ctrl_alt = 1;
 	*gotit = 1;
+
+	if ((cf->mode & BIMSPH_MODE_USRDB) &&
+	    ret==0 && keyinfo->keysym <= '9' && keyinfo->keysym >= '2') { 
+	    struct bimsContext *bc;
+	    int i, yinlen;
+
+	    bc = bimsGetBC(inpinfo->imid);
+	    i  = bc->yinpos;
+	    if (i == bc->yinlen && i > 0)
+		i--;
+/* 
+ *  Starting position of the tsi we want to extract.
+ *  The extracted string will never longer then 9.
+ */ 
+	    yinlen = keyinfo->keysym - '0';
+	    i -= (yinlen-1);
+
+	    if (i >= 0) {
+		struct TsiYinInfo ty;
+		struct TsiInfo tsi;
+		Yin tyin[10];
+		unsigned char tmp[20];
+
+		memset(&ty, 0, sizeof(ty));
+		ty.yinlen = yinlen;
+		ty.yin = tyin;
+		memcpy(ty.yin, bc->yin+i, ty.yinlen*sizeof(Yin));
+
+		memset(&tsi, 0, sizeof(tsi));
+		tsi.tsi = tmp;
+		strncpy(tsi.tsi, bc->internal_text+i*2, ty.yinlen*2);
+		tsi.tsi[ty.yinlen*2] = '\0';
+		bimsUserTsiEval(cdp, &tsi, &ty);
+
+		if (ty.tsidata)
+		    free(ty.tsidata);
+		if (tsi.yindata)
+		    free(tsi.yindata);
+	    }
+	}
     }
     else if ((keyinfo->keystate & Mod1Mask) == Mod1Mask) {
 	if ((cf->modesc & QPHR_ALT))
@@ -620,6 +691,7 @@ modifier_escape(phone_conf_t *cf, inpinfo_t *inpinfo,
 				IMKEY_SHIFTESC : IMKEY_IGNORE);
 	*gotit = 1;
     }
+
     if ((keyinfo->keystate & LockMask) == LockMask) {
 	if (ctrl_alt == 0 && (keyinfo->keystr_len == 1) &&
 	    (inpinfo->guimode & GUIMOD_LISTCHAR))
@@ -1072,8 +1144,8 @@ static char *phone_valid_objname[] = { "bimsphone*", "bimspinyin*", NULL };
 static char phone_comments[] = N_(
 	"This is the \"official\" phonetic input method module.\n"
 	"It uses the libtabe & bims libraries as the search engine\n"
-	"to perform the automatic characher selection from multipole\n"
-	"charachers with the same keystroke. This engine also provides\n"
+	"to perform automatic character selection from multiple\n"
+	"characters with the same keystroke. This engine also provides\n"
 	"several keymaps for each specific phonetic input rules.\n"
 	"We hope that this module will serve as the most \"natural way\"\n"
 	"for Chinese input.\n\n"

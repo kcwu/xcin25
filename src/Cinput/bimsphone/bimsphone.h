@@ -37,6 +37,7 @@
 #define BIMSPH_MODE_AUTOSEL	0x0002		/* auto-selection on */	
 #define BIMSPH_MODE_PHRASESEL	0x0004		/* phrase selection on */
 #define BIMSPH_MODE_AUTOUPCH	0x0008		/* auto-up char on */
+#define BIMSPH_MODE_USRDB	0x0010		/* user db file on */
 #define BIMSPH_MODE_PINYIN	0x1000		/* pinyin mode on */
 
 #define BIMSPH_PGKEY1		0x01		/* page key <> */

@@ -22,6 +22,12 @@ xcin-2.5.3-pre3:  2001/12
 7. Fix qphrase fallback mode bug in bimsphone.
    THanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>
 
+7. Fix qphrase fallback mode bug in bimsphone.
+   THanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>
+
+8. Add bimsphone facility: user add Tsi by hand and store to user DB files.
+   Thanks to Eric Cheng <eric@fractal.myip.org>.
+
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
