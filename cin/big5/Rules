@@ -14,7 +14,8 @@ big5 = 		sys.tab.$(BIG5ENC) \
 		daibuun.tab.$(BIG5ENC) \
 		hakka.tab.$(BIG5ENC) \
 		tcj.tab.$(BIG5ENC) \
-		wm2.tab.$(BIG5ENC)
+		wm2.tab.$(BIG5ENC) \
+		tlpa.tab.$(BIG5ENC)
 
 big5hkscs =	sys.tab.$(BIG5HKENC) \
 		array30.tab.$(BIG5HKENC) \
@@ -88,6 +89,9 @@ tcj.tab.$(BIG5ENC): tcj.cin sys.tab.$(BIG5ENC)
 wm2.tab.$(BIG5ENC): wm2.cin sys.tab.$(BIG5ENC)
 	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ wm2.cin
+tlpa.tab.$(BIG5ENC): tlpa.cin sys.tab.$(BIG5ENC)
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ tlpa.cin
 
 sys.tab.$(BIG5HKENC): sys.cin.big5hkscs
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) -o $@ sys.cin.big5hkscs

@@ -108,6 +108,12 @@ xcin-2.5.3-pre3:  2004/09/21
 
 38. Merge kMandarin field of Unicode 4.0.1 Unihan.txt into utf-8/phone.cin
 
+39. Fix infinite recursion in xcin_mergesort() when nmemb=0
+
+40. gen_inp and cin2tab support phrase input.
+    Add tlpa.cin, Taiwanese Languages Phonetic Alphabet
+    Thanks to Phuann, KhoGuan <khoguanp@yahoo.com>
+
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------

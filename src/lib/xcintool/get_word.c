@@ -30,11 +30,14 @@
 
 static char quote='"', backslash='\\';
 
+/* KhoGuan add: for word array buffer overflow check */
 int
 get_word(char **line, char *word, int word_size, char *token)
 {
     char *str = *line, *ret, *wd=word;
     char *strend;
+    /* KhoGuan add */
+    int ws = 0;
 
     if (word_size < 2)
 	return False;
@@ -60,6 +63,8 @@ get_word(char **line, char *word, int word_size, char *token)
 	    *wd = *strend;
             ++strend;
 	    ++wd;
+            if (++ws == word_size - 1) 
+                break;
         }
         *wd = '\0';
         if (*strend == quote)
@@ -75,6 +80,8 @@ get_word(char **line, char *word, int word_size, char *token)
 	    *wd = *strend;
             ++strend;
 	    ++wd;
+            if (++ws == word_size - 1) 
+                break;
 	}
         *wd = '\0';
     }

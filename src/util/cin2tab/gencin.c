@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <locale.h>
 #include <unistd.h>
@@ -37,10 +38,36 @@ static ccode_info_t ccinfo;
 static cintab_head_t th;
 static icode_idx_t *icode_idx;
 static ichar_t *ichar;
+#ifdef KCWU
+static icode_t *icode[MAX_ICODE_MODE];
+#else
 static icode_t *icode1;
 static icode_t *icode2;
+#endif
 static int n_ignore;
 
+/* KhoGuan add */
+/* tsi_idx[i]: accumulated length as index into tsi_list */ 
+static unsigned int *tsi_idx = NULL; 
+static icode_idx_t *tsi_list = NULL;
+
+typedef struct {
+/* KhoGuan rev
+    int char_idx;
+    unsigned int key[2];
+*/
+    icode_idx_t char_idx;
+#ifdef KCWU
+    icode_t key[MAX_ICODE_MODE];
+#else
+    icode_t key[2];
+#endif
+    byte_t mark;
+/* KhoGuan add */
+/* tsi_len and tsi will be used for multi-zi tsi only. Otherwise, they are kept 0. */
+    tsisize_t tsi_len;
+    icode_idx_t tsi[MAX_TSI_LEN];
+} cin_char_t;
 
 /*--------------------------------------------------------------------------
 
@@ -77,7 +104,7 @@ cin_selkey(char *arg, cintab_t *cintab)
     th.n_selkey = strlen(arg);
     if (th.n_selkey > SELECT_KEY_LENGTH)
 	perr(XCINMSG_ERROR, N_("%s(%d): too many selection keys defined.\n"),
-	     cintab->fname_cin, cintab->lineno);
+            cintab->fname_cin, cintab->lineno);
     strcpy(th.selkey, arg);
 }
 
@@ -90,7 +117,7 @@ cin_endkey(char *arg, cintab_t *cintab)
     th.n_endkey = strlen(arg);
     if (th.n_endkey > END_KEY_LENGTH)
 	perr(XCINMSG_ERROR, N_("%s(%d): too many end keys defined.\n"),
-	     cintab->fname_cin, cintab->lineno);
+	    cintab->fname_cin, cintab->lineno);
     strcpy(th.endkey, arg);
 }
 
@@ -102,7 +129,7 @@ cin_keyname(char *arg, cintab_t *cintab)
 
     if (! arg[0] || strcmp(arg, "begin") != 0)
 	perr(XCINMSG_ERROR, N_("%s(%d): arguement \"begin\" expected.\n"),
-	     cintab->fname_cin, cintab->lineno);
+	    cintab->fname_cin, cintab->lineno);
 
     while (cmd_arg(cmd1, 64, arg1, 64, NULL)) {
         if (! arg1[0])
@@ -125,12 +152,6 @@ cin_keyname(char *arg, cintab_t *cintab)
 
 /*------------------------------------------------------------------------*/
 
-typedef struct {
-    int char_idx;
-    unsigned int key[2];
-    byte_t mark;
-} cin_char_t;
-
 static int
 icode_cmp(const void *a, const void *b)
 {
@@ -150,28 +171,198 @@ icode_cmp(const void *a, const void *b)
 	return -1;
 }
 
+/* A "phrase" as processed in parse_phrase() may consist of one or 
+   several multibyte characters with the same encoding such as Big5.
+   Even singlebyte ASCII isgraph() character(s) can combine with it/them.
+   All of them will be parsed into zi cells.
+*/
+icode_idx_t
+parse_phrase(char arg[], icode_idx_t tsi[], tsisize_t* tsi_len_p) 
+{
+    char *cp = arg;
+    static icode_idx_t tsi_num = FIRST_TSI_NUM;
+    int arg_len;
+    int n_plane;
+    int hexwch_len;
+    /* int non_hexwch_0x = 0; */   /* 0 => false, 1 => true */
+    char hexstr[2+WCH_SIZE*2+1];
+    icode_idx_t ic;
+    wch_t wch;
+    int i;
+
+    arg_len = strlen(arg);
+    n_plane = ccinfo.n_ch_encoding;
+    hexwch_len = 2 + n_plane * 2;    /* e.g. 0xa140 has 2+2*2 bytes long */
+
+    memset(wch.s, 0, sizeof(wch_t));
+
+    *tsi_len_p = 0;
+
+    if (arg_len < n_plane) {
+        *tsi_len_p = 0;
+        return (tsi[0] = INVALID_ICODE_IDX);
+    }
+    else if (arg_len == n_plane) {
+    /* maybe a single multibyte char */
+    /* We don't accept singelbyte ASCII string with length equal to n_plane */
+        if (n_plane > WCH_SIZE)
+            perr(XCINMSG_ERROR, 
+                 N_("The encoding has %d bytes for a multibyte character!\n"),
+                 n_plane);
+        strncpy((char *)wch.s, arg, arg_len);
+        tsi[0] = ccode_to_idx(&wch);
+        if (tsi[0] == -1)
+            *tsi_len_p = 0;
+        else
+            *tsi_len_p = 1;
+        return tsi[0]; 
+    }
+    /* "hex-rep zi" case*/
+    else if (arg_len == hexwch_len && 
+             (strncmp(arg, "0x", 2) == 0 || strncmp(arg, "0X", 2) == 0)) {
+        /* maybe a single multibyte char with 0xaabb representation */
+        if (read_hexwch(wch.s, arg)) {
+            tsi[0] = ccode_to_idx(&wch);
+            if (tsi[0] != -1)
+                *tsi_len_p = 1;
+            else
+                *tsi_len_p = 0;
+            return tsi[0];
+        } 
+/*
+        else
+            non_hexwch_0x = 1;
+*/
+    }
+
+/* The following is when (arg_len > n_plane) except for "hex-rep zi" case*/
+
+    while (*cp) {
+        /* maybe several multibyte chars combined with 0 or more
+         * singlebyte char */
+
+        while (strncmp(cp, "0x", 2) == 0 || 
+               strncmp(cp, "0X", 2) == 0   ) {
+            if (strlen(cp) < hexwch_len) {
+                tsi[(*tsi_len_p)] = (icode_idx_t)(cp[0] * -1);
+                (*tsi_len_p)++;
+                tsi[(*tsi_len_p)] = (icode_idx_t)(cp[1] * -1);
+                (*tsi_len_p)++;
+                cp += 2;
+                continue;
+            }
+            /* when strlen(cp) >= hexwch_len */
+            strncpy(hexstr, cp, hexwch_len);
+            hexstr[hexwch_len] = '\0';
+            if (read_hexwch(wch.s, hexstr)) {
+                ic = ccode_to_idx(&wch);
+                if (ic != -1) {
+                    tsi[(*tsi_len_p)] = ic;
+                    (*tsi_len_p)++;
+                    cp += hexwch_len;
+                } 
+                else { /* common hex digit string with length == hexwch_len */
+                    for (i = 0; i < hexwch_len; i++) {
+                        tsi[(*tsi_len_p)] = (icode_idx_t)(cp[i] * -1);
+                        (*tsi_len_p)++;
+                    }
+                    cp += hexwch_len;
+                }
+            }
+            else {
+                tsi[(*tsi_len_p)] = (icode_idx_t)(cp[0] * -1); /* '0' */
+                (*tsi_len_p)++;
+                tsi[(*tsi_len_p)] = (icode_idx_t)(cp[1] * -1); /* 'x' or 'X' */
+                (*tsi_len_p)++;
+                cp += 2;
+            }
+        }
+
+        if (strlen(cp) >= n_plane) {
+            strncpy(wch.s, cp, n_plane);
+            ic = ccode_to_idx(&wch);
+            if (ic != -1) {
+                tsi[(*tsi_len_p)] = ic;
+                (*tsi_len_p)++;
+                cp += n_plane;
+                continue;
+            }
+            /* if (ic == -1) */
+            if (! isgraph(wch.s[0])) {
+                *tsi_len_p = 0;
+                return (tsi[0] = INVALID_ICODE_IDX);
+            }
+            else {
+                tsi[(*tsi_len_p)] = (icode_idx_t)(wch.s[0] * -1);
+                (*tsi_len_p)++;
+                cp++;
+            }
+        }
+        else {
+            while (*cp) {
+                if (! isgraph(*cp)) {
+                     *tsi_len_p = 0;
+                     return (tsi[0] = INVALID_ICODE_IDX);
+                }
+                else {
+                    tsi[(*tsi_len_p)] = (icode_idx_t)(cp[0] * -1);
+                    (*tsi_len_p)++;
+                    cp++;
+                }
+            }
+        }
+    }
+
+    if (*tsi_len_p > 1) {
+        return tsi_num++;
+    }
+    else {
+        perr(XCINMSG_ERROR,
+             N_("The length of tsi(%d) is not larger than 1\n"), *tsi_len_p);
+        return (tsi[0] = INVALID_ICODE_IDX);
+    }
+
+}
+        
 static void
 cin_chardef(char *arg, cintab_t *cintab)
 {
-    char cmd1[64], arg1[64], arg2[2];
+    int arg1_len = MAX_TSI_LEN * WCH_SIZE + 1;
+    char cmd1[64], arg1[arg1_len], arg2[2];
     byte_t *idx;
     wch_t ch;
     cin_char_t *cchar, *cch;
     int len, ret, cch_size;
-    unsigned int i, j;
+    icode_idx_t ic;
+    unsigned int i, j; 
+
+/* KhoGuan rev */
+    icode_idx_t tsi[MAX_TSI_LEN];
+    tsisize_t tsi_len = 0;
+    unsigned int tsi_accu_len = 0;
+    unsigned int* tsi_idx_cur = NULL;
+    icode_idx_t* tsi_list_cur = NULL;
+
+    th.n_tsi = 0;
+    memset(tsi, 0, sizeof(tsi));
 
     if (! arg[0] || strcmp(arg, "begin") != 0)
 	perr(XCINMSG_ERROR, N_("%s(%d): arguement \"begin\" expected.\n"),
 	     cintab->fname_cin, cintab->lineno);
-
+/* KhoGuan: since we don't know n_icode in advance, we use total_char
+   of the encoding as the starting buffer size */
     cch_size = ccinfo.total_char;
     cch = cchar = xcin_malloc(cch_size*sizeof(cin_char_t), 1);
     idx = xcin_malloc(cch_size*sizeof(byte_t), 1);
 
-    while ((ret=cmd_arg(cmd1, 64, arg1, 64, arg2, 2, NULL))) {
+
+    while ((ret=cmd_arg(cmd1, 64, arg1, arg1_len, arg2, 2, NULL))) {
+
         if (! arg1[0])
 	    perr(XCINMSG_ERROR, N_("%s(%d): arguement expected.\n"),
 		cintab->fname_cin, cintab->lineno);
+/* KhoGuan: afterwards, if we find n_icode is larger than total_char,
+   we resize our buffer */
 	if (th.n_icode >= cch_size) {
 	    cch_size += ccinfo.total_char;
 	    cchar = xcin_realloc(cchar, cch_size * sizeof(cin_char_t));
@@ -184,20 +375,44 @@ cin_chardef(char *arg, cintab_t *cintab)
 	 *  Fill in the cin_char_t *cch unit.
 	 */
 	ch.wch = (wchar_t)0;
-	if (! read_hexwch(ch.s, arg1))
-	    strncpy((char *)ch.s, arg1, WCH_SIZE);
-	if ((i = ccode_to_idx(&ch)) == -1) {
-	    n_ignore ++;
-	    continue;
+/* KhoGuan rev */
+        ic = parse_phrase(arg1, tsi, &tsi_len); /* ic is the codepoint */
+        if (tsi_len == 0) {
+            perr(XCINMSG_WARNING, N_("%s(line %d): 0x"), cintab->fname_cin, cintab->lineno);
+            for (i = 0; i < arg1[i]; i++)
+                printf("%hhx", arg1[i]);
+            printf(" invalid \"zi\" or \"tsi\".\n");
+
+            n_ignore ++;
+            continue;
+        }
+        else if (tsi_len == 1) {        /* single multibyte char */
+            if (! idx[ic]) {
+                th.n_ichar++;
+                idx[ic] = 1;
+            }
+            cch->tsi_len = 1;
+        }
+        else {        /* tsi_len > 1, for multi-zi tsi*/
+	    cch->tsi_len = tsi_len;
+	    for (i = 0; i < tsi_len; i++) {
+		cch->tsi[i] = tsi[i];
+		if (tsi[i] >= (icode_idx_t)0 && 
+			tsi[i] < (icode_idx_t)ccinfo.total_char) {
+		    if (! idx[tsi[i]]) {
+			th.n_ichar++;
+			idx[tsi[i]] = 1;
+		    }
+		}
+	    }
+	    tsi_accu_len += tsi_len;
+	    th.n_tsi++;
 	}
-	cch->char_idx = i;
+
+	cch->char_idx = ic;
 	keys2codes(cch->key, 2, cmd1);
 	cch->mark = (ret==3 && arg2[0]=='*') ? 1 : 0;
 
-	if (! idx[i])
-	    th.n_ichar ++;
-	else
-	    idx[i] = 1;
 	th.n_icode ++;
 	cch ++;
 
@@ -205,40 +420,79 @@ cin_chardef(char *arg, cintab_t *cintab)
 	if (th.n_max_keystroke < len)
 	    th.n_max_keystroke = len;
     }
-
     /*
      *  Determine the memory model.
      */
+/* KhoGuan rev
     ret = (th.n_max_keystroke <= 5) ? ICODE_MODE1 : ICODE_MODE2;
+*/
+#ifdef KCWU
+    ret = (th.n_max_keystroke+4)/5;
+#else
+    ret = (th.n_max_keystroke <= 10) ? ICODE_MODE1 : ICODE_MODE2;
+#endif
     th.icode_mode = ret;
 
     /*
      *  Fill in the ichar, icode_idx and icode1, icode2 arrays.
      */
+
+    if (th.n_tsi > 0) {
+        tsi_idx_cur = tsi_idx = xcin_malloc(th.n_tsi * sizeof(unsigned int), 1);
+        tsi_list_cur = tsi_list = xcin_malloc(tsi_accu_len * sizeof(icode_idx_t), 1);
+    }
+
+    for (i=0, cch=cchar; i<th.n_icode; i++, cch++) {
+        if (cch->tsi_len > 1) {
+            *tsi_idx_cur = ((tsi_idx_cur == tsi_idx)? 
+                             cch->tsi_len : cch->tsi_len + *(tsi_idx_cur-1));
+            tsi_idx_cur++;
+            for (j = 0; j < cch->tsi_len; j++)
+                *(tsi_list_cur + j) = cch->tsi[j];
+            tsi_list_cur += j;
+        }
+    }
+
     stable_sort(cchar, th.n_icode, sizeof(cin_char_t), icode_cmp);
 
-    ichar = xcin_malloc(cch_size * sizeof(ichar_t), 1);
+/* KhoGuan debug: cch_size => ccinfo.total_char
+    ichar = xcin_malloc(cch_size * sizeof(ichar_t), 1); */
+    ichar = xcin_malloc(ccinfo.total_char * sizeof(ichar_t), 1);
     icode_idx = xcin_malloc(sizeof(icode_idx_t)*th.n_icode, 1);
+#ifdef KCWU
+    for (i=0; i<ret; i++) {
+      icode[i] = xcin_malloc(th.n_icode*sizeof(icode_t), 1);
+    }
+#else
     icode1 = xcin_malloc(th.n_icode*sizeof(icode_t), 1);
     if (ret == ICODE_MODE2)
         icode2 = xcin_malloc(th.n_icode*sizeof(icode_t), 1);
+#endif
     memset(idx, 0, ccinfo.total_char);
 
-    for (i=0; i<cch_size; i++)
-	ichar[i] = (ichar_t)ICODE_IDX_NOTEXIST;
+    for (i=0; i<ccinfo.total_char; i++)
+        ichar[i] = (ichar_t)ICODE_IDX_NOTEXIST;
     for (i=0, cch=cchar; i<th.n_icode; i++, cch++) {
-	icode_idx[i] = j = (icode_idx_t)(cch->char_idx);
+	icode_idx[i] = ic = (icode_idx_t)(cch->char_idx);
+#ifdef KCWU
+	for(j=0; j<ret; j++)
+	  icode[j][i] = (icode_t)(cch->key[j]);
+#else
 	icode1[i] = (icode_t)(cch->key[0]);
         if (ret == ICODE_MODE2)
 	    icode2[i] = (icode_t)(cch->key[1]);
+#endif
 
-	if (! idx[j] || cch->mark) {
-	    ichar[j] = (ichar_t)i;
-	    idx[j] = 1;
-	}
+	if (ic >= (icode_idx_t)0 && ic < (icode_idx_t)ccinfo.total_char) { 
+	    if (! idx[ic] || cch->mark) {
+		ichar[ic] = (ichar_t)i;
+		idx[ic] = 1;
+            }
+        }
     }
     free(cchar);
     free(idx);
+
 }
 
 
@@ -313,9 +567,31 @@ gencin(cintab_t *cintab)
 
     fwrite(&th, sizeof(cintab_head_t), 1, cintab->fw);
     fwrite(icode_idx, sizeof(icode_idx_t), th.n_icode, cintab->fw);
+    free(icode_idx);
     fwrite(ichar, sizeof(ichar_t), ccinfo.total_char, cintab->fw);
+    free(ichar);
+#ifdef KCWU
+    for(i=0; i<th.icode_mode; i++) {
+	fwrite(icode[i], sizeof(icode_t), th.n_icode, cintab->fw);
+	free(icode[i]);
+    }
+#else
     fwrite(icode1, sizeof(icode_t), th.n_icode, cintab->fw);
-    if (th.icode_mode == ICODE_MODE2)
-	fwrite(icode2, sizeof(icode_t), th.n_icode, cintab->fw);
+    free(icode1);
+    if (th.icode_mode == ICODE_MODE2) {
+        fwrite(icode2, sizeof(icode_t), th.n_icode, cintab->fw);
+        free(icode2);
+    }
+#endif
+/* KhoGuan add */
+    if (th.n_tsi > 0) {
+        perr(XCINMSG_NORMAL, 
+             N_("number of phrase defined: %d\n"), th.n_tsi);
+
+        fwrite(tsi_idx, sizeof(unsigned int), th.n_tsi, cintab->fw);
+        fwrite(tsi_list, sizeof(icode_idx_t), tsi_idx[th.n_tsi-1], cintab->fw);
+        free(tsi_idx);
+        free(tsi_list);
+    }
 }
 

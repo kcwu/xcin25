@@ -39,7 +39,10 @@ static ccode_t charcode[WCH_SIZE];
 static unsigned int total_char;
 static byte_t highest_idx;
 
-
+/* KhoGuan: After reading ccp[4] from sys.tab, we pass ccp to ccode_init(),
+   calculate various numbers, fill them into charcode[4] 
+   total_char is the number of total chars for an encoding.
+*/
 void
 ccode_init(charcode_t *ccp, int n)
 {
@@ -100,14 +103,24 @@ match_encoding(wch_t *wch)
     }
     return 1;
 }
-
+/* ccode_to_idx(): non-linear big5 char code to linear index number */
 int
 ccode_to_idx(wch_t *wch)
 {
     int i, j, n, idx=0;
     ccode_t *ccp = charcode;
     ubyte_t *s = (ubyte_t *)(wch->s);
-
+/* KhoGuan: for big5, only ccp[0] and ccp[1] are used, so ccp[2]->n == 0.
+   If we has arg1 in our cin table with 2 chinese chars (4bytes), *wch
+   will has its all 4 bytes filled. When i goes to 2,
+     n = ccp->n; // ( n = 0 )
+     for (j=0; j<n; j++) // no run
+     if (j >= n)
+         return -1;
+   so cin_chardef() in gencin.c will get -1 and n_ignore++, and this entry 
+   in our cin table will be ignored. Note that the main purpose of checking
+   (j >= n) is to make sure the code point is between the valid range.
+*/
     for (i=0; i<WCH_SIZE && *s; i++, ccp++, s++) {
 	n = ccp->n;
 	for (j=0; j<n; j++) {
@@ -120,7 +133,7 @@ ccode_to_idx(wch_t *wch)
     }
     return (idx < total_char) ? idx : -1;
 }
-
+/* linear char code to non-linear big5 code */
 int
 ccode_to_char(int idx, unsigned char *mbs, int mbs_size)
 {

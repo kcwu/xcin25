@@ -154,8 +154,14 @@ code2key(int code)
 
 #define N_KEY_IN_CODE 5		/* Number of keys in code. */
 
-int
+#ifdef KCWU
 keys2codes(unsigned int *klist, int klist_size, char *keystroke)
+#else
+/* KhoGuan rev
+keys2codes(unsigned int *klist, int klist_size, char *keystroke) */
+int
+keys2codes(unsigned long long *klist, int klist_size, char *keystroke)
+#endif
 {
     int i, j;
     unsigned int k, *kk=klist;
@@ -180,7 +186,14 @@ keys2codes(unsigned int *klist, int klist_size, char *keystroke)
 }
 
 void
+#ifdef KCWU
 codes2keys(unsigned int *klist, int n_klist, char *keystroke, int keystroke_len)
+#else
+/* KhoGuan rev
+codes2keys(unsigned int *klist, int n_klist, char *keystroke, int keystroke_len)
+*/
+codes2keys(unsigned long long *klist, int n_klist, char *keystroke, int keystroke_len)
+#endif
 {
     int i, j, n_ch=0, shift;
     unsigned int mask = 0x3f, idx;    

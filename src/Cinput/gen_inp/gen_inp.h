@@ -39,6 +39,8 @@
 #define INP_MODE_AUTORESET   0x00000800 /* Enable auto reset error mode. */
 #define INP_MODE_HINTSEL     0x00001000 /* Enable hint selection. */
 #define INP_MODE_HINTTSI     0x00002000 /* Enable hint tsi. */
+/* KhoGuan add */
+#define INP_MODE_TABNEXTPAGE 0x00004000 /* tab to next candidates' page */
 #define INP_MODE_BEEPWRONG   0x00010000 /* Beap when type a wrong char. */
 #define INP_MODE_BEEPDUP     0x00020000 /* Beap when exists duplet chars. */
 
@@ -64,8 +66,12 @@ typedef struct {
     int n_kremap;		/* Number of keystroke remapping */
     kremap_t *kremap;		/* Keystroke remapping list */
 
+#ifdef KCWU
+    icode_t *ic[MAX_ICODE_MODE]; /* icode & idx for different memory models */
+#else
     icode_t *ic1;		/* icode & idx for different memory models */
     icode_t *ic2;
+#endif
     icode_idx_t *icidx;
     ichar_t *ichar;
 
@@ -73,9 +79,13 @@ typedef struct {
     struct TsiDB *tsidb;	/* tsi db */
     int codeset;
 #endif
+/* KhoGuan add */
+    unsigned int *tsi_idx;	/* accumulated length as index into tsi_list */
+    icode_idx_t *tsi_list;
 } gen_inp_conf_t;
 
 #define HINTSZ	100
+#define NUM_CANDI_BUFSZ 100
 
 typedef struct {
     char keystroke[INP_CODE_LENGTH+1];
@@ -86,12 +96,16 @@ typedef struct {
 
 #ifdef HAVE_LIBTABE
     wch_t commithistory[HINTSZ];	/* committed words */
-    int showtsiflag;		/* show tsi flag */
+    char showtsiflag;		/* show tsi flag */
     int nreltsi;
     wch_t reltsi[HINTSZ];	/* related tsi */
     int tsiindex[HINTSZ];	/* index of tsi */
     ubyte_t tsigroup[HINTSZ];	/* group of tsi */
 #endif
+/* KhoGuan add for supporting phrase input */
+    char has_tsi;		/* boolean. find some tsi matching keystroke */
+    int *all_index;		/* offset index for all matched candidates */
+    ubyte_t *all_grouping;	/* grouping for all candidates vs. inpinfo->mcch                                   _grouping which is only for current page */
 } gen_inp_iccf_t;
 
 

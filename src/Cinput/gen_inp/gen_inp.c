@@ -29,6 +29,7 @@
 #ifdef HAVE_LIBTABE
 #include <tabe.h>
 #include <iconv.h>
+#include <errno.h>
 #endif
 #include "xcintool.h"
 #include "module.h"
@@ -45,8 +46,13 @@
 static int
 loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
 {
+#ifdef KCWU
+    int i, j;
+#endif
     int n, nn, ret=1;
     char modID[MODULE_ID_SIZE];
+    /* KhoGuan add */
+    int n_tsi = 0;
 
     if (fread(modID, sizeof(char), MODULE_ID_SIZE, fp) != MODULE_ID_SIZE ||
 	strcmp(modID, "gencin")) {
@@ -54,7 +60,7 @@ loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
 	return False;
     }
     if (fread(&(cf->header), sizeof(cintab_head_t), 1, fp) != 1) {
-	perr(XCINMSG_WARNING, N_("gen_inp: %s: reading error.\n"), cf->tabfn);
+	perr(XCINMSG_WARNING, N_("gen_inp: %s: reading header error.\n"), cf->tabfn);
 	return False;
     }
     if (strcmp(GENCIN_VERSION, cf->header.version) > 0) {
@@ -73,6 +79,26 @@ loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
     nn = cf->ccinfo.total_char;
     cf->icidx = xcin_malloc(sizeof(icode_idx_t) * n, 0);
     cf->ichar = xcin_malloc(sizeof(ichar_t) * nn, 0);
+#ifdef KCWU
+    if(ret && n)
+	ret = (fread(cf->icidx, sizeof(icode_idx_t), n, fp)==n);
+    if(ret && nn)
+	ret = (fread(cf->ichar, sizeof(ichar_t), nn, fp)==nn);
+    for(i=0; i<cf->header.icode_mode; i++) {
+	cf->ic[i] = xcin_malloc(sizeof(icode_t) * n, 0);
+	if(fread(cf->ic[i], sizeof(icode_t), n, fp) != n) {
+	    if(n) {
+		free(cf->icidx);
+		for(j=0; j<=i; j++)
+		    free(cf->ic[j]);
+	    }
+	    if(nn)
+		free(cf->ichar);
+	    ret = 0;
+	    break;
+	}
+    }
+#else
     cf->ic1 = xcin_malloc(sizeof(icode_t) * n, 0);
     if (!n || !nn ||
 	fread(cf->icidx, sizeof(icode_idx_t), n, fp) != n ||
@@ -93,6 +119,24 @@ loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
 		free(cf->ic2);
 	    ret = 0;
 	}
+    }
+#endif
+
+    /* KhoGuan: add support of phrase input.
+       read further for phrase data appended to the cin table */
+    n_tsi = cf->header.n_tsi;
+    if (ret && n_tsi > 0) {
+        cf->tsi_idx = xcin_malloc(sizeof(unsigned int) * n_tsi, 0);
+        if (fread(cf->tsi_idx, sizeof(unsigned int), n_tsi, fp) != n_tsi) {
+            free(cf->tsi_idx);
+            ret = 0;
+        }
+        n = cf->tsi_idx[n_tsi-1];
+        cf->tsi_list = xcin_malloc(sizeof(icode_idx_t) * n, 0);
+        if ((n=fread(cf->tsi_list, sizeof(icode_idx_t), n, fp)) != cf->tsi_idx[n_tsi-1]) {
+            free(cf->tsi_list);
+            ret = 0;
+        }
     }
 
     if (! ret) {
@@ -235,6 +279,11 @@ gen_inp_resource(gen_inp_conf_t *cf, xcin_rc_t *xrc, char *objname, char *ftsi)
     cmd[1] = "TSI_FNAME";
     if (get_resource(xrc, cmd, value, 256, 2))
 	strcpy(ftsi, value);
+
+/* KhoGuan add */
+    cmd[1] = "TAB_NEXTPAGE";			/* tab to next candidate page */
+    if (get_resource(xrc, cmd, value, 256, 2))
+        set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_TABNEXTPAGE, 0);
 }
 
 static int
@@ -283,6 +332,9 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
 	cf->mode |= INP_MODE_BEEPWRONG;
     if ((cfd.mode & INP_MODE_BEEPDUP))
 	cf->mode |= INP_MODE_BEEPDUP;
+    if ((cfd.mode & INP_MODE_TABNEXTPAGE))
+	cf->mode |= INP_MODE_TABNEXTPAGE;
+
     cf->modesc = cfd.modesc;
     cf->disable_sel_list = cfd.disable_sel_list;
     cf->kremap = cfd.kremap;
@@ -293,6 +345,10 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
     ccode_info(&(cf->ccinfo));
     if (! (s = strrchr(cf->inp_ename, '.')) || strcmp(s+1, "tab"))
         snprintf(value, 50, "%s.tab", cf->inp_ename);
+/* KhoGuan add 2 lines */
+    else
+        snprintf(value, 50, "%s", cf->inp_ename);
+
     snprintf(sub_path, 256, "tab/%s", xrc->locale.encoding);
     if (check_datafile(value, sub_path, xrc, truefn, 256) == True) {
 	cf->tabfn = (char *)strdup(truefn);
@@ -349,6 +405,8 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
 
 ----------------------------------------------------------------------------*/
 
+static int num_candi_bufsz = NUM_CANDI_BUFSZ;
+
 static int
 gen_inp_xim_init(void *conf, inpinfo_t *inpinfo)
 {
@@ -358,6 +416,8 @@ gen_inp_xim_init(void *conf, inpinfo_t *inpinfo)
 
     inpinfo->iccf = xcin_malloc(sizeof(gen_inp_iccf_t), 1);
     iccf = (gen_inp_iccf_t *)inpinfo->iccf;
+    iccf->all_index = xcin_malloc(sizeof(int)*num_candi_bufsz, 1);
+    iccf->all_grouping = xcin_malloc(sizeof(ubyte_t)*num_candi_bufsz + 1, 1);
 
     inpinfo->inp_cname = cf->inp_cname;
     inpinfo->inp_ename = cf->inp_ename;
@@ -388,6 +448,9 @@ gen_inp_xim_init(void *conf, inpinfo_t *inpinfo)
 #else
     i = inpinfo->n_selkey;
 #endif
+    if (cf->header.n_tsi > 0 && i<MAX_TSI_LEN*inpinfo->n_selkey) {
+	i = MAX_TSI_LEN * inpinfo->n_selkey;
+    }
     inpinfo->mcch = xcin_malloc(i * sizeof(wch_t), 1);
     inpinfo->mcch_grouping = NULL;
     inpinfo->mcch_pgstate = MCCH_ONEPG;
@@ -405,10 +468,15 @@ gen_inp_xim_end(void *conf, inpinfo_t *inpinfo)
 {
     gen_inp_iccf_t *iccf = (gen_inp_iccf_t *)inpinfo->iccf;
 
-    if (iccf->n_mcch_list)
+/* KhoGuan trace */
+    if (iccf->n_mcch_list) {
 	free(iccf->mcch_list);
-    if (iccf->n_mkey_list)
+    }
+    if (iccf->n_mkey_list) {
 	free(iccf->mkey_list);
+    }
+    free(iccf->all_index);
+    free(iccf->all_grouping);
     free(inpinfo->iccf);
     free(inpinfo->s_keystroke);
     free(inpinfo->suggest_skeystroke);
@@ -464,9 +532,23 @@ reset_keystroke(inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 /*------------------------------------------------------------------------*/
 
 static int
+#ifdef KCWU
+cmp_icvalue(icode_t *ic[MAX_ICODE_MODE], unsigned int idx,
+	    icode_t icode[MAX_ICODE_MODE], int mode)
+#else
 cmp_icvalue(icode_t *ic1, icode_t *ic2, unsigned int idx,
 	    icode_t icode1, icode_t icode2, int mode)
+#endif
 {
+#ifdef KCWU
+    int i;
+    for(i=0; i<mode; i++)
+	if(ic[i][idx] > icode[i])
+	    return 1;
+	else if(ic[i][idx] < icode[i])
+	    return -1;
+    return 0;
+#else
     if (ic1[idx] > icode1)
 	return 1;
     else if (ic1[idx] < icode1)
@@ -481,18 +563,28 @@ cmp_icvalue(icode_t *ic1, icode_t *ic2, unsigned int idx,
 	else
 	    return 0;
     }
+#endif
 }
 
 static int 
+#ifdef KCWU
+bsearch_char(icode_t *ic[MAX_ICODE_MODE], icode_t icode[MAX_ICODE_MODE], 
+	int size, int mode, int wild)
+#else
 bsearch_char(icode_t *ic1, icode_t *ic2, 
 	     icode_t icode1, icode_t icode2, int size, int mode, int wild)
+#endif
 {
     int head, middle, end, ret;
 
     head   = 0;
     middle = size / 2;
     end    = size;
+#ifdef KCWU
+    while ((ret=cmp_icvalue(ic, middle, icode, mode))) {
+#else
     while ((ret=cmp_icvalue(ic1, ic2, middle, icode1, icode2, mode))) {
+#endif
         if (ret > 0)
             end = middle;
         else
@@ -503,7 +595,11 @@ bsearch_char(icode_t *ic1, icode_t *ic2,
     }
     if (ret == 0) {
 	while(middle > 0 &&
+#ifdef KCWU
+	      ! cmp_icvalue(ic, middle-1, icode, mode)) 
+#else
 	      ! cmp_icvalue(ic1, ic2, middle-1, icode1, icode2, mode)) 
+#endif
 	    middle --;
 	return middle;
     }
@@ -512,32 +608,60 @@ bsearch_char(icode_t *ic1, icode_t *ic2,
 }
 
 static int
+ccode_to_char_or_tsi(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf,
+                     icode_idx_t ic, wch_t *mcch, int n_ich, int *n_zi_p);
+
+static int
 pick_cch_wild(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, int *head, byte_t dir,
-		wch_t *mcch, unsigned int mcch_size, unsigned int *n_mcch)
+		wch_t *mcch, unsigned int mcch_size, unsigned int *n_ich)
 {
-    unsigned int i, size, klist[2];
+/* KhoGuan rev
+    unsigned int i, size, klist[2]; */
+    unsigned int i, size;
+#ifdef KCWU
+    int j;
+    unsigned int klist[MAX_ICODE_MODE];
+#else
+    unsigned long long klist[2];
+#endif
+
     int n_klist, ks_size, r=0, idx;
     char *ks;
+/* KhoGuan add */
+    int n_zi = 0;
 
     size = cf->header.n_icode;
     ks_size = cf->header.n_max_keystroke + 1;
     ks = xcin_malloc(ks_size, 0);
+#ifdef KCWU
+    n_klist = cf->header.icode_mode;
+#else
     n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
+#endif
     dir = (dir > 0) ? (byte_t)1 : (byte_t)-1;
 
     if (iccf->n_mkey_list)
 	free(iccf->mkey_list);
     iccf->mkey_list = xcin_malloc(mcch_size*sizeof(int), 0);
 
+    memset(iccf->all_index, 0, sizeof(int)*num_candi_bufsz);
+    memset(iccf->all_grouping, 0, sizeof(ubyte_t)*(1+num_candi_bufsz));
+
     for (i=0, idx = *head; idx>=0 && idx<size && i<=mcch_size; idx+=dir) {
+#ifdef KCWU
+	for(j=0; j<n_klist; j++)
+	    klist[j] = cf->ic[j][idx];
+#else
 	klist[0] = cf->ic1[idx];
 	if (cf->header.icode_mode == ICODE_MODE2)
 	    klist[1] = cf->ic2[idx];
+#endif
 	codes2keys(klist, n_klist, ks, ks_size);
 
 	if (strcmp_wild(iccf->keystroke, ks) == 0) {
 	    if (i < mcch_size) {
-		ccode_to_char(cf->icidx[idx], mcch[i].s, WCH_SIZE);
+		/* ccode_to_char(cf->icidx[idx], mcch[i].s, WCH_SIZE); */
+                ccode_to_char_or_tsi(cf, iccf, cf->icidx[idx], mcch, i, &n_zi);
 		iccf->mkey_list[i] = idx;
 		*head = idx;
 		i ++;
@@ -547,7 +671,7 @@ pick_cch_wild(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, int *head, byte_t dir,
 	}
     }
     free(ks);
-    *n_mcch = i;
+    *n_ich = iccf->all_grouping[0] = i;
     iccf->n_mkey_list = i;
     return r;
 }
@@ -556,13 +680,24 @@ static int
 match_keystroke_wild(gen_inp_conf_t *cf, 
 		       inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 {
+#ifdef KCWU
+    int i;
+    icode_t icode[MAX_ICODE_MODE];
+#else
     icode_t icode[2];
-    unsigned int md, n_mcch;
+#endif
+    unsigned int md, n_ich;
     int idx;
     char *s1, *s2, *s, tmpch;
 
+#ifdef KCWU
+    md = cf->header.icode_mode;
+    for(i=0; i<md; i++)
+	icode[i] = 0;
+#else
     md = (cf->header.icode_mode == ICODE_MODE2) ? 1 : 0;
     icode[0] = icode[1] = 0;
+#endif
 
     /*
      *  Search for the first char.
@@ -578,69 +713,219 @@ match_keystroke_wild(gen_inp_conf_t *cf,
     tmpch = *s;
     *s = '\0';
 
+#ifdef KCWU
+    keys2codes(icode, MAX_ICODE_MODE, iccf->keystroke);
+    idx = bsearch_char(cf->ic, icode, cf->header.n_icode, md, 1);
+#else
     keys2codes(icode, 2, iccf->keystroke);
     idx = bsearch_char(cf->ic1, cf->ic2, icode[0], icode[1], 
 			cf->header.n_icode, md, 1);
+#endif
     *s = tmpch;
     iccf->mcch_hidx = idx;		/* refer to head index of cf->icidx */
 
     /*
      *  Pick up the remaining chars;
      */
+    iccf->has_tsi = 0;
+    memset(iccf->all_index, 0, sizeof(int)*num_candi_bufsz);
+    memset(iccf->all_grouping, 0, sizeof(ubyte_t)*(1+num_candi_bufsz));
+    inpinfo->mcch_grouping = NULL;
+
     if (pick_cch_wild(cf, iccf, &idx, 1,
-	    inpinfo->mcch, inpinfo->n_selkey, &n_mcch) == 0)
+	    inpinfo->mcch, inpinfo->n_selkey, &n_ich) == 0)
         inpinfo->mcch_pgstate = MCCH_ONEPG;
     else 
 	inpinfo->mcch_pgstate = MCCH_BEGIN;
-    inpinfo->n_mcch = (unsigned short)n_mcch;
+
+    if (n_ich) {
+        inpinfo->n_mcch = 
+          (unsigned short)(iccf->all_index[n_ich-1]+iccf->all_grouping[n_ich]);
+        if (iccf->has_tsi)
+            inpinfo->mcch_grouping = iccf->all_grouping;
+    }
+    else
+        inpinfo->n_mcch = 0;
+
     iccf->mcch_eidx = idx;		/* refer to end index of cf->icidx */
-    return (n_mcch) ? 1 : 0;
+    return (n_ich) ? 1 : 0;
 }
+
+static int
+ccode_to_char_or_tsi(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, icode_idx_t ic, 
+                     wch_t *mcch, int n_ich, int *n_zi_p)
+{
+    int i, tsi_num, tsi_beg, tsi_len;
+
+    if (ic >= 0 && ic < cf->ccinfo.total_char) {
+        if (! ccode_to_char(ic, mcch[*n_zi_p].s, WCH_SIZE))
+            return 0;
+        iccf->all_grouping[n_ich+1] = 1;
+        iccf->all_index[n_ich] = (n_ich == 0)?  0 : 
+                    (iccf->all_index[n_ich-1] + iccf->all_grouping[n_ich]);
+        (*n_zi_p)++;
+    }
+    else if (ic >= FIRST_TSI_NUM) {
+        tsi_num = ic - FIRST_TSI_NUM;
+        if (tsi_num == 0) {
+            tsi_beg = 0;
+            tsi_len = cf->tsi_idx[0];
+        }
+        else {
+            tsi_beg = cf->tsi_idx[tsi_num-1];
+            tsi_len = cf->tsi_idx[tsi_num] - cf->tsi_idx[tsi_num-1];
+        }
+        for (i = 0; i < tsi_len; i++) {
+
+            ic = cf->tsi_list[tsi_beg+i];
+            if (ic < 0 && ic > INVALID_ICODE_IDX) {
+                mcch[*n_zi_p].s[0] = (unsigned char)(ic * -1);
+            }
+            else if (ic >= 0 && ic < cf->ccinfo.total_char) {
+                if (! ccode_to_char(ic, mcch[*n_zi_p].s, WCH_SIZE))
+                    return 0;
+            }
+            else {
+                perr(XCINMSG_WARNING, "Input table error.\n");
+                return 0;
+            }
+                (*n_zi_p)++;
+        }
+        iccf->all_grouping[n_ich+1] = tsi_len;
+        iccf->all_index[n_ich] = (n_ich == 0)?  0 : 
+                      (iccf->all_index[n_ich-1] + iccf->all_grouping[n_ich]);
+        iccf->has_tsi = 1;
+    }
+    else {
+        perr(XCINMSG_WARNING, "Input table error.\n");
+        return 0;
+    }
+   return 1;
+}
+
 
 static int
 match_keystroke_normal(gen_inp_conf_t *cf, 
 		       inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 {
+#ifdef KCWU
+    icode_t icode[MAX_ICODE_MODE];
+#else
     icode_t icode[2];
-    unsigned int size, md, n_ich=0, mcch_size;
-    int idx;
-    wch_t *mcch;
+#endif
+    unsigned int size, md, n_ich=0, n_zi = 0, mcch_size;
+    int idx, i, j;
+    wch_t *mcch; 
+
+    static ubyte_t mcch_grouping_buf[1+SELECT_KEY_LENGTH]; /* add 1 for SELKEY_SHIFT */
+    memset(mcch_grouping_buf, 0, sizeof(mcch_grouping_buf));
 
     size = cf->header.n_icode;
+#ifdef KCWU
+    md = cf->header.icode_mode;
+    for(i=0; i<md; i++)
+	icode[i] = 0;
+#else
     md = (cf->header.icode_mode == ICODE_MODE2) ? 1 : 0;
     icode[0] = icode[1] = 0;
+#endif
 
     /*
      *  Search for the first char.
      */
+#ifdef KCWU
+    keys2codes(icode, MAX_ICODE_MODE, iccf->keystroke);
+    if ((idx = bsearch_char(cf->ic, icode, size, md, 0)) == -1)
+	return 0;
+#else
     keys2codes(icode, 2, iccf->keystroke);
     if ((idx = bsearch_char(cf->ic1, cf->ic2, 
 		icode[0], icode[1], size, md, 0)) == -1)
 	return 0;
+#endif
 
     /*
      *  Search for all the chars with the same keystroke.
      */
-    mcch_size = inpinfo->n_selkey;
-    mcch = xcin_malloc(mcch_size*sizeof(wch_t), 0);
+/* KhoGuan rev
+    mcch_size = inpinfo->n_selkey; */
+    mcch_size = inpinfo->n_selkey * MAX_TSI_LEN;
+    mcch = xcin_malloc(mcch_size * sizeof(wch_t), 1);
+
+    iccf->has_tsi = 0;
+/* KhoGuan note: iccf->all_index/_grouping are initially allocated in
+   gen_inp_xim_init(), and will be realloc in this function if need. */
+    memset(iccf->all_index, 0, sizeof(int)*num_candi_bufsz);
+    memset(iccf->all_grouping, 0, sizeof(ubyte_t)*(1+num_candi_bufsz));
+
     do {
-	if (mcch_size <= n_ich) {
+	if ((mcch_size - MAX_TSI_LEN) <= n_zi) {
 	    mcch_size *= 2;
 	    mcch = xcin_realloc(mcch, mcch_size * sizeof(wch_t));
 	}
+        if (n_ich >= num_candi_bufsz) {
+            int old_num_candi_bufsz = num_candi_bufsz;
+            num_candi_bufsz += NUM_CANDI_BUFSZ;
+            perr(XCINMSG_NORMAL, 
+                 "Too many candidates(%d), realloc all_index and all_grouping array size from %d to %d\n",
+                  n_ich+1, old_num_candi_bufsz, num_candi_bufsz);
+
+            iccf->all_index = xcin_realloc(iccf->all_index, 
+                                           sizeof(int)*num_candi_bufsz);
+            memset((iccf->all_index + old_num_candi_bufsz), 0, 
+                   sizeof(int) * NUM_CANDI_BUFSZ);
+
+            iccf->all_grouping = xcin_realloc(iccf->all_grouping, 
+                                            1+sizeof(ubyte_t)*num_candi_bufsz);
+            memset((iccf->all_grouping + 1 + old_num_candi_bufsz), 0,
+                   sizeof(ubyte_t) * NUM_CANDI_BUFSZ);
+        }
+        if (! ccode_to_char_or_tsi(cf, iccf, cf->icidx[idx], 
+                                   mcch, n_ich, &n_zi))
+            return 0;
+/*
 	if (! ccode_to_char(cf->icidx[idx], mcch[n_ich].s, WCH_SIZE))
 	    return 0;
+*/
 	n_ich ++;
         idx ++;
     } while (idx < size &&
+#ifdef KCWU
+             ! cmp_icvalue(cf->ic, idx, icode, md));
+#else
              ! cmp_icvalue(cf->ic1, cf->ic2, idx, icode[0], icode[1], md));
+#endif
 
     /*
      *  Prepare mcch for display.
      */
+/* KhoGuan rev
     for (idx=0; idx<inpinfo->n_selkey && idx<n_ich; idx++)
 	inpinfo->mcch[idx].wch = mcch[idx].wch;
     inpinfo->n_mcch = idx;
+*/
+    iccf->all_grouping[0] = n_ich;
+
+    for (idx=0, i=0; idx<inpinfo->n_selkey && idx<n_ich; idx++) {
+        if (iccf->has_tsi) {
+            for (j=0; j < iccf->all_grouping[idx+1]; i++, j++) {
+	        inpinfo->mcch[i].wch = mcch[i].wch;
+            }
+            mcch_grouping_buf[idx+1] = iccf->all_grouping[idx+1];
+        }
+        else {
+	    inpinfo->mcch[i].wch = mcch[i].wch;
+            ++i;
+        }
+    }
+    inpinfo->n_mcch = i;
+    mcch_grouping_buf[0] = idx;
+
+    if (iccf->has_tsi) {
+        inpinfo->mcch_grouping = mcch_grouping_buf;
+    }
+    else
+        inpinfo->mcch_grouping = NULL;
 
     if (idx >= n_ich) {
         inpinfo->mcch_pgstate = MCCH_ONEPG;
@@ -651,7 +936,10 @@ match_keystroke_normal(gen_inp_conf_t *cf,
 	if (iccf->n_mcch_list)
 	    free(iccf->mcch_list);
         iccf->mcch_list = mcch;
-        iccf->n_mcch_list = n_ich;
+/* KhoGuan rev
+        iccf->n_mcch_list = n_ich; */
+        iccf->n_mcch_list = n_zi;
+
 	iccf->mcch_hidx = 0;		/* refer to index of iccf->mcch_list */
     }
     return 1;
@@ -681,7 +969,15 @@ static void
 get_correct_skeystroke(gen_inp_conf_t *cf,
 		inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, int idx, wch_t *cch)
 {
-    unsigned int i=0, j, klist[2];
+/* KhoGuan rev
+    unsigned int i=0, j, klist[2]; */
+    unsigned int i=0, j;
+#ifdef KCWU
+    unsigned int klist[MAX_ICODE_MODE];
+#else
+    unsigned long long klist[2];
+#endif
+
     int n_klist, ks_size, keycode;
     char *ks;
 
@@ -693,11 +989,17 @@ get_correct_skeystroke(gen_inp_conf_t *cf,
     }
     ks_size = cf->header.n_max_keystroke + 1;
     ks = xcin_malloc(ks_size, 0);
+#ifdef KCWU
+    n_klist = cf->header.icode_mode;
+    for(j=0; j<n_klist; j++)
+	klist[j] = cf->ic[j][i];
+#else
     n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
 
     klist[0] = cf->ic1[i];
     if (cf->header.icode_mode == ICODE_MODE2)
 	klist[1] = cf->ic2[i];
+#endif
     codes2keys(klist, n_klist, ks, ks_size);
     if (strcmp_wild(iccf->keystroke, ks) == 0) {
 	for (j=0; ks[j] != '\0'; j++) {
@@ -716,14 +1018,24 @@ static void
 commit_char(gen_inp_conf_t *cf,
 	    inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, int idx, wch_t *cch)
 {
-    static char cch_s[WCH_SIZE+1];
+/* KhoGuan rev
+    static char cch_s[WCH_SIZE+1]; */
+    static char cch_s[WCH_SIZE*MAX_TSI_LEN+1];
     char *s=NULL;
     int i;
 
+    memset(cch_s, 0, WCH_SIZE*MAX_TSI_LEN+1);
     inpinfo->cch = cch_s;
-    strncpy(cch_s, (char *)cch->s, WCH_SIZE);
-    cch_s[WCH_SIZE] = '\0';
 
+    if (! iccf->has_tsi) {
+        strncpy(cch_s, (char *)cch->s, WCH_SIZE);
+        cch_s[WCH_SIZE] = '\0';
+    }
+    else {
+        for (i = 0; i < inpinfo->mcch_grouping[idx+1]; i++) {
+            strncat(cch_s, cch[i].s, WCH_SIZE);
+        }
+    }
     if (! (s = strchr(iccf->keystroke,'*')) &&
 	! (s = strchr(iccf->keystroke,'?'))) {
 	for (i=0; i<=inpinfo->keystroke_len; i++)
@@ -739,6 +1051,8 @@ commit_char(gen_inp_conf_t *cf,
 
     iccf->mode &= ~(INPINFO_MODE_MCCH);
     iccf->mode &= ~(INPINFO_MODE_INWILD);
+/* KhoGuan add */
+    iccf->has_tsi = 0;
     inpinfo->guimode &= ~(GUIMOD_SELKEYSPOT);
 }
 
@@ -757,8 +1071,12 @@ commit_keystroke(gen_inp_conf_t *cf, inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
     }
 
     if (match_keystroke(cf, inpinfo, iccf)) {
-        if (inpinfo->n_mcch == 1) {
-            commit_char(cf, inpinfo, iccf, 1, inpinfo->mcch);
+/* KhoGuan rev
+        if (inpinfo->n_mcch == 1) { */
+        if (iccf->all_grouping[0] == 1) {
+/* KhoGuan debug
+            commit_char(cf, inpinfo, iccf, 1, inpinfo->mcch); */
+            commit_char(cf, inpinfo, iccf, 0, inpinfo->mcch);
             return IMKEY_COMMIT;
         }
         else {
@@ -783,8 +1101,9 @@ static int
 mcch_choosech(gen_inp_conf_t *cf, 
 	      inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, int idx)
 {
-    int min;
+    int min, cch_beg = 0;
     wch_t wch;
+    wch_t *wch_p;
 
     if (inpinfo->n_mcch == 0 && ! match_keystroke(cf, inpinfo, iccf))
         return 0;
@@ -799,8 +1118,21 @@ mcch_choosech(gen_inp_conf_t *cf,
         if (idx >= min)
             return 0;
     }
-    wch.wch = inpinfo->mcch[idx].wch;
-    commit_char(cf, inpinfo, iccf, idx, &wch);
+/* KhoGuan add */
+    if (iccf->has_tsi) {
+        if (! (iccf->mode & INPINFO_MODE_INWILD))
+            cch_beg = iccf->all_index[iccf->mcch_hidx+idx] - 
+                      iccf->all_index[iccf->mcch_hidx];
+        else {
+            cch_beg = iccf->all_index[idx];
+        }
+        wch_p = &(inpinfo->mcch[cch_beg]);
+        commit_char(cf, inpinfo, iccf, idx, wch_p);
+    }
+    else {
+        wch.wch = inpinfo->mcch[idx].wch;
+        commit_char(cf, inpinfo, iccf, idx, &wch);
+    }
     reset_keystroke(inpinfo, iccf);
 
     return 1;
@@ -810,17 +1142,25 @@ static int
 fillpage(gen_inp_conf_t *cf, inpinfo_t *inpinfo, 
 	 gen_inp_iccf_t *iccf, byte_t dir)
 {
-    int i, j, n_pg=inpinfo->n_selkey;
+    int i, j, k, m;
+    int n_pg=inpinfo->n_selkey;
+    int tsi_beg, tsi_len;
 
     if (! (iccf->mode & INPINFO_MODE_INWILD)) {
-        int total = iccf->n_mcch_list;
+        int total_zi = iccf->n_mcch_list;
+        int total_candi = iccf->all_grouping[0];
 
+/* KhoGuan note
+   For non-wild mode, iccf->mcch_hidx is used as the index, among all the candidates,
+   of the first candidate at the current page. For wild mode, the use is different,
+   see the following else section for wild mode and match_keystroke_wild().
+*/
         switch (dir) {
         case 0:
 	    iccf->mcch_hidx = 0;
 	    break;
         case 1:
-	    if (iccf->mcch_hidx + n_pg < total)
+	    if (iccf->mcch_hidx + n_pg < total_candi)
 	        iccf->mcch_hidx += n_pg;
 	    else
 	        return 0;
@@ -832,19 +1172,47 @@ fillpage(gen_inp_conf_t *cf, inpinfo_t *inpinfo,
 	        return 0;
 	    break;
         }
-	for (i=0, j=iccf->mcch_hidx; i<n_pg && j<total; i++, j++)
-	    inpinfo->mcch[i].wch = iccf->mcch_list[j].wch;
+        if (iccf->has_tsi) {
+            inpinfo->mcch_grouping[0] = 0;	/* reinitialize */
+            tsi_beg = iccf->all_index[iccf->mcch_hidx];
+            tsi_len = iccf->all_grouping[iccf->mcch_hidx+1];
+            i = 0;
+            for (j = 0; j < n_pg && (iccf->mcch_hidx + j) < total_candi; j++) {
+                for (k = 0; k< tsi_len; k++) {
+                    inpinfo->mcch[i].wch = iccf->mcch_list[tsi_beg+k].wch;
+                    i++;
+                }
+                inpinfo->mcch_grouping[0]++;
+                inpinfo->mcch_grouping[j+1] = tsi_len;
+
+                tsi_beg = iccf->all_index[iccf->mcch_hidx+j+1];
+                tsi_len = iccf->all_grouping[1+iccf->mcch_hidx+j+1];
+            }
+        }
+        else {
+	    for (i=0, j=iccf->mcch_hidx; i<n_pg && j<total_zi; i++, j++)
+	        inpinfo->mcch[i].wch = iccf->mcch_list[j].wch;
+        }
+
         if (iccf->mcch_hidx == 0)
-            inpinfo->mcch_pgstate = (i < total) ? MCCH_BEGIN : MCCH_ONEPG;
-        else if (total - iccf->mcch_hidx > n_pg)
+            inpinfo->mcch_pgstate = (i < total_zi) ? MCCH_BEGIN : MCCH_ONEPG;
+        else if (total_candi - iccf->mcch_hidx > n_pg)
 	    inpinfo->mcch_pgstate = MCCH_MIDDLE;
         else
 	    inpinfo->mcch_pgstate = MCCH_END;
         inpinfo->n_mcch = i;
     }
-    else {
-	int r=0, n_mcch, hidx, eidx; 
-	wch_t mcch[SELECT_KEY_LENGTH];
+    else { /* wild mode */
+/* KhoGuan rev
+	int r=0, n_mcch, hidx, eidx; */
+	int r=0, n_ich, hidx, eidx;
+	wch_t mcch[SELECT_KEY_LENGTH * MAX_TSI_LEN];
+/* KhoGuan add */
+        static ubyte_t mcch_grouping[SELECT_KEY_LENGTH + 1];
+        static int mcch_index[SELECT_KEY_LENGTH];
+
+        memset(mcch_grouping, 0, sizeof(mcch_grouping));
+        memset(mcch_index, 0, sizeof(mcch_index));
 
         switch (dir) {
         case 0:
@@ -852,9 +1220,16 @@ fillpage(gen_inp_conf_t *cf, inpinfo_t *inpinfo,
         case 1:
 	    if (inpinfo->mcch_pgstate == MCCH_BEGIN ||
 	        inpinfo->mcch_pgstate == MCCH_MIDDLE) {
+                iccf->has_tsi = 0;
+                inpinfo->mcch_grouping = NULL;
+                inpinfo->n_mcch = 0;
 		hidx = eidx = iccf->mcch_eidx + 1;
         	r = pick_cch_wild(cf, iccf, &eidx, 1, inpinfo->mcch, 
-			inpinfo->n_selkey, (unsigned int *)&n_mcch);
+			inpinfo->n_selkey, (unsigned int *)&n_ich);
+                if (iccf->has_tsi)
+                    inpinfo->mcch_grouping = iccf->all_grouping;
+                inpinfo->n_mcch = iccf->all_index[n_ich-1] + 
+                                  iccf->all_grouping[n_ich];
 	    }
 	    else
 		return 0;
@@ -862,11 +1237,37 @@ fillpage(gen_inp_conf_t *cf, inpinfo_t *inpinfo,
         case -1:
 	    if (inpinfo->mcch_pgstate == MCCH_END ||
 	        inpinfo->mcch_pgstate == MCCH_MIDDLE) {
+                iccf->has_tsi = 0;
+                inpinfo->mcch_grouping = NULL;
+                inpinfo->n_mcch = 0;
 		hidx = eidx = iccf->mcch_hidx - 1;
         	r = pick_cch_wild(cf, iccf, &hidx, -1,
-	        	mcch, inpinfo->n_selkey, (unsigned int *)&n_mcch);
-	        for (i=0, j=n_mcch-1; j>=0; i++, j--)
-		    inpinfo->mcch[i].wch = mcch[j].wch;
+	        	mcch, inpinfo->n_selkey, (unsigned int *)&n_ich);
+/* KhoGuan note:
+   For wild mode, iccf->all_index/grouping has only one page of candidates every time.
+   And no matther iccf->has_tsi is 1 or 0, their data are used here.
+*/
+                m = 0;
+	        for (i=0, j=n_ich-1; j>=0; i++, j--) {
+		    /* inpinfo->mcch[i].wch = mcch[j].wch; */
+                    tsi_beg = iccf->all_index[j];
+                    tsi_len = iccf->all_grouping[j+1];
+                    for (k=0; k < tsi_len; k++) {
+                        inpinfo->mcch[m].wch = mcch[tsi_beg+k].wch;
+                        ++m;
+                    }
+                    mcch_grouping[i+1] = tsi_len;
+/* KhoGuan note
+   all_index[] need be recalculated, use mcch_index as tmp buffer */
+                    mcch_index[i] = (i == 0)?  0 : (mcch_index[i-1] + mcch_grouping[i]);
+                }
+                mcch_grouping[0] = iccf->all_grouping[0]; 
+                if (iccf->has_tsi) {
+                    inpinfo->mcch_grouping = mcch_grouping;
+                }
+                inpinfo->n_mcch = mcch_index[n_ich-1] + mcch_grouping[n_ich];
+                for (i=0; i < mcch_grouping[0]; i++)
+                    iccf->all_index[i] = mcch_index[i]; 
 	    }
 	    else
 		return 0;
@@ -881,7 +1282,7 @@ fillpage(gen_inp_conf_t *cf, inpinfo_t *inpinfo,
 	}
         else
 	    inpinfo->mcch_pgstate = MCCH_MIDDLE;
-        inpinfo->n_mcch = n_mcch;
+        /* inpinfo->n_mcch = n_mcch; */
 	iccf->mcch_hidx = hidx;
 	iccf->mcch_eidx = eidx;
     }
@@ -1052,7 +1453,7 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	       (iccf->mode & INPINFO_MODE_MCCH)) &&
 /* end of wild mod */
 	    (inpinfo->n_mcch > 1 || inpinfo->mcch_pgstate != MCCH_ONEPG)) {
-            if ((mcch_choosech(cf, inpinfo, iccf, -1)))
+            if (mcch_choosech(cf, inpinfo, iccf, -1))
                 return IMKEY_COMMIT;
             else {
                 if ((cf->mode & INP_MODE_AUTORESET))
@@ -1062,8 +1463,17 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
                 return return_wrong(cf);
             }
 	}
-	else if ((iccf->mode & INPINFO_MODE_MCCH))
-	    return mcch_nextpage(cf, inpinfo, iccf, ' ');
+	else if ((iccf->mode & INPINFO_MODE_MCCH)) {
+            if ((cf->mode & INP_MODE_TABNEXTPAGE) &&
+                (! (iccf->mode & INPINFO_MODE_INWILD) ||
+                   (iccf->mode & INPINFO_MODE_MCCH)) &&
+                (inpinfo->n_mcch > 1 || inpinfo->mcch_pgstate != MCCH_ONEPG)) {
+                mcch_choosech(cf, inpinfo, iccf, -1);
+                return IMKEY_COMMIT;
+            }
+            else
+	        return mcch_nextpage(cf, inpinfo, iccf, ' ');
+        }
         else if ((cf->mode & INP_MODE_SPACERESET) && inp_wrong) {
             reset_keystroke(inpinfo, iccf);
             return IMKEY_ABSORB;
@@ -1074,10 +1484,17 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	    return commit_keystroke(cf, inpinfo, iccf);
     }
 
+/* KhoGuan add */
+    else if ((keysym == XK_Tab) && (cf->mode & INP_MODE_TABNEXTPAGE)) {
+        if ((iccf->mode & INPINFO_MODE_MCCH)) {
+            return mcch_nextpage(cf, inpinfo, iccf, ' ');
+        }
+    }
+
     else if ((keysym >= XK_KP_0 && keysym <= XK_KP_9) || 
 	     (keysym >= XK_KP_Multiply && keysym <= XK_KP_Divide))
 	return IMKEY_IGNORE;
-
+/* KhoGuan general case */
     else if (keyinfo->keystr_len == 1) {
         unsigned int ret=IMKEY_ABSORB, ret1=0;
 	int selkey_idx, endkey_pressed=0;
@@ -1086,6 +1503,7 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 
         inpinfo->cch_publish.wch = (wchar_t)0;
 	keycode = key2code(keystr[0]);
+
 	wch.wch = cf->header.keyname[(int)keycode].wch;
 	selkey_idx = ((s = strchr(cf->header.selkey, keystr[0]))) ? 
 		(int)(s - cf->header.selkey) : -1;
@@ -1164,7 +1582,6 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 
 	return ret;
     }
-
     return IMKEY_IGNORE;
 }
 
@@ -1483,21 +1900,32 @@ gen_inp_show_keystroke(void *conf, simdinfo_t *simdinfo)
     wchar_t tmp;
     char *k, keystroke[INP_CODE_LENGTH+1];
     static wch_t keystroke_list[INP_CODE_LENGTH+1];
+#ifdef KCWU
+    unsigned int klist[MAX_ICODE_MODE];
+#endif
 
     if ((i = ccode_to_idx(&(simdinfo->cch_publish))) == -1)
         return False;
 
     if ((idx = cf->ichar[i]) == ICODE_IDX_NOTEXIST)
 	return False;
+#ifdef KCWU
+    for(i=0; i<cf->header.icode_mode; i++)
+	klist[i] = cf->ic[i][idx];
+    codes2keys(klist, cf->header.icode_mode, keystroke, SELECT_KEY_LENGTH+1);
+#else
     if (cf->header.icode_mode == ICODE_MODE1)
 	codes2keys(&(cf->ic1[idx]), 1, keystroke, SELECT_KEY_LENGTH+1);
     else if (cf->header.icode_mode == ICODE_MODE2) {
-        unsigned int klist[2];
+/* KhoGuan rev
+        unsigned int klist[2]; */
+        unsigned long long klist[2];
 
 	klist[0] = cf->ic1[idx];
 	klist[1] = cf->ic2[idx];
 	codes2keys(klist, 2, keystroke, SELECT_KEY_LENGTH+1);
     }
+#endif
     for (i=0, k=keystroke; i<INP_CODE_LENGTH && *k; i++, k++) {
 	idx = key2code(*k);
 	if ((tmp = cf->header.keyname[idx].wch))

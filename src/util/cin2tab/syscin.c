@@ -164,6 +164,18 @@ check_hex_num(char *numbuf, int *num)
     return 0;
 }
 
+/* KhoGuan:
+   read_encoding(): called by syscin(cintab_t *cintab) in syscin.c, 
+                    read the 2nd half of sys.cin table:
+%charcode       begin
+plane1          0xa1-0xf9
+plane2          0x40-0x7e
+plane2          0xa1-0xfe
+%charcode       end
+
+   The first line(%charcode begin) has already been consumed in syscin()
+*/
+
 static void
 read_encoding(charcode_t *ccp, cintab_t *cintab)
 {

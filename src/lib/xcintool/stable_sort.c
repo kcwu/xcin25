@@ -119,6 +119,7 @@ void
 xcin_mergesort(void *base, size_t nmemb, size_t size,
               int (*compar)(const void *, const void *))
 {
+    if(nmemb <= 0) return;
     buf = xcin_malloc(nmemb*size, 0);    
     separate(base, nmemb, size, compar);
     free(buf);
