@@ -211,6 +211,10 @@ case "$host_os" in
 	os_type=DARWIN
 	AC_DEFINE(DARWIN, 1, [Define for Darwin system.])
 	;;
+    cygwin*)
+	os_type=CYGWIN
+	AC_DEFINE(CYGWIN, 1, [Define for cygwin system.])
+	;;
     *)
 	AC_MSG_RESULT([Warning: xcin does not support this system yet.])
 	AC_MSG_RESULT([Warning: please report this to xcin@linux.org.tw])
@@ -543,12 +547,12 @@ if test x$without_tabe = x && test x$without_bims = x; then
 	  without_bims=yes ], [ -ltabe $test_db_lib ])
 fi
 
-if test x$without_tabe = x; then
-    test_tabe_lib="$test_tabe_lib -ltabe"
-fi
 if test x$without_tabe = x && test x$without_bims = x; then
     test_bims_lib="$test_tabe_lib -lbims"
     build_bimsphone=bimsphone
+fi
+if test x$without_tabe = x; then
+    test_tabe_lib="$test_tabe_lib -ltabe"
 fi
 
 dnl-----------------------------------------------------------------------

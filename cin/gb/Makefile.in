@@ -29,6 +29,11 @@ all-SOLARIS:
 all-DARWIN:
 	( GB2312ENC=euccn make -f Rules make-gb2312 )
 
+all-CYGWIN:
+	( GB2312ENC=gb2312 GBKENC=gbk make -f Rules make-gb2312 make-gbk )
+
+all-UNKNOWN:
+	( GB2312ENC=euccn make -f Rules make-gb2312 )
 
 install: all install-$(OS_TYPE)
 
@@ -49,6 +54,15 @@ install-HPUX:
 
 install-SOLARIS:
 	( GB2312ENC=euc make -f Rules install_gb2312 )
+
+install-DARWIN:
+	( GB2312ENC=euccn make -f Rules install_gb2312 )
+
+install-CYGWIN:
+	( GB2312ENC=gb2312 GBKENC=gbk make -f Rules install_gb2312 install_gbk )
+
+install-UNKNOWN:
+	( GB2312ENC=euccn make -f Rules install_gb2312 )
 
 clean:
 	rm -f *.tab* core

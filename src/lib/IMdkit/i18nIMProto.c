@@ -170,7 +170,7 @@ xim_externaldef XimFrameRec input_styles_fr[] =
     _PAD4(1), 			/* unused */
     _FRAME(ITER), 		/* XIMStyle list */
     _FRAME(POINTER),
-    _PTR(inputstyle_fr),
+    __PTR(inputstyle_fr),
     _FRAME(EOL),
 };
 
@@ -204,7 +204,7 @@ xim_externaldef XimFrameRec connect_fr[] =
     _BYTE_COUNTER(BIT16, 1), 	/* length of client-auth-protocol-names */
     _FRAME(ITER), 		/* client-auth-protocol-names */
     _FRAME(POINTER),
-    _PTR(xpcs_fr),
+    __PTR(xpcs_fr),
     _FRAME(EOL),
 };
 
@@ -247,7 +247,7 @@ xim_externaldef XimFrameRec auth_setup_fr[] =
     _PAD4(1), 			/* unused */
     _FRAME(ITER), 		/* server-auth-protocol-names */
     _FRAME(POINTER),
-    _PTR(xpcs_fr),
+    __PTR(xpcs_fr),
     _FRAME(EOL),
 };
 
@@ -269,7 +269,7 @@ xim_externaldef XimFrameRec disconnect_reply_fr[] =
 xim_externaldef XimFrameRec open_fr[] =
 {
     _FRAME(POINTER), 		/* locale name */
-    _PTR(str_fr),
+    __PTR(str_fr),
     _PAD4(1),
     _FRAME(EOL),
 };
@@ -280,12 +280,12 @@ xim_externaldef XimFrameRec open_reply_fr[] =
     _BYTE_COUNTER(BIT16, 1), 	/* byte length of IM attributes supported */
     _FRAME(ITER), 		/* IM attribute supported */
     _FRAME(POINTER),
-    _PTR(ximattr_fr),
+    __PTR(ximattr_fr),
     _BYTE_COUNTER(BIT16, 2), 	/* number of IC attribute supported */
     _PAD4(1), 			/* unused */
     _FRAME(ITER), 		/* IC attribute supported */
     _FRAME(POINTER),
-    _PTR(xicattr_fr),
+    __PTR(xicattr_fr),
     _FRAME(EOL),
 };
 
@@ -310,11 +310,11 @@ xim_externaldef XimFrameRec register_triggerkeys_fr[] =
     _BYTE_COUNTER(BIT32, 1),    /* byte length of on-keys */
     _FRAME(ITER), 		/* on-keys list */
     _FRAME(POINTER),
-    _PTR(ximtriggerkey_fr),
+    __PTR(ximtriggerkey_fr),
     _BYTE_COUNTER(BIT32, 1), 	/* byte length of off-keys */
     _FRAME(ITER), 		/* off-keys list */
     _FRAME(POINTER),
-    _PTR(ximtriggerkey_fr),
+    __PTR(ximtriggerkey_fr),
     _FRAME(EOL),
 };
 
@@ -350,7 +350,7 @@ xim_externaldef XimFrameRec encoding_negotiation_fr[] =
     _BYTE_COUNTER(BIT16, 1), 	/* byte length of encodings listed by name */
     _FRAME(ITER), 		/* supported list of encoding in IM library */
     _FRAME(POINTER),
-    _PTR(str_fr),
+    __PTR(str_fr),
     _PAD4(1),
     _BYTE_COUNTER(BIT16, 2), 	/* byte length of encodings listed by
                                        detailed data */
@@ -358,7 +358,7 @@ xim_externaldef XimFrameRec encoding_negotiation_fr[] =
     _FRAME(ITER), 		/* list of encodings supported in the
     				   IM library */
     _FRAME(POINTER),
-    _PTR(encodinginfo_fr),
+    __PTR(encodinginfo_fr),
     _FRAME(EOL),
 };
 
@@ -378,7 +378,7 @@ xim_externaldef XimFrameRec query_extension_fr[] =
     				   by the IM library */
     _FRAME(ITER), 		/* extensions supported by the IM library */
     _FRAME(POINTER),
-    _PTR(str_fr),
+    __PTR(str_fr),
     _PAD4(1),
     _FRAME(EOL),
 };
@@ -391,7 +391,7 @@ xim_externaldef XimFrameRec query_extension_reply_fr[] =
     _FRAME(ITER), 		/* list of extensions supported by the
     				   IM server */
     _FRAME(POINTER),
-    _PTR(ext_fr),
+    __PTR(ext_fr),
     _FRAME(EOL),
 };
 
@@ -411,7 +411,7 @@ xim_externaldef XimFrameRec get_im_values_reply_fr[] =
     _BYTE_COUNTER(BIT16, 1), 	/* byte length of im-attribute returned */
     _FRAME(ITER), 		/* im-attribute returned */
     _FRAME(POINTER),
-    _PTR(ximattribute_fr),
+    __PTR(ximattribute_fr),
     _FRAME(EOL),
 };
 
@@ -421,7 +421,7 @@ xim_externaldef XimFrameRec create_ic_fr[] =
     _BYTE_COUNTER(BIT16, 1), 	/* byte length of ic-attributes */
     _FRAME(ITER), 		/* ic-attributes */
     _FRAME(POINTER),
-    _PTR(xicattribute_fr),
+    __PTR(xicattribute_fr),
     _FRAME(EOL),
 };
 
@@ -454,7 +454,7 @@ xim_externaldef XimFrameRec set_ic_values_fr[] =
     _PAD4(1),
     _FRAME(ITER), 		/* ic-attribute */
     _FRAME(POINTER),
-    _PTR(xicattribute_fr),
+    __PTR(xicattribute_fr),
     _FRAME(EOL),
 };
 
@@ -484,7 +484,7 @@ xim_externaldef XimFrameRec get_ic_values_reply_fr[] =
     _PAD4(1),
     _FRAME(ITER), 		/* ic-attribute */
     _FRAME(POINTER),
-    _PTR(xicattribute_fr),
+    __PTR(xicattribute_fr),
     _FRAME(EOL),
 };
 

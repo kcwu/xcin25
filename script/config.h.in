@@ -1,5 +1,8 @@
 /* script/config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Define for cygwin system. */
+#undef CYGWIN
+
 /* Define for Darwin system. */
 #undef DARWIN
 
@@ -18,9 +21,6 @@
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
-
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
 
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN

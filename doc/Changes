@@ -77,6 +77,9 @@ xcin-2.5.3-pre3:  2001/12
 25. Partial Darwin support.
     Thanks to <glee@gnupilgrims.org>.
 
+26. Port xcin to Cygwin.
+    Thanks to weijr <weijr@magic.b81.org>.
+
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
 1. Fix memory leakage problem in IMdkit: i18nIc.c.
