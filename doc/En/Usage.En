@@ -1,0 +1,733 @@
+In this article the detailed usage or xcin is described.
+
+1. Command line options and environment variables:
+
+   You will see the following usage description via the "xcin -h" command:
+
+===========================================================================
+XCIN (Chinese XIM server) version xcin <version number>
+(module ver: <version number>, syscin ver: xcin-<version number>).
+(use "-h" option for help)
+
+xcin: locale "zh_TW.Big5" encoding "big5"
+
+Usage:  xcin [-h] [-d DISPLAY] [-x XIM_name] [-r rcfile]
+Options:  -h: print this message.
+          -m: print the comment of module "mod_name"
+          -d: set X Display.
+          -x: register XIM server name to Xlib.
+          -r: set user specified rcfile.
+
+Useful environment variables:  $XCIN_RCFILE.
+===========================================================================
+
+   The huge amount of command line options of the old xcin are mostly
+   moved to rcfile (see the description of section 2). Besides of the
+   command line options and the configuration of rcfile, xcin can also
+   accept the following environment variables:
+
+   LC_CTYPE:	set the character handling locale, default is "zh_TW.Big5".
+   LC_MESSAGES:	set the message output locale, default is "C" or "POSIX".
+   XCIN_RCFILE: set the file name of "rcfile".
+
+   If some of the configurations appear in command line option, environment
+   variable, and rcfile, then the priority is:
+
+	command line option > environment variable > user rcfile >
+		default rcfile > xcin default
+
+   If no command line option nor environment variable given, xcin starts with
+   its internal configuration. The internal configuration uses $RCPATH/xcinrc
+   as the default rcfile, where the value of $RCPATH is specified during
+   configure/make from the source code. Its default is /usr/local/etc or /etc.
+   XCIN only read one rcfile. It searches the rcfile with the following 
+   ordering:
+
+	$HOME/.xcin/xcinrc	(suppose that your XCIN_USER_DIR is set to
+				 be ".xcin", see the following)
+	$HOME/.xcinrc
+	$RCPATH/xcinrc		(the system default rcfile)
+
+   Hence, if a normal user does not like the configuration of the system 
+   default rcfile, in principle he only needs to copy the system default
+   rcfile into $HOME/.xcin/ or $HOME/ directory and modify its configuration
+   to his favoriates.
+
+***************************************************************************
+***************************************************************************
+***************************************************************************
+
+2. XIM (X Input Method) server:
+
+   In the framework of XIM, the programs are classified into 2 groups: The
+   first is called "XIM server", and the other one is "XIM client". The XIM
+   server is used to provide the (internationalized) input method for the
+   XIM client (the X Window applications). The X applications should support
+   the XIM protocol in order to accept the texts input from the XIM server.
+
+   XCIN-2.5 is a XIM server and can serve to provide the Chinese input (e.g.,
+   Big5 or GB encodings) for XIM client. In a running X Display, there can
+   be a several XIM servers co-exist, and every XIM server has a set of
+   tag for identification: (LC_CTYPE, XIM_name), where "LC_CTYPE" is the
+   locale name (the character handling category, e.g., zh_TW.Big5), and
+   "XIM_name" is the XIM server name which xcin registered in this X Display.
+   In the same locale environment, there can be several xcin processes running
+   with different "XIM_name". And, if you want to input Big5 and GB texts
+   into the XIM client, you have to run two xcin processes with zh_TW.Big5 
+   and zh_CN.GB2312 locales and different "XIM_name"s respectively. Then the 
+   one starts with zh_TW.Big5 locale will display/input Big5 texts, while 
+   the one starts with zh_CN.GB2312 locale will display/input GB2312 texts.
+
+   Similarly, every XIM client should start with a specified locale and the
+   "XIM_name" setting such that it can talk to a specific XIM server. Then,
+   the one starts from the zh_TW.Big5 locale can accept the input from the
+   xcin started with the zh_TW.Big5, and similarly for zh_CN.GB2312.
+
+   By default, if xcin starts from the zh_TW.Big5 locale, its "XIM_name"
+   registered to the X Display will be "xcin". If it starts from other locales,
+   e.g., zh_CN.GB2312, then its "XIM_name" will be "xcin" with "-<locale name>"
+   appended, for example:
+
+	xcin-zh_CN.GB2312
+
+   Of course, we can also use the command line option -x to specify the
+   "XIM_name" of xcin.
+
+   Besides, the standard XIM server can also support several input_styles.
+   Currently xcin support 2 kinds of input_style:
+
+	Root:  the preedit information and status information are both in
+	       xcin main window.
+	OverTheSpot:  xcin will open a small window near the input cursor
+		      of the XIM client to display the preedit information,
+		      and the small window will move with the input cursor.
+
+   In the future, xcin will support other input_styles.
+
+   When xcin starts, all the XIM server configurations described above will
+   be listed as the guideline to start the XIM client. For example in the
+   zh_TW.Big5 locale to start xcin without any options, xcin will list the
+   following messages:
+
+XCIN (Chinese XIM server) version xcin <version number>.
+(module ver: <version number>, syscin ver: <version number>).
+(use "-h" option for help)
+
+xcin: locale "zh_TW.Big5" encoding "big5"
+xcin: XIM server "xcin" transport "X/"
+xcin: inp_styles: Root OverTheSpot 
+
+   the meaning is: locale (LC_CTYPE) is "zh_TW.Big5", with the encoding name
+   "big5"; while the XIM_name is "xcin", XIM transport mode is "X protocol",
+   and the input_styles are "Root" and "OverTheSpot".
+
+   XCIN uses dynamic linking method to operate with the XIM clients. During
+   the English input mode, xcin and the XIM client are disconnected, so that
+   we can type normal ASCII codes. But when we press any trigger key (see
+   the description in the following), the xcin will connect to the XIM client,
+   then the begin Chinese input mode.
+
+***************************************************************************
+***************************************************************************
+***************************************************************************
+
+3. The format of rcfile (see also "xcinrc" file)
+
+   XCIN-2.5 use siod as the syntax parser to read the rcfile. Its language
+   is the mix of lisp/Scheme language, as described in the following:
+
+   a. If the line contains the ';' character, then begins from this character
+      to the end of the line are treated as the comments.
+
+   b. (define $cmd $value):
+	Set the value of $cmd to be $value. If $value is simply a string, 
+	it should be quoted inside a pair of double quotation mark: "
+
+	(define FG_COLOR "white")	; set the foreground color to be white.
+
+	The $value can be a sub-group of ($cmd, $value) pairs, for example:
+
+	; Set the input method zh_hex with Chinese name "Big5 ¤º½X", and
+	; set its "BEEP_WRONG" value to be "YES". Please note the parenthesis
+	; pairs in each level.
+	(define zh_hex  '((INP_CNAME   "Big5 ¤º½X")
+			  (BEEP_WRONG  "YES")))
+
+   The main structer of xcin-2.5 contains xcin main program and IM (Input
+   Method) modules. The configuration of rcfile is roughly devided to 3
+   parts: main program global configuration, locale setting, and the detailed
+   settings of each input method. The setting of each input method is related
+   to the IM module which it use. For details please refer to the documents
+   in doc/modules/. In the following we will explain the meaning of rcfile
+   keywords for global configurations and locale settings (see also xcinrc
+   file).
+
+   a. Main program global setting:
+   -------------------------------
+   XCIN_DEFAULT_DIR:
+	XCIN default data directory, which will contain the IM tables, IM
+	modules, and other data files.
+
+   XCIN_USER_DIR:
+	User specified data directory. If it is not a relative path, then
+	it will start with the user's $HOME directory.
+
+   INDEX_FONT:
+	The font used to display the English IM name (in the right-bottom
+	corner of the xcin main window).
+
+   FG_COLOR:
+	The foreground color of xcin windows.
+
+   BG_COLOR:
+	The background color of xcin windows.
+
+   M_FG_COLOR:
+	The specially displayed foreground color (e.g., the preedit area,
+	mutiple characters for selection).
+
+   M_BG_COLOR:
+	The specially displayed background color (e.g., the preedit area,
+	mutiple characters for selection).
+
+   ULINE_COLOR:
+	The color of phrases marking underline of xcin windows.
+
+   GRID_COLOR:
+	The grid color of xcin windows.
+
+   X_GEOMETRY:
+	The size and position of xcin main window.
+
+   START_MAINWIN2:
+	Open the xcin 2nd main window or not? Because in the OverTheSpot
+	input_style, all the preedit information are moved into the 
+	OverTheSpot window (the small window appeared near the cursor of
+	the XIM client), so the original xcin main window seems to be too
+	large and waste a lot of space of the disktop. Therefore, if the
+	xcin 2nd main window is opened, then in the English input mode or
+	the OverTheSpot input_style, xcin will use the smaller 2nd main
+	window to display necessary information. But when the Root input_style
+	is enabled, the xcin will automatically switch to the original main
+	windown.
+
+   MAINWIN2_GEOMETRY:
+	The size and position of xcin 2nd main window.
+
+   XCIN_HIDE:
+	Hide xcin window when English input mode or not?
+
+   XKILL_DISABLE:
+	Disable the facility such that the Window Manager can terminate xcin
+	through WM protocol or not?
+
+   ICCHECK_DISABLE:
+	Disable the IC checking facility or not? This facility can check the
+	ICs and windows of all the XIM clients periodically.
+
+   SINGLE_IM_CONTEXT:
+	Let all the XIM clients to share the same IM data structer or not.
+	The default is NO, i.e., the IM data structer of each XIM client
+	are distinct, so the IM status of each XIM client is independent.
+	If set this option to YES, then all the XIM clients will have the
+	same IM status.
+
+   IM_FOCUS_ON:
+	Start the IM focus facility when running xcin. See the following for
+	details.
+
+   KEEP_POSITION_ON:
+	Keep the position of the xcin window or not? If this option is opened,
+	then xcin window will automatically appeared on the disktop when we
+	switch between the virtual disktops. Also when we move the xcin window
+	out of the boundary of the screen (or, disktop), xcin will come back
+	to its original position. This option is useful to some simple Window
+	Managers, e.g., fvwm series. If the Window Manager does not provide
+	the function to fix the applicatiion window on the working virtual
+	desktop, then you can try to enable this option. But if your Window
+	Manager dose provide this functionality, it is suggested to disable
+	this option to aviod other possible problems. By default this option
+	is not enabled.
+
+   DISABLE_WM_CTRL:
+	Disable the control of Window Managers over the xcin window or not?
+	By default it is not enabled, so that Window Managers can control
+	the xcin window, including that you can use mouse to drag or resize
+	the xcin window, can close, iconfy the window .... etc, and the
+	Window Managers can change the configuration of the window if it
+	needs .... etc. Because different Window Manager has many different
+	controlling style overs the window of the applications, and sometimes
+	this might disturb the operation of xcin itself. In this circumstance
+	you can turn on this option to prevent the control from the Window
+	Managers.
+
+   DIFF_BEEP:
+	Enable the different beep or not? There are two kinds of situations
+	that xcin will beep, one is that the user types the wrong keystroke,
+	and the other is that there are duplicated characters to choose.
+	Depending on the design of the IM module and the configuration of
+	the input methods in the xcinrc file, xcin may beep when both of the
+	situations occures, or only beep when one of the situations occures.
+	By default the beeps of both situation are the same. But if you turn
+	on this option, then the two beeps will be different.
+
+   LOCALE:
+	In this option all the locale name set in the xcinrc file could be
+	listed here. This option is optional. However, if you are using
+	glibc-2.2 system, it is recommanded to use this option in order to
+	avoid the locale naming problem.
+
+   INPUT_STYLE:
+	Set the input_styles acceptable to the xcin. The value could be any
+	combinations of the following:
+
+	Root: both the preedit area and status area are inside the xcin main
+	      window.
+	OverTheSpot: besides the xcin main window, xcin will open another
+		     window near your current input cursor to display the
+		     preedit area.
+
+   OVERSPOT_USE_CLICOLOR:
+	Use the colors determined by xcin (i.e., the colors the user set in
+	xcinrc) as the foreground and background colors of the OverTheSpot
+	window or not? By default it is YES, then the window is usually
+	colorful.  If this option is disabled, then xcin will use the color
+	specified by the XIM client, and there will be only foreground and
+	background colors.
+
+   OVERSPOT_USE_USRFONTSET:
+	Use the font specified by the user as the font of the OverTheSpot
+	window or not? By default is NO, i.e., xcin will use the font specified
+	by the XIM client. If this option is enabled, then the user specified
+	font will be used immediately (see the description in the following).
+
+   OVERSPOT_WINDOW_ONLY:
+	Start the OverTheSpot window ONLY or not? By default is disabled, 
+	i.e., at least xcin will start a main window (no matter the first 
+	main window or the second main window) to display the status message.
+	If enable this option, then xcin will not display any main window,
+	and all the preedit and partial status messages will move to the
+	OverTheSpot window. Therefore, the area occupied by the xcin window
+	in the desktop of the screen will be reduced to the minimum.
+
+	Please note that because of the smallness of the OverTheSpot window,
+	so it cannot contain too many information. This will lead to only
+	partial information originally displayed in the xcin main window can
+	be moved here, and the other part will be neglected.
+
+   FKEY_ZHEN:  (default: "ctrl space")
+	Set the trigger key of English/Chinese input mode.
+
+   FKEY_2BSB:  (default: "shift space")
+	Set the trigger key of Wide/Normal ASCII input mode.
+
+   FKEY_CIRIM:  (default: "ctrl shift")
+	Set the trigger key of circulatory switching the input methods in 
+	positive direction.
+
+   FKEY_CIRRIM:  (default: "shift ctrl")
+	Set the trigger key of circulatory switching the input methods in
+	negative direction.
+
+   FKEY_CHREP:  (default: "ctrl alt r")
+	Set the function key to repeat the last input texts.
+
+   FKEY_SIMD:  (default: "ctrl alt i")
+	Set the function key to circulatory switching the keystroke recalling
+	mode (simd).
+
+   FKEY_IMFOCUS:  (default: "ctrl alt f")
+	Set the function key of IM focus switch.
+
+   FKEY_IMN:  (default: "ctrl alt")
+	Set the modifier keys of the trigger keys of all the input methods.
+	For example, if it is set to "ctrl alt", then input ctrl+alt+1 will
+	switch to the input method with setkey set to 1.
+
+   FKEY_QPHRASE:  (default: "shift alt")
+	Set the modifier keys of the trigger keys of all the quick-phrase
+	output. For example, if it is set to "shift alt", then input
+	shift+alt+o will output the phrase standed by code "o".
+
+   For the detailed description of all the functional keys or trigger keys,
+   please refer to section 4.
+
+
+   b. Locale configurations:
+   -------------------------
+   Every locale environment you want xcin to work in should be configured here.
+   The syntax is:
+
+	(define "locale name"   '(( "detailed settings" ....)))
+
+   For example, if you will use xcin in zh_TW.Big5 and zh_CN.GB2312 locales,
+   then you will have the settings in xcinrc as:
+
+==========================================================================
+        (define "zh_TW.Big5"   '((cmd1  "value1")
+                                 (....  ........)))
+        (define "zh_CN.GB2312" '((cmd1  "value1")
+                                 (....  ........)))
+==========================================================================
+
+   The acceptable commands are:
+
+   DEFAULT_IM:
+	The default input method xcin will load when starts.
+
+   DEFAULT_IM_MODULE:
+	The default IM module for all the input methods.
+
+   DEFAULT_IM_SINMD:
+	The default input method for keystroke recalling. When you are 
+	inputting Chinese texts, xcin will display (recall) the keystroke you 
+	just input when every Chinese character is typed out. This option is 
+	used to specify this recalling mode. If it is set to the name of
+	any input method, then no matter what input method you are using,
+	it will display the recalling keystroke of the input method you
+	specified here. If it is set to "DEFAULT", then it will use the input
+	method you are using to display the recalling keystroke (when you
+	switch to other input method, the recolling keystroke will also
+	be switched).
+
+   PHRASE:
+	Specify the data file of the quick-phrases.
+
+   CINPUT:
+	Specify the input methods you want to use in this locale.
+
+   FONTSET:
+	Specify the fontset of the xcin main window in this locale environment.
+	The format is:
+		"<font name 1>,<font name 1>,...."
+
+	That is, different font names are separated by commas. For different
+	systems, different locales, the needed fontset settings should be
+	different, so you have to set this according to your environment.
+	For example, in GNU/Linux or FreeBSD (i.e., using XFree86 system),
+	under zh_TW.Big5 locale the FONTSET should contain one English font
+	(the font name ended with "iso8859-1") and one Big5 font (the font
+	name ended with "big5-0"), so the FONTSET should be set as:
+
+		"-sony-*-24-*-iso8859-1,-*-24-240-*-big5-0"
+
+   OVERSPOT_FONTSET:
+	The above FONTSET is used to set the font of xcin main window; while
+	the OVERSPOT_FONTSET here is used to set the font of the OverTheSpot
+	window. The way of setting is exactly the same as that of FONTSET.
+	Generally speaking, the font size of FONTSET will be larger, but the
+	size of OVERSPOT_FONTSET could be smaller.
+
+	Please note, if the option OVERSPOT_USE_USRFONTSET is not enabled,
+	then only if the XIM clients do not specify the font to xcin so that
+	xcin will use the font specified in OVERSPOT_FONTSET, otherwise the
+	font specified here will not have any effect. Therefore, if you want
+	to enable this setting immediately, if have to enable the option
+	OVERSPOT_USE_USRFONTSET, too.
+
+	Besides, you can also set this option to be "NONE", which means to
+	disable this configuration completely. Then xcin will use the font
+	provided by the XIM client directly. If in case the XIM client does
+	not provide it, then xcin will use the font of FONTSET setting to
+	display.
+
+
+   c. The detailed configurations of each input method:
+   ----------------------------------------------------
+   XCIN adopts the module structer to provide the input methods. Different
+   IM modules support the necessary functions and features for different
+   classes input methods. However, not all of the input methods could use
+   all the IM modules, and different IM modules have different adopting way
+   by the input methods. This depends on the implementation of the IM modules.
+   Therefore, when we are going to have detailed configurations for the
+   input methods, we have to specify which IM module this input method will
+   use. If not specified, then xcin will use the setting of DEFAULT_IM_MODULE
+   as the IM module for this input method.
+
+   Now xcin does not impose the ctrl+alt+3 switch as the phone IM, or the
+   ctrl+alt+6 as the intellegent phone IM, .... etc. All the needed input
+   methods should be specified in the CINPUT setting, plus the suitable
+   detailed configurations as described in the following, then they will be
+   loaded when using. Note that the input methods specified in DEFAULT_IM
+   and DEFAULT_IM_SINMD should be also found in the CINPUT list (except that
+   when DEFAULT_IM_SINMD is set to "DEFAULT"). If they are not found, xcin
+   will automatically choose other IMs in CINPUT to be the DEFAULT_IM or
+   DEFAULT_IM_SINMD.
+
+   In the following we will have detailed configurations for each input methods
+   specified in CINPUT option. The format is looked like this:
+
+============================================================================
+(define zh_hex                          ; This is one of the IM founded in 
+					; the CINPUT list.
+        '((INP_CNAME    "Big5 ¤º½X")    ; The following is the detailed
+          (SETKEY       0)		; configurations of this IM.
+          (MODULE       zh_hex)
+          (......       ......)))
+
+(define cj@big5
+        '((SETKEY       1)
+          (......       ......)))
+============================================================================
+
+   Please note that the detailed configurations of each input method are
+   independent to each other. Please also note the settings of Changjei
+   input method. The "@big5" text behind of the "cj" is optional. If it is
+   added, then xcin will load it only in the locale with Big5 encoding (e.g.,
+   the zh_TW.Big5 locale). Therefore, you can write the IM configurations
+   for different encodings in the same configuration file, but each has
+   distinct SETKEY value (see below) without confliction. For example:
+
+        (define pinyin@big5
+                '((SETKEY       4)
+                  (......       ......)))
+        (define pinyin@gb2312
+                '((SETKEY       1)
+                  (......       ......)))
+
+   The detailed setting of each input method varies according to the IM module
+   it adopted. For the description please refer to the documents in modules/
+   directory. In the following the common setting itmes are described:
+
+   1. SETKEY:
+	Define the switch (trigger) key of this input method, e.g., the 
+	internal-encoding input method could be ctrl+alt+0, and the Changjei
+	input method could be ctrl+alt+1 .... etc. Please note that every
+	input methods used in the same locale should have its distinct SETKEY
+	values.
+
+   2. MODULE:
+	Specify the IM module name this input method will adopt. If not
+	specified, then the setting in DEFAULT_IM_MODULE will be used here.
+	Please note that not all of the IM modules can be adopted by all
+	of the input methods. For example, the zh_hex IM module can only
+	be adopted by the zh_hex input method, but cannot be adopted by 
+	Changjei input method. Therefore, if you give an inaccurate 
+	specification, the adoption will fault, and xcin will show the
+	warning message and neglect this input method.
+
+   All the input methods and IM modules will only loaded into memory when
+   you are using them, so you can specify many of them in the rcfile without
+   wasting memory if you do not actually use them.
+
+   Besides, for some IM modules which contains a lot of complex configurations,
+   e.g., gen_inp and bimsphone IM modules, they will support the "default
+   configuration value" setting itmes. The name of these setting items are:
+
+		<IM module name>_default
+
+   You can specify all the common configurations for all the input methods
+   which adopt this IM module in here, then you don't need to specify those
+   amount of configurations for each input methods. For example, the cj and
+   array30 input methods use gen_inp IM module, so you can provide the
+   following settings:
+
+        (define gen_inp_default
+                '((AUTO_COMPOSE         YES)
+                  (AUTO_UPCHAR          YES)
+                  (AUTO_FULLUP          NO)
+                  (............         .....)))
+        (define cj@big5
+                '((SETKEY               1)))
+        (define array30@big5
+                '((SETKEY               8)
+                  (AUTO_UPCHAR          NO)))
+
+   Hence, for cj besides SETKEY setting, all the other settings will take
+   the value in "gen_inp_default"; while for array30 besides SETKEY and
+   AUTO_UPCHAR settings, all the other will be the same as those in
+   "gen_inp_default". Therefore, using "gen_inp_default" will simply the
+   configurations greatly. Please note that not all of the input methods
+   support the "default configuration value". Please refer to their docs
+   for details.
+
+   All the locale related data files, including all .tab, and quick-phrase
+   data file .... etc, are placed in $XCIN_DEFAULT_DIR/tab/$ENCODING/
+   directory. You can prepare your own .cin and .tab files and put them
+   in $XCIN_USER_DIR directory (e.g., $HOME/.xcin/). When xcin starts, the
+   order to search these data files is:
+
+        1. $XCIN_USER_DIR/tab/$ENCODING/
+        2. $XCIN_USER_DIR/tab/
+        3. $XCIN_USER_DIR/
+        4. $XCIN_DEFAULT_DIR/tab/$ENCODING/
+        5. $XCIN_DEFAULT_DIR/tab/
+        6. $XCIN_DEFAULT_DIR/
+
+***************************************************************************
+***************************************************************************
+***************************************************************************
+
+4. Trigger keys and special functional keys:
+
+   Trigger keys are used to "trigger" (or enable) the connection between the
+   XIM client and the XIM server. In this version we have the following 
+   trigger keys:
+
+   a. FKEY_ZHEN:			Switch between Chinese/English modes.
+					(default "ctrl space")
+   b. FKEY_IMN + [0123456790-=]:	Choose the input method.
+					(default "ctrl alt")
+   c. FKEY_2BSB:			Switch between ASCII/Wide ASCII modes.
+					(default "shift space")
+   d. FKEY_CIRIM:			Circularly switch the input methods
+					in positive direction.
+					(default "ctrl shift")
+   e. FKEY_CIRRIM:			Circularly switch the input methods
+					in negative direction.
+					(default "shift ctrl")
+   f. FKEY_QPHRASE + [0-9a-z....]:	Output the quick phrases.
+					(default "shift alt")
+
+   The quick phrases output is a little special. If initially xcin under 
+   the English input mode (i.e., xcin is not connected to the XIM clients),
+   pressing the FKEY_QPHRASE trigger key will cause the temparay connection
+   between the XIM client and xcin, and after the output of the quick phrase,
+   it will go back to the un-connected status. In other words, in the English
+   input mode one can output the quick phrase directly, but still keeps xcin
+   in the English input mode.
+
+   Besides, xcin has other functional keys which are not belong to the trigger
+   keys, which means, they will only have effects when the connection of xcin
+   and the XIM client is established (i.e., xcin is under the Chinese input
+   mode or Wide ASCII input mode). These functional keys includes:
+
+   a. FKEY_CHREP: (default "ctrl alt r")
+      Repeat the output texts the user just typed.
+
+   b. FKEY_SIMD: (default "ctrl alt i")
+      Circularly switch the keystroke recalling mode. If in xcinrc the
+      "DEFAULT_IM_SINMD" is set to "DEFAULT", then pressing this functional
+      key will disable the "DEFAULT" setting.
+
+   c. FKEY_IMFOCUS: (default "ctrl alt f")
+      Enable or disable the IM focus facility. When the IM focus is enabled,
+      the IM name in the right-bottom corner of the xcin window will contain
+      a "*" symbol. Under this mode, everytime a new XIM client starts, then
+      it will enter the currently focused IM automatically instead of starting
+      into the default English input mode. When you switch the IMs, the focused
+      IM will also change with it.
+
+      (This facility is introduced in order to work around the problem of 
+       input Chinese into netscape-4.5/6, in Root input_style. Read the
+       description of FAQ for details).
+
+   All the functional keys or tirgger keys are configurable in the rcfile.
+   For example:
+
+	(define FKEY_CHREP     "ctrl alt r")
+
+   will set the functional key FKEY_CHREP to be the key combination: "ctrl+
+   alt+r". Please note that there should be quotation mark outside the key
+   names, and every key names should be separated by a white space. The number
+   of keys in combination should not be greater than 3, and also note the
+   ordering of these keys: The last key is called "real key", while the others
+   are called "modifier keys". The order of pressing is press the "modifier
+   keys" first, and then the "real key", then this key combination will have
+   effect.
+
+   Therefore, please note the difference between "ctrl shift" and "shift ctrl".
+   The "shift" key is the "real key" in the former, but in the later it becomes
+   "modifier key". So different order of pressing these 2 keys will lead to
+   different reaction of xcin.
+
+   Please also not that not every key could be the "modifier key", but every
+   key could be the "real key". In this version xcin defines the following
+   modifier keys:
+
+	shift, L-shift, R-shift,	(the 3 keys are identical)
+	ctrl, L-ctrl, R-ctrl,		(similar to the above)
+	alt, L-alt, R-alt,		(similar to the above)
+
+   For the "real key" list defined in xcin, see the following table.
+
+-------------------------------------------------------------------------
+	key name		comment
+    ===================================================
+	"shift"			identical to "L-shift"
+	"L-shift",
+	"R-shift",		
+	"ctrl",			identical to "L-ctrl"
+	"L-ctrl",
+	"R-ctrl",
+	"alt",			identical to "L-alt"
+	"L-alt",
+	"R-alt",
+	"esc",			the ESC key
+	"f1",			F<n> function key area, where <n> is a digit
+	"f2",
+        "f3",
+        "f4",
+        "f5",
+        "f6",
+        "f7",
+        "f8",
+        "f9",
+        "f10",
+        "f11",
+        "f12",
+        "grave",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "-",
+        "=",
+        "tab",
+        "space",
+        "backspace",
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+        "[",
+        "]",
+        "semicolon",
+        "apostrophe",
+        "comma",
+        "period",
+        "slash",
+        "backslash",
+    ===================================================
+
+
+***************************************************************************
+***************************************************************************
+***************************************************************************
+
+
+5. For the description of the IM modules, please refer to the docs in
+   modules/ directory.
+
+
+T.H.Hsieh
+
+

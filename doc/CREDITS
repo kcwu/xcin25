@@ -1,0 +1,118 @@
+XCIN-2.5 是大家努力的成果。以下我簡單列出幾位最主要的貢獻者，若沒有他們
+的貢獻，就沒有今天的 XCIN-2.5。讓我們給點掌聲，謝謝他們對此計畫的協助 :-)))
+
+PS. XCIN 的原始作者是 Edward Der-Hua Liu (Oct. 1994), 並由 
+    vvvv.bbs@bbs.cis.nctu.edu.tw 大量引入新的輸入法功能 (1997)，
+    這些都是 XCIN-2.5 的發展基礎。
+
+(以下按照其英文 ID 或英文的姓 (last name) 名 (first name) 排序)
+
+============================================================================
+XCIN-2.5 comes from many people's efforts and contributions. In the following
+several main contributers are listed. Without their help, XCIN-2.5 will not
+reach today's status. Let's thanks to their contributions to this project.
+
+PS. XCIN is originally written by Edward Der-Hua Liu (Oct. 1994),
+    followed by the contribution from vvvv.bbs@bbs.cis.nctu.edu.tw
+    who introduced a lot of new functionalities to improve the input
+    method techenology. These are the fundations of the development
+    of XCIN-2.5.
+
+(this list is sorted according to their last name and then their first name)
+
+============================================================================
+Name:  Adoal Xu 
+Email: adoal@iname.com
+Contribution:  Donate GB cin tables: pinyin.cin, shuangpin.cin, wubizixing.cin.
+
+Name:  Array: 行列科技有限公司, 負責人: 廖明德先生
+       (http://www.array.com.tw/)
+Email: array30@ms10.hinet.net
+Contribution:  Donate array30.cin table.
+
+Name:  邱智偉 (Chao, Weichung)
+Email: weichung@mail.cynix.com.tw
+Contribution:  XCIN po file Big5 translation.
+
+Name:  鄭原忠 (Cheng, Yuan-Chung)
+Email: platin@ms.ccafps.khc.edu.tw
+Contribution:  General i18n concept discussion and testing.
+
+Name:  莊明哲 (Chuang, Ming-Che)
+Email: r8921131@ms1.cc.ntu.edu.tw
+Contribution:  General discussion on i18n, XIM and rcfile reading system.
+
+Name:  霍東靈 (Fok, Anthony)
+Email: foka@debian.org
+Contribution:  Contribute the debian package directory.
+	       Many suggestions to improve the array30 input method.
+
+Name:  惠普科技 (Hewlett-Packard Company)
+URL:   http://www.hp.com
+Contribution:  Techenique support for software porting to HP-UX platform.
+
+Name:  蕭百翔 (Hsiao, Pai-Hsiang)
+Email: shawn@iis.sinica.edu.tw
+Contribution:  libtabe library.
+
+Name:  蕭永慶 (Hsiao, Yung-Ching)
+Email: yhsiao@cae.wisc.edu
+Contribution:  1. Basic XIM server programming.
+	       2. Introduce the Xi18n & locale concept.
+	       3. Provide siod library for rcfile reading system.
+
+Name:  謝東翰 (Hsieh, Tung-Han)
+Email: thhsieh@linux.org.tw
+Contribution:  General xcin structer/modules design.
+
+Name:  洪朝貴 (Hung(2), Chao(2)-Kuei(4))
+Email: ckhung@cyut.edu.tw
+Contribution:  GPL translation modification.
+
+Name:  PhantomCat (Hung, Peter)
+       (美商網虎 XLinux 軟體工程師)
+Email: peter@xlinux.com
+Contribution:  Add the OverTheSpot input style support.
+
+Name:  Joe
+Email: joe@os.nctu.edu.tw
+Contribution:  Contribute many improvement on libbims (libtabe) and bimsphone.
+
+Name:  高嘉良 (Kao, Chia-liang)
+Email: clkao@CirX.ORG
+Contribution:  Original xcin module structer design.
+
+Name:  陳強勤 (Khon, Ah)
+Email:  khon@tm.net.my
+Contribution:  Donation of GB ChanJei Input Method table.
+
+Name:  Kirin Chou
+Email: kirin@ms7.url.com.tw
+Contribution:  The pioneer to add pinyin support to bimsphone module.
+
+Name:  Roger So
+Email: rogerso@sis.dhs.org
+Contribution:  Donation of Big5 jyutping.cin & jyutping0.cin.
+
+Name:  Steve Underwood
+Email: steveu@netpage.com.hk
+Contribution:  1. IMdkit library bug fix.
+	       2. Suggestions to general IM modules.
+
+Name:  Voidoo 
+Email: voidoo@glink.net.hk
+Contribution:  1. Donation of Big5 simplex.cin input method table.
+	       2. Update Big5 cj.cin input method table.
+
+Name:  王齊年 (Wang, Chinian)
+Email: chinian@linux.org.tw
+Contribution:  DNS maintainer of domain xcin.linux.org.tw & linux.org.tw.
+
+Name:  袁天竑 (與其中央研究院計算機中心裡的同仁) 
+       (Yuan, Tein Horng, and his colleges in the Computing Center of 
+        Academia Sinica, Taiwan)
+Email: tyuan@sinica.edu.tw
+Contribution:  Mailing-list, news, www, ftp servers maintainer.
+
+
+(To be continued .... :-))

@@ -1,0 +1,114 @@
+%sys
+#
+# This is the system constant string cin file of xcin-2.5.
+# 
+# keyname		big5-char
+
+INPN_ENGLISH		Ó¢Êý
+INPN_SBYTE		°ë½Ç
+INPN_2BYTES		È«½Ç
+
+ASCII_space		0xa1a1
+ASCII_exclam		£¡
+ASCII_quotedbl		¡±
+ASCII_numbersign	££
+ASCII_dollar		¡ç
+ASCII_percent		£¥
+ASCII_ampersand		£¦
+ASCII_apostrophe	¡¯
+ASCII_parenleft		£¨
+ASCII_parenright	£©
+ASCII_asterisk		£ª
+ASCII_plus		£«
+ASCII_comma		£¬
+ASCII_minus		£­
+ASCII_period		£®
+ASCII_slash		£¯
+ASCII_0			£°
+ASCII_1			£±
+ASCII_2			£²
+ASCII_3			£³
+ASCII_4			£´
+ASCII_5			£µ
+ASCII_6			£¶
+ASCII_7			£·
+ASCII_8			£¸
+ASCII_9			£¹
+ASCII_colon		£º
+ASCII_semicolon		£»
+ASCII_less		£¼
+ASCII_equal		£½
+ASCII_greater		£¾
+ASCII_question		£¿
+ASCII_at		£À
+ASCII_A			£Á
+ASCII_B			£Â
+ASCII_C			£Ã
+ASCII_D			£Ä
+ASCII_E			£Å
+ASCII_F			£Æ
+ASCII_G			£Ç
+ASCII_H			£È
+ASCII_I			£É
+ASCII_J			£Ê
+ASCII_K			£Ë
+ASCII_L			£Ì
+ASCII_M			£Í
+ASCII_N			£Î
+ASCII_O			£Ï
+ASCII_P			£Ð
+ASCII_Q			£Ñ
+ASCII_R			£Ò
+ASCII_S			£Ó
+ASCII_T			£Ô
+ASCII_U			£Õ
+ASCII_V			£Ö
+ASCII_W			£×
+ASCII_X			£Ø
+ASCII_Y			£Ù
+ASCII_Z			£Ú
+ASCII_bracketleft	£Û
+ASCII_backslash		£Ü
+ASCII_bracketright	£Ý
+ASCII_asciicircum	¡Ä
+ASCII_underscore	¡¡
+ASCII_grave		¡®
+ASCII_a			£á
+ASCII_b			£â
+ASCII_c			£ã
+ASCII_d			£ä
+ASCII_e			£å
+ASCII_f			£æ
+ASCII_g			£ç
+ASCII_h			£è
+ASCII_i			£é
+ASCII_j			£ê
+ASCII_k			£ë
+ASCII_l			£ì
+ASCII_m			£í
+ASCII_n			£î
+ASCII_o			£ï
+ASCII_p			£ð
+ASCII_q			£ñ
+ASCII_r			£ò
+ASCII_s			£ó
+ASCII_t			£ô
+ASCII_u			£õ
+ASCII_v			£ö
+ASCII_w			£÷
+ASCII_x			£ø
+ASCII_y			£ù
+ASCII_z			£ú
+ASCII_braceleft		£û
+ASCII_bar		Ø­
+ASCII_braceright	£ý
+ASCII_asciitilde	¡«
+
+#
+#  This is GB2312 encoding, char1: <0x81> ... <0xfe>
+#			    char2: <0x40> ... <0x7e>, <0x80> ... <0xfe>
+%charcode	begin
+plane1		0xa1-0xa9
+plane1		0xb0-0xf7
+plane2		0xa1-0xfe
+%charcode	end

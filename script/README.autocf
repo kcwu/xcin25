@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# To create config.h.in:
+	autoheader configure.in > config.h.in
+
+# To create configure:
+	autoconf; mv configure ..

@@ -1,0 +1,275 @@
+This article describes the procedure of installation of xcin-2.5:
+
+---------------------------------
+A. System requirement:
+
+Because xcin-2.5 is based on the design to support Xi18n and locale, you have
+to prepare the I18N and suitable locale environment before installing xcin.
+You also need a completed X11R6 system and needed X Window fonts in your 
+system. If you are not sure if the I18N and locale environments are ready
+in your system, you could follow the descriptions of QA.2 and QA.3 of the
+document "FAQ" to check your system, or refer to the documents in
+
+	ftp://xcin.linux.org.tw/pub/xcin/i18n/i18n_tool.tar.gz
+
+Currently xcin-2.5 can be installed in GNU/Linux, FreeBSD, and HP-UX systems.
+The requirement of these systems are:
+
+1. GNU/Linux:
+     a. Need glibc-2.1.x and above (although xcin could also be installed in
+	glibc-2.0.x system through some special arrangements, but it might
+	introduce many possible problems, so we do not recommand this).
+     b. Need gcc-2.7.2 and above.
+     c. Need XFree86-3.3.6 and above (although xcin could also be installed in
+	all the XFree86-3.3.X systems through some special arrangements, but it
+	might introduce many possible problems, so we do not recommand this).
+     d. Need suitable locale supports, such as zh_TW.Big5, zh_CN.GB2312 ....
+	etc, and their corresponding Chinese fonts. Because not all the 
+	GNU/Linux distributions support these locales, if your system does
+	not have them, please refer to
+	    ftp://xcin.linux.org.tw/pub/xcin/i18n/i18n_tool.tar.gz
+	to establish your locale environment.
+
+2. FreeBSD:
+     a. FreeBSD-4.0 and above systems which support locale and ELF are 
+	recommanded.
+     b. Need gcc-2.7.2 and above.
+     c. Need XFree86-3.3.6 and above (although xcin could also be installed 
+	in all the XFree86-3.3.X systems via some special arrangements, but 
+	it might introduce many possible problems, so it is not recommanded).
+     d. Need suitable locale supports, such as zh_TW.Big5, zh_CN.EUC .... etc,
+	and their corresponding Chinese fonts.
+
+3. HP-UX:
+     a. HP-UX B.10.XX and above systems are recommanded.
+     b. Need ANSI C compiler.
+     c. Need suitable locale supports, such as zh_TW.big5, zh_HK.hkbig5 .... 
+	etc, and their cooresponding Chinese fonts.
+
+
+---------------------------------
+B. Install xcin-2.5:
+
+1. Berkeley DB2:
+   If you want to install bimsphone module when installing xcin-2.5, then you
+   need Berkeley DB2, otherwise you don't. Please note that if you do not want
+   to install bimsphone, you have to add the "--disable-bimsphone" option when
+   configuring xcin (see below), then the configure procedure will not check
+   the existence of Berkeley DB2.
+
+   If your system is GNU/Linux with glibc-2.1.X, the system already contains
+   Berkeley DB2, so you don't need to install it. If your system do not have
+   it, you can find it in the following:
+
+	http://www.sleepycat.com
+	ftp://xcin.linux.org.tw/pub/xcin/misc/db-2.7.4.tar.gz
+
+2. libtabe:
+   Beginning from xcin-2.5.1, libtabe is separated from xcin package and will 
+   be maintained independently. If you want to install bimsphone module when 
+   installing xcin-2.5, then you also need libtabe, otherwise you don't.
+   Please note that if you do not want to install bimsphone, you have to add 
+   the "--disable-bimsphone" option when configuring xcin (see below), then 
+   the configure procedure will not check the existence of libtabe.
+
+   You can find the stable libtabe package in
+
+	ftp://xcin.linux.org.tw/pub/xcin/libtabe/libtabe-<version>.tar.gz
+
+   or the under-development version in
+
+	ftp://xcin.linux.org.tw/pub/xcin/libtabe/devel/libtabe-<version>.tar.gz
+
+   Please note that since xcin develops with libtabe, so different versions
+   of xcin need their corresponding versions libtabe. To be clearly, you will
+   always find the correct version of libtabe package in the same directory
+   of the ftp site where you download the xcin package. For example, if you
+   are going to install the stable version of xcin, please also install the
+   libtabe package found in:
+
+	ftp://xcin.linux.org.tw/pub/xcin/xcin/libtabe-<version>.tar.gz
+
+   On the other hand if you are planing to install the newest under-development
+   version of xcin, please also install the newest version of libtabe found in:
+
+	ftp://xcin.linux.org.tw/pub/xcin/xcin/devel/libtabe-<version>.tar.gz
+
+   For the correct version of libtabe for this xcin version, please see the
+   description of section C in the "README" file.
+
+   If your system has the support to shared library, it is recommanded to
+   compile libtabe to be the shared library. In the following is the quick 
+   installation guide (see the documents in libtabe for details):
+
+	gzip -dc libtabe-<version>.tar.gz | tar -xvf -
+	cd libtabe
+	./configure --prefix=<path> --enable-shared
+	make install
+
+3. GNU Gettext:
+   Under GNU/Linux and FreeBSD systems, if you want to have the i18n message 
+   displaying facility of xcin, you have to install GNU Gettext package. 
+   Otherwise you don't need.
+
+4. The source code of stable version of xcin is available in:
+
+	ftp://xcin.linux.org.tw/pub/xcin/xcin/
+
+   If you want to have the newest testing version, you can find them in:
+
+	ftp://xcin.linux.org.tw/pub/xcin/xcin/devel/
+
+   The package name of xcin is usually: xcin-<version>.tar.gz, where <version>
+   is the version number. If you see the "pre" word or the date number in it, 
+   then it should be the testing version, otherwise it should be the stable
+   version. When you get the version you want, please unpack it through the
+   following command:
+
+	gzip -dc xcin-<version>.tar.gz | tar -xvf -
+
+   After that you will get a xcin-2.5/ directory.
+
+5. Change to xcin-2.5 directory and run configure program. Generally speaking,
+   if the extra libraries (such as Berkeley DB2, libtabe .... etc) needed by
+   xcin are all placed in the same position of the system, you only need to
+   excute:
+
+	 ./configure --prefix=<installation path> \
+		     --with-extra-prefix=<path of extra libraries>
+
+   In addition, configure program can accept other options, as described in
+   the following:
+
+	--help
+	    Print the usage message.
+
+	--prefix=PATH (default is /usr/local)
+	    Set the installation path to PATH, then xcin will be installed in
+	    the following directories,
+
+		excutables:  $PATH/bin
+		data files:  $PATH/lib/xcin
+		configuration files:  $PATH/etc
+
+	--binpath=PATH (default is ${prefix}/bin)
+	    Set the installation path of xcin excutables to PATH.
+
+	--with-xcin-dir=PATH (default is ${prefix}/lib/xcin)
+	    Set the installation path of xcin data files to PATH.
+
+	--with-xcin-rcdir=PATH (default is ${prefix}/etc)
+	    Set the installation path of xcin configuration files to PATH.
+
+	--with-localedir=PATH (default is ${prefix}/share/locale)
+	    Set the path of the system locale directory. It is used to install
+	    xcin LC_MESSAGES mo files.
+
+	--with-extra-prefix=PATH (default is ${prefix})
+	    Set the path to the prefix of the extra libraries. Because to 
+	    install xcin-2.5 you need extra libraries such as Berkeley DB2, 
+	    libtabe, .... etc, if these libraries are available in the same 
+	    prefix, instead of setting the paths of these libraries one by 
+	    one (see below), you can set their common prefix here, so that 
+	    you don't need to type a long option list for configure program.
+
+	    After setting this option, the configure program will set the
+	    following two options automatically:
+
+		extra_include=-I$extra_prefix/include
+		extra_library=-L$extra_prefix/lib
+
+	    and during the configure and compilation stages, the extra lib
+	    and header files will be searched according the above 2 variables.
+
+	--with-extra-inc=PATH (default is ${extra_prefix}/include)
+	    Set the common path to the header files of extra libraries.
+
+	--with-extra-lib=PATH (default is ${extra_prefix}/lib)
+	    Set the common path to the extra libraries.
+
+	--disable-bimsphone (default is enable)
+	    Do not install bimsphone module. Because to install bimsphone
+	    module, the Berkeley DB2 and libtabe are needed, and in this 
+	    situation the xcin configure program will check these two packages
+	    to see if they are available or not. If not the it will just stop
+	    and give error messages. Therefore, if you don't want to install
+	    bimsphone, you have to add this option when running configure,
+	    then it will not check Berkeley DB2 and libtabe, and when 
+	    compilation the bimsphone module will not be compiled, either.
+
+	--with-dbinc=PATH (default is ${extra_include})
+	    Set the path to the header files of Berkeley DB2 as PATH.
+
+	--with-dblib=PATH (default is ${extra_library})
+	    Set the path to Berkeley DB2 library as PATH.
+
+	--with-tabeinc=PATH (default is ${extra_include})
+	    Set the path to the header files of libtabe as PATH.
+
+	--with-tabelib=PATH (default is ${extra_library})
+	    Set the path to libtabe as PATH.
+
+	--with-intlinc=PATH (default is ${extra_include})
+	    Set the path to the header files of libintl as PATH (for gettext).
+
+	--with-intllib=PATH (default is ${extra_library})
+	    Set the path to libintl as PATH.
+
+	--x-includes=PATH (no defaults)
+	    Set the path to the header files of the X Window system.
+
+	--x-libraries=PATH (no defaults)
+	    Set the path to the libraries of X Window system.
+
+	--enable-debug
+	    Enable the debug options.
+
+   Please note that if you are using GNU/Linux with glibc-2.1.2 and previous
+   versions (including glibc-2.1.2), after configure please modify the created
+   file "config.h" to delete the following line:
+
+#define HAVE_NL_LANGINFO 1
+
+6. Start the compilation:
+	make
+	make install
+
+7. Modify the contents of $RCPATH/xcinrc according to your locale environment:
+
+   Generally speaking, for GNU/Linux, FreeBSD or HP-UX systems, the default 
+   settings in xcinrc are valid to work, so you don't need to do extra 
+   modification. But for other UNIX systems, the locale environment and the
+   needed X Window fonts might be different. So some modifications are needed
+   in this situation. For details about the xcinrc setting please refer to 
+   Usage and modules/* documents.
+
+8. Extra notes for various UNIX platform:
+
+   HP-UX:
+	The default xmodmap configuration in HP-UX CDE environment might 
+	cause some functional keys of xcin to be fault. Please check the 
+	following: Run xmodmap command and note the value of "mod1" printed. 
+	If you see
+		mod1        Meta_L (0x22),  Meta_R (0x42),  Mode_switch (0x84)
+
+	then you have to run
+		xmodmap -e "remove mod1 = Mode_switch"
+
+	to unset the Mode_switch. In other words, only keep the Meta_L and
+	Meta_R settings. You can put this command in suiable place such that 
+	everytime when you login into CDE environment, this command will be
+	excuted automatically. For details please read the man page of xmodmap
+	and your CDE documentations.
+
+9. If you cannot find your favorite input method tables in $XCINPATH/tab/,
+   please refer to Cin document to prepare for your .cin file.
+
+
+---------------------------------
+C. Test:
+
+For details, please refer to the documents: UserGuide and Usage.
+
+
+T.H.Hsieh
+

@@ -1,0 +1,50 @@
+本文簡述 gen_inp 模組的中文字與其對應的 keystroke 搜尋資料結構。
+
+gen_inp 是自 .tab 檔中讀取輸入法表格，是由 cin2tab 將 .cin 檔編譯而來，
+其格式就定義在 xcin-2.5/src/util/cin2tab/gencin.c 中，除了正向搜尋以外，
+還包含了反向搜尋，指的是可以由一個中文字反查它在某輸入法中的 keystroke:                        
+
+.tab 的格式包括以下幾個部分:
+
+name            size (# of bytes)               description
+===========================================================================
+modID:          MODULE_ID_SIZE                  ID of the readable module  
+th:             sizeof(cintab_head_t)           Header of the IM         
+icode_idx:      sizeof(icode_idx_t)*th.n_icode  idx for keystroke searching
+ichar:          sizeof(ichar)*th.n_icode        idx for char searching     
+icode1:         sizeof(icode_t)*th.n_icode      keystroke 1-5
+icode2:         sizeof(icode_t)*th.n_icode      keystroke 6-10
+
+其中 sizeof(icode_t) = 4, icode_t 是用來儲存中文字的 keystroke, 一個
+icode1 最多可以儲存五個碼，這是一般輸入法的情況。如果超過五個碼的話，
+則還需要 icode2, 故 gen_inp 目前最多能處理十個碼的輸入法。如果該輸入
+法的最多碼數不超過五的話， .tab 檔就不包含 icode2, 節省空間。       
+
+icode_idx 用於正查， ichar 用於反查。正查的步驟為:
+(詳見 xcin-2.5/src/Cinput/gen_inp/gen_inp.c)     
+
+1. 將使用者輸入的 keystroke 字串編碼，成為 icode_t 的格式。
+   (使用 keys2codes 函式)
+
+2. 從 icode1 與 icode2 的陣列中搜尋，找到與使用者輸入的 keystroke 
+   icode_t 相符的，傳回它在陣列中的 index: idx 。                 
+
+3. icode_idx[idx] 的值即為符合此 keystroke 的中文字碼 (ichar_t 格式)，
+   這時必須用 ccode_to_char 函式將它轉回該中文字的內碼 (如 Big5 碼)
+
+反查的步驟為:
+
+1. 將欲反查的中文字內碼 (如 Big5 碼) 編碼，成為 ichar_t 的格式，即 
+   index i。 (使用 ccode_to_idx 函式)
+
+2. idx = ichar[i] 的值即為 icode1 與 icode2 陣列的 index 。
+
+3. 用 codes2keys 函式將 icode1[idx] 與 icode2[idx] 還原為 keystroke 。
+
+在這裏我們同時將 keystroke 與中文字的內碼都編碼儲存了，這是為了
+節省記憶體的使用量 (sizeof(icode_idx_t)=2, sizeof(ichar_t)=2, 也就是 
+說 gen_inp 最多能處理 65565 個字或 keystroke)。而這些編碼的函式都在   
+xcin-2.5/src/Cinput/im_comm 裏頭。
+
+
+T.H.Hsieh

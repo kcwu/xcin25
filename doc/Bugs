@@ -1,0 +1,84 @@
+A. Known bugs of xcin:
+----------------------
+1. Currently only "Root" and "OverTheSpot" input styles of XIM are supported. 
+   The others are not.
+
+2. XCIN still cannot repond the XIM message "XNQueryIMValuesList" to the client.
+   And not all of the possible XIC requests from the client are handled. If the
+   client sends unknown XIC requests to xcin, xcin will complain warning 
+   message.
+
+
+B. Glibc related problem:
+-------------------------
+1. Because glibc use UCS4 as its internal encoding, but some of the Eten
+   extension characters of Big5 encoding does not have correct mapping
+   to UCS4 in the glibc-2.1.x iconv data. Hence, under this situation 
+   these characters will have difficulties to be exchanged between XIM
+   server and clients. These characters are:
+
+   Big5:  0xF9D6, 0xF9D7, 0xF9D8, 0xF9D9, 0xF9DA, 0xF9DB, 0xF9DC
+
+   This problem will be fixed in the incoming glibc-2.2.x system.
+
+
+C. rxvt-2.6.x/2.7.x related problem:
+------------------------------------
+   (See also http://xcin.linux.org.tw/rxvt/index.html for more details.
+    Please also use the most recent versions of rxvt as possible, see
+    http://www.rxvt.org for more detials)
+    
+1. In GNU/Linux running fvwm95 window manager and rxvt-2.6/7, if simultaneously
+   kill xcin and rxvt (for example, shutdown the fvwm95 environment), in some
+   circumstance rxvt cannot terminate properly, instead it might still hang
+   in the memory to waste CPU time. In this situation the only way to terminate
+   it is using "kill -9".
+
+   I am not sure if in other window managers this situation exist or not, but
+   the users using icewm / KDE told me that they never see this situation.
+   So, if you see this, one way to get rid of this is before your logging out,
+   terminate xcin first and then log out.
+
+2. In zh_TW.Big5 locale and OverTheSpot input style, rxvt cannot report correct
+   spot location to xcin, such that the OverTheSpot window of xcin cannot move
+   with the cursor of rxvt correctly.
+
+
+D. xedit related problem:
+-------------------------
+1. If the "international" of xedit in $HOME/.Xresources is enabled, you may
+   not use xedit to open any file to edit. It will cause segmentation fault.
+
+2. It has X11R5 problem (XIM server cannot terminate before it, cannot start
+   after it).
+
+
+E. Netscape-4.5/6/7 and Mozilla M16/M17 related problem:
+--------------------------------------------------------
+1. It has X11R5 problem (XIM server cannot terminate before it, cannot start
+   after it).
+
+2. Bug in Mozilla, the when the XICs change their input focus, they do not
+   send XSetICFocus or XUnsetICFocus messages to the XIM server.
+
+
+F. Gnome Window Maker related problem:
+--------------------------------------
+1. If the xcinrc option "XCIN_HIDE" is enabled, in this environment using
+   ctrl+space to turn on/off the xcin Chinese input mode will cause the
+   xcin window "flying" upward gradually.
+
+
+G. HP-UX CDE environment:
+-------------------------
+1. XCIN cannot start after the CDE applications (e.g., dtterm). The connection
+   will not established in this case.
+
+
+
+If you find other problems, please report to
+
+	xcin@linux.org.tw
+	thhsieh@linux.org.tw
+
+T.H.Hsieh

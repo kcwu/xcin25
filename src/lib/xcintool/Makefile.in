@@ -1,0 +1,89 @@
+CC           = @CC@
+CFLAGS       = @CFLAGS@
+CPPFLAGS     = @CPPFLAGS@
+DEFS         = @DEFS@
+RANLIB	     = @RANLIB@
+LN_S	     = @LN_S@
+@SET_MAKE@
+
+extra_inc   = @extra_include@
+extra_lib   = @extra_library@
+intl_inc    = @intl_include@
+
+srcdir      = @srcdir@
+top_srcdir  = @top_srcdir@
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+
+xcininc = -I$(top_srcdir)/src/include
+TARGET  = libxcintool.a
+INC     = $(xcininc) $(extra_inc) $(intl_inc)
+
+SRC =	perr.c open_file.c open_data.c copy_file.c check_file_exist.c \
+	check_version.c get_line.c get_word.c set_data.c strcmp_wild.c \
+	xcin_rc.c set_locale.c wchs_to_mbs.c wchs_len.c stable_sort.c \
+	debug.c snprintf.c extract_char.c
+
+OBJ = 	perr.o open_file.o open_data.o copy_file.o check_file_exist.o \
+	check_version.o get_line.o get_word.o set_data.o strcmp_wild.o \
+	xcin_rc.o set_locale.o wchs_to_mbs.o wchs_len.o stable_sort.o \
+	debug.o snprintf.o extract_char.o
+
+.c.o:
+	$(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ $<
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	ar -rc $@ $(OBJ)
+	if [ -n "$(RANLIB)" ]; then $(RANLIB) $(TARGET); fi
+	rm -f ../$(TARGET)
+	( cd ..; $(LN_S) xcintool/$(TARGET) . )
+
+perr.o: perr.c ../../include/constant.h ../../include/config.h \
+	../../include/xcintool.h
+
+open_file.o: open_file.c ../../include/xcintool.h ../../include/config.h
+
+open_data.o: open_data.c ../../include/xcintool.h ../../include/config.h
+
+copy_file.o: copy_file.c ../../include/xcintool.h ../../include/config.h
+
+check_file_exist.o: check_file_exist.c ../../include/config.h \
+	../../include/xcintool.h
+
+check_version.o: check_version.c ../../include/config.h \
+	../../include/xcintool.h
+
+get_line.o: get_line.c ../../include/xcintool.h ../../include/config.h
+
+get_word.o: get_word.c ../../include/xcintool.h ../../include/config.h
+
+set_data.o: set_data.c ../../include/xcintool.h ../../include/config.h
+
+strcmp_wild.o: strcmp_wild.c ../../include/xcintool.h ../../include/config.h
+
+xcin_rc.o: xcin_rc.c ../../include/constant.h ../../include/config.h \
+  ../../include/xcintool.h ../siod/siod.h
+
+set_locale.o: set_locale.c ../../include/constant.h ../../include/config.h \
+  ../../include/xcintool.h
+
+wchs_to_mbs.o: wchs_to_mbs.c ../../include/xcintool.h ../../include/config.h
+
+wchs_len.o: wchs_len.c ../../include/xcintool.h ../../include/config.h
+
+stable_sort.o: stable_sort.c ../../include/xcintool.h ../../include/config.h
+
+debug.o: debug.c ../../include/xcintool.h ../../include/config.h
+
+snprintf.o: snprintf.c ../../include/xcintool.h ../../include/config.h
+
+extract_char.o: extract_char.c ../../include/xcintool.h ../../include/config.h
+
+
+.PHONY: clean distclean
+clean:
+	rm -f $(OBJ) $(TARGET) core
+distclean: clean
+	rm -f Makefile .depend

@@ -1,0 +1,638 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2000-10-25 11:36+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+
+#: ../src/gui.c:131
+#, c-format
+msgid "invalid font %s.\n"
+msgstr ""
+
+#: ../src/gui.c:325
+#, c-format
+msgid "cannot open display: %s\n"
+msgstr ""
+
+#: ../src/gui.c:344
+#, c-format
+msgid "invalid INDEX_FONT: %s\n"
+msgstr ""
+
+#: ../src/module.c:76
+#, c-format
+msgid "undefined symbol \"%s\" in module \"%s\", ignore.\n"
+msgstr ""
+
+#: ../src/module.c:82
+#, c-format
+msgid "not valid module \"%s\" with version \"%s\", ignore.\n"
+msgstr ""
+
+#: ../src/module.c:120
+#, c-format
+msgid "dlerror: %s\n"
+msgstr ""
+
+#: ../src/module.c:121
+#, c-format
+msgid "module \"%s\" not found, ignore.\n"
+msgstr ""
+
+#: ../src/module.c:325
+#, c-format
+msgid "module \"%s\":"
+msgstr ""
+
+#: ../src/module.c:329
+msgid "no comments available\n"
+msgstr ""
+
+#: ../src/xcin_main.c:63
+msgid "the default xcin dir does not exist.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:93
+msgid ""
+"\n"
+"Usage:  xcin [-h] [-m module] [-d DISPLAY] [-x XIM_name] [-r rcfile]\n"
+"Options:  -h: print this message.\n"
+"          -m: print the comment of module \"mod_name\"\n"
+"          -d: set X Display.\n"
+"          -x: register XIM server name to Xlib.\n"
+"          -r: set user specified rcfile.\n"
+"\n"
+msgstr ""
+
+#: ../src/xcin_main.c:102
+msgid ""
+"        -v n: set debug level to n.\n"
+"\n"
+msgstr ""
+
+#: ../src/xcin_main.c:105
+msgid ""
+"Useful environment variables:  $XCIN_RCFILE.\n"
+"\n"
+msgstr ""
+
+#: ../src/xcin_main.c:120
+#, c-format
+msgid ""
+"XCIN (Chinese XIM server) version %s.\n"
+"(module ver: %s, syscin ver: %s).\n"
+"(use \"-h\" option for help)\n"
+"\n"
+msgstr ""
+
+#: ../src/xcin_main.c:124
+#, c-format
+msgid "locale \"%s\" encoding \"%s\"\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:283 ../src/xcin_main.c:153
+#, c-format
+msgid "unknown option  -%c.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:202
+#, c-format
+msgid "X locale \"%s\" is not supported by your system.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:218
+#, c-format
+msgid "%s: %s: value not specified.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:348
+#, c-format
+msgid ""
+"%s:\n"
+"\tlocale section \"%s\": %s: value not specified.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:424
+#, c-format
+msgid ""
+"%s:\n"
+"\tIM section \"%s\": %s: value not specified.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:480
+#, c-format
+msgid "invalid tab file: %s.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:483
+#, c-format
+msgid "invalid sys.tab version: %s.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:493
+msgid "sys.tab reading error.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:513
+#, c-format
+msgid "not valid %s: %s, ignore\n"
+msgstr ""
+
+#: ../src/xcin_main.c:519 ../src/xcin_main.c:538 ../src/xcin_main.c:572
+#, c-format
+msgid "error loading IM: %s, ignore.\n"
+msgstr ""
+
+#: ../src/xcin_main.c:533
+msgid "no valid input method loaded.\n"
+msgstr ""
+
+#: ../src/xim.c:235 ../src/xim.c:374
+#, c-format
+msgid "cannot load IM: %s, ignore.\n"
+msgstr ""
+
+#: ../src/xim.c:901
+#, c-format
+msgid "unsupported input style: %s, ignore.\n"
+msgstr ""
+
+#: ../src/xim.c:924
+#, c-format
+msgid "too many input styles setting: max=%d.\n"
+msgstr ""
+
+#: ../src/xim.c:995
+#, c-format
+msgid "IMOpenIM() with name \"%s\" transport \"%s\" failed.\n"
+msgstr ""
+
+#: ../src/xim.c:999
+#, c-format
+msgid "XIM server \"%s\" transport \"%s\"\n"
+msgstr ""
+
+#: ../src/xim.c:1001
+msgid "inp_styles: "
+msgstr ""
+
+#: ../src/xim_IC.c:266
+#, c-format
+msgid "ic_get: unknown IC attr: %s\n"
+msgstr ""
+
+#: ../src/xim_IC.c:330
+#, c-format
+msgid "ic_get: unknown IC pre_attr: %s\n"
+msgstr ""
+
+#: ../src/xim_IC.c:377
+#, c-format
+msgid "ic_get: unknown IC sts_attr: %s\n"
+msgstr ""
+
+#: ../src/xim_IC.c:408
+msgid "client input style not enabled, set to \"Root\".\n"
+msgstr ""
+
+#: ../src/xim_IC.c:424
+#, c-format
+msgid "ic_set: unknown IC attr: %s\n"
+msgstr ""
+
+#: ../src/xim_IC.c:478
+#, c-format
+msgid "ic_set: unknown IC pre_attr: %s\n"
+msgstr ""
+
+#: ../src/xim_IC.c:514
+#, c-format
+msgid "ic_set: unknown IC sts_attr: %s\n"
+msgstr ""
+
+#: ../src/lib/xcintool/open_file.c:37
+#, c-format
+msgid "cannot open file:  %s.\n"
+msgstr ""
+
+#: ../src/lib/xcintool/perr.c:64
+#, c-format
+msgid "%s: warning: "
+msgstr ""
+
+#: ../src/lib/xcintool/perr.c:67
+#, c-format
+msgid "%s internal: warning: "
+msgstr ""
+
+#: ../src/lib/xcintool/perr.c:70
+#, c-format
+msgid "%s: error: "
+msgstr ""
+
+#: ../src/lib/xcintool/perr.c:74
+#, c-format
+msgid "%s internal: error: "
+msgstr ""
+
+#: ../src/lib/xcintool/set_data.c:129
+#, c-format
+msgid "set_rc(): unknown rctype: %d.\n"
+msgstr ""
+
+#: ../src/lib/xcintool/set_locale.c:59
+#, c-format
+msgid "C locale \"%s\" is not supported by your system.\n"
+msgstr ""
+
+#: ../src/lib/xcintool/open_data.c:39
+msgid "NULL xcin default_path\n"
+msgstr ""
+
+#: ../src/lib/xcintool/open_data.c:47
+msgid "NULL xcin default_sub_path\n"
+msgstr ""
+
+#: ../src/lib/xcintool/open_data.c:52
+msgid "NULL xcin locale_sub_path\n"
+msgstr ""
+
+#: ../src/lib/xcintool/open_data.c:114
+#, c-format
+msgid "cannot open data file: %s\n"
+msgstr ""
+
+#: ../src/lib/xcintool/xcin_rc.c:98
+msgid "null rcfile name.\n"
+msgstr ""
+
+#: ../src/lib/xcintool/xcin_rc.c:110
+#, c-format
+msgid "rcfile \"%s\" reading error.\n"
+msgstr ""
+
+#: ../src/lib/xcintool/xcin_rc.c:225
+msgid "rcfile not found.\n"
+msgstr ""
+
+#: ../src/lib/xcintool/xcin_rc.c:248
+#, c-format
+msgid "rcfile \"%s\" does not exist, ignore.\n"
+msgstr ""
+
+#: ../src/Cinput/im_comm/qphrase.c:64
+#, c-format
+msgid "qphrase: %s: unknown tag: %s, ignore.\n"
+msgstr ""
+
+#: ../src/Cinput/zh_hex/zh_hex.c:102
+#, c-format
+msgid "%s: %s: value not found.\n"
+msgstr ""
+
+#: ../src/Cinput/zh_hex/zh_hex.c:309
+msgid ""
+"This is the internal zh_encoding input method module.\n"
+"It is the simplist module which demonstrate the basic\n"
+"xcin IM module programming. It also has the ability to\n"
+"get Chinese characters input from different encodings,\n"
+"say, Big5 or GB codes, depending on the locale setting.\n"
+"Currently it can only accept 2-bytes encodings per character.\n"
+"\n"
+"This module is free software, as part of xcin system.\n"
+msgstr ""
+
+#: ../src/Cinput/gen_inp/gen_inp.c:51
+#, c-format
+msgid "gen_inp: %s: invalid tab file.\n"
+msgstr ""
+
+#: ../src/Cinput/gen_inp/gen_inp.c:55 ../src/Cinput/gen_inp/gen_inp.c:97
+#, c-format
+msgid "gen_inp: %s: reading error.\n"
+msgstr ""
+
+#: ../src/Cinput/gen_inp/gen_inp.c:59
+#, c-format
+msgid "gen_inp: %s: invalid version.\n"
+msgstr ""
+
+#: ../src/Cinput/gen_inp/gen_inp.c:63
+#, c-format
+msgid "gen_inp: %s: invalid encoding: %s\n"
+msgstr ""
+
+#: ../src/Cinput/gen_inp/gen_inp.c:1121
+msgid ""
+"This is the general input method module. It is the most generic\n"
+"module which can read the IM table (\".tab\" file) and perform\n"
+"the correct operations of the specific IM. It also can accept a\n"
+"lot of options from the \"xcinrc\" file to detailly control the\n"
+"behavior of the IM. We hope that this module could match most of\n"
+"your Chinese input requirements.\n"
+"\n"
+"This module is free software, as part of xcin system.\n"
+msgstr ""
+
+#: ../src/Cinput/bimsphone/bimsphone.c:189
+#, c-format
+msgid "bimsphone: %s: cannot open pinyin data file: %s.\n"
+msgstr ""
+
+#: ../src/Cinput/bimsphone/bimsphone.c:206
+#: ../src/Cinput/bimsphone/bimsphone.c:214
+#, c-format
+msgid "bimsphone: %s: cannot open data file: %s\n"
+msgstr ""
+
+#: ../src/Cinput/bimsphone/bimsphone.c:970
+msgid ""
+"This is the \"official\" phonetic input method module.\n"
+"It uses the libtabe & bims libraries as the search engine\n"
+"to perform the automatic characher selection from multipole\n"
+"charachers with the same keystroke. This engine also provides\n"
+"several keymaps for each specific phonetic input rules.\n"
+"We hope that this module will serve as the most \"natural way\"\n"
+"for Chinese input.\n"
+"\n"
+"This module is free software, as part of xcin system.\n"
+msgstr ""
+
+#: ../src/Cinput/bimsphone/bimspinyin.c:40
+#, c-format
+msgid "bimsphone: %s: invalid tab file.\n"
+msgstr ""
+
+#: ../src/Cinput/bimsphone/bimspinyin.c:44
+#: ../src/Cinput/bimsphone/bimspinyin.c:53
+#, c-format
+msgid "bimsphone: %s: reading error.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:159
+#, c-format
+msgid "%s: invalid tab file.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:162
+#, c-format
+msgid "%s: invalid version.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:166
+#, c-format
+msgid "%s: reading error.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:196
+#, c-format
+msgid "cin file: %s, use module: %s version %s.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:205
+msgid "no module header name specified.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:217
+#, c-format
+msgid ""
+"CIN2TAB version (%s)\n"
+"Usage: cin2tab [-v] [-r <rcfile>] [-s <sysfn>] [-l <encoding>]\n"
+"               [-o output] <cin_fn>\n"
+"\n"
+"Supported module header names:\n"
+"\t"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:287
+#, c-format
+msgid "CIN2TAB version (%s) encoding=%s\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:291
+msgid "no cin file specified.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:293
+msgid "no valid encoding specified.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:311
+#, c-format
+msgid "%s: XCIN_DEFAULT_DIR: value not found.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/cin2tab.c:314
+#, c-format
+msgid "%s: XCIN_USER_DIR: value not found.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:55 ../src/util/cin2tab/gencin.c:65
+#: ../src/util/cin2tab/gencin.c:75 ../src/util/cin2tab/gencin.c:88
+#: ../src/util/cin2tab/gencin.c:109 ../src/util/cin2tab/gencin.c:173
+#, c-format
+msgid "%s(%d): arguement expected.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:79
+#, c-format
+msgid "%s(%d): too many selection keys defined.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:92
+#, c-format
+msgid "%s(%d): too many end keys defined.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:104 ../src/util/cin2tab/gencin.c:164
+#, c-format
+msgid "%s(%d): arguement \"begin\" expected.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:115
+#, c-format
+msgid "%s(%d): illegal key \"%c\" specified.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:118
+#, c-format
+msgid "%s(%d): key \"%c\" is already in used.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:287
+#, c-format
+msgid "%s(%d): unknown command: %s.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:293
+#, c-format
+msgid "%s: command \"%s\" not specified.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:297
+#, c-format
+msgid "number of keyname: %d\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:299
+#, c-format
+msgid "max length of keystroke: %d\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:301
+#, c-format
+msgid "total char number of this encoding: %d\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:303
+#, c-format
+msgid "number of char defined: %d\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:305
+#, c-format
+msgid "number of keystroke code defined: %d\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:307
+#, c-format
+msgid "number of defined char ignored: %d\n"
+msgstr ""
+
+#: ../src/util/cin2tab/gencin.c:309
+#, c-format
+msgid "memory model: %d\n"
+msgstr ""
+
+#: ../src/util/cin2tab/syscin.c:175 ../src/util/cin2tab/syscin.c:228
+#, c-format
+msgid "%s(%d): \"cmd arg\" pair expected.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/syscin.c:184
+#, c-format
+msgid "%s(%d): unexpected syscin key: %s.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/syscin.c:190
+#, c-format
+msgid "%s(%d): too many rules for char plane %d, ignore.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/syscin.c:197 ../src/util/cin2tab/syscin.c:203
+#, c-format
+msgid "%s(%d): hex number expected.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/syscin.c:233
+#, c-format
+msgid "%s(%d): unknown syscin key: %s\n"
+msgstr ""
+
+#: ../src/util/cin2tab/syscin.c:236
+#, c-format
+msgid "%s(%d): %s: arguement expected.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/syscin.c:242
+#, c-format
+msgid "%s(%d): %s: arguement \"begin\" expected.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:55
+#, c-format
+msgid "%s(%d): keystroke too long, ignore.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:62
+#, c-format
+msgid "%s(%d): keystroke out of range [a-z].\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:96
+#, c-format
+msgid "%s(%d): ZhuYin string too long, ignore.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:107
+#, c-format
+msgid "%s(%d): unknown ZhuYin character.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:142
+#, c-format
+msgid "duplicated keystroke: %s\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:162
+#, c-format
+msgid "duplicated ZhuYin code: %s: %s, %s\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:185
+#, c-format
+msgid "%s(%d): token \"end\" expected.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:215
+#, c-format
+msgid "%s(%d): token \"begin\" expected.\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:220
+#, c-format
+msgid "%s(%d): unknown command: %s\n"
+msgstr ""
+
+#: ../src/util/cin2tab/bimscin.c:223
+#, c-format
+msgid "number of pinpho added: %d\n"
+msgstr ""
+
+#: ../src/fkey.c:221
+#, c-format
+msgid "set_funckey: %d: unknown key_type\n"
+msgstr ""
+
+#: ../src/fkey.c:225
+#, c-format
+msgid "%s: %s: too many keys, ignore.\n"
+msgstr ""
+
+#: ../src/fkey.c:236
+#, c-format
+msgid "%s: %s: not valid modifier key.\n"
+msgstr ""
+
+#: ../src/fkey.c:244
+#, c-format
+msgid "%s: %s: not valid key name.\n"
+msgstr ""
+
+#: ../src/fkey.c:249 ../src/fkey.c:253
+#, c-format
+msgid "%s: %s: duplicate keys.\n"
+msgstr ""
+
+#: ../src/fkey.c:278
+#, c-format
+msgid "%s and %s have the same key-definition.\n"
+msgstr ""
+
+#: ../src/gui_main.c:461 ../src/gui_main2.c:273
+msgid "string text property error.\n"
+msgstr ""
+
+#: ../src/gui_main.c:543 ../src/gui_main2.c:342
+msgid "fontset setting error.\n"
+msgstr ""

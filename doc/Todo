@@ -1,0 +1,35 @@
+The is the Todo list, the future plans.
+---------------------------------------
+
+1. Continue to fix all the know bugs.
+
+2. Add the support to other input methods: e.g., OffTheSpot, OnTheSpot.
+
+3. Support multiple-locale handling ability in the same xcin process.
+
+4. Redesign the encoding subsystem to support more general encodings, 
+   e.g., Unicode and UTF-8.
+
+   Add an encoding mapping layer between xcin main program and modules.
+
+5. Redesign the IM module API to be a more secure and flexible way.
+
+6. More modulization of the GUI part, such that changing the widget set or 
+   adding vander specific GUI functions could be easy to do.
+
+7. Improve the bimsphone (should be improved with libtabe): 
+   Enhance the phrase database to increase the accuracy of intellegent 
+   character selection.
+
+   Add auto-learning ability to learn the user frequently used phrases.
+
+8. Add a phrase input ability into gen_inp module.
+   Add phrase parts into GB: pinyin.cin & shuangpin.cin.
+
+9. Extend the rcfile reading system to support "include" syntax, and support
+   reread rcfile on the fly (without restarting xcin).
+
+10. More English documentation and man pages.
+
+
+T.H.Hsieh

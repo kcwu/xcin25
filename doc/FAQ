@@ -1,0 +1,1366 @@
+XCIN 常見問題與解答:
+
+A. I18N 與 XIM 相關問題:
+------------------------
+QA.1:  什麼是 I18N? 什麼是 locale? 什麼又是 XIM?
+QA.2:  什麼樣的系統才具有中文 I18N 的環境? 若我的系統目前沒有 I18N 的環
+       境，我要如何建立它呢?
+QA.3:  我要如何查看我的系統是否支援 I18N 以及中文 locale 呢？
+QA.4:  在 FreeBSD-3.0/4.0, 我的程式無法設定 zh_TW.Big5 locale, 是不是需
+       要加入 -DXLOCALE?
+QA.5:  我的系統中找不到 /usr/X11R6/lib/X11/locale/zh_CN.GB2312/XLC_LOCALE,
+       請問這個應該到那裏下載呢?
+
+B. xcin 安裝問題:
+-----------------
+QB.1:  我已經安裝了 Berkeley DB2 了，為什麼在 configure 時還是跟我說:
+       You need Berkeley DB 2 to compile xcin.
+       Please use --with-dbinc and --with-dblib to configure.
+QB.2:  為什麼安裝 xcin 時 configure 跟我說要 libtabe 呢？以前都不需要啊!
+QB.3:  我到處都找不到 tsi.db 與 yin.db, 以前不是有 libtabe-tsi-bin.tar.gz
+       這個套件嗎？到那裏去了？
+QB.4:  為什麼我在執行 configure 時，會有這樣的錯誤訊息呢？
+       You need X11R6 to compile xcin.
+       Please use --x-includes and --x-libraries to configure.
+QB.5:  我第一次 compile xcin 時沒有裝 bimsphone (在 configure 時加了
+       --disable-bimsphone 選項)，但現在想再裝 bimsphone, 請問要怎麼
+       做？需要整個 xcin 系統重新 compile 嗎？
+QB.6:  我在安裝 xcin 時，configure 沒有問題，但安裝到一半卻出現以下的錯誤:
+       gcc -Wall -fsigned-char -O2 -DHAVE_CONFIG_H -I../../../src/include \
+           -c -o set_locale.o set_locale.c
+       set_locale.c: In function `locale_setting':
+       set_locale.c:68: `CODESET' undeclared (first use in this function)
+       set_locale.c:68: (Each undeclared identifier is reported only once
+       set_locale.c:68: for each function it appears in.)
+       make[3]: *** [set_locale.o] Error 1
+QB.7:  為什麼我執行 xcin 時，會跑出如下的錯誤訊息呢？
+       xcin internal error: NULL xcin locale_sub_path
+
+C. xcinrc 設定相關問題:
+-----------------------
+QC.1:  什麼是 xcinrc 檔？它放在那裡呢？
+QC.2:  我無法啟動 xcin, 我懷疑是我的 fontset 設定有問題，我該如何檢查呢?
+QC.3:  請問 xcinrc 內的 INDEX_FONT 是做什麼的啊?
+QC.4:  那 xcinrc 內的 OVERSPOT_FONTSET 又是做什麼的？
+QC.5:  請問 xcinrc 內為什麼要分 zh_TW.Big5 與 zh_CN.GB2312 等多個小節呢?
+       它們的設定項目不都是一樣的嗎?
+QC.6:  我的系統中已經有 zh_TW.BIG5 locale 了，而且 /usr/X11R6/lib/X11/locale
+       底下也已有 zh_TW.BIG5/XLC_LOCALE 檔，為什麼還是無法啟動 xcin?
+QC.7:  為什麼我在執行 xcin 時，會跑出這樣的錯誤訊息？
+       xcin: error: rcfile: DEFAULT_IM: value not specified.
+QC.8:  如何改變 xcin 主視窗的啟動大小與位置呢？
+QC.9:  為什麼 xcin 會有兩個不同大小的主視窗呢？
+QC.10:  我還是覺得那個第二主視窗太佔空間，可不可以連它都不要啊？
+QC.11:  什麼是 OverTheSpot 呢？
+QC.12:  我要如何改變 xcin 的輸入模式呢？
+
+D. 輸入法模組相關問題:
+----------------------
+QD.1:  xcin-2.5 的注音輸入法用起來好奇怪，跟一般的輸入習慣不太一樣。
+QD.2:  再原有的 xcin-2.3.X 詞音輸入法中，可以按 SHIFT+, SHIFT+. 而輸出
+       全形標點，但 xcin-2.5 的 bimsphone 為什麼沒有呢?
+QD.3:  我要如何改變注音輸入法的鍵盤對應呢？如倚天鍵盤或許氏鍵盤？
+QD.4:  像注音這種一個 keycode 可以對映到多種字的輸入法, cin2tab 似乎會把 
+       phone.cin 裡的順序亂掉。像 "天" 在 .cin 的順序是 "天添倎屇酟婖", 
+       打出來的順序卻是 "婖添酟屇倎天", 其他字也是一樣, 舊版(2.3.02) 就沒
+       有這種情形。這是 bug 還是 feature?
+QD.5:  如何修改 xcin 啟動的預設輸入法呢？
+QD.6:  請問要如何增加新的輸入法呢？
+QD.7:  我如何在 bimsphone 輸入法中加入新詞呢？
+QD.8:  我發現注音輸入法中可以連續輸入兩個 ㄅ，或者可以輸入如 ㄚㄉ 這樣的
+       音，這似乎很不合理？
+
+E. xcin 設計相關問題:
+---------------------
+QE.1:  請問我要如何 Debug xcin?
+QE.2:  xcin-2.5 在 64 bits 機器上 (如 DEC alpha) 會不會有問題呢?
+QE.3:  請問什麼是 IC Check? 什麼是 garbage collection? 這兩個東東有關嗎？
+
+F. 其他的問題:
+--------------
+QF.1:  rxvt 可以看中文，也可以用 xcin-2.5 打中文，但好像有好多問題，例如中
+       文顯示有時候會莫名奇妙變亂碼、關掉 xcin 時有時候 rxvt 也會莫名奇妙
+       地消失 .... 怎麼會這樣呢？
+QF.2:  我在 xcin+xedit 可以打出中文，不過 xedit 在載入檔案時有沒有 xcin 
+       都會造成 segmentation fault, 這和 xcin-2.5 沒有關係吧?
+QF.3:  為什麼在 netscape-4.X 裏頭，每次打入一個中文字 xcin 就會切到「英
+       數」輸入呢?
+QF.4:  我在 CLE-0.8 下，使用 xcin-2.5 + rxvt-2.6.0, 但每次輸入一個中文字
+       時，就會 core dump, 怎麼辦呢?
+QF.5:  我已將 libtabe 安裝在 /usr/local 底下了，而且我也安裝 xcin 成功了，
+       但為什麼當我啟動 xcin 並準備使用 bimsphone 輸入法時，卻仍見到這樣的
+       錯誤訊息？
+QF.6:  當我使用 xcin-2.5 的 bimsphone 在 netscape 下輸入中文時，為什麼在
+       按下方向鍵、或用滑鼠點選 netscape 上的游標時，原本存在 xcin 視窗中
+       的中文字就消失了？
+QF.7:  為什麼當我切換虛擬桌面時， xcin 無法跟著跳過來呢？
+QF.8:  為什麼在使用 OverTheSpot 時，當我把滑鼠游標移到 OverTheSpot 的視
+       窗上時，該視窗會一直閃動，但只要游標移開後就正常了？
+QF.9:  為什麼我常常在關掉 xcin 之後，目前工作中的 rxvt 也跟著掛掉了？
+QF.10:  使用 KDE 時，每次切換輸入法 xcin 視窗都會變成前景視窗，每次我都要用
+        滑鼠點一下 rxvt 才能繼續輸入，怎麼辦呢？
+
+==============================================================================
+
+
+A. I18N 與 XIM 相關問題:
+
+------------------------
+QA.1:  什麼是 I18N? 什麼是 locale? 什麼又是 XIM?
+
+I18N 是 InternationalizatioN 的縮寫，它是一個程式國際化的解決方案，目標是
+希望做到只要寫好一份程式碼，就能將程式用在不同的語系上，而不需要每次換一
+個語言或內碼系統就要改寫程式本身。
+
+在 UNIX (包括 GNU/Linux, FreeBSD ....) 的 I18N 架構中，其支援是從底層的系
+統函式庫 libc 做起的，它提供一些標準的函式呼叫，讓程式能夠在不同的語系環
+境下，得以處理該語文的文字、使用該語文做訊息輸出 .... 等等。
+
+而 locale 指的是「區域化訊息資料庫」，其內容為處理各語文所需的資料。一個
+I18N 的程式必須透過 libc 及其他函式庫的呼叫介面來使用 locale 的資料，以達
+到處理該語文的工作。因此，在程式啟動前，我們必須先設好 locale，挑選我們所
+需的語系，則往後 I18N 在此環境下執行時，就會以該語系來運作。
+
+XIM 是 X Input Method 的縮寫，是 X Window 環境下的標準輸入法協定，支援此
+協定的應用程式 (即 XIM client) 可接受支援此協定的輸入法程式 (即 XIM server)
+的輸入，如此即可達到非英語系 (例如中文、日文、韓文 .... 等) 的文字輸入。
+
+由於 XIM 是以系統底層的 I18N 為基礎，故在使用 XIM 之前，您必須設好 locale,
+並且設好適當的 XIM 環境變數。
+
+有關 locale 與 XIM 等環境變數的設定方式，請見 UserGuide 一文的說明。
+
+
+------------------------
+QA.2:  什麼樣的系統才具有中文 I18N 的環境? 若我的系統目前沒有 I18N 的環
+       境，我要如何建立它呢?
+
+若您是使用 GNU/Linux 系統，您的系統必須要有 libc6 (glibc-2.1.X) 以上的版
+本，以及 XFree86-3.3.6，才能具備 I18N 的環境 (雖然在稍舊的 glibc-2.0.7 以
+及所有的 XFree86-3.3.X 系統中，我們可以經由一些特殊的處理，而讓系統可以具
+備 I18N 的環境，但這會導至許多潛在的問題，故在此我們不建議這麼做)。
+
+除此之外，您的系統還必須安裝中文 locale 才行，例如台灣地區使用的 zh_TW.Big5 
+locale，或者大陸地區所使用的 zh_CN.GB2312 locale 等。一般說來，目前大部分
+的 GNU/Linux 安裝套件的 I18N 環境已沒有問題，但它們不見得內含中文 locale。
+
+若您發現您的系統中沒有正確安裝您需要的中文 locale，您可以參考
+
+	ftp://xcin.linux.org.tw/pub/xcin/i18n/i18n_tool.tar.gz 
+
+套件的 README 文件的說明，將它建立起來。
+
+若您是使用 FreeBSD 系統，您大概要使用 3.0 以上的 release 才行，而且最好是
+有 ELF 的支援。
+
+
+------------------------
+QA.3:  我要如何查看我的系統是否支援 I18N 以及中文 locale 呢？
+
+1. 若您是使用 GNU/Linux，首先您要檢查您的 glibc 版本 (必須 2.1.X 以上)，您
+   可以用這個指令來查看:
+
+	ls /lib/libc-*
+
+2. 若您是使用 XFree86 的 X Window 系統 (例如 GNU/Linux, FreeBSD 等)，您要
+   檢查 XFree86 的版本 (必須 3.3.6 以上)。如果您有安裝 xterm 這個程式的話，
+   您可以用這個指令來檢查:
+
+	xterm -v
+
+3. 接下來您要檢查您的系統中是否安裝了中文 locale？以台灣地區使用的 zh_TW.Big5
+   為例 (請注意，在 GNU/Linux 與 FreeBSD 中是 zh_TW.Big5, 但在其他的 UNIX 中
+   可能是 zh_TW.big5 或 zh_TW.BIG5, 有大小寫的差別)，您可以試試執行
+
+	locale -a
+
+   的指令，看看印出的內容中是否包括 zh_TW.Big5？有的話就表示您的系統有安裝，
+   否則就沒有。
+
+4. 然後您要檢查您的 X Window 系統是否有安裝中文 locale 的資料？在 XFree86
+   的系統中，可以使用:
+
+	ls /usr/X11R6/lib/X11/locale
+
+   看看有沒有 zh_TW.Big5 的目錄？而且裏頭是不是有 XLC_LOCALE 的檔案？請注
+   意在其他的 UNIX 系統中，其路徑可能不一樣，您要參考該系統的手冊或說明文
+   件來尋找。
+
+5. 最後，您的系統必須安裝 zh_TW.Big5 locale 所需的字型。該 locale 需要中文
+   及英文字型。英文字型是標準的，沒有問題。至於中文字型的部分，請參考底下
+   QC.1: fontset 設定的說明。
+
+底下我們提供一個小程式，可以用來測試您的 locale 環境是不是正常的。程式的
+原始碼如下:
+
+=================================================================
+#define USE_XOPEN_SOURCE
+
+#include <stdio.h>
+#include <locale.h>
+#ifdef USE_XOPEN_SOURCE
+#  include <langinfo.h>
+#endif
+#include <X11/Xlib.h>
+#include <X11/Xlocale.h>
+
+main()
+{
+    printf("LC_CTYPE = %s\n", setlocale(LC_CTYPE, ""));
+#ifdef USE_XOPEN_SOURCE
+    printf("encoding = %s\n", nl_langinfo(CODESET));
+#endif
+    if (XSupportsLocale() == True)
+        printf("X Locale = OK\n");
+}
+=================================================================
+
+您可以將這一段程式碼存成 localetest.c 檔，然後用這個指令來編譯:
+(假設您的系統使用的 XFree86 系統，若是其他的 UNIX 系統，您可能需要改變
+ -I 與 -L 之後的路徑名稱。請見您的系統的文件說明)
+
+        gcc localetest.c -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
+
+如果在編譯過程中有任何錯誤的話，請將
+
+        #define USE_XOPEN_SOURCE
+
+這一行刪除，然後再重新編譯一次。完成後，就會產生一個名為 a.out 的檔案，接著
+您就可以做如下的測試:
+
+        LC_ALL=zh_TW.Big5 ./a.out
+
+如果印出如下的結果:
+
+        LC_CTYPE = zh_TW.Big5
+        encoding = BIG5
+        X Locale = OK
+
+表示您的 I18N 與 locale 環境已沒有問題了 (請注意，如果您將
+#define USE_XOPEN_SOURCE 拿掉後再編譯的話，則不會有 encoding = .... 那一行)。
+同理，對於 zh_CN.GB2312 測試結果應如下:
+
+        指令: LC_ALL=zh_CN.GB2312 ./a.out
+
+        LC_CTYPE = zh_CN.GB2312
+        encoding = GB2312
+        X Locale = OK
+
+如果您執行後印出不一樣的結果，很可能您的系統的 locale 環境仍有問題。這時建
+議您可以詳讀
+
+	ftp://xcin.linux.org.tw/pub/xcin/i18n/i18n_tool.tar.gz
+
+的說明文件，來一步步檢查您的系統。
+
+
+------------------------
+QA.4:  在 FreeBSD-3.0/4.0, 我的程式無法設定 zh_TW.Big5 locale, 是不是需
+       要加入 -DXLOCALE?
+
+那是因為您在編譯您的程式時沒有加上 -lxpg4 的緣故。在 FreeBSD 中，在 libc 
+與 libxpg4 各有一個 setlocale() 函式，但 libc 的那一個只能成設為 POSIX 或 
+C locale, 若要設成其他的 locale (如 zh_TW.Big5), 則您必須使用 libxpg4 的
+那一個。
+
+另外， -DXLOCALE 只有在您系統的 libc 對於 I18N 支援不好，而您需要編譯 X
+Window 的 I18N 程式時才要加入，它其實是用 Xlib 內的 I18N 處理函式來取代
+libc 裏頭的標準函式。一般說來，如果您的 libc 對 I18N 的支援很好的話 (如
+glibc-2.X, FreeBSD-3.0 以上) ，您不要加入此一選項，因為那樣可能會造成其
+他的問題。
+
+
+------------------------
+QA.5:  我的系統中找不到 /usr/X11R6/lib/X11/locale/zh_CN.GB2312/XLC_LOCALE,
+       請問這個應該到那裏下載呢?
+
+在 XFree86 的系統中，zh_CN.GB2312 的 XLC_LOCALE 其實早就在您的系統中了，它
+是放在:
+
+	/usr/X11R6/lib/X11/locale/zh/XLC_LOCALE
+
+至於為什麼會放在這? 我想大概是歷史因素吧? 如果您希望您的系統可以支援
+zh_CN.GB2312 locale, 請參考
+
+	ftp://xcin.linux.org.tw/pub/xcin/i18n/i18n_tool.tar.gz
+
+的說明，同時根據 XLC_LOCALE 的內容，您還需要安裝字型名末尾為 GB2312.1980-0
+的 GB 字型，這個也可以在 XFree86 的套件中找到。
+
+
+
+B. xcin 安裝問題:
+
+------------------------
+QB.1:  我已經安裝了 Berkeley DB2 了，為什麼在 configure 時還是跟我說:
+
+	You need Berkeley DB 2 to compile xcin.
+	Please use --with-dbinc and --with-dblib to configure.
+
+如同上頭的提示，您必須指定 Berkeley DB2 所在的路徑，如此 configure 時才找得
+到。舉例來說，您當初安裝 Berkeley DB2 時是裝在 /usr/local 底下，請您找一下
+您的 /usr/local/lib 中是不是有 libdb.so, 或者是 libdb2.so？如果沒有的話請找
+出它們存在的目錄，這就是 <dblib_path>。還有，在您的 /usr/local/include 下是
+否有 db.h 檔？沒有的話請將它找出來，而這就是 <dbinc_path>。然後，當您在 
+xcin-2.5 底下執行 configure 指令時，請這樣執行:
+
+    configure --with-dbinc=<dbinc_path> --with-dblib=<dblib_path> <其它參數>
+
+除了 Berkeley DB2 以外，安裝 xcin-2.5 還需要其他的函式庫，操作方式同上，詳
+見 SETUP 一文的說明。
+
+
+------------------------
+QB.2:  為什麼安裝 xcin 時 configure 跟我說要 libtabe 呢？以前都不需要啊!
+
+自 xcin-2.5.1 開始， libtabe 將不再內含於 xcin 套件中，而將獨立發展，故您若
+安裝 xcin-2.5.1 及往後的版本，您還要先安裝 libtabe 套件，詳見 SETUP 一文的
+說明。
+
+
+------------------------
+QB.3:  我到處都找不到 tsi.db 與 yin.db, 以前不是有 libtabe-tsi-bin.tar.gz
+       這個套件嗎？到那裏去了？
+
+自 xcin-2.5.1 開始， libtabe 將不再內含於 xcin 套件中，而將獨立發展，而上
+述的那兩個 db 檔則屬於 libtabe 套件的一部分，只要您安裝了 libtabe 之後，
+就會自動將它們裝起來。目前 libtabe 套件的檔案名稱應為 libtabe-<version>.tar.gz,
+例如 libtabe-0.1.X.tar.gz, 您可以在
+
+	ftp://xcin.linux.org.tw/pub/xcin/libtabe/
+
+底下找到它。詳見 SETUP 一文的說明。
+
+
+------------------------
+QB.4:  為什麼我在執行 configure 時，會有這樣的錯誤訊息呢？
+
+       You need X11R6 to compile xcin.
+       Please use --x-includes and --x-libraries to configure.
+
+那多半是因為您的系統中沒有安裝 X Window development package, 裏頭包括 compile
+X Window 程式時所需的 include 檔 (在 /usr/X11R6/include/ 下) 以及一些 link lib
+(在 /usr/X11R6/lib/ 下)。您必須安裝它才能 compile xcin 。若您是 RedHat 的系統
+則該 package 名多半為 XFree86-devel-<version>.rpm, 若您是 Debian 的系統，則該
+package 名多半為 xlib6g-dev-<version>.deb 。若您是其他的系統，請查詢一下該系
+統的相關文件。
+
+當您將所需的 package 裝好後，在重新跑 configure 程式之前，請注意在 xcin-2.5
+目錄下是否已存在了 config.status, config.cache, config.h, config.log 等這些
+檔案？如果是的話請先將它們移除之後，再重新跑 configure 程式。
+
+
+------------------------
+QB.5:  我第一次 compile xcin 時沒有裝 bimsphone (在 configure 時加了
+       --disable-bimsphone 選項)，但現在想再裝 bimsphone, 請問要怎麼
+       做？需要整個 xcin 系統重新 compile 嗎？
+
+不需要，您只要到 xcin-2.5 的 source 當中，按照您原先執行 configure 的方式
+再跑一次 configure，但這此不要加 --disable-bimsphone 選項，並且注意您的系
+統這時必須已安裝了 Berkeley DB2 與 libtabe，必要時要將這兩個套件的位置告
+訴 configure (詳見 SETUP 一文的說明)。當 configure 完成後，請到
+
+	xcin-2.5/src/Cinput/bimsphone/
+
+目錄下，直接執行 make install 即可。
+
+
+------------------------
+QB.6:  我在安裝 xcin 時，configure 沒有問題，但安裝到一半卻出現以下的錯誤:
+
+gcc -Wall -fsigned-char -O2 -DHAVE_CONFIG_H -I../../../src/include \
+	-c -o set_locale.o set_locale.c
+set_locale.c: In function `locale_setting':
+set_locale.c:68: `CODESET' undeclared (first use in this function)
+set_locale.c:68: (Each undeclared identifier is reported only once
+set_locale.c:68: for each function it appears in.)
+make[3]: *** [set_locale.o] Error 1
+
+有一種可能情況是您適圖在較舊的 GNU/Linux 系統上安裝 xcin-2.5.2.1，例如使用
+glibc-2.1.2 及以前的系統。因為這一版的 xcin 使用了 nl_langinfo() 的函式
+呼叫，而在較老舊的 glibc 系統上這個函式的實作並沒有完全。解決的方式為修
+改 xcin-2.5/config.h 檔，將這一行
+
+#define HAVE_NL_LANGINFO 1
+
+刪除，然後重新 make 即可 (不要重新 configure, 否則的話您必須再改一次
+config.h 將上頭那行刪除)。
+
+
+------------------------
+QB.7:  為什麼我執行 xcin 時，會跑出如下的錯誤訊息呢？
+
+	xcin internal error: NULL xcin locale_sub_path
+
+有兩種可能性: 一種是您可能忘了在執行 xcin 之前設好 locale 等環境變數。
+請您參考 UserGuide 文件的說明，將所需的 locale 相關環境變數設好。
+
+另一種可能性是您的系統的 locale 環境並沒有安裝好，請您參考本文 QA.2 與
+QA.3 的說明檢查一遍。
+
+
+
+C. xcinrc 設定相關問題:
+
+------------------------
+QC.1:  什麼是 xcinrc 檔？它放在那裡呢？
+
+xcinrc 檔是 xcin 的設定檔，xcin 的一且功能與表現方式都可以經由這裡的設定
+來加以控制。由於 xcin-2.5 的設定與可調選項比起 xcin-2.3 與更舊版的 xcin
+要複雜很多，故那時絕大部分的命令列選項都移到了 xcinrc 檔中。
+
+xcinrc 檔的位置依您安裝 xcin 的位置而異。如果您是裝在 /usr/local 底下，則
+它就會出現在 /usr/local/etc 下；如果您裝在 /usr 底下，則它可能出現在 /etc
+或 /usr/etc 下。若您是使用 CLE 的系統，則它多半是在 /etc/chinese 底下。
+
+除此之外，您也可以將系統的 xcinrc 檔複製一份到您的 $HOME/.xcin/xcinrc 或
+$HOME/.xcinrc，如此您的一些個人化設定就可以直接改在裡頭，xcin 在讀取 xcinrc
+檔時會以您的個人化設定優先讀取。另一方面，在您更新 xcin 版本時，雖然系統的
+xcinrc 檔也被更新了，但您的個人化設定仍然會存在，不會因為系統的 xcinrc 更
+新而被覆蓋掉。
+
+
+------------------------
+QC.2:  我無法啟動 xcin, 我懷疑是我的 fontset 設定有問題，我該如何檢查呢?
+
+以下就以 zh_TW.Big5 locale 為例來做說明。請您檢查以下的項目:
+   
+1. /usr/X11R6/lib/X11/locale/zh_TW.Big5/XLC_LOCALE 中，Big5 的字型是什
+   麼? 以一般常見的為例，是:
+
+======================================================================
+fs1     {
+        charset {
+                name    BIG5-0:GLGR
+        }                                                                       
+        font    {
+                primary BIG5-0:GLGR
+        }                                                                       
+}                                                                               
+======================================================================
+
+   注意! 字型名的末尾是 BIG5-0 。
+
+2. 查一下所需的中文字型名是否存在您的系統中? 只要是字型名末尾是 big5-0
+   (大小寫不拘) 都可以，也就是要符合前面 XLC_LOCALE 中的設定值。以我的
+   系統為例，當我執行
+
+	xlsfonts | grep big5-0
+
+   時，列出結果如下:
+
+-twmoe-kai-medium-r-normal-fs-14-140-75-75-c-140-big5-0
+-twmoe-kai-medium-r-normal-fs-15-150-75-75-c-150-big5-0
+-twmoe-kai-medium-r-normal-fs-16-160-75-75-c-160-big5-0
+-twmoe-kai-medium-r-normal-fs-18-180-75-75-c-180-big5-0
+-twmoe-kai-medium-r-normal-fs-20-200-75-75-c-200-big5-0
+-twmoe-kai-medium-r-normal-fs-24-240-75-75-c-240-big5-0
+
+   故以上這些字形我都可以用。
+
+3. 檢查您的 xcinrc 的 FONTSET 設定。由於我們這邊要設定的是 zh_TW.Big5 locale
+   的 FONTSET，故請您找到
+
+	(define zh_TW.Big5
+
+   小節，裏頭就會有一個 FONTSET 的項目 (自 2.5.2 版起還會有 OVERSPOT_FONTSET 
+   的項目，二者的區別請見 Usage 一文的說明)。以我這邊為例，假設我想用 24 點
+   的字型，則我只要這樣設即可:
+
+	(define FONTSET "-sony-*-24-*-iso8859-1,-*-24-240-*-big5-0")
+
+   其中第一行是英文字型名，第二行是中文字型名。因為我的系統中確實有 24 點的
+   big5-0 字型 (即 -twmoe-kai-medium-r-normal-fs-24-240-75-75-c-240-big5-0),
+   故我這樣設定之後 xcin 就會自動使用。
+   
+   請注意，您在 xcinrc 中可能會見到兩個或以上的 FONTSET 設定，一個是在
+   zh_TW.Big5 節，一個可能是在 zh_CN.GB2312。由於以上的修改是針對 big5-0
+   的字型，故必須設定在 zh_TW.Big5 節。同理，如果您希望設定 GB 字型的話，
+   您必須設定在 zh_CN.GB2312 節。
+                
+
+請注意，這裏不要設類似 taipei24, kai24, .... 等「簡名」，一定要設類似上述
+格式的名字，否則無法成功。若所需的 big5-0 字型不存在的話，您可以自行安裝
+它們，或拿現有的中文字型 alias 成 big5-0 字型。
+
+另外，如果您在執行 xlsfonts | grep big5-0 時得到類似如下的結果:
+
+-twmoe-kai-medium-r-normal-fs-24-240-0-0-c-240-big5-0
+-twmoe-kai-medium-r-normal-fs-24-240-75-75-c-240-big5-0
+
+請注意第一行與第二行的差別: 第二行 -75-75- 處在第一行卻是 -0-0-, 這時，如
+果您在 FONTSET 的設定是 "-*-24-*-big5-0" 的話，則 xcin 會直接挑第一個可用
+的字型名來用。但這樣一來 xcin 可能會跑不起來，原因是 -0-0- 這樣的字型名的
+問題。對於這種情況，您可以將 FONTSET 的設定改成「明確指定」一個可用的中文
+字型名，亦即:
+
+(define FONTSET '("-sony-*-24-*-iso8859-1"
+                  "-twmoe-kai-medium-r-normal-fs-24-240-75-75-c-240-big5-0"))
+
+
+------------------------
+QC.3:  請問 xcinrc 內的 INDEX_FONT 是做什麼的啊?                               
+
+這是用來在 xcin 視窗的右下角顯示目前輸入法的英文名稱用的，可以設成一個小
+一點的英文字型 (注意! 必須是一個英文字型)。
+
+
+------------------------
+QC.4:  那 xcinrc 內的 OVERSPOT_FONTSET 又是做什麼的？
+
+這是用來設定 xcin OverTheSpot 視窗的字型用的。請注意自 xcin-2.5.2 開始，
+在每個 locale 設定中，您會見到兩個 fontset 的設定，一為 FONTSET，另一為
+OVERSPOT_FONTSET，而後者是用於設定 xcin 主視窗的字型，因為主視窗所用的字
+型通常比 OverTheSpot 視窗的字型來得大。
+
+然而，OVERSPOT_FONTSET 所設定的字型不見得會馬上起作用，原因是預設情況下
+xcin 會使用 XIM client 所提供的字型來顯示。如果您希望它馬上起作用，還必
+須同時打開 OVERSPOT_USE_USRFONTSET 的選項。詳見 Usage 一文中對這些選項
+的說明。
+
+
+------------------------
+QC.5:  請問 xcinrc 內為什麼要分 zh_TW.Big5 與 zh_CN.GB2312 等多個小節呢?
+       它們的設定項目不都是一樣的嗎?
+
+這些是屬於 locale 相關的細部設定，依 locale 環境的不同而有不同。現在 xcin
+已可以在不同的 locale 下分別同時啟動了，但因為不同的 locale 需要不同的設
+定，為了方便起見，我將這類的設定依不同的 locale 分開，如此一來您就不需要
+每次換 locale 時就必須修改一次 xcinrc 了 :-))
+
+
+------------------------
+QC.6:  我的系統中已經有 zh_TW.BIG5 locale 了，而且 /usr/X11R6/lib/X11/locale
+       底下也已有 zh_TW.BIG5/XLC_LOCALE 檔，為什麼還是無法啟動 xcin?
+
+您必須做以下的設定讓 xcin 知道您有 zh_TW.BIG5 locale:
+
+1. 改 xcinrc, 將裏頭的 zh_TW.Big5 字眼全部換成 zh_TW.BIG5。
+   (也就是，您在 xcinrc 中要有一個定義 zh_TW.BIG5 locale 的 section)
+
+2. 到 ..../xcin/tab/ 底下，做一個 symbolic link:
+
+        ln -s zh_TW.Big5 zh_TW.BIG5
+
+   (也就是，您必須為 zh_TW.BIG5 locale 準備一個 sys.tab)
+   (注: 如果您是使用 xcin-2.5.2 以上的版本，您不需要做這一步，因為所有的輸
+	入法表格檔已改放在以內碼為名的目錄 (如 big5/, gb2312/ 等) 中，而不
+	再放入以 locale 為名的目錄中了)
+
+3. 執行 xcin 時，請用以下指令:
+
+        export LC_CTYPE=zh_TW.BIG5
+        xcin &                    
+
+4. 要在 XIM client 輸入時，注意這時 xcin 的 IM name 可能已變成:
+
+        xcin-zh_TW.BIG5
+
+   了，故在啟動 XIM client 時要做相對的設定。或者，如果您還是希
+   望 xcin 的 IM name 還是 "xcin" 的話，用這個指令:            
+
+        export LC_CTYPE=zh_TW.BIG5
+        xcin -x "xcin" &          
+
+相關細節請見 xcin-2.5/doc/Usage 一文的說明。
+
+
+------------------------
+QC.7:  為什麼我在執行 xcin 時，會跑出這樣的錯誤訊息？
+       xcin: error: rcfile: DEFAULT_IM: value not specified.
+
+有一種可能情況是， xcin 根據您目前的 locale 啟動，但它卻在它的設定檔 xcinrc
+中找不到該 locale 的資訊。例如，您目前的 locale 預設是 C, 但 xcinrc 中預設的
+locale 有 zh_TW.Big5 與 zh_CN.GB2312, 卻沒有 C, 因此就會印出如上的訊息。
+
+解決辦法是: 先確定您的系統中所支援的中文 Big5 的 locale 為何？若是 zh_TW.BIG5
+則請參考 QC.3 的說明做必要的調整，然後，在啟動 xcin 之前，先執行 (for bash)
+
+	LC_CTYPE=<locale_name>; export LC_CTYPE
+
+您也可以將它寫入 $HOME/.profile 中，以方便每次 login 時都自動執行。至於有關
+xcinrc 的設計細節，情參考 xcin-2.5/doc/Usage 一文的說明。
+
+請注意，若您的系統中已設定了 LC_ALL 環境變數的話 (如 RedHat-6.1), 則您在設
+定 LC_CTYPE 時會失效，這時您必須先取消 LC_ALL 的設定，然後再設 LC_CTYPE:
+
+	unset LC_ALL
+	LC_CTYPE=<locale_name>; export LC_CTYPE
+
+或者直接將 LC_ALL 設成您的 locale_name 亦可:
+
+	LC_ALL=<locale_name>; export LC_ALL
+
+
+------------------------
+QC.8:  如何改變 xcin 主視窗的啟動大小與位置呢？
+
+您可以修改 xcinrc 檔，在這裡有兩個設定 xcin 視窗啟動位置的地方:
+
+1. X_GEOMETRY: 用來設定 xcin 第一主視窗 (即較大的 xcin 視窗) 的位置。
+
+2. MAINWIN2_GEOMETRY: 用來設定 xcin 第二主視窗 (即較小的 xcin 視窗) 的位置。
+
+它們的設定格式如下:	<width>x<height>[x][y]
+
+其中 <width> 與 <height> 分別代表視窗的寬度與高度，以一個英文字的寬度與高度
+作單位。請注意您無法改變視窗的高度，只能改變寬度，原因是 xcin 視窗的高度是
+永遠固定的: 第一主視窗是兩行，而第二主視窗是一行。
+
+後面的 [x] 與 [y] 就是設定視窗的啟動水平與垂直位置，是以螢幕的像素點個數為
+單位。以 [x] 而言，如果是正數，則代表從螢幕的最左邊算起多少像素點，直到視
+窗的左邊界為止；若是負數，則代表從螢幕的最右邊算起多少像素點，直到視窗的右
+邊界為止。同樣的，以 [y] 而言，如果是正數，則代表從螢幕的最上邊算起多少像
+素點，直到視窗的上邊界為止；若是負數，則代表從螢幕的最下邊算起多少像素點，
+直到視窗的下邊界為止。
+
+舉兩個例子: 45x2+100+10 就代表寬 45, 高 2 的視窗，其位置是視窗的左上角位於
+(100,10) 的點上。若是 18x1+200-15 就代表寬 18, 高 1 的視窗，其位置是視窗的
+左下角位於 (200,-15) 的位置上，其中 -15 即從螢幕的最下邊往上算 15 的位置。
+
+
+------------------------
+QC.9:  為什麼 xcin 會有兩個不同大小的主視窗呢？
+
+自 xcin-2.5.2 開始，xcin 開始支援 OverTheSpot 的輸入模式。在此模式下大部分
+的輸入法組字資訊都會移到 OverTheSpot 的視窗，那是出現在您的輸入游標附近的
+小視窗。因此原來的主視窗所需要顯示的資訊就少了，而顯得太佔空間，故才有較小
+的主視窗 (即第二主視窗) 的設計。
+
+您必須將 xcinrc 中的 MAINWIN2_GEOMETRY 選項打開後，才會啟動第二主視窗。而
+在此模式下，除非遇到使用 Root 輸入模式的 XIM client，xcin 才會切換到第一主
+視窗來顯示，否則的話一律用第二主視窗來顯示。
+
+
+------------------------
+QC.10:  我還是覺得那個第二主視窗太佔空間，可不可以連它都不要啊？
+
+您有兩種方式可以選擇 (修改 xcinrc 檔):
+
+1. 打開 XCIN_HIDE 的選項，則在英數狀態下 xcin 視窗是隱藏的，只有在中文輸入
+   時它才會出現。
+
+2. 打開 OVERSPOT_WINDOW_ONLY 的選項，則在使用 OverTheSpot 輸入模式的 XIM
+   client 下，完全不會有 xcin 主視窗出現，只有 OverTheSpot 視窗會活動。但
+   因為 OverTheSpot 視窗比較小，故無法包含原來主視窗中所有的資訊。
+
+
+------------------------
+QC.11:  什麼是 OverTheSpot 呢？
+
+OverTheSpot 是 xcin 的一種輸入模式，自 xcin-2.5.2 起開始支援。
+
+在 XIM 的協定中，有一個稱之為「輸入法模式」(input style) 的「協定」，簡單
+講就是 XIM server 與 XIM client 之間要以怎麼樣的使用者介面展現給使用者。
+XIM 支援的 input style 有很多種，但大體上可以分成 pre_edit area (組字區)
+與 status area (輸入法狀態區) 來談: 這兩個區域可以分別 (或同時) 在輸入法
+視窗上、或出現在您目前的游標附近、或 XIM client自己準備一塊區域來顯示 ....
+等等。至於要用那一種 style? 通常都是當 XIM client 與 server 搭上線時，它
+先向 server 詢問有那些 style可用，然後再從中挑選一種，告訴 server 說指定
+要使用，二者達成協議後即可上路。
+
+在 xcin-2.5.1 之前，xcin 只支援一種 input style，傳統上稱之為 Root，意思是
+pre_edit area 與 status area 都在 xcin 視窗中：前者即為視窗第二行那塊紅棕
+色的區域 (您所敲入的字鍵碼會依續出現，等到敲完之後才會跑出一個完整的字，這
+過程就是「組字」) ，若遇到多重字選擇時還會包括視窗的第一行；而後者則為視窗
+第二行的左右兩塊區域，它們顯示了目前 xcin 所處的狀態 (如英數、全型半型等)。
+
+而自 2.5.2 起，我們替 xcin 加入另一種 input style，傳統上稱之為 OverTheSpot, 
+它的意思是 pre-edit area 會出現在您目前打字的游標附近，而且是由 XIM server
+(即 xcin) 另外在那游標附近開一個小小視窗，而將 pre_edit area 中的資料顯示在
+那。此 input style 最大的好處就是 pre_edit area 是跟著游標跑的，如此當您在打
+字時，您就不用眼睛一直移上移下看游標以及 xcin 視窗了。
+
+
+------------------------
+QC.12:  我要如何改變 xcin 的輸入模式呢？
+
+如果這裡指的是 xcin 在啟動時就開啟某些輸入模式 (input style) 的支援的話，您
+修改 xcinrc 檔，在 INPUT_STYLE 選項中列出您希望開啟的輸入模式即可。例如:
+
+(define INPUT_STYLE             '(Root OverTheSpot))
+
+表示同時開啟 Root 與 OverTheSpot 兩個模式。如此當您在重新啟動 xcin 時，您會
+見到如下的訊息:
+
+XCIN (Chinese XIM server) version xcin 2.5.2-pre1.
+(module ver: 20000110, syscin ver: 20000210).
+(use "-h" option for help)
+
+xcin: XIM server "xcin" locale "zh_TW.Big5" transport "X/"
+xcin: inp_styles: Root OverTheSpot
+                  ^^^^^^^^^^^^^^^^
+這樣就表示成功啟動了。
+
+然而，是否接下來就使用某個特定的輸入模式來輸入，還得由 XIM client 來決定 (目
+前 xcin 不主動為 client 決定)。由於 OverTheSpot 是較好的一個 style，因此目前
+絕大部分的 XIM client 在對於使用優先順序上都是 OverTheSpot 大於 Root (通常
+Root 都是排在最後的)。因此，如果 XIM client 在與 XIM server 交談過後，發現有
+OverTheSpot 這個輸入模式可用時，一般情況下都會指定使用它。
+
+
+
+D. 輸入法模組相關問題:
+
+------------------------
+QD.1:  xcin-2.5 的注音輸入法用起來好奇怪，跟一般的輸入習慣不太一樣。
+ 
+這要分成兩點來回答:
+ 
+1. 關於注音輸入法的上字習慣: 您可能是使用到了 gen_inp + phone 的注音
+   輸入法了 :-))  xcin-2.5 提供兩種注音輸入，一為通用性輸入法模組再掛
+   上 phone.tab (即 gen_inp + phone), 這只是個很陽春的注音輸入法，沒
+   什麼功能，另一個是 bimsphone 模組，此為「專業」的注音輸入法。它擁
+   有許多大家可能都需要的功能，例如自動選字，支援許氏與倚天鍵盤等。
+
+   在我們的 xcinrc 中，已預設好了 ctrl+alt+3 啟動 gen_inp + phone, 而
+   ctrl+alt+6 則啟動 bimsphone, 希望大家在用慣了 xcin-2.3.X 時，能夠
+   對此感到熟悉。當然，如果您不喜歡這樣，也可以自行修改 xcinrc 加以更換。
+
+2. 目前 gen_inp.so 已能接受一字多碼、多字同碼的 .cin 檔。當遇到一字多
+   碼、或多字一碼時， gen_inp.so 的內定排列順序是依 .cin 原來的排列順
+   序而定的。若您發現有排列順序不對的情況，可以試著修改一下 .cin 檔中
+   的順序，然後再用 cin2tab 重新編譯一次，再重跑 xcin ，看是否有改善。
+
+   除此之外，在處理一字多碼時，您可以在其中挑一個做為此字的「代表碼」，
+   則 gen_inp.so 在顯示此字的字碼時，便會以此「代表碼」來顯示。詳見
+   doc/Cin 一文的說明。
+
+
+------------------------
+QD.2:  再原有的 xcin-2.3.X 詞音輸入法中，可以按 SHIFT+, SHIFT+. 而輸出
+       全形標點，但 xcin-2.5 的 bimsphone 為什麼沒有呢?
+
+您可以修改 $XCIN_DEFAULT_DIR/tab/zh_TW.Big5/default.phr, 到 %shift 那一
+節，自行設定您希望按下 shift+某鍵後的輸出字串，其中該檔的格式是左半邊的
+半形字是 shift+所按下的鍵，而右半邊的全形字就是 xcin 的輸出結果。如果您
+沒有 root 權限，無法直接修改其內容時，您可以將它複製到
+
+        $HOME/.xcin/tab/
+
+再來修改。同時您也要修改 xcinrc 的內容，將 bimsphone 那一節的 QPHRASE_MODE 
+設成:
+	(QPHRASE_MODE      1)
+
+以啟動此功能。請注意，在 default.phr 總共分成五節，分別是 %trigger, %shift,
+%alt, %ctrl 以及 %fallback, 其中中間三者分別代表按 shift, alt, ctrl 再加其
+他鍵的輸出，而 %fallback 代表若您所按的字鍵不是該輸入法中有意義的字鍵時，就
+以此小節的片語輸出。若您想啟動這些功能，您必須適當設定 QPHRASE_MODE 的值。
+詳見 doc/modules/im_comm 的說明。
+ 
+
+------------------------
+QD.3:  我要如何改變注音輸入法的鍵盤對應呢？如倚天鍵盤或許氏鍵盤？
+
+XCIN 有兩種不一樣的注音輸入法，一為 gen_inp 模組搭配 phone.cin，另一個為
+bimsphone 模組所提供的注音輸入法，而只有後者才能改變鍵盤對應。改變的方式為
+修改 xcinrc 檔，找到 
+
+	(define bimsphone 
+或 
+	(define bimsphone_default 
+
+小節，裡頭會有 KEYMAP 的設定，修改它的值即可。您可以見到此設定後頭的注解，
+例如設為 1 代表零壹鍵盤，2 代表倚天鍵盤，3 代表倚天 26 鍵盤，而 4 代表許氏
+鍵盤 .... 等。
+
+
+------------------------
+QD.4:  像注音這種一個 keycode 可以對映到多種字的輸入法, cin2tab 似乎會把 
+       phone.cin 裡的順序亂掉。像 "天" 在 .cin 的順序是 "天添倎屇酟婖", 
+       打出來的順序卻是 "婖添酟屇倎天", 其他字也是一樣, 舊版(2.3.02) 就沒
+       有這種情形。這是 bug 還是 feature?
+
+這是 Bug, 與所使用的排序函式有關。理論上，目前 xcin 已採用自己的排序函式，
+而不再依賴系統提供的排序函式，故上述問題應該不會發生了。
+
+
+------------------------
+QD.5:  如何修改 xcin 啟動的預設輸入法呢？
+
+對於不同的 locale，其在 xcinrc 的該 locale 小節中都有預設輸入法的設定項。例
+如 zh_TW.Big5 locale，請您找到:
+
+	(define zh_TW.Big5
+
+小節，修改 DEFAULT_IM 後頭的值，將它改成您希望的輸入法名即可。請注意這個輸
+入法名也必須同時出現在同一小節中底下的 CINPUT 後頭所列的輸入法中。
+
+
+------------------------
+QD.6:  請問要如何增加新的輸入法呢？
+
+要增加新的輸入法您必須先確定兩件事:
+
+1. 您的輸入法是使用那種內碼？若是 Big5 的話則屬於 zh_TW.Big5 locale, 若是
+   GB 的話則屬於 zh_CN.GB2312 locale。
+
+2. 您的輸入法是使用 gen_inp 模組？還是它另外提供一個新的模組？
+
+以下我先就最一般的情況，即您想新增的輸入法 xyz 是使用 Big5 碼，且使用 gen_inp
+模組驅動，來作說明。凡是使用 gen_inp 模組來驅動的輸入法，它必須要有一個 .cin
+檔，我想使用過舊版 xcin 系統的朋友應該相當熟悉。有了 .cin 檔，您必須先用 
+cin2tab 這個程式將它轉成 .tab 檔:
+
+	cin2tab -l big5 xyz.cin
+
+在這裏 "-l big5" 選項是指定啟動的內碼名，因為 xyz.cin 是使用 Big5 碼，故這
+裏的值是 big5。當然，如果您的環境中已預設了
+
+	LC_CTYPE=zh_TW.Big5
+
+環境變數的話，您可以省略這個 -l 的選項。請注意， xcin-2.5 的 cin2tab 所接受
+的 .cin 檔格式與舊版的不同。新的格式定義可以在 Cin 一文的第二節中找到。
+
+完成後，您會有一個 xyz.tab, 這時您可以將它放入預設的 xcin 目錄中，如
+
+	/usr/local/lib/xcin/tab/big5/
+
+或者您在自己的 $HOME 目錄下建一個 .xcin 目錄，把它放進去亦可。
+
+接著，您要改 xcinrc 檔，要改兩個地方:
+
+1. locale section 的部分: 由於 xyz.tab 屬於 zh_TW.Big5 locale, 故這時請找到
+   zh_TW.Big5 那一節:
+
+(define zh_TW.Big5
+	............................
+
+   在這一節中有一個 CINPUT 的項目，它是指定目前 xcin 可載入的輸入法，如
+
+	(CINPUT             (cj phone bimsphone zh_hex)
+
+   您只要將 xyz 輸入法加進去即可，如
+
+	(CINPUT             (cj phone bimsphone zh_hex xyz)
+
+   詳見 Usage 一文的說明。
+
+2. 加入 xyz 輸入法詳細定義: 由於 xyz 輸入法是由 gen_inp 模組來驅動的，故
+   您可以直接參考原 xcinrc 中 cj 輸入法那一節的寫法，寫一份 xyz 輸入法節,
+   直接加入 xcinrc 檔裏頭，例如:
+
+(define xyz
+        '((SETKEY               9)
+          (AUTO_COMPOSE         YES)
+          (AUTO_UPCHAR          YES)
+          (AUTO_FULLUP          NO)
+          (SPACE_AUTOUP         NO)
+	  ..........................
+
+   其中每一個細部項目的意義請參考 modules/gen_inp 一文的說明。要特別注意的
+   是 SETKEY 代表了預設情況下切換到此輸入法的鍵，如上例為 ctrl+alt+9, 它在
+   同一 locale 所有輸入法中必須是獨一無二，不能有重複的 (但在不同 locale 中
+   可以重複)，因此在設定這一項時要注意。
+
+設定完成後，重跑 xcin 即可。
+
+
+如果您要新增的輸入法不使用 gen_inp 模組，而是使用其他模組的話，首先您必須
+確定您手上的那個模組 (xyz-module) 的版本符合您目前使用的 xcin 版本。您目
+前使用的 xcin 模組版本可以在 xcin 啟動時見到，例如:
+
+XCIN (Chinese XIM server) version xcin 2.5-19991128.
+(module ver: 19991107, syscin ver: 19990521).
+(use "-h" option for help)
+
+其中 module ver 即為 xcin 的模組版本。如果 xyz-module 的模組版本與 xcin 的
+不合的話， xcin 會拒絕使用它，這時您唯一個辦法就是重新編譯一次 xyz-module,
+讓它在您的 xcin 的 source 下編譯，詳細步驟請參閱該模組的說明文件。
+
+若沒有問題的話，您可以將 xyz-module.so 放到 xcin 預設目錄下，如
+
+	/usr/local/lib/xcin/
+
+或者放到您的 $HOME/.xcin/ 底下即可，同時您也要裝好該模組的附帶資料檔以及
+library (請參閱該模組的說明文件)。接著就是修改 xcinrc, 改法與前述完全相同:
+假設您的 xyz 輸入法使用 xyz-module.so 模組的話，則 locale 節中
+
+	(CINPUT             (cj phone bimsphone zh_hex xyz)
+
+而在 xyz 節中
+
+(define xyz
+        '((SETKEY               9)
+	  (MODULE		"xyz-module")
+	  ...................................
+
+要特別注意這裏必須要有一個 MODULE 項，用來指明此輸入法所使用的模組。至於
+其他的設定選項請自行參考該模組的說明文件。
+
+
+------------------------
+QD.7:  我如何在 bimsphone 輸入法中加入新詞呢？
+
+bimsphone 的詞庫是屬於 libtabe 套件的一部分，如果您要加入新詞的話，首先
+您必須先取回 libtabe 套件的原始碼，您可以從這裡下載:
+
+	ftp://xcin.linux.org.tw/pub/xcin/xcin/
+	ftp://xcin.linux.org.tw/pub/xcin/libtabe/
+
+將原始碼套件解開後，其詞庫檔原始碼就放在
+
+	libtabe/src/tsi-src/tsi.src
+
+您可以按照其格式加入新詞。其格式很簡單，每一個詞一行，共三個欄位，如下:
+
+	<詞條> <詞頻> <詞條的注音碼>
+
+其中 <詞條> 是指詞的本身，<詞頻> 您只需填入 0 即可，而 <詞條的注音碼> 您
+可填可不填，若不填的話等一會程式在編譯詞庫時會自動補上。但原則上我們還是
+建議您填入比較好。
+
+完成後，請按照以下步驟編譯:
+
+	sort tsi.src > tsi.src.new
+	tsiadd -d tsi.db -f tsi.src.new -y -r
+	tsiyindump -d tsi.db -y yin.db
+
+其中第一個指令將整個詞庫檔排序，存成一個新檔: tsi.src.new，第二個指令讀
+入 tsi.src.new 產生 tsi.db 檔，最後一個指令讀入 tsi.db 檔產生 yin.db 檔，
+而 tsi.db 與 yin.db 就是編譯完成的詞庫檔。接下來，您就可以將這兩個詞庫檔
+安裝到系統目錄去:
+
+	cp tsi.db yin.db $(prefix)/share/tabe/tsiyin/
+
+其中 $(prefix) 是您當初安裝 libtabe 的位置，可能是 /usr 或者 /usr/local。
+
+有關 tsi.src 詳細的格式說明，請見:
+
+	http://xcin.linux.org.tw/libtabe/tsi.src.html
+
+
+------------------------
+QD.8:  我發現注音輸入法中可以連續輸入兩個 ㄅ，或者可以輸入如 ㄚㄉ 這樣的
+       音，這似乎很不合理？
+
+會有這種問題的是使用 gen_inp 模組的注音輸入法，其輸入法表格名為 phone.cin。
+由於 gen_inp 模組是定位為一般通用型的輸入法模組，它的工作只有將你所輸入的字
+鍵查表，找出對映的字然後送出。因此，對於任何輸入法表格 (即 .cin 表格)，它的
+處理方式都是一視同仁，不會因為輸入法的不同而有特別不同的處理方式。因此您才
+會見到在此注音輸入中，錯誤的注音碼順序仍可接受，因為此模組中並沒有特別內建
+注音碼的順序表。
+
+如果您很不喜歡這個缺限的話，建議您可以改用 bimsphone 輸入法模組。此模組是專
+門針對注音輸入而設計的，不僅內建了正確的注音碼次序，故不會有上述的問題，同
+時它還內建多種注音碼鍵盤對映，以及自動選字功能 .... 等等。如果您不喜歡它的
+自動選字功能，您也可以將它關掉，只要修改 xcinrc 檔，找到 bimsphone_default
+或者 bimsphone 的設定小節，將此選項設成 NO:
+
+	(AUTO_SELECTION		NO)
+
+然後重新啟動 xcin 即可，如此它就是一個純種的注音輸入法了。
+
+
+
+E. xcin 設計相關問題:
+
+------------------------
+QE.1:  請問我要如何 Debug xcin?
+
+您可以試試 compile xcin 時，將 xcin 的 DEBUG 選項打開:
+
+	configure --enable-debug
+
+則重新編譯過後的 xcin 就會多出一個 -v 的參數 (即 verbose)，可用來設定除錯
+訊息顯示層級。使用方式為:
+
+	xcin -v n <其他選項>
+
+其中 n 為數字，數字越大表示顯示的除錯訊息越多。下表為該數字值與將顯示的除
+錯訊息對應:
+
+	1:	訊號 (signal) 攔截顯示，包括 SIGQUIT, SIGTERM, SIGINT。
+
+	2:	fontset 管理機制訊息顯示。
+		上層 XIM 運作訊息顯示。
+
+	3:	應用程式 IC 檢查機制訊息顯示。
+		底層 (IMdkit) XIM 運作訊息顯示。
+	
+關於 XIM 的運作過程，通常在啟動 xcin 後，再啟動 client, 則訊息流程如下:
+
+1. XIM_OPEN:
+	Client 與 XIM server (即 xcin) 連上。
+
+2. XIM_CREATE_IC:
+	Client 開啟了一個視窗，且該視窗可以接受 XIM server 的輸入。這樣的物
+	件稱之為一個 IC (Input Context)。
+
+3. XIM_SET_IC_FOCUS:
+	Client 所開的這個視窗設為 XIM 工作前景視窗，此視窗直接與 XIM server
+	溝通。
+
+4. XIM_UNSET_IC_FOCUS:
+	如果此時您的滑鼠點別的視窗，則原來 XIM_SET_IC_FOCUS 的視窗為變成背
+	景視窗。
+
+5. XIM_TRIGGER_NOTIFY:
+	在您尚未按下 trigger key 之前 (如 ctrl+space)， xcin 還不會去攔 
+	client 的 key event, 但在您按了 trigger key 以後。這時每按下任何按
+	鍵，都會交由 xcin 處理。
+
+6. XIM_FORWARD_EVENT:
+	這是在您按了 trigger key 以後，這時每按下任何按鍵，都會印出這個訊
+	息，代表 xcin 會處理您的按鍵輸入。
+
+7. XIM_GET_IC_VALUES:
+	在某些設計精良的 XIM client (如 rxvt-2.6) 每次在處理 X event 時，
+	都會向 XIM server 詢問其 IC 的狀態值。而每當 client 做這樣的詢問
+	時， xcin 都會印出這樣的訊息。
+
+8. XIM_SET_IC_VALUES:
+	在某些情況下， XIM client 會要求 XIM server 將其 IC 設定狀態值。
+	而每當 client 做這樣的要求時， xcin 都會印出這樣的訊息。
+
+9. XIM_DESTROY_IC:
+	理論上，當 XIM client 的某個有開啟 IC 物件的視窗要關閉時，它必需
+	送這個訊號給 XIM server, 好讓 XIM server 做一些膳後的動作，但可
+	惜的是這樣的 client 不多。
+
+10. XIM_CLOSE:
+	理論上，當 XIM client 結束時，它必需送這個訊號給 XIM server, 好讓
+	XIM server 做一些膳後的動作，但可惜的是這樣的 client 不多。
+
+請注意，當您要進行 Debug 的工作時， *請不要* 在 XIM client 上直接啟動 xcin
+(例如，不要在 rxvt 上啟動 xcin), 正確的做法時開另一個非 XIM client 的
+terminal (如 xterm), 在上頭啟動 xcin 或跑 gdb, 然後才來進行 debug 的工作。
+
+
+------------------------
+QE.2:  xcin-2.5 在 64 bits 機器上 (如 DEC alpha) 會不會有問題呢?
+
+目前 xcin 的主程式我已盡量做到可以在 long int 為 64 bits 可以相容了，我們
+也在 Linux Alpha 與 Linux PPC 上測過，大體上沒什麼大問題。有興趣的朋友也可
+以試試，當然，可能的話也請您做問題回報 :-))
+
+
+------------------------
+QE.3:  請問什麼是 IC Check? 什麼是 garbage collection? 這兩個東東有關嗎？
+
+在 xcin-2.5 中，這兩個是同一個東東，它是用來檢查 XIM client 是否還存在用的。
+
+這些是針對一些設計上不夠完整的 XIM client 而設計的。按照標準，當一個 XIM
+client 上任何視窗要結束時，它應該呼叫 XCloseIM() 來通知 XIM server (即 xcin),
+如此 xcin 才能回收不要用的系統資源 (即 Input Context, IC), 釋放不需要的記
+憶體。然而，並非所有的 XIM client 都按照這樣的標準。為了克服這個問題，我們
+才特別為 xcin 設計了 IC Check 機制，讓它定時檢查所有的 XIM client 的 Window
+是否還存在？若不存在則回收無用的 IC 。
+
+然而，這個 IC Check 在某些情況下可能會造成問題，這一點我們還無法確定，故為
+了安全起見，我還是在 xcinrc 中加了 ICCHECK_DISABLE 選項，萬一您發現此機制有
+若干暇疵，您可以設此選項為 YES 將此機制關閉。當然，若您真的發現有問題時，我
+們很希望您能向我們回報。
+
+
+
+F. 其他的問題:
+
+------------------------
+QF.1:  rxvt 可以看中文，也可以用 xcin-2.5 打中文，但好像有好多問題，例如中
+       文顯示有時候會莫名奇妙變亂碼、關掉 xcin 時有時候 rxvt 也會莫名奇妙
+       地消失 .... 怎麼會這樣呢？
+ 
+是的， rxvt-2.6.x/2.7.x 目前還不夠完美，多少會有些問題，但那些多半是 rxvt
+本身的問題，有些已經有修正。有興趣的朋友可以到
+
+	http://xcin.linux.org.tw/rxvt/index.html
+	ftp://ftp.rxvt.org/pub/rxvt
+
+底下挖挖看，看是否有新版的 rxvt 或 patch 可以用 :-)) 若您有問題想回報，建
+議您 mail 到:
+
+	rxvt-bugs@rxvt.org
+	rxvt-workers@rxvt.org
+
+詳見 http://www.rxvt.org 的說明。
+
+
+------------------------
+QF.2:  我在 xcin+xedit 可以打出中文，不過 xedit 在載入檔案時有沒有 xcin 
+       都會造成 segmentation fault, 這和 xcin-2.5 沒有關係吧?
+
+Yes, xedit 的問題多多 (尤其是在 $HOME/.Xresources 將 xedit*international
+enable 時) 且應該與 xcin 本身無關。我在 doc/Bugs 文件中有提到目前已遇到的
+所有問題，我建議大家多多使用 rxvt   :-))
+                                                           
+
+------------------------
+QF.3:  為什麼在 netscape-4.X 裏頭，每次打入一個中文字 xcin 就會切到「英
+       數」輸入呢?
+
+這是 netscape 在 XIM 上的設計特點，也是令我們大感頭痛的地方 :-))
+
+先說一般的 XIM client 的設計方式。通常當 XIM client 啟動後，就會為每一個
+需要接受 xcin 輸入的視窗開一個 IC, 而讓這些 IC 持續等待並接受 xcin 的輸入，
+直到該視窗結束為止。
+
+但 netscape 不然，當它的一個視窗開啟後，它自然也會產生一個 IC, 但當該 IC
+接受一個來自 xcin 的輸入 (不論是中文或英文) ，則它會馬上將該 IC 做掉 
+(Destroy IC)，另外再開一個新的 IC 來接受輸入。因此，它不像一般的 client,
+同一個 IC 從頭使用到尾，而是每收到單一的字，就換一個 IC 。
+
+這在 xcin 下會產生很大的影響。 xcin 的設計是，當一個新的 IC 產生時，預設
+是直接進入英數輸入，除非您按下 trigger key (如 ctrl+space) 才會進入中文輸
+入。因此，這就會造成在 netscape 下，每輸入一個中文字，它就換一個 IC, 而此
+新換的 IC 又是預設以英文輸入，因此，您必須每輸入一個中文字，就要按一次
+ctrl+space 切回中文輸入。
+
+為了解決此困擾，故 xcin-2.5.0-pre2-3 中我加入了「輸入法鎖定」的功能。當您
+在 netscape 底下，第一次切到中文輸入模式時，可以按 ctrl+alt+f 將此輸入法
+鎖定，則您就可以持續進行中文輸入，不需要一直按 ctrl+space 。如此便可解決
+此一惱人的問題。
+
+若要解除鎖定，可以在中文輸入模式下直接再按一次 ctrl+alt+f 即可。
+
+請注意，以上的現象只會發生在 Netscape 與 xcin 之間使用 Root 輸入模式連線時。
+由於 xcin 自 2.5.2 版以後已支援 OverTheSpot 模式，故在此建議您可以改用此模
+式來對 Netscape 輸入中文，在此模式下 Netscape 不會發生如上述的問題，故您也
+不需要「輸入法鎖定」的功能了。
+
+
+------------------------
+QF.4:  我在 CLE-0.8 下，使用 xcin-2.5 + rxvt-2.6.0, 但每次輸入一個中文字
+       時，就會 core dump, 怎麼辦呢?
+
+這是因為 CLE-0.8 中預設 LD_PRELOAD xa+cv 的原故。 xa+cv 其實是兩個部分，
+xa 的部分稱之為 "Xcin Anywhere", 它是用來幫助讓所有的 X-Window 軟體可以
+接受來自傳統的 xcin-2.3 或更早版本的 xcin 的輸入。另一部分是 cv, 它可以
+幫助無法顯示中文 (顯示出亂碼) 的 X-Window 軟體可以正確顯示中文。
+
+問題的關鍵在於 xa+cv 的 xa 部分與 xcin-2.5 不相容，因此，當您的環境中已
+LD_PRELOAD xa+cv 且 xa 部分是 enable 的話，您無法使用 xcin-2.5 對 XIM
+client 輸入中文 (會 core dump), 只能用舊版的 xcin (非 XIM server)來做輸
+入。解決的辦法有兩個，一是不要 LD_PRELOAD xa+cv, 再啟動 xcin 與 XIM client:
+
+for bash:
+	unset LD_PRELOAD
+	export LC_CTYPE=zh_TW.Big5
+	xcin &
+	rxvt -im xcin -pt Root -fm <chinese font name>
+
+for tcsh:
+	unsetenv LD_PRELOAD
+	setenv LC_CTYPE zh_TW.Big5
+	xcin &
+	rxvt -im xcin -pt Root -fm <chinese font name>
+
+另一個辦法是修改 /etc/chinese/xa+cv/config ，把所有 XIM client 程式的 xa 部
+分都 disable, 也就是將 mode 都改成 ":0:b", 如：                                
+
+	gedit:0:b
+	gnomecal:0:b
+(謝謝 Platin 兄的提供)
+
+
+------------------------
+QF.5:  我已將 libtabe 安裝在 /usr/local 底下了，而且我也安裝 xcin 成功了，
+       但為什麼當我啟動 xcin 並準備使用 bimsphone 輸入法時，卻仍見到這樣的
+       錯誤訊息？
+
+xcin internal: warning: dlerror: libbims.so.0.1: cannot open shared object file: No such file or directory
+xcin: warning: module "bimsphone.so" not found, ignore.
+xcin: warning: cannot load IM: bimsphone, ignore.
+
+那是因為您將 libtabe 的 lib 裝在 /usr/local/lib 下，但它卻沒有在您的 lib 搜
+尋目錄的緣故。解決的方式如下:
+
+1. 如果您有 root 權限的話，請您修改 /etc/ld.so.conf 的內容，加入一行
+   /usr/local/lib, 然後再跑一下 ldconfig 程式即可。
+
+2. 如果您沒有 root 的權限的話，在您執行 xcin 之前，請先執行:
+
+   (for bash):	LD_LIBRARY_PATH=/usr/local/lib; export LD_LIBRARY_PATH
+   (for tcsh):  setenv LD_LIBRARY_PATH /usr/local/lib
+
+   然後再執行 xcin 。您可以將此指令加入您的 $HOME/.profile 或 $HOME/.cshrc
+   中以便每次 login 之後可以自動執行。
+
+
+------------------------
+QF.6:  當我使用 xcin-2.5 的 bimsphone 在 netscape 下輸入中文時，為什麼在
+       按下方向鍵、或用滑鼠點選 netscape 上的游標時，原本存在 xcin 視窗中
+       的中文字就消失了？
+
+這是 netscape 設計上的問題。前面 (QF.3) 已提過，netscape 的設計特色是每接
+收一個字，它就會 create 一個 IC, 接到字後馬上將該 IC destroy, 然後再開一個
+新的 IC 。而現在我們發現當我們不打任何字，光是按方向鍵或用滑鼠移動游標時， 
+netscape 也會做 destroy IC 及 create IC 的動作。換句話說， netscape 視窗中
+任何游標移動的動作就會更換 IC, 相當喜新厭舊。
+
+但這樣一來在 bimsphone 裏頭會有很大的麻煩，原因是當我們現在開始輸入時，所有
+的輸入都暫存在 xcin 視窗中，而這時 xcin 的焦點是對準目前 netscape 中游標所
+在的 IC (請記得， netscape 游標一動就會換 IC), 則當我按下 space 鍵，把 xcin 
+視窗中所有的字全部往那個 IC 送過去，於是這些字全部出現在 netscape 視窗上。
+這一點不成問題。然而，如果您又用 xcin 打一堆字，存在 xcin 視窗中，但不小心
+按了方向鍵去移動游標，則 netscape 馬上將目前 xcin 所對準的 IC 幹掉，則根據 
+xcin 的定義，一旦它對準的 IC 被幹掉了，它就沒有理由要為該 IC 保存資料，因此
+剛剛您辛苦打的字就全部不見了 :-((
+
+我曾試過改一些 source, 就是當 xcin 發現它對準的 IC 被幹掉了，但 xcin buffer 
+中若還有字還沒送，就馬上將字全部送出去。但還是沒有用 :-(( 一旦 IC 被幹掉了，
+送去的字就像肉包子打狗，無影無蹤。
+
+為了解決此問題，我們後來在 xcin-2.5.1-2 版中修改了 bimsphone 的部分，讓它只
+有在 buffer catch (即 xcin 視窗) 中不含中文字時，才將使用者所按的方向鍵直接
+傳回給 XIM client, 但若 buffer catch 裏頭有東西時，您所按下任何方向鍵將不會
+直接傳給 XIM client, 也就是說在此情況下您無法藉由方向鍵直接移動 XIM client
+中的游標位置。我想這樣的改變是合理的，原因是此時您的輸入是針對目前的游標點進
+行的，雖然所輸入的字仍暫存在 xcin 視窗中；且這時候您沒有理由要在這些字送達
+XIM client 之前做游標移動。若要移動游標，您必須先按下 space 鍵將字全部送出，
+或按 backspace 鍵將 xcin 視窗中的字全部清空才行。
+
+這樣的改變，就某種程度而言已避免了上述 netscape 的問題，但仍是治標不治本。如
+果您在打字中途使用滑鼠移動游標時， xcin 視窗中的字還是會不見。若要根治此問題，
+唯有希望未來的 netscape 可以改變其 IC 的設計。
+
+若您在使用 xcin-2.5 對 netscape 輸入時遇到上述問題，建議您換到 xcin-2.5.1-2
+及其以後的版本，將有助於「減輕」此問題的嚴重性。
+
+
+------------------------
+QF.7:  為什麼當我切換虛擬桌面時， xcin 無法跟著跳過來呢？
+
+xcin 本身有一個簡單的機制可以隨著虛擬桌面的切換而跟著「跳」過來，您只需要
+將 xcinrc 中 SINGLE_IM_CONTEXT 設為 YES 即可。但在某些情況下，就算您啟動
+它，也不一定有效，這與您所使用的 Window Manager 有關。其原因如下:
+
+以 fvwm95 為例，當切換虛擬桌面時， WM 會 send ConfigureNotify event
+給 xcin 。但很多情況下 xcin 都會接到 ConfigureNotify event, 因此必須
+判斷什麼樣的 ConfigureNotify 代表已切換了虛擬桌面。於是，在 fvwm95
+底下有一個很好的判斷方式: 假設現在有兩個虛擬桌面:
+
+        +-----------------+--------------------+
+        |                 |                    |
+        |       A         |         B          |
+        |                 |                    |
+        |   (x,y)         |                    |
+        |                 |                    |
+        +-----------------+--------------------+
+
+而使用者正在用桌面 A, xcin 也在桌面 A 的 (x,y) 坐標上，其中 x>0, y>0。
+如果使用者用滑鼠點選桌面 B (先不考慮滑鼠移動超過桌面 A 跑到 B 的情況) 
+而換到桌面 B 時，會變這樣:
+
+        +-----------------+--------------------+
+        |                 |                    |
+        |       A         |         B          |
+        |                 |                    |
+        |   (-|x|,-|y|)   |                    |
+        |                 |                    |
+        +-----------------+--------------------+
+
+則 xcin 還是在桌面 A, 但它的坐標會變負的，也就是超出了 B 的坐標範圍，
+同時 xcin 也會收到 ConfigureNotify event。於是藉由判斷目前的坐標值，
+就知道目前 xcin 到底在那個桌面，如果不在目前的桌面，就跳過來。
+
+然而，這個機制雖然簡單，但有一個副作用: 若將 xcin 視窗拖超出桌面邊界，
+它會馬上跑回原位。因此，如果 WM 不能藉由滑鼠超出邊界而換桌面，則此副
+作用不會造成太大影響；反之，如果 WM 可以藉由滑鼠超出邊界而換桌面，則
+當我們用滑鼠拖著 xcin 超出桌面邊界時，我們可能會面臨 race condition:
+
+要是桌面換得夠快的話，則 xcin 還沒來得及知道它的坐標超出螢幕邊界之前，
+桌面就換好了，坐標值也正常了，一切 OK。但是，萬一 xcin 搶先知道的話，
+那可能造成 xcin 視窗永遠換不過去，也就是說， xcin 會一直想要移回原位，
+因為它發現它的坐標超出邊界了。
+
+因此，在此一情況下，使用此選項將帶來其他的問題。除此之外，假若在某些 
+WM 下，換了虛擬桌面後， xcin 的坐標根本沒變，或者沒有超出螢幕的邊界，
+則 xcin 便無從得知桌面已換，所以跳不過來。故就算設了這個選項，也沒有用。
+
+因此，是否要設此選項，以及設了它之後有沒有用，取決於您所用的 WM。由於
+目前很多 WM 可以設定讓某些視窗永遠出現在目前的虛擬桌面上，切換虛擬桌
+面時可以讓視窗一起跟過去，則在這類的 WM 下，建議您不要使用此選項，直
+接用您的 WM 來控制 xcin 視窗，比較不會有問題。但如果您使用的 WM 沒有
+這個功能時，您可以試著打開此選項，或許可以正常運作。但萬一發現仍然不
+正常的話，建議您還是不要使用此選項。
+
+
+------------------------
+QF.8:  為什麼在使用 OverTheSpot 時，當我把滑鼠游標移到 OverTheSpot 的視
+       窗上時，該視窗會一直閃動，但只要游標移開後就正常了？
+
+這種現像通常是發生在 MouseFocus 的 Window Manager 上，也就是只要將滑鼠游標
+移到某個視窗上，不需要再按任何滑鼠上的按鍵，該視窗就會變成前景視窗，可以接
+受鍵盤的輸入。而發生此現象的原因，是由於 xcin 具備隨前景視窗的切換而即時變
+換其輸入法狀態顯示的特色。
+
+當我們在某個 XIM client 上打中文時，如果這時我們改變輸入的 focus (即換個輸
+入視窗)，則所有 xcin 視窗的內容會全部跟著變換，包括 OverTheSpot 的視窗。例
+如，如果我們正在視窗 A 打中文，且 OverTheSpot 視窗也出現時，如果我們將 focus
+換到其他非 XIM client 的視窗上，或者其他處於「英數」輸入模式的 XIM client 
+視窗上時，則 xcin 主視窗就會變成「英數」模式，而且 OverTheSpot 視窗也不見
+了。如果再將 focus 換回來，則所有的輸入法狀態就會恢復原狀。
+
+正是這樣的特色造成這個現象。由於 OverTheSpot 視窗是設計成「完全脫離 Window
+Manager 控制」的視窗，因此，OverTheSpot 視窗所出現的位置，在 Window Manager
+看來就好像那一塊是 Root 視窗 (即底層桌布) 一樣。就算 OverTheSpot 視窗疊在
+rxvt 視窗上，只要當您將游標移過去，就會發現原本 I 字型的游標變成 X 字型了。
+
+現在，如果您的 Window Manager 只要將游標移到視窗任何部分，即可改變 focus，
+而無需再按滑鼠鍵。這時，如果您將游標移到 OverTheSpot 視窗上，由於 Window
+Manager 會認為現在游標已到了 Root 視窗區域，而將此訊號送給 xcin。於是 xcin
+會發現現在的 focus 在 Root 視窗區，不是 XIM client, 故它便將它所有的輸入法
+狀態都切回英數模式，並且將 OverTheSpot 視窗藏起來。就在那一剎那，底下的 rxvt
+視窗就浮上來了，而您的游標就變成在 rxvt 視窗上，focus 又變了，於是 Window
+Manager 又送訊號給 xcin，xcin 發現這回 focus 是 rxvt，馬上又將它的狀態全部
+切回中文輸入，並將 OverTheSpot 視窗叫出來。然而，這下游標又變成在 OverTheSpot
+視窗上，focus 又變了，然後 ....
+
+如此週而復始，造成了 OverTheSpot 快速地閃動，也就是這裡所見到的現象。
+
+
+------------------------
+QF.9:  為什麼我常常在關掉 xcin 之後，目前工作中的 rxvt 也跟著掛掉了？
+
+這是目前已知最嚴重的一個 bug，很抱歉目前我們束手無策，故在此只能提醒大家避
+開這個問題。問題是這樣，如果關閉 xcin ，很可能會造成目前為前景視窗的 rxvt
+一起掛掉，它可能在以下的情況發生:
+
+a. 目前 rxvt 是前景視窗，而您用滑鼠是按 xcin 視窗的 title bar 的按鈕，將
+   xcin 關掉，則那個前景視窗的 rxvt 有可能會當掉，或關閉。
+
+b. 目前您正在操作 rxvt, 用 ps -ax 找出 xcin 的 PID 然後 kill 掉它，則這個
+   rxvt 有可能跟著掛掉。
+
+c. 目前 X Window 中有 rxvt 與 xcin 正運作著，如果這時離開 X Window, 則 rxvt
+   有可能會當掉，但仍然暫著系統資源，持續吃記憶體，如果您沒有即時發覺，一個
+   晚上下來很可能您的記憶體會被吃光，然後開始大量使用硬碟的 swap，除非用
+   kill -9 將這些當掉的 rxvt process 都殺掉。
+
+避開的方式:
+
+就 a. 而言，目前已知發生的機率極小，除非是在慢速的電腦，或者系統 load 高
+時，才可能發生。但不論 a. 或 b., 避開的方式都是不要在 rxvt 為前景視窗時關
+閉 xcin。例如，您可以再開一個 xterm 來 kill 掉 xcin。
+
+就 c. 而言，最安全的方式是離開 X Window 前，先將所有的 rxvt 以及其他的 XIM
+client 統統關閉，然後再離開 X Window。或者，如果您的機器從未發生過 a. 的情
+況，則您也可以先關掉 xcin, 再離開 X Window, 而不需要先關 rxvt。
+
+雖然，有人曾回報說，他們用 gnome, icewm .... 等 Window Manager 從未發生過 c.
+的情況，但我們暫時持保留態度，因為目前仍然無法証明使用這些 Window Manager 絕
+對不會發生這個情況，然而，使用 fvwm 系列 (如 fvwm, fvwm2, fvwm95) 則 *可能*
+會發生這情況，因為我遇過很多次了，也有接到使用者回報了。故在此要提醒一下大
+家，請稍微留心注意。
+
+
+------------------------
+QF.10:  使用 KDE 時，每次切換輸入法 xcin 視窗都會變成前景視窗，每次我都要用
+        滑鼠點一下 rxvt 才能繼續輸入，怎麼辦呢？
+
+雖然 xcin 已按照 X Window 的標準來寫，理論上是永遠都不應該成為前景視窗的。
+但是在不同的 Window Manager 下，其表現出來的方式可能不一樣。原因是 Window
+Manager 掌控了它底下所有應用程式的視窗運作，而與 X Window 標準遍離的 Window
+Manager 可能因而干擾到 xcin 的正常運作。
+
+在這種情況下，一個可行的解決方法是: 將 xcin 完全拖離 Window Manager 的控制。
+這時您只要修改 xcinrc 檔，將 DISABLE_WM_CTRL 的選項打開即可。然而，這樣也可
+能造成若干不方便之處，例如 xcin 就沒有視窗的 title bar 了，也無法經由滑鼠點
+選 title bar 上的按扭或選單將 xcin 視窗關閉、最小化 .... 等，或者用滑鼠拖曳
+的方式來縮放 xcin 視窗的大小或改變其位置，因為這些都是經由 Window Manager 的
+控制來達成的。
+
+
+
+T.H.Hsieh

@@ -1,0 +1,367 @@
+------------------
+A. Introduction:
+
+XCIN is an XIM (X Input Method) server which is widely used in Taiwan to
+perform Chinese input under X Window system. It is originally developed
+by Edward Der-Hua Liu (Oct. 1994) and many other programmers in early 
+days; while now it is supported by the XCIN Project (http://xcin.linux.org.tw). 
+
+The current release of XCIN is xcin-2.5 series (developed during 1999-2000), 
+which makes a big jump from the old releases (e.g., xcin-2.3 and older 
+versions). The whole program structer is redesigned, the various input 
+methods are modulized, the custumization is more flexible, and the core 
+system is more stable and solid. The XIM protocol is also supported starting 
+from this series (although several XIM patches for old versions have already 
+appeared before xcin-2.5). The XIM supports is not completed yet, and is 
+still under development and improvement.
+
+The goal of XCIN is to serve as a general Input Method server for various
+kinds of people, not only for people in Taiwan (who mainly use the Big5 
+encoding), but also for people in MainLand China (who mainly use the GB 
+encoding). So we have tried to design it as much independent of the encoding 
+as possible. We also hope that the supports of XIM protocol can help to 
+solve the long standing Chinese-input problem completely.
+
+Features of xcin-2.5 includes:
+
+1. "rcfile" configuration file:
+
+   XCIN has its own configuration file, which is formatted in Lisp/Scheme
+   language. This configuration file offers a wide flexibility to customize
+   the Chinese input enviroment.
+
+2. Support XIM and I18N/locale architecture:
+
+   XIM is the international input method protocol defined by X. With this
+   support, we hope that people can input Chinese into most of the X Window
+   applications.
+
+   Furthermore, XCIN is also a completed I18N program, which means we are
+   trying to make it as independent of the character set encoding as possible.
+   This work is still under working. With this consideration we hope that
+   XCIN could be a "universal" input method server for many other languages.
+
+3. IM module dynamic loading:
+
+   All of the input method are modulized and can be dynamically loaded in
+   most of the supported platforms. Currently xcin contains the following
+   IM modules:
+
+   a. zh_hex: Input Chinese using encoding (Hex) number.
+
+   b. gen_inp: This is the table driven IM module, which can use a keystroke
+	       to character mapping table (called .cin file) to simulate 
+	       many kinds of input methods. It also provides comprehensive
+	       configurable options for customization.
+
+   c. bimsphone: This is an intellegent character guessing IM module. It is
+		 based on the pronunciation input and pick out the correct
+		 character from a set of candidates according to the phrase
+		 or syntax already input.
+
+4. Many platform support:
+
+   In theory, xcin-2.5 could run on any I18N/locale based, with X11R6 UNIX
+   systems. Up to now it is successfully tested in the following platforms:
+
+   a. GNU/Linux / GCC:  i386, Alpha (using glibc-2.1.x and above)
+
+   b. FreeBSD / GCC:  i386  (FreeBSD-4.0 / with ELF support)
+
+   c. HP-UX / ANSI-C compiler:  32-bits HP workstation
+
+   For the support and porting to Solaris and OpenBSD is under progress
+   and needs more tests and feedbacks.
+
+Any suggestion or feedback are welcomed. You can contact the XCIN Project
+Team through the xcin mailing-list: xcin@linux.org.tw.
+
+
+------------------
+B. History:
+
+1. 1994/10/25, Edward Der-Hua Liu announced the first version of xcin in
+   tw.bbs.comp.linux news group. At that time the package is called 
+   "big5-pack.tgz", which contains xcin and crxvt programs. The xcin part
+   only contains the input method program, and the input method tables and
+   the Chinese fonts should be converted from the data of the Eten Chinese 
+   system.
+
+2. 1997/03, Tung-Han Hsieh <thhsieh@linux.org.tw> took care of the 
+   maintainance. At that time the main progress is to modify the Makefile
+   such that xcin could be as an independent UNIX package as possible,
+   instead of depending on the Eten Chinese system.
+
+3. 1997/03/10, <vvvv.bbs@bbs.cis.nctu.edu.tw> announced his first patch of
+   xcin for the Boshiamy input method (http://www.liu.com.tw): "xcinbosh.tgz". 
+   From that time he introduced many convenient input method functions, but
+   most of them are for Boshiamy input method.
+
+4. Many and many people contributed to xcin, and the xcin source code became
+   dirty and difficult to maintain. Therefore, we decide to redesign xcin
+   with the hope to fix all the problems. The maintainance of old series of 
+   xcin continuoused until 1999/04 the release of xcin-2.3.04-3. After that,
+   this work stoped.
+
+5. A new design of xcin began in 1998/1999. At that time the main contributors
+   includes:
+
+   a. Kao, Chia-liang: Original design of xcin module structer.
+
+   b. Hsiao, Yung-Ching: Introduce XIM server design, Xi18n/locale programming
+      concept, and xcin rcfile reading system "siod lib".
+
+   c. Chuang, Ming-Che: Suggestion and useful discussion to locale/I18N/
+      XIM/rcfile reading system.
+
+   d. Hsiao, Pai-Hsiang: Introduce libtabe such that xcin has the ZhuYin
+      input method with the ability to do intellegent character selection
+      (libtabe).
+
+   e. Cheng, Yuan-Chung: Help to estabilish the completed I18N/zh_TW.Big5
+      locale environment, to provide a test and development platform for xcin.
+
+   In the beginning, the web-site of xcin is maintained by Cd Chen. In 1998/06
+   the project web-site was moved to the Computing Center of Acamedia Sinica
+   (http://www.sinica.edu.tw) and maintained by Yuan, Tein Horng and his
+   colleges.
+
+6. 1999/06/21 xcin-2.5.0 was announced. In this release the basic module
+   structer, XIM server, and zh_hex, gen_inp, and bimsphone IM modules are
+   implemented.
+
+7. 1999/08/24 xcin-2.5.1 was announced.
+
+8. 2000/10/15 xcin-2.5.2 was announced.
+
+
+------------------
+C. What's New (Please refer to Changes document for details):
+
+(version: xcin-2.5.2.1, needs libtabe-0.1.9 and above):
+
+1. Improvement for bimsphone module:
+   a. Now bimsphone supports 3 input modes:
+
+      bimsphone mode:  traditional intellegent character selection.
+      bimssimple mode: no intellegent character selection function, but
+		       provides many ZuYin input method specific function
+		       which does not appear in gen_inp module.
+      bimspinyin mode: pinyin intellegent character selection.
+
+   b. New options: AUTO_SELECTION, NSELKEY, SPACE_SELECTION, and AUTO_UPCHAR
+      are added into xcinrc configuration file.
+
+   c. The composed characters inside xcin buffer are labeled by underline
+      to show each phrase.
+
+   d. We can enter phrase selection or character selection by pressing 
+      Up/Down key.
+
+   e. Support the Eten 26 keymap.
+
+2. Improvement for gen_inp module:
+   Add DISABLE_SEL_LIST & KEYSTROKE_REMAP options into xcinrc to support 
+   Array30 input method.  Also support "gen_inp_default" xcinrc global 
+   setting.
+
+3. Improvement for zh_hex module:
+   Add INP_CNAME_<encoding name> option into xcinrc to support the INP_CNAME 
+   definition for many encodings.
+
+4. Improvement for qphrase:
+   The configuration in default.phr now provide 4 sections: %trigger, %shift, 
+   %ctrl, and %alt. Also in xcinrc a new option "MOD_PHR" are provided in
+   many IM modules to control the 4 qphrase modes mentioned above.
+
+5. Improvement for cin2tab & .cin table:
+   a. Add bimscin compiling mode for cin2tab, to compile the needed data for
+      bimsphone module, bimspinyin mode. Also a new bims_pinyin.cin table is
+      added.
+
+   b. Move all the .cin tables to encoding directories, where big5/big5hkscs
+      share the same set of .cin tables in big5/ directory, while gb2312/gbk 
+      share the same set of those in gb/ directory. The compiled .tab table
+      are installed in the directory according to their actual encoding. There
+      are several new .cin tables added.
+
+   c. Add command line options: -l <encoding/LC_CTYPE>, -h, -o .... etc into
+      cin2tab.
+
+   d. cin2tab gencin: It can accept hex codes instead of the character string
+      in the %chardef and %keyname sections. If there are characters outside
+      the defined encoding range, it will just ignore them instead of stoping
+      with error messages.
+
+6. Changes in xcinrc:
+   a. Add DISABLE_WM_CTRL, KEEP_POSITION_ON and DIFF_BEEP options.
+
+   b. Support "<IM name>@<encoding>" format for xcinrc IM module setting.
+
+7. Changes in IM module API:
+   a. inpinfo_t new items added: lcch_grouping, mcch_grouping, 
+      suggest_skeystroke, zh_ascii, and gui_request.
+
+   b. module_t: add new function terminate().
+
+   c. IM module static linking is now supported.
+
+8. Improvement for GUI system:
+   a. New design for winlist_t to support multiple window creation for xcin.
+
+   b. Add new window class: OverTheSpot, and gui_request/menusel.
+
+   c. Add gui_main2 window, which can be controlled by START_MAINWIN2 and
+      MAINWIN2_GEOMETRY options.
+
+9. Improvement for XIM system:
+   a. Add OverTheSpot input style support. The utility testprog is also
+      modified to support OverTheSpot. Also the corresponding xcinrc options
+      are added.
+
+   b. get_ic_value(): add the handler for XNPreeditState request.
+
+   c. IMdkit is modified to support XIM_SYNC sending from XIM server side.
+
+   d. XCIN now will send XIM_SYNC signal to the connecting client before
+      quiting, to insure that the connection will be properly shutdown.
+
+10. Add IMC system:
+    a. Saparate the input method related data structer from the IC structer
+       and put them into IM_Context_t structer. So that the IC will only
+       handle the XIC requests, while the operation of IM modules are 
+       managed by IMC.
+
+    b. New option SINGLE_IM_CONTEXT is added in xcinrc.
+
+11. New porting to HP-UX + ANSI C compiler platform.
+
+12. Many bug fixing and documentation updating.
+
+
+------------------
+D. Contents of the package:
+
+1. xcin (installed in $(prefix)/bin/):
+   main xcin input method server program.
+
+2. cin2tab (installed in $(prefix)/bin/):
+   input method table .cin ==> .tab converting program.
+
+3. xcinrc (installed in $(prefix)/etc/):
+   xcin common configuration file.
+
+4. IM modules (installed in $(XCIN_DIR)/, default is $(prefix)/lib/xcin/):
+   dynamical loadable IM module, includes zh_hex.so, gen_inp.so, bimsphone.so.
+
+   ps. In HP-UX platform, the dynamic loaded module feature is not supported
+       yet, so these modules are static linked with xcin main program. So in
+       this directory there are no these files.
+
+5. tab files (installed in $(XCIN_DIR)/tab/$(ENCODING)/):
+   Most of them are data files for gen_inp module. They are installed in
+   different sub-directories according to their encodings:
+
+   $(BIG5)/:
+	a. sys.tab:		big5 encoding information.
+	b. array30.tab:		Array 30 input method.
+	c. cj.tab:		ChangJei input method.
+	d. phone.tab:		ZhuYin input method.
+	e. pinyin.tab:		PinYin input method.
+	f. simplex.tab:		Simple input method.
+	g. bims_pinyin.tab:	The ZhuYin-PinYin mapping table for bimspinyin.
+	h. jyutping.tab:	Jyut-Pinyin input method.
+	i. jyutping0.tab:	Jyut-Pinyin input method (no tone).
+	j. default.phr:		Data for qphrase.
+
+   $(BIG5HKSCS)/:
+	a. sys.tab:		big5hkscs encoding information.
+	b. cj.tab:		ChangJei input method.
+	c. default.phr:		Data for qphrase.
+
+   $(GB2312)/:
+	a. sys.tab:		gb2312 encoding information.
+	b. jtcj_gb.tab:		ChangJei input method.
+	c. pinyin.tab:		PinYin input method.
+	d. phonegb2.tab:	ZhuYin input method.
+	e. shuangpin.tab:	ShuangPin input method.
+	f. wubizixing.tab:	WuBiz input method.
+	g. default.phr:		Data for qphrase.
+
+   $(GBK)/:
+	a. sys.tab:		gbk encoding information.
+	b. default.phr:		Data for qphrase.
+
+   Note: The encoding name varies for different platforms, as listed in
+	 the following:
+
+   GNU/Linux:   $(BIG5):	big5
+		$(BIG5HKSCS):	big5hkscs
+		$(GB2312):	gb2312
+		$(GBK):		gbk
+
+   FreeBSD:	$(BIG5):	big5
+		$(GB2312):	euc
+
+   HP-UX:	$(BIG5):	big5
+		$(BIG5HKSCS):	hkbig5
+		$(GB2312):	hp15cn
+
+6. testprog (source in xcin-2.5/src/util/testprog/):
+   This is a simple Xi18n test program, which is independent of the xcin
+   system. It is used to test that if your system is i18n ready or not,
+   and to test the character inputs from xcin. It will not be installed
+   to any where when make install.
+
+7. Documentations (in xcin-2.5/doc/).
+
+
+------------------
+E. Installation and test:
+
+Because xcin-2.5 is very different from the old versions of xcin, you have
+to read the following documents carefully before you install and use it:
+
+1. SETUP:  xcin-2.5 installation guide.
+
+2. UserGuide:  Introduction to the usage of xcin-2.5 and several XIM clients.
+
+3. Usage and modules/*:  The usages of xcin-2.5 and IM modules.
+
+4. FAQ:  Frequently Asked Questions.
+
+5. Bugs:  Problems of xcin-2.5.
+
+6. Todo:  The future plan.
+
+If you want to prepare your .cin input method table, or to convert the old
+.cin sytle to the new style, please refer to:
+
+7. Cin:  Format of .cin table and the usage of cin2tab.
+
+For the copyright and license of xcin-2.5, please refer to:
+
+8. CopyRight:  xcin license.
+
+9. COPYING:  GNU General Public License 
+   (includes English original and Big5 translation)
+
+If you are interested in the internal implementation of xcin and the 
+programming of IM modules, please refer to:
+
+10. internal/*:  xcin implementation and module structers.
+
+If you need the English translated documents, please refer to:
+
+11. En/*:  English translation of xcin documentations (partial).
+
+
+Any suggestions and comments are welcome and appreciated.
+
+
+Tung-Han Hsieh  <thhsieh@linux.org.tw>
+Physics Department of National Taiwan University, R.O.C.
+XCIN Team.  <mailing-list:  xcin@linux.org.tw>
+            <www:           http://xcin.linux.org.tw>
+            <ftp:           ftp://xcin.linux.org.tw/pub/xcin>
+

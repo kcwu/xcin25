@@ -1,0 +1,547 @@
+In this article the design principle and the overall structer of xcin-2.5
+is described.
+
+The design principles of xcin-2.5 are:
+
+1. All the input methods are independent to each other and modulized.
+
+2. As usual, the users only have to prepare a .cin file, then it could
+   be used under xcin immediately. In most cases they don't have to
+   write new IM modules for their input methods.
+
+3. XCIN follows the standard of locale and XIM as much as possible, in
+   hope that the Chinese input problem under X Window could be solved
+   completely.
+
+Under these principles, the implementation of xcin-2.5 is very different
+to the old xcin versions. The basic structer is the following:
+
+                       IC manager <------> IMC system
+                           ||                |
+                           ||                |
+                       XIM system <----------+
+                           ||                |
+                           ||                |
+                       GUI system          module <----- cinput
+                  (winlist subsystem)        |
+                           ||                |
+                           ||                |
+                         xccore   <------ xcintool
+                           ||                |
+                           ||                |
+                         xcin_rc  <------  siod 
+
+Here each component of the above figure will be described.
+
+
+--------------------------------------
+A. xcintool: (include/xcintool.h, lib/xcintool/*.c)
+
+   This is the lowest level tool library of xcin. It only serves for some
+   simple and basic operations.
+
+--------------------------------------
+B. siod & xcin_rc: (lib/siod/*, lib/xcintool/xcin_rc.c)
+
+   This is the rcfile reading system of xcin. Its API is contained in the
+   xcintool library; while the kernel is the siod lib. SIOD library is an
+   interpreter of lisp and Scheme mixed language. Using this the format of
+   rcfile can be written in a solid and flexible lisp/Scheme language.
+
+   xcin_rc can provide the rcfile data-reading for xccore and modules. It
+   also could be the common rcfile reading interface for other extern
+   programs (e.g., cin2tab). Therefore we only need a single rcfile to do
+   all the configurations of xcin.
+
+   All the global variables (excluding the detailed settings of CINPUT)
+   read via siod and rcfile reading system will be held in xcin_rc data
+   structer. When there is any module of xcin starting and initializing,
+   this data structer will be passed into the initialization function of
+   that module so that the module could refer to the data it needs.
+
+--------------------------------------
+C. xccore: (include/constant.h, include/xcin.h, xcin_main.c)
+
+   This is the main data structer of xcin. It is initially designed by 
+   clkao (in early days it is called xcin_core module). It is responsible
+   for all the initialization when xcin starts to run. This includes
+   reading command line options, setting locale, running rcfile reading
+   system to read the configurations, excuting initialization for other
+   parts .... etc. It also contains all the current status information of
+   xcin, including GUI, XIM and input method statuses. This data structer
+   is a private part of xcin main program and is controlled directly by
+   xcin core. The input methods cannot refer to its contents directly.
+
+   In this structer, the variable "xccore.xcin_mode" is used to record
+   the status of xcin. It has two functions: the first is holding the
+   configurations of the rcfile, and the other is the run-time status of
+   xcin.
+
+--------------------------------------
+D. module: (include/module.h include/imodule.h include/cinput.h module.c)
+
+   This is the IM module kernel of xcin. All the dynamic loadable input
+   methods enter xcin system through here. This kernel maintains all the
+   input method related information for IMC system. For the details, please
+   refer to the document "module".
+
+--------------------------------------
+E. GUI system: (include/gui.h, gui.c)
+
+   This is the kernel part of the GUI system. All the window drawing and
+   operations of xcin are handled here. The "gui_t" data structer holds
+   the global variables of this part, for example, the colors of xcin
+   windows, the font names, and other information of X server .... etc.
+
+   The GUI system could be divided into 2 sub-systems. The 1st is the
+   FontSet management part, and the other is the winlist management part,
+   as shown in the following:
+
+                        GUI core
+                           |
+              +------------+------------+
+              |                         |
+           FontSet sys             winlist sys
+                                        |
+                             +----------+----------+-------------+
+                             |          |          |             |
+                       gui_main.c  gui_main2.c  gui_menusel.c  gui_overspot.c
+
+   The FontSet part is a little simpler. It maintains the usage of the fonts
+   in a uniform way, to avoid multiply opening the same font or close a font
+   which should not be closed.
+
+   The winlist part provides the ability of xcin to open multiple windows.
+   In fact it could be treated as a simple widget set. The data structer is
+   as following:
+
+===========================================================================
+typedef struct winlist_s winlist_t;
+struct winlist_s {
+    Window window;              /* window of the winlist */
+    xtype_t wtype;              /* winlist type */
+    int imid;                   /* IMC number */
+    xmode_t winmode;            /* the current mode of the window */
+
+    int pos_x, pos_y;
+    unsigned int width, height, c_width, c_height;
+    font_t *font;
+    unsigned short n_gc;
+    GC *wingc;
+
+    void *data;                 /* Data for window drawing */
+    void (*win_draw_func)(gui_t *, winlist_t *);
+                                /* Function to draw the window */
+    void (*win_attrib_func)(gui_t *, winlist_t *, XConfigureEvent *, int);
+                                /* Function when XConfigureEvent received */
+    void (*win_destroy_func)(gui_t *, winlist_t *);
+                                /* Function to destroy window */
+    winlist_t *next;
+};
+===========================================================================
+
+   where the "wtype" has 3 types:
+
+	WTYPE_MAIN:	The xcin main window, e.g., gui_main, gui_main2.
+	WTYPE_GUIREQ:	The xcin GUI Request window, e.g., gui_menusel ... etc.
+	WTYPE_OVERSPOT:	The xcin OverTheSpot window.
+
+   and "winmode" denotes the current status of the window:
+
+	WMODE_MAP:	denotes the window is pupped-up of hided.
+	WMODE_EXIT:	denotes if the window is going to destroy or not.
+
+   and the facilities of the functions are:
+
+	win_draw_func:  For drawing the window. If during the operation it
+			is needed to hide or pup-up the window, you have to
+			call the gui_winmap_change() function here. The data
+			needed for drawing the window is pointed by the "data"
+			pointer.
+
+	win_attrib_func:  If the window received a XConfigureEvent (e.g.,
+			the window is dragged by the mouse, or the size of it
+			is changed .... etc), this function will be called.
+			Then we can trace the new pos_x, pos_y, width, and
+			height .... etc of the window.
+
+	win_destroy_func:  This function will be called when the window is
+			going to be destroyed. We can do some final handling
+			here before the window being destroyed (if really
+			needed).
+
+   The win_attrib_func() and win_destroy_func() could be set to NULL, then
+   xcin will handle them by default methods.
+
+   From the release of xcin-2.5.2, there are 2 kinds of xcin main window:
+
+                         +-------------------------------------------+
+   The 1st main window:  |                     a                     |
+                         +---------+---------+--------------+--------+
+                         |    b    |    c    |      d       |   e    |
+                         +---------+---------+--------------+--------+
+
+                         +-------+-------+-------+
+   The 2nd main window:  |   b   |   d   |   e   |
+                         +-------+-------+-------+
+
+   a. Multiple characters for choosing displaying area.
+
+   b. Input method status displaying area.
+
+   c. Character composing area.
+
+   d. Character composing callback area. After the composing, the entire
+      keystroke used for composing will be displayed here.
+
+   e. Input method English name displaying area (e.g., zh_hex, phone ....).
+
+   For the 1st main window, it is mainly for Root input_style. In this style
+   all the xcin character composing and status information will be displayed
+   here. Furthermore, if the option "SINMD_IN_LINE1" of a input method is
+   set to "YES" in the rcfile, then the information displayed in d will move
+   to a area.
+
+   For the 2nd main window, it is mainly for OverTheSpot input_style. Since
+   all the character composing information is moved to OverTheSpot window,
+   so the information remained here is reduced and the size of the window
+   can also be reduced.
+
+   The GUI system will draw the window only in 2 conditions. One is when it
+   receives an Expose event, and the other is when any input method changes
+   its status. The GUI system will determine if there is any status changes
+   of the input mehtods via the value of gui_t->winchange. Therefore, the
+   XIM system can just change its value if there is any status change in the
+   input methods, then the result will be displayed in the xcin windows.
+   The value definition of winchange is as following:
+
+   WIN_CHANGE_IM:  When it is ON, it means the status of the input method
+		is changed.
+
+   WIN_CHANGE_FOCUS:  When it is ON, it means the focus window of the XIM
+		clients is changed.
+
+   WIN_CHANGE_REDRAW:  When it is ON, it means the xcin windows need to be
+		redraw. In most cases the redrawing is only needed when the
+		above 2 cases occure.
+
+   WIN_CHANGE_BELL:  It means the input method need to beep in first kind.
+
+   WIN_CHANGE_BELL2:  It means the input method need to beep in second kind.
+
+   WIN_CHANGE_BELLALL:  It means the input method need just a beep, no matter
+		the first kind or the second kind.
+
+   The GUI system draws the windows according to the input method status in
+   the xccore, and these status information comes from the xccore.ic structer,
+   i.e., the current working IC (see the description in the following). Hence,
+   any changes in the xccore.ic will be shown in the GUI system.
+
+   Besides, many of the drawing modes of the GUI system could be changed via
+   the configuration of the interface between the IM modules and the XIM
+   system: the inpinfo structer of IC (see the following and "module" doc for
+   details). This will be useful to display the current status of the input
+   methods.
+
+   After xcin completing all the initialization, it will enter the gui_loop()
+   function of the GUI system until it terminates. In this function it will
+   continuously wait for the next X event (XNextEvent()) and pass that event
+   to XFilterEvent(). If this event comes from the XIM client (i.e., the XIM
+   client is doing the Chinese input actions), Xlib will pass the event back
+   to the XIM system of xcin (see the description of the following). If it
+   is not the event from the XIM client, then it will be passed back to 
+   gui_loop() for further processing (e.g., redraw the window). The whole
+   process will run once again and again.
+
+
+--------------------------------------
+F. XIM system (include/xcin_core.h, xim.c, fkey.c, lib/IMdkit)
+
+   This is the kernel to handle the XIM protocols. It is also the interface
+   between the IM module system and the XIM clients. Every X app. supporting
+   XIM protocol and can accept the input from xcin starts will send a event
+   to here. Then the XIM system will create an IC (Input Context) for it.
+   An IC keeps tracing of current input method status and other related XIM
+   protocol information.
+
+   This system does not communicate with the Xlib directly, but via IMdkit
+   lib instead. IMdkit is not developed by us. It is introduced by Mr. yhsiao
+   and Mr. gamete. It handle the basic data structers and protocols such that
+   the XIM protocol handling could be greatly simplified. During the initiali-
+   zation, it will register some xcin related information into Xlib, then
+   the XIM clients will be informed that there is a XIM server called "xcin"
+   could be used. The registered information includes:
+
+   IMServerName:  The XIM server name. If in the zh_TW.Big5 locale environment,
+	the IMServerName will be "xcin", otherwise it will be set to
+	"xcin-<locale name>".
+
+   IMLocale:  The LC_CTYPE category locale xcin is running.
+
+   IMInputStyles:  The input_styles xcin supports. Currently xcin only supports
+	the Root and OverTheSpot input_styles. In the future other new styles
+	will be supported, too.
+
+   IMProtocolHandler:  The XIM events handling function. This is the XIM
+	processing center.
+
+   IMOnKeysList:  Register the trigger keys. XCIN uses the dynamic connecting
+	model with XIM clients. Which means, under the English input mode,
+	the user keyins will not be passed into xcin, until the user press
+	the trigger keys to start the connection between xcin and the XIM
+	clients. The trigger keys xcin registered includes the following:
+
+	Switch between English/Chinese:  default is ctrl+space.
+
+	Switch between wide ASCII/single byte ASCII:  default is shift+space.
+
+	Switch between the input methods:  defaults are ctrl+shift, shift+ctrl,
+		and ctrl+alt+[0123456789-=]
+
+	Quick phrases input:  defaults are shift+alt+<ascii key>
+
+	The above trigger keys are configurable in the settings in rcfile.
+	The trigger key configuratiions is maintained in fkey.c.
+
+   The function:
+
+	int im_protocol_handler(XIMS ims, IMProtocol *call_data)
+
+   is registered as the IMProtocolHandler by xcin. All the XIM events comes
+   from Xlib (or IMdkit) will be passed into here, where the "call_data" is
+   the contents of the event. In fact these events came from the XNextEvent()
+   call and are filtered by XFilterEvent() call in the gui_loop() of the GUI
+   system. If it is found that they are belong to the XIM events, then they
+   be passed into here through IMdkit instead of passing back to gui_loop().
+   These events includes:
+
+   XIM_OPEN:  When a XIM client starts and decides to use xcin as its XIM
+	server, it will send this event to xcin.
+
+   XIM_CLOSE:  Before a XIM client terminating, it should send this event
+	to xcin to inform xcin for doing necessary reactions.
+
+   XIM_CREATE_IC:  When a XIM client start, every window using XIM protocol
+	opens, it will send this event to xcin. Then xcin will create a
+	corresponding structer: IC to handle the communication to that window.
+
+   XIM_DESTROY_IC:  When a XIM window is going to close, it should send this
+	event to xcin to inform xcin for doing necessary reactions. Then xcin
+	will release its corresponding IC back to the system.
+
+   XIM_SET_IC_FOCUS:  When the mouse klick on a XIM window, that window should
+	send this event to xcin. Then xcin will do current IC switching work.
+
+   XIM_UNSET_IC_FOCUS:  When a XIM window is going to leave the focus state,
+	it should send this event to xcin.
+
+   XIM_TRIGGER_NOTIFY:  In the beginning when the XIM window is not connected
+	to xcin (i.e., in the English input mode), if then the Chinese input
+	is needed, the user will press the trigger keys, and xcin will receive
+	this event. Then xcin will initialize its cooresponding IC.
+
+   XIM_FORWARD_EVENT:  After the trigger key being pressed, all the keyboard
+	input will be passed into xcin via this event (the key information
+	is stored inside the "call_data" structer). Then xcin will handle
+	this key event in the following steps:
+
+	1. Is it a trigger key or a function key (because the user may change
+	   the input method or go back to the English input mode). If it is
+	   a trigger key, then xcin will do the input method switching task.
+
+	2. If it is not a trigger key or a function key, then xcin will pass
+	   this key into the keystroke() function of the current IM module.
+	   The current status information of the input method "inpinfo_t"
+	   will also be passed into it, so that it will do the character
+	   composing works. Then xcin will decide the next step according
+	   to the return value of that function.
+
+	3. If this key event is not interested by the IM module and currently
+	   it is under the wide ASCII input mode, or the IM module wish xcin
+	   to process this key in the wide ASCII input mode, then xcin will
+	   do it.
+
+	4. If any character is composed and want to commit the characters
+	   to the XIM client, then xcin will do it.
+
+	5. If this key event is not meaningful to any part of xcin and its
+	   IM modules, then xcin will send this event back to Xlib, and
+	   Xlib will pass it back to the XIM client.
+
+   The most important data structer of the XIM system is "xccore.ic". It is
+   a pointer which points to the current working IC structer.
+
+
+--------------------------------------
+G. IC manager (include/IC.h, xim_IC.c)
+
+   This is directly related to the XIM system. It manages the whole IC link
+   list. The IC is a very complicated data structer. It records current status
+   of the input method and its corresponding XIM window. The definition is
+   (partially)
+
+===========================================================================
+typedef struct _IC IC; /* forward declaration */
+    CARD16              id;             /* ic id */
+    CARD16              connect_id;     /* id of connected client */
+    time_t              exec_time;      /* recent excution time */
+    xmode_t             ic_state;       /* status of the IC */
+    ic_rec_t            ic_rec;         /* the IC resource setting by client */
+    IM_Context_t       *imc;            /* the IM Context */
+    IC                 *next;
+};
+===========================================================================
+
+   where the meaning of each item is
+
+   id:  The number of this IC.
+
+   connect_id:  The number of the XIM window connecting to this IC.
+
+   exec_time:  The most recent time which the IC is used by the XIM client.
+	This is used for garbage collection algorithm. See the following for
+	details.
+
+   ic_state:  The current status of the IC, which includes:
+	IC_NEWIC:	It means this IC is a newly created IC.
+	IC_CONNECT:	It means this IC is under the connection with the
+			XIM window.
+	IC_FOCUS:	It means this IC is a current working IC.
+
+   ic_rec:  This keeps all the information from the XIM window, which includes:
+	ic_value_set:	  It means which IC variables are set by the XIM window.
+	ic_value_update:  It means which IC variables are updated by the XIM
+			  window.
+	input_style:	  The input style of this IC.
+	client_win, focus_win:  The window of the XIM client under connection.
+	pre_attr:	  The composing variables of this IC.
+
+   imc:  The pointer which points to the IMC link list (see the following).
+
+   Because the IC is the communicating interface between the XIM clients and
+   xcin, for every XIM client window there will be an IC to provide the
+   services. However, they will not handle the input method reactions. So
+   the input method content (IMC) might be independent for each IC, or all
+   the ICs might share the same input method content (see the following).
+
+
+   IC garbage collection:
+
+   Because not all of the XIM client will send the XIM_CLOSE or XIM_DESTROY_IC
+   event to xcin when it is going to terminate, this will lead to the opened
+   IC continuously increasing. Under the consideration of performance and
+   the complexity of the algorithm, and also consider the racing condition,
+   we designed the following garbage collection algorithm to handle the above
+   circumstance:
+
+   XCIN will check all the ICs roughly every 5 minutes to make sure that their
+   corresponding XIM windows are actually working. The reason to use the
+   "roughly" word is that we do not use a multi-thread techenique or fork
+   another process to keep the time precisely. We only insert the checking
+   function into im_protocol_handler() function. This function will be called
+   the most frequently. For example, the user press any key or use the mouse
+   to klick in any XIM client, this function will most likely be excuted.
+   Therefore, insert the checking function in here is the most simple and
+   effective way.
+
+   In order to avoid the racing condition, we have a "time_t exec_time" field
+   in the IC structer. Everytime this IC is working for its XIM window, this
+   field will be set to the current system time. The checking function will
+   only choose IC with the idling time over 10 minutes to check. If it finds
+   that the cooresponding XIM window is disappeared, the this IC will be
+   released.
+
+
+---------------------------------
+H. IM Context (IMC) System
+
+   IMC refers to Input Method Context. It is the actual data structer of the
+   input methods. In the xcin-2.5.1 this structer is combined with the IC
+   structer directly. Therefore when you change the focus window of the XIM
+   clients, the contents of the xcin window (i.e., the status of the input
+   methods) will change accordingly.
+
+   However, in some circustances we do not want this, especially when we are
+   using the bimsphone input method. We may hope that changing the focus of
+   the XIM windows will not cause the changes in the input method contents.
+   To acomplish this requirement, we decide to separate the IMC from the IC
+   structer.
+
+   Now xcin has two modes: XCIN_SINGLE_IMC ON and XCIN_SINGLE_IMC OFF. For
+   XCIN_SINGLE_IMC OFF, every IC has its distinct IMC, then the input method
+   status is independent for each XIM window. For XCIN_SINGLE_IMC ON, all
+   the ICs will share the same IMC, then all the XIM window will have the
+   same input method status.
+
+   The IC has its lifetime, which is the same as that of its cooresponding
+   XIM window. When a new XIM window is created, then a new IC will be created
+   in the xcin side. When a XIM window is destroyed, then its cooresponding
+   IC is also closed.
+
+   The IMC has its lifetime, too. But it depends on the mode of xcin. For
+   XCIN_SINGLE_IMC ON, then its lifetime is the same as the xcin main program.
+   For XCIN_SINGLE_IMC OFF, then it is the same as the IC.
+
+   The IMC structer is defined as the following:
+
+==============================================================================
+typedef struct _IMC IM_Context_t;
+struct _IMC {
+    unsigned short      id;             /* id of this IMC */
+    unsigned int        icid;           /* id of the current attached IC */
+    ic_rec_t           *ic_rec;         /* point to the current IC resource */
+
+    inp_state_t         inp_state;      /* ic cinput state */
+    inp_state_t         inp_num;        /* ic cinput num */
+    inp_state_t         sinp_num;       /* ic cinput num (sinmd) */
+    imodule_t          *imodp;          /* current binding cinput module */
+    imodule_t          *s_imodp;        /* show keystroke cinput module */
+    inpinfo_t           inpinfo;        /* inp info referenced by gui */
+    unsigned int        skey_size;      /* sinmd_keystroke buf size. */
+    wch_t              *sinmd_keystroke;/* for keystroke of a published cch. */
+    unsigned int        cch_size;       /* cch buf size. */
+    char               *cch;            /* composed char for commit. */
+
+    int                 n_gwin;         /* IM GUI request window recorder. */
+    greq_win_t          gwin[MAX_GREQ_CNT];
+    Window              overspot_win;   /* OverTheSpot candidate window. */
+
+    IM_Context_t       *next;
+    IM_Context_t       *prev;
+};
+==============================================================================
+
+   Here "id" is the serial number of this IMC. In many other places it is the
+   same as the value "imid". If SINGLE_IM_CONTEXT is ON, the there is always
+   a single IMC, and the "imid" is 1. On the other hand, if it is OFF, then
+   the "imid" will be set to the value of "icid".
+
+   We see that this structer contains all the data of the input methods, 
+   including which IM module is used (imodp and s_imodp), the status of the
+   input methods (inp_state, inp_num and sinp_num), the interface to the
+   IM modules (inpinfo), and the OverTheSpot window and the GUI Request
+   windows .... etc. The pointer "ic_rec" points to the "ic_rec" field of
+   the IC structer, so that the IM modules and the GUI systems could obtain
+   the status of XIM clients via here. The IMC structer could be treated
+   as the bridge between the IM modules and the XIM system.
+
+   Finally the IMC status is described here:
+
+	IM_CINPUT ON:	The IMC enters the Chinese input mode.
+	IM_CINPUT OFF:	The IMC is in the English input mode.
+	IM_2BYTES ON:	The IMC enters the wide ASCII input mode.
+	IM_2BYTES OFF:  The IMC is in the single byte ASCII input mode.
+	IM_XIMFOCUS ON: The IMC enters the Chinese focus status.
+	IM_XIMFOCUS OFF:The IMC leaves the Chinese focus status.
+	IM_2BFOCUS ON:	The IMC enters the wide ASCII focus status.
+	IM_2BFOCUS OFF: The IMC leaves the wide ASCII focus status.
+
+   Here we only discuss the IM_CINPUT and IM_XIMFOCUS, while the IM_2BYTES
+   is similar to IM_CINPUT. The "entering the Chinese focus status" means
+   that the IMC is switched to the Chinese input mode, and its cooresponding
+   XIM window is also in input focus (i.e., the foreground window). Then
+   the following keyboard input will go to that client window.
+
+
+
+T.H.Hsieh

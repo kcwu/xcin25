@@ -1,0 +1,69 @@
+CC           = @CC@
+CFLAGS       = @CFLAGS@
+CPPFLAGS     = @CPPFLAGS@
+DEFS         = @DEFS@
+RANLIB	     = @RANLIB@
+LN_S	     = @LN_S@
+@SET_MAKE@
+
+x_includes  = @x_includes@
+extra_inc   = @extra_include@
+extra_lib   = @extra_library@
+intl_inc    = @intl_include@
+
+srcdir      = @srcdir@
+top_srcdir  = @top_srcdir@
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+
+xcininc = -I$(top_srcdir)/src/include
+TARGET  = libXimd.a
+INC     = $(x_includes) $(xcininc) $(extra_inc) $(intl_inc)
+
+SRC =	FrameMgr.c IMValues.c i18nIMProto.c i18nPtHdr.c i18nX.c IMConn.c \
+	i18nAttr.c i18nIc.c IMMethod.c i18nClbk.c i18nMethod.c i18nUtil.c
+
+OBJ =	FrameMgr.o IMValues.o i18nIMProto.o i18nPtHdr.o i18nX.o IMConn.o \
+	i18nAttr.o i18nIc.o IMMethod.o i18nClbk.o i18nMethod.o i18nUtil.o
+
+.c.o:
+	$(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ $<
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	ar -rc $@ $(OBJ)
+	if [ -n "$(RANLIB)" ]; then $(RANLIB) $(TARGET); fi
+	rm -f ../$(TARGET)
+	( cd ..; $(LN_S) IMdkit/$(TARGET) . )
+
+FrameMgr.o: FrameMgr.c FrameMgr.h
+
+IMValues.o: IMValues.c IMdkit.h
+
+i18nIMProto.o: i18nIMProto.c FrameMgr.h
+
+i18nPtHdr.o: i18nPtHdr.c IMdkit.h Xi18n.h XimProto.h XimFunc.h
+
+i18nX.o: i18nX.c FrameMgr.h IMdkit.h Xi18n.h XimProto.h Xi18nX.h XimFunc.h
+
+IMConn.o: IMConn.c IMdkit.h
+
+i18nAttr.o: i18nAttr.c IMdkit.h Xi18n.h XimProto.h XimFunc.h
+
+i18nIc.o: i18nIc.c IMdkit.h Xi18n.h XimProto.h FrameMgr.h XimFunc.h
+
+IMMethod.o: IMMethod.c IMdkit.h 
+
+i18nClbk.o: i18nClbk.c IMdkit.h Xi18n.h XimProto.h FrameMgr.h XimFunc.h
+
+i18nMethod.o: i18nMethod.c FrameMgr.h IMdkit.h Xi18n.h XimFunc.h
+
+i18nUtil.o: i18nUtil.c IMdkit.h Xi18n.h XimProto.h FrameMgr.h XimFunc.h
+
+
+.PHONY: clean distclean
+clean:
+	rm -f $(OBJ) $(TARGET) core
+distclean: clean
+	rm -f Makefile .depend

@@ -1,0 +1,340 @@
+In this article the detailed procedure to start xcin and XIM clients is
+described. For the detailed usage and the configurations in xcinrc, please
+refer to the document "Usage".
+
+-----------------------------
+A. Start xcin and XIM client:
+
+XCIN-2.5 is a XIM server, so it can only input Chinese characters into XIM
+clients. Hence when you are going to test it, please be sure that you are
+using the XIM client to accept the input from it. Some of the detailed 
+operations of several popular XIM clients are described in section B. Here 
+we will use the "testprog" program provided by the xcin-2.5 package as an 
+example to describe the over all procedures.
+
+Generally speaking, there are 4 steps to start XIM server (i.e., xcin) and
+the XIM client:
+
+1. Setting locale:
+
+   The "locale" stands for the local language environment of your system.
+   You can set it up through the settings of the environment variables.
+   First you have to make sure the locale name of your system, and use it
+   in the following settings. You can use the command "locale -a" or just
+   look into the contents of the directory /usr/share/locale to determine
+   the correct locale name of your system.
+
+   A usual locale name contains a definite format as following:
+
+	<language name>_<local area name>.<encoding name>
+
+   The the Big5 environment usually used in Taiwan area as an example, the
+   locale name might be a little different in different operating systems.
+   The following is a simple list:
+
+	GNU/Linux and FreeBSD:		zh_TW.Big5
+	HP-UX:				zh_TW.big5
+
+   where "zh" stands for "Chinese language", "TW" stands for the Taiwan area,
+   and "Big5" or "big5" stands for Big5 character set/encoding. Similarly,
+   for the GB2312 character set/encoding used in Mainland China, the locale
+   name is
+
+	GNU/Linux:			zh_CN.GB2312
+
+   Please note that because currently xcin only supports the following
+   character set/encoding:
+
+	Big5, GB2312, Big5HKSCS (Big5 + Hong Kong extension), GBK
+
+   so you should not choose the locale name with unsupported encoding name,
+   such as "zh_TW.utf8". The unsupported name cannot work under xcin.
+
+
+   After deciding the correct locale name you want, you can begin to set
+   the locale. In the following we take "zh_TW.Big5" locale as an example.
+   There are many ways to do the setting. The simplest one is running these
+   command under a X Window terminal
+
+   (under sh, ksh, or bash)
+	LANG=zh_TW.Big5; export LANG
+   (under csh or tcsh)
+	setenv LANG zh_TW.Big5
+
+   then in this terminal, the whole language environment is changed to 
+   zh_TW.Big5, including character set handling (LC_CTYPE), message output
+   (LC_MESSAGES) and other aspects. From now on every program running under
+   this termiinal will operate under the zh_TW.Big5 locale as long as it
+   support the I18N standard.
+
+   If you do not want to switch the whole language environment to zh_TW.Big5,
+   but only want to switch the most important part while the other parts
+   remain in the English environment, you can set like this:
+
+   (under sh, ksh, or bash)
+	LC_CTYPE=zh_TW.Big5; export LC_CTYPE
+   (under csh or tcsh)
+	setenv LC_CTYPE zh_TW.Big5
+
+   This way only the character set handling part will be switched, which 
+   should be the kernel part of the all. If you want an I18N program to have
+   the Big5 character set handling ability, you have to setup this part.
+
+   Furthermore, if you want the message output of the program to be Big5
+   Chinese, you should also set
+
+   (under sh, ksh, or bash)
+	LC_MESSAGES=zh_TW.Big5; export LC_MESSAGES
+   (under csh or tcsh)
+	setenv LC_MESSAGES zh_TW.Big5
+
+   You can also add the above commands into your $HOME/.profile (for sh, ksh,
+   or bash) or $HOME/.cshrc (for csh or tcsh), then everytime you login these
+   commands will be excuted automatically instead of you running them manually.
+
+
+2. Run xcin program. If success, you will see the following message:
+
+============================================================================
+XCIN (Chinese XIM server) version xcin <version number>.
+(module ver: <version number>, syscin ver: <version number>).
+(use "-h" option for help)
+
+xcin: locale "zh_TW.Big5" encoding "big5"
+xcin: XIM server "xcin" transport "X/"
+xcin: inp_styles: Root OverTheSpot 
+============================================================================
+
+   Please note the last 2 lines and the words inside the quotation. They may
+   be different depending on the locale setting in the previous step. And
+   they are also the hints to start the XIM clients. The meaning of each
+   fields are:
+
+	locale: The locale name when start up. Here the value is "zh_TW.Big5".
+
+	encoding: The encoding name of this locale.
+
+	XIM server: This is the <XIM server name> of xcin, and as shown in
+		the message the name is "xcin". Every XIM server will have
+		a unique name to make the connection with the XIM clients.
+		Please note that depending on the locale setting when start
+		up, the value of <XIM server name> will be different.
+
+	transport: The name of the connecting method between XIM server/client.
+
+	inp_styles: The input styles supported by xcin. As shown in the above,
+		xcin start up with 2 kinds of input styles, i.e., Root and
+		OverTheSpot. The XIM client can choose one of them to make
+		the connection. You can decide which input styles to be brought
+		up by the configurations in the xcinrc file. Please refer to
+		the document "Usage" for details.
+
+
+3. Before starting the XIM client, you have to set this environment variable:
+
+   (under sh, ksh, or bash)
+	XMODIFIERS="@im=<name>"; export XMODIFIERS
+   (under csh or tcsh)
+	setenv XMODIFIERS "@im=<name>"
+
+   where <name> is the <XIM server name> as described in the above. Take the
+   example of the above, you should have the setting as
+
+   (under sh, ksh, or bash)
+	XMODIFIERS="@im=xcin"; export XMODIFIERS
+   (under csh or tcsh)
+	setenv XMODIFIERS "@im=xcin"
+
+   The actual setting value depends on the message you see when starting xcin.
+   Of course, if you can expect what the message of xcin will be, you can
+   also write the above commands into $HOME/.profile or $HOME/.cshrc such
+   that they can be excuted automatically when login.
+
+4. Now you can start the XIM client. Please note that some XIM clients might
+   not be so clever to determine the correct input style to make the connection
+   with xcin. If this happens you have to assign the correct input style to
+   the client according to the document of it.
+
+
+Now we take the "testprog" provided in xcin-2.5 package as the example to
+demonstrate the above procedures. This is a very simple XIM client for test.
+You can find it under "xcin-2.5/src/util/testprog/" directory. If it is not
+compiled yet, please type "make" to build it up. If we want to use the
+"zh_TW.Big5" locale, we can excute the following commands under bash:
+
+        LC_CTYPE=zh_TW.Big5; export LC_CTYPE
+        xcin &
+        XMODIFIERS="@im=xcin"; export XMODIFIERS
+        ./testprog -fontset "-*-big5-0,-*-iso8859-1"
+
+On the other hand, if we want to use "zh_CN.GB2312", the needed comands are
+
+        LC_CTYPE=zh_CN.GB2312; export LC_CTYPE
+        xcin &
+        XMODIFIERS="@im=xcin-zh_CN.GB2312"; export XMODIFIERS
+        ./testprog -fontset "-*-gb2312.1980-0,-*-iso8859-1"
+
+For the detailed usage of testprog, you can run
+
+	testprog -h
+
+and it will print the following messages
+
+========================================================================
+Use "-h" option to see help.
+Usage: testprog -fontset <fontset> -im <im_name> -pt <im_style>
+Example:
+  export LC_CTYPE=<locale name>.
+  export LC_MESSAGES=<locale name>.
+  export XMODIFIERS="@im=<im_name>".
+  zh_TW.Big5 fontset: "-*-big5-0,-*-iso8859-1".
+  zh_CN.GB2312 fontset: "-*-gb2312.1980-0,-*-iso8859-1".
+========================================================================
+
+For the other XIM client, the start up procedures are very similar, so we will
+not repeat them again. In the following some details of several common used
+XIM clients are described.
+
+
+---------------------------------------
+B. Some details of several XIM clients:
+
+In the following we only list the clients which we really tested, but there
+should be many other XIM clients in the world. If you have experience on other
+XIM clients, it is welcome to provide us your information, and we are very
+appreciated to list them in this list.
+
+1. xedit:
+****************************
+   Please add the following lines into your $HOME/.Xresources:
+
+xtDefaultFontSet: -*-big5-0,-adobe-*-iso8859-1
+xedit*international: True
+xedit*fontSet: -*-16-*-big5-0,-adobe-*-16-*-iso8859-1
+.Xedit.shellext.inputMethod:    xcin
+.Xedit.shellext.preeditType:    Root
+
+   and run "xrdb -merge ~/.Xresources" or reenter X Window system. Then use
+   the procedures described in section A to start xcin and xedit.
+
+
+2. rxvt-2.6.x/2.7.x:
+****************************
+   You can find the rxvt in
+
+	ftp://ftp.rxvt.org/pub/rxvt/
+	ftp://xcin.linux.org.tw/pub/xcin/rxvt/
+
+   The compiling procedures are:
+
+   For rxvt-2.6.x:
+        a. configure --enable-xim --enable-big5
+        b. make
+
+   For rxvt-2.7.x:
+        a. configure --enable-languages --enable-xim
+        b. make
+
+   Then use the procedures described in section A to start xcin and rxvt.
+   You might need the following options when starting rxvt:
+
+   For rxvt-2.6.x:
+        rxvt -pt Root -fm <Chinese font name> -fn <English font name>
+
+   For rxvt-2.7.x:
+        rxvt -pt Root -fm <Chinese font name> -fn <English font name> \
+		-km <encoding name>
+
+	where the <encoding name> could be "big5" or "gb".
+
+   Most of the rxvt options can also be written in $HOME/.Xresources. For
+   details please refer to the documents provided by rxvt package.
+
+   PS. RXVT still has several problems to be fixed. For details please refer
+       to http://xcin.linux.org.tw/rxvt/
+
+
+3. netscape-4.5/4.6/4.7:
+************************
+   Please add the following lines into your $HOME/.Xresources:
+
+Netscape*useStderrDialog:  False
+Netscape*preeditType:  OverTheSpot
+Netscape*fontList: \
+        -*-helvetica-bold-r-*-120-*-iso8859-1;-*-big5-0:
+Netscape*XmLGrid*fontList: \
+        -*-helvetica-medium-r-*-120-*-iso8859-1;-*-big5-0:,\
+        -*-helvetica-bold-r-*-120-*-iso8859-1;-*-big5-0:=BOLD,\
+        -*-helvetica-medium-o-*-120-*-iso8859-1;-*-big5-0:=ITALIC
+
+   and excute "xrdb -merge ~/.Xresources" or reenter X Window system. Then
+   use the procedures described in section A to start xcin and netscape.
+
+
+4. XEmacs20:
+****************************
+   Here we use the xemacs20 package provided by Debian-2.1 as the example.
+   In the Debian distribution there are 3 major xemacs20 packages:
+
+	xemacs20-mule-canna-wnn_<version>.deb
+	xemacs20-mule_<version>.deb
+	xemacs20-nomule_<version>.deb
+
+   You have to choose one of them to install. According to the description
+   of these packages, the 1st one supports international character display,
+   and also support the input methods of Asian languages, including XIM.
+   The 2nd one only supports international character display, but does not
+   support any input methods of Asian languages. The 3rd one does not have
+   any support for internationalization. Because xcin-2.5 use XIM protocol,
+   so we have to choose the 1st package (which have the --with-xim=xlib
+   option when configure/compiling). Of course, to install the 1st package
+   you also need to install other related packages. Please see
+
+	dpkg --info xemacs20-mule-canna-wnn_20.4-13.deb
+
+   for details. For the other non-Debian systems, I think the methods are
+   very similar. If you build xemacs from the source code by yourself, please
+   remember to add the --with-xim=xlib option when configure. The "mule"
+   package (the internationalization support) might also needed if necessary.
+   If you are using RPM based distributions or FreeBSD, you have to choose
+   the xemacs with mule or XIM supports to install.
+
+   If your xemacs has been installed correctly, then the remaining thing
+   to do is just do some configurations. You can add this line into
+   $HOME/.Xresources for Big5 environment:
+
+Emacs*FontSet: -*-big5-0,-adobe-*-iso8859-1
+
+   and run "xrdb -merge ~/.Xresources" or reenter X Window system. Then use
+   the procedures described in section A to start xcin and xemacs. Now you
+   can press trigger keys (default is ctrl+space) to switch to the Chinese
+   input mode, but the characters you input are still not displayed correctly.
+   Then you can use the mouse to choose the following menus:
+
+	Mule -> Set language environment -> Chinese-BIG5
+
+   so that the problem could be solved.
+
+
+
+If you have experience on other XIM clients, please tell us. We are very
+appreciated to share your experience with others.
+
+
+---------------------------
+C: Other known XIM clients:
+
+Here are other known XIM clients which can work with xcin-2.5, but we do not
+have time to fully test them. The interested people can try.
+
+1. vim-5.4/5.5.
+
+2. GNOME:  http://www.gnome.org
+
+3. KDE 2.X:  http://www.kde.org
+
+4. Mozilla M16/M17:  http://www.mozilla.org
+
+
+T.H.Hsieh
+

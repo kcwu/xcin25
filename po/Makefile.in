@@ -1,0 +1,49 @@
+INSTALL         = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA    = @INSTALL_DATA@
+GNU_GETTEXT     = @GNU_GETTEXT@
+@SET_MAKE@
+
+program_prefix = @program_prefix@
+srcdir      = @srcdir@
+top_srcdir  = @top_srcdir@
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+
+xcin_binp   = $(program_prefix)@bindir@
+xcin_libp   = $(program_prefix)@xcin_dir@
+xcin_datap  = ${xcin_libp}/tab
+xcin_rcp    = $(program_prefix)@xcin_rcdir@
+xcin_manp   = $(program_prefix)@mandir@
+xcin_msgp   = $(program_prefix)@xcin_msgdir@
+
+
+LC_MESG = zh_TW
+
+all:
+
+.PHONY: clean distclean install pot
+
+install: 
+	if [ "$(GNU_GETTEXT)" = 1 ]; then \
+	    for l in $(LC_MESG); do \
+		msgpath=$(xcin_msgp)/$$l/LC_MESSAGES; \
+		if [ ! -d $$msgpath ]; then \
+	            $(INSTALL) -d $$msgpath; fi; \
+	        msgfmt -o $$msgpath/xcin.mo xcin-$$l.po; \
+	    done; \
+	fi
+
+pot:
+	if [ "$(GNU_GETTEXT)" = 1 ]; then \
+	    ff=`find ../src -name "*.c" -print | grep -v testprog`; \
+	    xgettext --keyword=N_ --keyword=_ -o xcin.pot $$ff; \
+	    for l in $(LC_MESG); do \
+		msgmerge xcin-$$l.po xcin.pot > xcin-$$l.po.new; \
+		mv xcin-$$l.po.new xcin-$$l.po; \
+	    done; \
+	fi
+
+distclean:
+	rm -f Makefile
+

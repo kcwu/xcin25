@@ -1,0 +1,420 @@
+In this article the IM module structer of xcin and the way to add new
+IM modules are described.
+
+----------------------------------------
+A. Internal structer (include/module.h, include/imodule.h,
+		      include/cinput.h, module.c):
+
+   The design goal of module is in a hope that the programmers could be
+   very easy to add new input methods into xcin. It is separated into
+   2 parts as much as possible:
+
+	1. programmer interface (module.h)
+	2. internal implementation (imodule.h)
+
+   Programmers could neglect the details of the internal implementation
+   at all. All he has to do is to complete all the fields of "module_t"
+   data structer defined in module.h. But maybe somebody is interested
+   in the internal implementation. Therefore it will be briefly described
+   in this section.
+
+   The meaning of "load the module or use the module for a input method"
+   in fact includes two stages, as stated in the following example:
+
+   Suppose that one user presses ctrl+alt+1 to start the cj (Changjie)
+   input method, then xcin will look into its internal "cinput" table for
+   it to start it. The definition of "cinput" is:
+
+=========================================================================
+typedef struct cinput_s {
+    char *modname;
+    char *objname;
+    imodule_t *inpmod;
+} cinput_t;
+
+cinput_t cinput[MAX_INP_ENTRY];
+=========================================================================
+
+   Suppose that according to the configuration of rcfile, the cj input
+   method is registered and should use gen_inp module, and with the "setkey"
+   value 1, but that input method is not loaded yet. Then the contents of
+   "cinput" will be
+
+        cinput[1].modname = "gen_inp";
+        cinput[1].objname = "cj";
+        cinput[1].inpmod = NULL;
+
+   where "inpmod" is actually loaded IM module which is used by cj input
+   method. If its value is not NULL, then it means that input method is
+   already loaded and could be used, so that xcin will use it immediately,
+   otherwise xcin will do the following loading procedures.
+
+   Firstly xcin will look into the list "tmodule_t *mod_templet" for the
+   "gen_inp" module. The "tmodule_t" is defined in "imodule.h", which is
+   one part if the internal implementation. If it is found, then it will
+   be used. Then xcin will create a "imodule_t" (defined in imodule.h)
+   structer according to the information of "tmodule_t". The created
+   "imodule_t" will have a "conf" data area and a object name "cj", so that
+   the cj input method is ready for usage. And finally "cinput[1].inpmod"
+   will also point to the newly created "imodule_t" structer.
+
+   If in "mod_templet" the "gen_inp" module is not found, then xcin will
+   use dlopen() call to load the "gen_inp.so" file from the hard disk. It
+   will be added into the "mod_templet" list, and the "cj" input method
+   in "imodule_t" will be created for usage.
+
+   The important point is that: A module is not an object for operation.
+   It is only a templet and could be used by input methods. A module could
+   be used by many different input methods. Therefore, in the initial
+   definition of module its private data area does not exist. Until it is
+   used by one input method (i.e., an imodule_t is created), then the system
+   will use malloc() call to allocate an area for its data area. The configu-
+   ration in rcfile will be loaded into its data area in this stage (see the
+   following).
+
+
+----------------------------------------
+B. The data structer (include/module.h):
+
+   Because include/module.h defines the xcin module interface, while
+   include/xcintool.h declares tool functions of xcin, so both the header
+   files are needed for developing new xcin IM modules. In order to encourage
+   everyone to write new IM modules, we open the license restriction for
+   these 2 header files: Although the xcin package as a whole is licensed
+   as GPL, but if anyone wants to write new IM modules of xcin, they are
+   free to use these 2 header files in any style and they will not affect
+   the license status of their works. See for the declaration in CopyRight
+   for details.
+
+   To add a new IM module, you only have to complete the following data
+   structer and write the corresponding functions:
+
+=================================  module.h  ==============================
+typedef struct module_s  module_t;
+struct module_s {
+    char *name;
+    char *version;
+    char *comments;
+    char **valid_objname;
+    enum mtype module_type;
+
+    int conf_size;
+    int (*init) (void *conf, char *objname, xcin_rc_t *xc);
+        /* called when IM first loaded & initialized. */
+    int (*xim_init) (void *conf, inpinfo_t *inpinfo);
+        /* called when trigger key occures to switch IM. */
+    unsigned (*xim_end) (void *conf, inpinfo_t *inpinfo);
+        /* called just before xim_init() to leave IM, not necessary */
+    unsigned (*keystroke) (void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo);
+        /* called to input key code, and output chinese char. */
+    int (*show_keystroke) (void *conf, simdinfo_t *simdinfo);
+        /* called to show the key stroke */
+    int (*terminate) (void *conf);
+        /* called when xcin is going to exit. */
+};
+=============================================================================
+
+   Please note that since the module is *used* by the input methods, and
+   the input method status of each IC (Input Context, see the description in
+   "structer" for details) is independent to each other, so the input methods
+   in xcin is just like the servers. They are waiting for the request of xcin
+   and do the appreciated response. Therefore, all the IM modules contain
+   2 different data areas: The configurations of the input methods, which
+   will enter the module functions via the "void *conf" variable; while the
+   other is the status information of each IC. We do not pass the whole IC
+   into the module functions since the IC structer contains a lot of XIM
+   related details and we hope that the IM modules could be independent to
+   those details. Hence here we only pass "inpinfo_t *inpinfo" (for the
+   function "show_keystroke()" the passed structer is "simdinfo_t *simdinfo")
+   into the module functions. The "inpinfo" sturcter contains the current
+   status of xcin and the input method related information. It is the
+   communication media between xcin and IM modules.
+
+   1. Configurations of the input methods:
+
+      These configurations are read from the rcfile reading system. For example:
+
+============================================================================
+(define cj
+        '((SETKEY         1)
+          (AUTO_COMPOSE   YES)
+          (AUTO_UPCHAR    YES)
+          (AUTO_FULLUP    NO)
+          (SPACE_AUTOUP   NO)
+          (SELKEY_SHIFT   NO)
+          (SPACE_IGNORE   NO)
+          (SPACE_RESET    YES)
+          (AUTO_RESET     NO)
+          (END_KEY        NO)
+          (WILD_ENABLE    NO)
+          (AUTO_SELECT    NO)
+          (SINMD_IN_LINE1 NO)
+          (BEEP_WRONG     YES)
+          (BEEP_DUPCHAR   YES)))
+============================================================================
+
+       These configurations are common for all ICs. But because the "cj"
+       input method will use "gen_inp" module, and this module could also
+       be used by other input methods, the input methods other than "cj"
+       will not have the same configurations as "cj". Therefore, the
+       configurations of each input method should be separated.
+
+       Therefore, we see that in the "module_t" structer there is no field
+       for configuration area. On the other hand it has a "size of the
+       configuration area" filed: "int conf_size". The programmer should
+       assign it, since for each IM module the configuratiion area might
+       be different. XCIN will not allocate an configuration area for the
+       module (the input method object) according to the value of "conf_size" 
+       until the module is actually being used.
+
+       But how do the module functions use this configuration area? One can
+       see that in each function there is a "void *conf" arguement. The
+       configuration area will be passed in via that arguement. In short,
+       if we want to write new modules, we could follow the example shown
+       in the following:
+
+============================================================================
+typedef struct {                /* the configuration area structer specified */
+    char *inpname;		/* by the IM module */
+    int  setkey;
+    ...........
+} my_module_datastr_t;
+
+int my_module_init(void *conf, char *objname, core_config_t *xc)
+/* the init() module function */
+{
+    my_module_datastr_t *cf = (my_module_datastr_t *)conf;
+
+    cf->inpname = .....;
+    cf->setkey = .....;
+}
+
+.................
+
+module_t module_ptr = {
+    ......
+    sizeof(my_module_datastr_t),        /* the "conf_size" field */
+    ......
+    my_module_init,                     /* the "init" field */
+};
+============================================================================
+
+      Please note that the name "module_ptr" is special. It should be used
+      in any case such that when xcin loads the module via dlopen(), each
+      fields of "module_t" could be reached through "module_ptr".
+
+   2. The input method status of each IC:
+
+      The input method status of each IC is maintained by IM modules and
+      xcin system. For each X Window ready to accept the input from xcin,
+      xcin will create an IC for it, and there will be an "inpinfo_t"
+      data structer in it to hold the input method status of the IC:
+
+=============================================================================
+typedef struct inpinfo_s  inpinfo_t;
+struct inpinfo_s {
+    int imid;                           /* ID of current IM Context */
+    void *iccf;                         /* Internal data of IM for each IC */
+
+    char *inp_cname;                    /* IM Chinese name */
+    char *inp_ename;                    /* IM English name */
+    ubyte_t area3_len;                  /* Length of area 3 of window (n_char)*/
+    ubyte_t zh_ascii;                   /* The zh_ascii mode */
+    unsigned short xcin_wlen;           /* xcin window length */
+    unsigned guimode;                   /* GUI mode flag */
+
+    ubyte_t keystroke_len;              /* # chars of keystroke */
+    wch_t *s_keystroke;                 /* keystroke printed in area 3 */
+    wch_t *suggest_skeystroke;          /* keystroke printed in area 3 */
+
+    ubyte_t n_selkey;                   /* # of selection keys */
+    wch_t *s_selkey;                    /* the displayed select keys */
+    unsigned short n_mcch;              /* # of chars with the same keystroke */
+    wch_t *mcch;                        /* multi-char list */
+    ubyte_t *mcch_grouping;             /* grouping of mcch list */
+    byte_t mcch_pgstate;                /* page state of multi-char */
+
+    unsigned short n_lcch;              /* # of composed cch list. */
+    wch_t *lcch;                        /* composed cch list. */
+    unsigned short edit_pos;            /* editing position in lcch list. */
+    ubyte_t *lcch_grouping;             /* grouping of lcch list */
+
+    wch_t cch_publish;                  /* A published cch. */
+    char *cch;                          /* the string for commit. */
+};
+=============================================================================
+
+      This structer will be passed into some special module functions (e.g.,
+      the keystroke() function) such that the IM module could join to maintain
+      it. The meaning of each field is as following:
+
+      imid:  The number of the IMC which use this IM module.
+
+      iccf:  Sometimes the IM module should keep the data structers for each
+	  IC (In fact it is IMC, since each IC could contain its own IMC or
+	  all the ICs could share the same IMC. See "structer" doc for details),
+	  then there are 2 approached: One is to maintain the data structer
+	  list for each IC in the configuration area (see item 1 above). Then
+	  the module could use the value of "imid" to see that which IMC is
+	  under operation in the current. Another simpler way is to use the
+	  pointer "iccf" to point to the data structer which belongs to the
+	  current IMC. Whenever one IMC is under operation, then its
+	  corresponding data structer will be there in "iccf".
+
+	  Please note that xcin will not maintain the structer of "iccf" for
+	  you. So whenever you want to use this pointer, you should make sure
+	  that it is actually points to the data structer you want by yourself.
+	  And because "inpinfo" is a common interface for xcin and all the
+	  input methods, you have to make sure that everytime when the input
+	  method is switched the "iccf" should still point to the correct
+	  data sturcter. A simple way for this is to malloc the data structer
+	  for "iccf" in xim_init() (see below), and free it in xim_end().
+
+      inp_cname:  The Chinese name of the input method.
+
+      inp_ename:  The English name of the input method.
+
+      area3_len:  The size of the preediting area (in unit of the number of
+	  the English characters).
+
+      zh_ascii:   Currently xcin is under the wide ASCII input mode or not?
+	  If yes, its value is 1, otherwise it is 0.
+
+      xcin_wlen:  The currect length of the xcin window. It is set by xcin.
+
+      guimode:  The IM modules could use this to specify the GUI status for
+	  display:
+
+	  GUIMOD_SELKEYSPOT:  When under the multiple character selection,
+		this setting could inform the GUI system to use the spot
+		light color to display the selection keys.
+
+	  GUIMOD_SINMDLINE1:  This system could tell the GUI system to display
+		the "recalling keystrokes" in the original position or in
+		the first line of the xcin main window (the bigger main
+		window).
+
+	  GUIMOD_LISTCHAR:  If this is on, then GUI system will print the
+		contents of "inpinfo->lcch" in appreciated position of xcin
+		windows, and the cursor will also appear in the position
+		according to the value of "inpinfo->edit_pos". This is a
+		special design for bimsphone module. When input using this
+		module, the charcters will not go into the XIM client
+		immediately, but remains in the xcin window instead, and the
+		cursor shows the current input position. If this is off, then
+		the same area of the xcin window will be used for multiple
+		characters (phrases) selection list. If in this moment there
+		are contents in "inpinfo->mcch", then they will be printed.
+
+	  keystroke_len:  The keystroke length input up to now.
+
+	  s_keystroke:  The keystroke input up to now. It will be displayed
+		in the preedit area of xcin window. Please note that xcin
+		will not maintain the contents of this buffer. So the IM modules
+		should maintain it by itself. See the description of "iccf".
+
+	  suggest_skeystroke:  The recalling keystroke suggested by the IM
+		module. This field is optional. When the preediting is
+		completed, the IM module could fill the keystroke into this
+		buffer. Then xcin will use its contents to display the recalling
+		keystroke instead of calling show_keystroke() if it finds that
+		the current IM module for recalling keystroke displaying is
+		the same as the IM module under operation.
+
+		Please note that xcin will not maintain the contents of this
+		buffer. So the IM modules sould maintain it by itself. See the
+		descriptions in "iccf".
+
+	  n_selkey:  The number of selection keys for multi-characters
+		selection.
+
+	  s_selkey:  The selection keys list. Please note that xcin will not
+		maintain the contents of this buffer. So the IM modules sould
+		maintain it by itself. See the descriptions in "iccf".
+
+	  n_mcch:  The number of characters in the buffer: mcch.
+
+	  mcch:  The list of multi-characters selection. This length of this
+		list should not be larger than the value of "n_selkey". Please
+		note that xcin will not maintain the contents of this buffer.
+		So the IM modules sould maintain it by itself.
+
+	  mcch_grouping:  The group listing of "mcch". If it is NULL, then each
+		character in "mcch" is a distinct item for selection, and
+		the value of "n_mcch" is the number of characters of "mcch".
+		If it is not NULL, the the first element of "mcch_grouping"
+		stands for the total number of items for selection, and the
+		following elements of it stand for the number of characters
+		in each selectable item in "mcch". For example:
+
+		n_mcch = 9;
+		mcch_grouping[5] = {4, 2, 2, 1, 4}
+		mcch = {ABCDEFGHI}
+
+	 	Then according to mcch_grouping[0], there are totally 4 items
+		for selection, and the content of each item is:
+
+		1.AB  2.CD  3.E  4.FGHI
+
+		If the value of "mcch" and "n_mcch" are not changed, but
+		"mcch_grouping" becomes NULL, then the selections will be
+
+		1.A  2.B  3.C  4.D  5.E  6.F  7.G  8.H  9.I
+
+		Therefore, for multi-characters selection, you don't need
+		"mcch_grouping", so you could set it to be NULL. For multi-
+		phrases selection, you could fill the phrases into "mcch"
+		and use "mcch_grouping" to separate each phrases.
+
+	  mcch_pgstate:  The current page status of multi-characters selection.
+		The meaning of "one page" is the width which could be displayed
+		in the xcin window entirely. The values could be:
+
+		MCCH_ONEPG:  All the multi-characters could be displayed in
+			one page.
+
+		MCCH_BEGIN:  The multi-characters could not be displayed inside
+			one page. Now it is the 1st page.
+
+		MCCH_MIDDLE: The multi-characters could not be displayed inside
+			one page. Now it is between the 1st page and the last
+			page.
+
+		MCCH_END:  The multi-characters could not be displayed inside
+			one page. Now it is the last page.
+
+	  n_lcch:  The number of characters in the buffer: lcch.
+
+	  lcch:  The bimsphone module or other similar modules could store the
+		composed characters inside this buffer. See the description of
+		"guimode -> GUIMOD_LISTCHAR". Please note that xcin will not
+		maintain this buffer. The IM modules should maintain it by
+		themself.
+
+	  edit_pos:  The position of the cursor of "lcch". See the description
+		of "guimode -> GUIMOD_LISTCHAR".
+
+	  lcch_grouping:  The grouping list of "lcch". This is completely
+		analogy to "mcch_grouping". In the bimsphone or other similar
+		modules, the grouping information could be used to draw
+		underlines of composed characters in the "lcch" buffer to
+		stand for each phrase. For example:
+
+		A B C D E F G H I
+		--- ---   -------
+
+		if the contents of "lcch_grouping" is {4,2,2,1,4} and n_lcch=0,
+		then the above underlines will be drew. If it is NULL, then
+		no underlines will be drew.
+
+	  cch_publish:  This is the character which is composed OK and could
+		be "published". It will be used for recalling keystroke display.
+		See the following.
+
+	  cch:  The string which are ready to be commited to the XIM client.
+		Please note that xcin will not maintain this buffer. So the
+		IM modules should maintain it by themself.
+
+
+----------------------------------------
+C. The description of "module_t":

@@ -1,0 +1,26 @@
+#
+# This is Makefile.in for autoconf configure program.
+#
+LN_S = @LN_S@
+@SET_MAKE@
+
+SUBSYS = xcintool siod IMdkit
+
+all: subsys
+
+subsys:
+	@for i in $(SUBSYS); do ( cd $$i && $(MAKE) ); done
+
+.PHONY: install clean distclean depend
+install:
+
+depend:
+	for d in $(SUBSYS); do ( cd $$d; touch .depend; $(MAKE) depend ); done
+
+clean:
+	for d in $(SUBSYS); do ( cd $$d; $(MAKE) clean ); done
+	rm -f lib*.a *.so* core
+
+distclean:
+	for d in $(SUBSYS); do ( cd $$d; $(MAKE) distclean ); done
+	rm -f lib*.a *.so* core Makefile

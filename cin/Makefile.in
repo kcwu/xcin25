@@ -1,0 +1,22 @@
+LN_S = @LN_S@
+@SET_MAKE@
+
+SUBSYS = big5 gb
+
+all: subdirs
+
+subdirs:
+	@for i in $(SUBSYS); do ( cd $$i && $(MAKE) ); done
+
+.PHONY: clean distclean install
+clean:
+	rm -f *.a core
+	for d in $(SUBSYS); do ( cd $$d; $(MAKE) clean ); done
+
+distclean:
+	for d in $(SUBSYS); do ( cd $$d; $(MAKE) distclean ); done
+	for d in $(SUBSYS); do rm -f $$d/Makefile; done
+	rm -f Makefile .depend
+
+install:
+	for d in $(SUBSYS); do ( cd $$d; $(MAKE) install ); done

@@ -1,0 +1,51 @@
+gb2312 =	sys.tab.$(GB2312ENC) \
+		jtcj_gb.tab.$(GB2312ENC) \
+		pinyin.tab.$(GB2312ENC) \
+		phonegb2.tab.$(GB2312ENC) \
+		shuangpin.tab.$(GB2312ENC) \
+		wubizixing.tab.$(GB2312ENC)
+
+gbk =	 	sys.tab.$(GBKENC)
+
+include Makefile
+
+make-gb2312: $(gb2312)
+
+make-gbk: $(gbk)
+
+sys.tab.$(GB2312ENC): sys.cin.gb2312
+	$(cin2tab) -r $(xcinrc) -l $(GB2312ENC) -o $@ sys.cin.gb2312
+jtcj_gb.tab.$(GB2312ENC): jtcj_gb.cin sys.tab.$(GB2312ENC)
+	$(cin2tab) -r $(xcinrc) -l $(GB2312ENC) \
+		-s sys.tab.$(GB2312ENC) -o $@ jtcj_gb.cin
+pinyin.tab.$(GB2312ENC): pinyin.cin sys.tab.$(GB2312ENC)
+	$(cin2tab) -r $(xcinrc) -l $(GB2312ENC) \
+		-s sys.tab.$(GB2312ENC) -o $@ pinyin.cin
+phonegb2.tab.$(GB2312ENC): phonegb2.cin sys.tab.$(GB2312ENC)
+	$(cin2tab) -r $(xcinrc) -l $(GB2312ENC) \
+		-s sys.tab.$(GB2312ENC) -o $@ phonegb2.cin
+shuangpin.tab.$(GB2312ENC): shuangpin.cin sys.tab.$(GB2312ENC)
+	$(cin2tab) -r $(xcinrc) -l $(GB2312ENC) \
+		-s sys.tab.$(GB2312ENC) -o $@ shuangpin.cin
+wubizixing.tab.$(GB2312ENC): wubizixing.cin sys.tab.$(GB2312ENC)
+	$(cin2tab) -r $(xcinrc) -l $(GB2312ENC) \
+		-s sys.tab.$(GB2312ENC) -o $@ wubizixing.cin
+
+sys.tab.$(GBKENC): sys.cin.gbk
+	$(cin2tab) -r $(xcinrc) -l $(GBKENC) -o $@ sys.cin.gbk
+
+
+install_gb2312:
+	if [ ! -d $(xcin_datap)/$(GB2312ENC) ]; then \
+	  $(INSTALL) -d $(xcin_datap)/$(GB2312ENC); fi
+	for f in $(gb2312) default.phr; do \
+	  ff=`basename $$f .$(GB2312ENC)`; \
+	  $(INSTALL_DATA) $$f $(xcin_datap)/$(GB2312ENC)/$$ff; done
+
+install_gbk:
+	if [ ! -d $(xcin_datap)/$(GBKENC) ]; then \
+	  $(INSTALL) -d $(xcin_datap)/$(GBKENC); fi
+	for f in $(gbk) default.phr; do \
+	  ff=`basename $$f .$(GBKENC)`; \
+	  $(INSTALL_DATA) $$f $(xcin_datap)/$(GBKENC)/$$ff; done
+

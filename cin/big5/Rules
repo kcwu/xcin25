@@ -1,0 +1,76 @@
+big5 = 		sys.tab.$(BIG5ENC) \
+		array30.tab.$(BIG5ENC) \
+		bims_pinyin.tab.$(BIG5ENC) \
+		cj.tab.$(BIG5ENC) \
+		phone.tab.$(BIG5ENC) \
+		pinyin.tab.$(BIG5ENC) \
+		simplex.tab.$(BIG5ENC) \
+		jyutping.tab.$(BIG5ENC) \
+		jyutping0.tab.$(BIG5ENC)
+
+big5hkscs = 	sys.tab.$(BIG5HKENC) \
+		cj.tab.$(BIG5HKENC)
+
+include Makefile
+
+make-big5: $(big5) 
+
+make-big5hkscs: $(big5hkscs)
+
+
+sys.tab.$(BIG5ENC): sys.cin.big5
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) -o $@ sys.cin.big5
+array30.tab.$(BIG5ENC): array30.cin sys.tab.$(BIG5ENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ array30.cin
+bims_pinyin.tab.$(BIG5ENC): bims_pinyin.cin sys.tab.$(BIG5ENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ bims_pinyin.cin
+cj.tab.$(BIG5ENC): cj.cin sys.tab.$(BIG5ENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ cj.cin
+phone.tab.$(BIG5ENC): phone.cin sys.tab.$(BIG5ENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ phone.cin
+pinyin.tab.$(BIG5ENC): pinyin.cin sys.tab.$(BIG5ENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ pinyin.cin
+simplex.tab.$(BIG5ENC): simplex.cin sys.tab.$(BIG5ENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ simplex.cin
+jyutping.tab.$(BIG5ENC): jyutping.cin sys.tab.$(BIG5ENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ jyutping.cin
+jyutping0.tab.$(BIG5ENC): jyutping0.cin sys.tab.$(BIG5ENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ jyutping0.cin
+
+sys.tab.$(BIG5HKENC): sys.cin.big5hkscs
+	$(cin2tab) -r $(xcinrc) -l $(BIG5HKENC) -o $@ sys.cin.big5hkscs
+cj.tab.$(BIG5HKENC): cj.cin sys.tab.$(BIG5HKENC)
+	$(cin2tab) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ cj.cin
+
+
+install_big5:
+	if [ ! -d $(xcin_datap)/$(BIG5ENC) ]; then \
+	  $(INSTALL) -d $(xcin_datap)/$(BIG5ENC); fi
+	for f in $(big5) default.phr; do \
+	  ff=`basename $$f .$(BIG5ENC)`; \
+	  $(INSTALL_DATA) $$f $(xcin_datap)/$(BIG5ENC)/$$ff; done
+	if [ -d $(xcin_datap)/$(BIG5ENC) ]; then \
+	  if [ -f $(tabe_data)/tsi.db ]; then \
+	    ( cd $(xcin_datap)/$(BIG5ENC); \
+	      rm -f tsi.db; ln -s $(tabe_data)/tsi.db . ); fi; \
+	  if [ -f $(tabe_data)/yin.db ]; then \
+	    ( cd $(xcin_datap)/$(BIG5ENC); \
+	      rm -f yin.db; ln -s $(tabe_data)/yin.db . ); fi; \
+	fi
+
+install_big5hkscs:
+	if [ ! -d $(xcin_datap)/$(BIG5HKENC) ]; then \
+	  $(INSTALL) -d $(xcin_datap)/$(BIG5HKENC); fi
+	for f in $(big5hkscs) default.phr; do \
+	  ff=`basename $$f .$(BIG5HKENC)`; \
+	  $(INSTALL_DATA) $$f $(xcin_datap)/$(BIG5HKENC)/$$ff; done
+

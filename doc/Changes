@@ -1,0 +1,630 @@
+xcin-2.5.2.2:  2000/12/
+------------------------------
+1. Remove useless character set counting code from testprog.c: create_fontset().
+   Add a cursor into testprog window.
+
+2. Add new docs: doc/En/internal/structer.En
+
+3. Report a compiling problem in GNU/Linux glibc-2.1.2.
+   Thanks to <ptcheng@ee.nthu.edu.tw>.
+
+4. Fix the bug of no immediately display the ctrl-alt-f mode.
+   Thanks to Kuang-che Wu <kcwu@camel.ck.tp.edu.tw>.
+
+5. Rename xcin-2.5/src/util/testprog/REAMDE to README.
+   Thanks to <foka@debian.org>
+
+6. Fix bugs in bimsphone:
+   a. CapsLock on, qphrase %ctrl turn off, the ctrl+, will output ,,
+      (the ShiftESC is returned only when no ctrl or alt key pressed).
+   b. CapsLock on, the up/down/return/space keys should be ignored.
+   Thanks to Ken Shan <ken@digitas.harvard.edu>
+
+7. Add %fallback feature into qphrase.
+   Add %fallback section into big5/default.phr.
+   Add %fallback support in gen_inp and bimsphone.
+   Thanks to Ken Shan <ken@digitas.harvard.edu>
+
+8. Fix bug in gui_overspot: Do not draw when n_mcch=0 (do not just relay on
+	GUIMOD_SELKEYSPOT bit of inpinfo.guimode).
+   Fix bug in bimsphone: Turn off GUIMOD_SELKEYSPOT when mcch selection OK.
+
+9. Documents update.
+
+
+xcin-2.5.2.1:  2000/10/30
+------------------------------
+1. Add OpenBSD, NetBSD support to autoconf.
+   Add UNKNOWN support to autoconf.
+   Note: The porting to OpenBSD, NetBSD, and Solaris have not been tested.
+	 So they are not fully suppoted yet.
+
+2. Rotate Changes file.
+
+3. Add nl_langinfo() support to determine the encoding name of a locale.
+
+4. Add LOCALE setting in xcinrc. Modify xcin source such that it will not
+   depend on the locale name as much as possible.
+   Thanks to Rigel <rigel863@yahoo.com>
+
+5. Fix a bug of gui_create_fontset() in testprog.c.
+
+6. Add nl_langinfo() support in xcin-2.5/src/util/testprog/.
+
+
+xcin-2.5.2:  2000/10/15
+------------------------------
+1. Bug fix in xcin-2.5/cin/big5/Makefile.in for FreeBSD.
+   Thanks to <keith@bsdvm.jtjang.idv.tw>
+
+2. Add patch for typo fix, jyutping.cin fix, and xcinrc.LINUX fix.
+   Thanks to <foka@debian.org>
+
+3. Fix compiling problem for HPUX platform.
+
+4. Change xcinrc option: OVERSPOT_USE_CLICOLOR to OVERSPOT_USE_USRCOLOR.
+   Note that its meaning is reversed.
+   Thanks to <cwhuang@linux.org.tw>
+
+5. Change the OVERSPOT_WINDOW_ONLY style:
+   a. The 2B/SB symbol.
+   b. Color of input method name.
+   c. Draw recalling keystorke (sinmd).
+   d. Make underline of phrases in bimsphone more clear.
+   Thanks to <cwhuang@linux.org.tw>
+	     <id5id5@tcts1.seed.net.tw>
+
+6. Add gb/phonegb2.cin.
+   Thanks to <bv1al@ms2.journalist.com.tw>
+
+7. Add black_color & white_color element in gui_t structer. OverTheSpot
+   window will use the gui->black_color.
+
+8. Fix a dependence bug in xcin-2.5/src/Makefile.in.
+
+9. Remove greq_callback() check in greq_register() (in xim_IC.c).
+
+10. Document update.
+
+
+xcin-2.5.2-pre6:  2000/10/08
+------------------------------
+1. Rewrite the gui_overspot draw_preedit part.
+   Thanks to suggestion of <cwhuang@linux.org.tw>
+
+2. Add encoding recorder in gen_inp .tab files.
+
+3. Add XNLineSpace handler in ic_get_values() and ic_set_values().
+
+4. Fix the gettext message template (pot) generation and update po files.
+   (both for xcin and testprog). And by default testprog will not be built
+   when "make" or "make install".
+
+5. Add patches of xcinrc.in fix, and typo fix.
+   Fix bug in gen_inp: SPACE_IGNORE function.
+   Add xcinrc option "DIFF_BELL" to distiguish duplicated & wrong belling.
+   Add xcinrc option "KEYSTROKE_REMAP" for gen_inp for array30 IM.
+   Thanks to Anthony Fok <foka@debian.org>
+
+6. Remove "gethostname()" checking in configure.
+
+7. Fix memory leakage program in gen_inp: match_keystroke_normal().
+   gen_inp: When endkey is pressed, even the selkey is one of the keyname,
+	it will be treated as the selkey instead of a normal keyname.
+   gen_inp: the '<' and '>' keys will have effect on mcch only when really
+	enter the mcch state.
+
+8. Replace the GB: pinyin.cin, shuangpin.cin from cce-0.36.
+   (http://programmer.lib.sjtu.edu.cn/cce/cce.html,
+    http://packages.debian.org/cce)
+   Thanks to Anthony Fok <foka@debian.org>
+
+9. Add %endkey entry to Big5: pinyin.cin. Also add "1" as tone5 into it.
+   Thanks to Lin Zhemin <ljm@ljm.qqjane.net>
+
+10. Add XSync() call in xim_close() and xim_terminate() in hope to solve
+    the problem of rxvt crash when xcin terminte.
+    Thanks to Ming-Che Chuang <r8921131@ms1.cc.ntu.edu.tw>
+
+11. Change the xcin hidden behavior: when XIM client is focus out, xcin will
+    not hide if it is already mapped. This is to avoid the moving xcin window
+    problem in some of the Window Managers.
+
+12. Redesign the installation process of tabs, xcinrc, to be os_type specific.
+    (xcinrc is moved to xcin-2.5/etc/)
+
+13. Add INP_CNAME: name%%short_name style into zh_hex module.
+
+14. Add jyutping.cin, jyutping0.cin.
+    Thanks to Roger So <rogerso@sis.dhs.org>
+
+15. Fix a minor bug in cin2tab for searching the xcinrc file.
+
+16. Add "OVERSPOT_WINDOW_ONLY" xcinrc option: enable it will only display the
+    OverTheSpot window. Add IM_2BFOCUS bit in inp_state.
+    Thanks to suggestion of <cwhuang@linux.org.tw>
+
+17. Documents update.
+
+
+xcin-2.5.2-pre5:  2000/08/25
+------------------------------
+1. IM module change: add a terminate() function all.
+
+2. Add signal catch: SIGTERM, SIGQUIT, SIGINT.
+
+3. XCIN termination now change to the following processes:
+   1. Call xim_close(), turn on XCIN_RUN_EXIT flag, and check if currently
+      there is an IC on focus:
+
+      if yes: Send XIM Sync signal to the client, and waits for the reply.
+      if no:  turn on XCIN_RUN_EXITALL flag.
+
+   2. If XCIN_RUN_EXIT on, turn off any XIM action (do nothing but only
+      return True), but loop continuous, untill the reply for the Sync
+      signal from the client to xim_sync_reply_handler(). Then call
+      IMCloseIM() and turn on XCIN_RUN_EXITALL flag.
+
+   3. If XCIN_RUN_EXITALL on, stop the loop and terminate the XIM engine
+      and all the IM modules. Then exits.
+
+4. Mozilla M16 work-around: 
+   a. xim_IC.c: ignore get_ic_value & set_ic_value for null name/value. 
+      Also modify the set_ic_value: XNFontSet part.
+
+   b. Fix bug in gui_overspot.c fontset updating part.
+
+   c. Add get_ic_value(): XNPreeditState handler.
+
+   Thanks to "Huei_ru, Chen (Cathy Chen)" <cathy@mitux.tatung.com.tw>
+	     Yung-Fong Tang <ftang@netscape.com>
+	     Masaki Katakai <Masaki.Katakai@Japan.Sun.COM>
+	     <CyberMax.bbs@openbazaar.net>
+
+5. Fix bug in call_switch_out(): When IM_2BYTES on & switch between clients,
+   the IM_2BYTES state of xcin window cannot update.
+
+6. IMdkit, i18nPtHdr.c: add include config.h.
+
+7. Remove xcin_mode flag: XCIN_RUN_FIRSTIM. Use static variable to indecate
+   the "first call" of that function in Change_IM() & ic_create().
+
+   Add IC_FOCUS check in xim_set_focus_handler() & xim_unset_focus_handler()
+   Thanks to Chuang Ming-Che <r8921131@ms1.cc.ntu.edu.tw>
+
+8. Fix bug in gen_inp: fillpage(): inpinfo->mcch_pgstate assignment.
+
+9. Fix bug in IMdkit: During the operation of xcin and the XIM clients, the 
+   X-Atoms generated by xcin will continuously increase. Now using the garbage
+   collection mechanism IMdkit will reuse the free connect_id and the 
+   "_server%d_%d" X-Atoms will not increase indefinitely.
+   Thanks to Cheng, Yuan Chen <ycheng@sinica.edu.tw>.
+
+10. Documentation updation.
+
+11. Remove big5/cantonese.cin & gb/zhiranma.cin & gb/biaoxingma.cin tables 
+    because of potentially license problem.
+    Thanks to Anthony Fok <foka@debian.org>, zhaoway <zw@zhaoway.com>, 
+	      hashao <hashao@china.com>, Ben Luo <benluo@etang.com>
+
+12. Add fontset resource management functions.
+
+13. OverTheSpot improvement: 
+    a. Add OVERSPOT_USE_USRFONTSET and OVERSPOT_FONTSET options in xcinrc, 
+       such that the user can specify the fontset of overspot window.
+       Thanks to suggestion of zhaoway <zw@zhaoway.com>.
+    b. Remove OVERSPOT_DRAW_AREA3 and OVERSPOT_DRAW_LCCH options. They will 
+       always be enabled.
+    c. Change the drawing for lcch to "lcch [preedit keystroke]" style.
+       Thanks to suggestion of KIRIN <kirin@ms7.url.com.tw>.
+    d. Add draw_lcch_grouping function.
+
+14. a, Merge the functional of WIN_CHANGE_IM_CONTEXT & WIN_CHANGE_IM, and add
+       new flag WIN_CHANGE_REDRAW, and simplify the updation of gui_mainwin.
+    b. Also, to work around the problem of IC focus change of Mozilla, the
+       xim_set_focus_handler() & xim_unset_focus_handler will always set
+       WIN_CHANGE_REDRAW flag. The side effect is when the clients are in 
+       English mode, changing the input focus will always result the redrawing
+       of xcin main window.
+
+15. Add xcin_mainwin2, and if it is enabled, it will replace the original
+    xcin_mainwin to take care all the operations, and xcin_mainwin will only
+    be active in Root input style in this situation.
+
+16. In trigger key handler, it will set xccore->ic and xccore->ic->ic_state
+    IC_FOCUS will enabled. Then the focus window checking in ic_create() can
+    be removed (it is useless).
+
+
+xcin-2.5.2-pre4:  2000/07/24
+------------------------------
+1. Fix bug in bimscin.c: initialize the pinyin.tone array.
+   Add "nen" entry to bims_pinyin.cin.
+   Thanks to KIRIN <kirin@ms7.url.com.tw>
+
+2. Fix bug in zh_hex module: don't process ctrl/alt binding keys.
+   Thanks to Kuang-che Wu <kcwu@camel.ck.tp.edu.tw>
+
+3. Fix bug in cin2tab that cannot find default sys.tab problem:
+   call set_open_data().
+   Thanks to <kirin@ms7.url.com.tw>
+
+4. Fix bug in bimspinyin: initialize cf->pinyin with zero.
+
+5. Port to HP-UX ANSI C compiler system:
+   a. Remove "make depend" and explicitly add dependence rules to Makefiles.
+   b. Rewrite DebugLog() functiion.
+   c. Add autoconf detection for HPUX & ANSI C compiler.
+   d. Correct the order of "-L<lib_path> -l<lib>" in autoconf.
+   e. Impliment simple/buggy snprintf function.
+   f. Support static linking IM modules (for system without dlopen()).
+   g. Explicitly separate "#include <config.h>" out from constant.h.
+   Thanks to the support from Hewlett-Packard Taiwan Ltd.
+
+6. Fix the bug in xcintool/strcmp_wild(): next_token() modify the buffer
+   contents.
+
+7. Fix the bug in bimsphone: simple_keystroke(): control GUIMOD_SELKEYSPOT.
+
+8. Fix the bug in load_module: objenc is assigned to the loaded module,
+   while objname is used to compare with the valid_objname list.
+
+9. Add zh_ascii into inpinfo_t.
+   Thanks to Yuan-Chen Cheng <ycheng@sinica.edu.tw>
+
+10. Add imc->ic_rec->ic_value_update field.
+    Add gui_overspot client fontset change support.
+    Thanks to <p2682116@sparc19.cc.ncku.edu.tw>
+
+11. Fix a bug in gui_main.c: when drawing xcin main window, check the
+    IM_XIMFOCUS in IC inp_state to decide to raise window or not.
+    Thanks to Fernando <bv1al@new7.com.tw>
+
+12. Change gui_overstop.c: check GUIMOD_LISTCHAR in inpinfo.guimode is off or 
+    on, then decide to draw in DRAW_MCCH mode or not.
+
+13. Fix a bug in xcintool/open_data.c for the case when user_path=NULL.
+
+14. Add xcinrc option: DISABLE_WM_CTRL. Fix bug in gui_main.c: sizeHint,
+    the "height_inc" cannot be zero.
+
+15. Enlarge the support to multiple encodings:
+    a. Move cin & tab files from locale-subdir to encoding-subdir.
+    b. Change: cin2tab -l <encoding/LC_CTYPE>. 
+       cin2tab gencin: now support hex code in %chardef & %keyname sections.
+       cin2tab now can accept not only .tab or .cin filenames.
+       cin2tab will ignore the out of range characters.
+    c. When install, automatically link tabe data files.
+    d. zh_hex now support: INP_CNAME_<encoding name> settings.
+    e. Add support to big5hkscs encoding: sys.cin, cj.cin.
+       Add support to gbk encoding: sys.cin.
+    f. Extend gen_inp and bimsphone to support default xcinrc entries.
+
+16. Bug fix in gen_inp: DISABLE_SEL_LIST only effect at 1st keystroke.
+    Thanks to report by Anthony Fok <foka@debian.org>.
+
+17. Add ``extern "C"'' to xcintool.h & module.h to support C++ language.
+
+18. Fix the sys.cin.gb2312 encoding range.
+
+
+xcin-2.5.2-pre3:  2000/04/11
+------------------------------
+1. Fix the bug of multiply creating GC in gui_overspot & gui_menusel.
+   Thanks to Peter Hung <peter@phantom.wahoo.com.tw>
+
+2. Fix bugs when xcin is going to exit and xccore->ic = NULL case;
+
+3. Change the mechanism of IMC windows' map change during IC focus changes.
+   Add a gui->winchange flag: WIN_CHANGE_FOCUS.
+
+4. Remove the check_focus() function. Let xim_trigger_handler() to set
+   xccore->ic and xccore->ic->imc->icid.
+
+5. Fix a bug when IM_FOCUS_ON in xcinrc truned on, xcin will only initially
+   start from Setkey=0 input method.
+
+6. Move the fontset data from gui_t to winlist_t.
+
+7. Change the OverTheSpot styles:
+   1. the candidate window will always follow the spot location of the client.
+   2. the candidate window will use the fontset specified by the client if
+      possible.
+   3. the length of the candidate window will be adjusted according to the
+      amount of the data being drawed.
+   4. add xcinrc option "OVERSPOT_DRAW_AREA3".
+   5. change testprog for valid OverTheSpot styles.
+   6. add "OVERSPOT_USE_CLICOLOR" option to xcinrc.
+   Thanks to Peter Hung <peter@phantom.wahoo.com.tw>
+
+   7. add "OVERSPOT_DRAW_LCCH" option to xcinrc.
+   Thanks to <clkao@CirX.ORG>
+
+8. Fix bug in gen_inp: to remove the handling of CapsLock ON.
+   Thanks to loneeagle <loneeagle@cle.linux.org.tw>.
+
+9. Fix a bug of reading error of cin2tab when sys.cin "%planeX" option 
+   contains value zero (like "0x00-0xFF").
+   Thanks to wong fu keung <wfkwong@net.polyu.edu.hk>.
+
+10. Add GC fields in winlist_t. Change all the guis to use GC fields in winlist.
+
+11. Fix a bug in drawing IM English name in xcin main window.
+
+12. Add wch_mblen() and nwchs_to_mbs() in xcintool.a. Change their prototype
+    to return int.
+
+13. Fix a bug in bimsphone for phrase multi-seletion: incorrect pgstate.
+
+14. Change the API of GUI Request programing:
+    1. Use a union to handle all the GUI requist structures.
+    2. Add the callback mechanism for special events.
+    3. Add the "greq_register()" and "greq_unregister()" functions.
+    4. Simplify the GUI request GUI updating.
+    5. Remove the gui_request field from inpinfo_t.
+    Thanks to Y. Cheng <ycheng@phi.sinica.edu.tw>.
+
+15. Change the winlist and IMC list to be private link list structer.
+
+16. Close all the window belonging to the focused IC when xcin is exiting.
+    Hope that this will avoid the problem of crashing client in OverTheSpot.
+
+17. Add the module "<objname>@<encoding>" loading support to xcinrc:
+    a. xcintool: locale_setting() add encoding entry.
+    b. module.c: add get_objenc(), each module should call it when init.
+    c. module.c: search_cinput() & set_cinput(): add encoding entry.
+
+18. Add bimspinyin support:
+    a. cin2tab: add bimscin module, add bims_pinyin.cin.
+    b. bimsphone: add bimspinyin.c and modifiy bimsphone main program.
+    Thanks to <kirin@ms7.url.com.tw>.
+
+19. Fix the memory leakage bug in gen_inp when loadtab() false.
+
+
+xcin-2.5.2-pre2:  2000/02/23
+------------------------------
+1. Register a WM protocol into testprog such that it can be terminated by WM.
+
+2. Add the completed support of OverTheSpot input style to testprog.
+
+3. Complete the support of OverTheSpot to xcin.
+
+4. Add IMSyncXlib() such that XIM server can send XIM_SYNC message to Xlib,
+   and wait for XIM_SYNC_REPLY from Xlib.
+
+5. Use the IMSyncXlib() facility to synchronize the XIM messages from XIM 
+   clients and Xlib, such that xcin can safely exit without affect the clients.
+
+6. Many bugs on IC->ic_state, IMC->inp_state, and xcin_core->xcin_mode
+   flags and others are fixed.
+
+7. Add doc/internal/greq_menusel document.
+
+8. Rearrange xim.c & xim_IC.c handler functions.
+
+9. GUI Request Menusel API change the location of "n_sel_return".
+
+
+xcin-2.5.2-pre1:  2000/02/17
+------------------------------
+1. Fix the problem when loading bimsphone both with AUTO_SELECTION YES and NO.
+   Thanks to Andrew Lee <andrew@cle.linux.org.tw>.
+
+2. Change back to always redraw xcin window when change focus between XIM
+   clients, since doing that will cause bugs (see 2.5-20000124:5).
+
+3. Modify the autoconf scripts & Makefiles to support OpenBSD.
+   Thanks to Kevin Lo <kevlo@xlinux.com>.
+
+4. testprog is changed to have default settings when start.
+
+5. Change the Makefile and fix several bugs of IMdkit according to
+   ami-1.0.1.
+
+6. Add a id data in IM_Context_t, such that IC and IM have different id.
+
+7. Remove ending "^M" symbols in cin/zh_CN.GB2312/jtcj_gb.cin.
+
+8. Fix bugs of draw_lcch_grouping to draw multibyte/single bytes underlines.
+   Thanks to report of <kpchen@iis.sinica.edu.tw>
+
+9. Reduce the contents of xcin_rc_t. The reduced parts are moved to 
+   inner_rc_t for internal usage and will be freed after system 
+   initialization. While the remaining parts are perhaps useful to IM modules.
+
+10. The API of open_data() function (in xcintool) changed.
+
+11. Modify the gui_t structer to include other window types.
+
+12. Add support to OverTheSpot input style.
+    Thanks to PhantomCat (Peter Hung) <peter@phantom.wahoo.com.tw>
+
+13. Fix a bug of GUIMOD_SELKEYSPOT in gen_inp module.
+
+14. Remove the switch_in(), switch_out() callbacks in module definition.
+
+15. Reimplement the XIM_FOCUS model of IC when changing IC focus. Remove the
+    duplicated IM_XIMINIT flag and replace it by IM_CINPUT.
+
+16. Add the GUI Request Menu-Selection support.
+
+
+xcin-2.5-20000124:  2000/01/24
+------------------------------
+1. Replace the "isspace()" in "src/lib/xcintool/get_word.c" to avoid problems
+   in zh_CN.GBK. Thanks to Xianping Ge <xge@ics.uci.edu>.
+
+2. Change the valid objname of bimsphone module to "bimsphone*", "bimspinyin*".
+   Thanks to Andrew Lee <andrew@cle.linux.org.tw>.
+
+3. Fix the bimsphone bug to use single bims context when SINGLE_IM_CONTEXT is 
+   YES. Thanks to Scott Tsai <Scott@earth.org>.
+
+4. Add Eten 26 keymap support to bimsphone.
+
+5. When SINGLE_IM_CONTEXT is YES, don't redraw xcin window when change focus
+   between XIM client.
+
+6. Change the base of GUI structer to support gui_request for IM modules.
+
+7. Add "DISABLE_SEL_LIST" option to gen_inp module to support array30 IM
+   special needs.
+   Thanks to suggestion of JamesChiu.bbs@cis.nctu.edu.tw
+			   Anthony Fok <foka@debian.org>
+
+
+xcin-2.5-20000103:  2000/01/03
+------------------------------
+1. Add an option "-h" to cin2tab.
+
+2. Support single IM Context for each IC: add SINGLE_IM_CONTEXT xcinrc option.
+   Thanks to suggestion of <tyuan@sinica.edu.tw>
+
+3. bimsphone changes:
+   a. fix a bug when selection key > the max # of multi-cch.
+   b. in no auto-selection, when there is only 1 selection, commit char
+      directly. (Thanks to suggestion of loneeagle <u4361233@cc.ncu.edu.tw>)
+   c. add "AUTO_UPCHAR" option in xcinrc.
+      (Thanks to suggestion of Andrew <andrew@nssh.tpc.edu.tw>)
+   d. modify it to ignore the XK_KP_ keysym.
+      (Thanks to suggestion of loneeagle <loner@alone.mgt.ncu.edu.tw>)
+
+4. Resolve IM loading for different locales: add LOCALE in xcinrc IM section.
+   Thanks to report by Michael Chin-yuan Wu <mwu@ece.utexas.edu>
+
+5. Add "KEEP_POSITION_ON" option to xcinrc to set window position 
+   controllation.
+
+
+xcin-2.5-19991128:  1999/11/28
+------------------------------
+1. Add the lcch_grouping support and phrase selection to bimsphone.
+   Thanks to the patch from joe <joe@os.nctu.edu.tw>
+
+2. Several minor changes in memory allocation.
+
+3. Remove unused SETKEY assignment in each module initialization.
+
+4. Change some definitions of zh_TW.Big5/default.phr in %shift section
+   according to the style of Going IM.
+   Thanks to Jian-Da Li <jdli@freebsd.csie.nctu.edu.tw>.
+
+5. Change the xcin-2.5/cin/Makefile to a proper way.
+   Add configure option --program-prefix.
+   Thanks to Andrew Lee <Andrew@nssh.tpc.edu.tw>
+
+6. Change the error message output to include section name.
+   Thanks to <cwhuang@linux.org.tw>
+	     <platin@linux.org.tw>
+
+7. Redesign the GUI layout.
+
+8. Disable the xcin window redrawing when IMKEY_IGNORE.
+
+9. bimsphone improvement:
+   a. CapsLock ignore arrow keys.
+   b. Up key to switch between multi-char & multi-phrase selection.
+   c. New page-key setting option: PAGE_KEYS
+   d. Separate the rcfile reading of simple mode from bims mode.
+   Thanks to suggestions of Jian-Da Li <jdli@freebsd.csie.nctu.edu.tw>.
+
+10. Rewrite "make distclean" for IMdkit.
+
+11. xcin-2.5/doc update.
+
+
+xcin-2.5-19991109:  1999/11/09
+------------------------------
+1. Change the definition of lcch_grouping, n_lcch & mcch_grouping, n_mcch.
+   Thanks to joe <joe@os.nctu.edu.tw>.
+
+2. Fix a bug in circular changing pages when selecting multi-chars in bimsphone.
+
+3. Add -fsigned-char flag into CFLAGS.
+   Thanks to <cwhuang@linux.org.tw>.
+
+4. Make space key to change pages in multi-chars selection when SPACE_SEL 
+   is YES in bimsphone.
+   Thanks to <yuchia.bbs@bbs.ee.ntu.edu.tw>
+
+5. Fix a bug in return commit char in multi-chars selection of bimsphone.
+
+6. Change the IM Capslock behavior. See doc/modules/im_comm for details.
+   Thanks to <yuchia.bbs@bbs.ee.ntu.edu.tw>
+
+7. Add an option "-l <LC_CTYPE>" into cin2tab. Modify the "make install" in
+   xcin-2.5/cin/ to be locale independent.
+
+8. Change several xcinrc keywards of bimsphone to make them more meaningful.
+   Thanks to Yung-Ching Hsiao <yhsiao@cae.wisc.edu>
+
+9. Add "no auto-selection" function in bimsphone.
+   Thanks to the suggestion of <loneeagle.bbs@bbs.ee.ntu.edu.tw>
+
+10. Add support to inpinfo->suggest_skeystroke.
+
+11. xcin-2.5/doc/ update.
+
+
+
+xcin-2.5-19991027:  1999/10/27
+------------------------------
+1. Fix a bug in bimsphone: space toggle selection & up char problem.
+
+2. Add inpinfo->suggest_skeystroke to improve show_keystroke mechanism.
+
+3. Add inpinfo->gui_request pointer for further implementation.
+
+4. Change all the one-byte counters "char" & "unsigned char" to "byte_t"
+   and "ubyte_t".
+
+5. Add the grouping mechanism for lcch & mcch list.
+
+6. Add --disable-bimsphone option in configure.
+
+7. Bug fix in default_IM assignment in xcin_main.c.
+   Thanks to Kang-Ming Liu <gugod@gugu.m6.ntu.edu.tw>.
+
+8. Fix several minor bugs in gcc -Wall warnings.
+
+9. Fix some espects to be partial compilable in Solaris system.
+   Thanks to <JamesChiu.bbs@cis.nctu.edu.tw>
+
+10. xcin-2.5/doc update.
+
+
+xcin-2.5-19991017:  1999/10/17
+------------------------------
+1. Add endkeys to phone.cin. Remove the 0 selectiion key.
+   Thanks to <loneeagle.bbs@bbs.ee.ntu.edu.tw>
+	     Andrew Lee <Andrew@nssh.tpc.edu.tw>
+
+2. Fix a bug in fontset parsing: add a get_resource_long() in xcintool.
+   Thanks to <loneeagle.bbs@bbs.ee.ntu.edu.tw>
+
+3. Fix a bug of missing installation of default.phr.
+   Thanks to <loneeagle.bbs@bbs.ee.ntu.edu.tw>
+
+4. Fix a bug of make install problem in xcin-2.5/src/lib/Makefile.in
+   Thanks to <JamesChiu.bbs@cis.nctu.edu.tw>
+
+5. Add a new option to bimsphone: NSELKEY: number of selection key.
+
+6. Enlarge the capacity of Cinput/im_comm/qphrase.c: Add modifier keys
+   sections. Add a new option to all modules: MOD_PHR: enable modifier keys 
+   qphrase mode.
+   Thanks to <yuchia.bbs@bbs.ee.ntu.edu.tw>
+	     <loneeagle.bbs@bbs.ee.ntu.edu.tw>
+
+7. Add a new option to bimsphone: SPACE_SEL: use space key to toggle selection.
+   Thanks to <yuchia.bbs@bbs.ee.ntu.edu.tw>
+
+8. xcin-2.5/doc update.
+
+
+--------------------------
+For early Changes, please refer to history/Changes-*
+
+
+T.H.Hsieh

@@ -1,0 +1,419 @@
+------------------
+A. 簡介:
+
+XCIN (X window Chinese INput) 是一個 X Window 下的中文輸入法程式，其原
+始作者為 Edward Der-Hua Liu，第一版於 1994 年十月發表。之後歷經許多網友
+加入開發，而目前是由 XCIN 計畫 (http://xcin.linux.org.tw) 負責主要的維
+護工作。
+
+XCIN-2.5 是 XCIN 改寫計畫 (Redesigning XCIN Project, 1999-2000) 的成果。
+其目的是希望藉由重新設計，將較好的演算法與嚴緊且模組化的程式架構實作在 
+xcin 系統中，並引進、實驗新的設計概念與中文處理技術，同時也希望藉此修正
+舊版 xcin 長久以來不易修正的問題。
+
+有關 XCIN 的版權宣告，請見 CopyRight 與 COPYING 二文的說明。
+
+目前 xcin-2.5 已進入實用階段，其特色有:
+
+
+1. rcfile 讀取系統:
+
+   過去 xcin-2.3.X 有相當複雜的命令列選項，而且這些選項一經設定後，則
+   影響了所有的輸入法行為，這對很多人來說造成不少的困擾。 xcin-2.5 對
+   此做了改變，它將大部分的命令列選項移到了 rcfile 中，且所有關於輸入
+   法的微調設定，是每個輸入法彼此獨立的。因此使用者可以自己的喜好為每
+   個輸入法分別做不同的設定，比起 xcin-2.3.X 更有彈性。
+
+
+2. 支援 locale 與 XIM 協定:
+
+   目前 xcin 已放棄原本的 xcin-crxvt 協定，而採用標準的 XIM 協定，可能
+   未來也是如此。這意味著我們無法在原有的 crxvt 中直接使用本 xcin 輸入
+   中文字。這麼做的目的是希望做到 X window 下的中文輸入能夠「標準化」，
+   也就是遵循 X11R6 的標準。未來的 X window 應用軟體應該漸漸會朝向 XIM 
+   的標準，這樣才可以真正做到 xcin anywhere。
+
+   目前新版的 rxvt-2.6/2.7 已支援 XIM 協定, 且能正確地接受來自 xcin-2.5
+   的中文輸入。故 xcin-2.5/rxvt-2.6 的組合未來將可以取代傳統的 xcin-2.3/
+   crxvt。
+
+
+3. 完整的 I18N 設計:
+
+   xcin-2.5 是一個 I18N (InternationalizatioN) 的程式，其視窗中所有的文
+   字顯示全部採用 fontset，而不再使用傳統的內碼判讀以分辦 ASCII 與 Big5
+   的方式。這意味著程式的 GUI 介面可以與內碼無關，故可適用與各種內碼系
+   統下。未來我們將持續改進其底層的字元處理系統，使其可以適用於更多樣化
+   的內碼系統。
+
+   此外，目前 xcin 所有的訊息輸出已全部採用 GNU gettext (debug 訊息除外)，
+   只要我們為各 locale 翻譯好所有的訊息，並在執行 xcin 之前做好 locale 的
+   設定，我們就會有一個「多國語文訊息」的 xcin 了。
+
+
+4. 輸入法模組動態載入:
+
+   xcin-2.5 所有的輸入法均已模組化，並且可以依需要而動態載入。目前已有的
+   輸入法模組為:
+
+   a. zh_hex:  
+	內碼輸入法模組。可做為各種內碼 (如 Big5 或 GB 碼) 的內碼輸入，只
+	要系統環境有適當的 locale 支援，並有所需的 sys.cin (見後述) 即可。
+
+   b. gen_inp:
+	一般性輸入法模組。本模組可以處理絕大部分的輸入法，如同舊版的 xcin
+	一樣，只要您準備好適當的 .cin 檔，並經由 cin2tab 將它轉換成 .tab
+	檔，就能直接套用此輸入法模組，並能達到大部分在 xcin-2.3 上見得到的
+	輸入功能。
+
+   c. bimsphone:
+	bims 注音輸入法模組。本模組採用蕭百翔兄與其在中研院的同仁所開發的 
+	libtabe 與 bims 模組，可以視為「專業」的注音輸入法。它提供了 gen_inp
+	+ phone.cin 所達不到的功能，如穩定的自動選字、大量的詞庫、各種注音
+	鍵盤對應 .... 等等。
+
+   除此之外， xcin-2.5 承襲了舊版的特色，還提供了如下的輸入功能:
+
+   d. 全形字鍵輸入 (shift+space 切換)
+
+   e. shift+alt+? 快速鍵片語輸入: 這就是傳統的 xcin 中打 shift+alt+i 出現頓
+      號， shift+alt+o 出現句號等，而且片語內容可以讓使用者依喜好自行設定。
+
+
+5. 新的 cin 資料表格檔系統:
+
+   cin (即輸入法表格檔) 其實是與 locale 與 encoding 相關的，故 xcin-2.5
+   將 cin 檔依不同的 encoding 分別存放。若使用者希望在 Big5 或 GB 的環境
+   下使用某輸入法，則他只需分別為這些 encoding 準備好一個 cin 檔，再分別
+   經由 cin2tab 編譯成 tab 檔後即可。 cin 分為以下三大類，均可使用 cin2tab
+   進行編譯：
+
+   a. sys.cin:
+	這是系統表格檔，它的格式與一般的輸入法表格檔有很大的不同。它存
+	放了與 locale 相關的資訊，供程式內部運作參考用的。
+
+   b. gen_inp 模組所使用的 .cin:
+	這是一般的輸入法表格檔，即目前 xcin-2.3 常見的 .cin 檔。但它的
+	格式與目前的 .cin 檔已有不同，但大家依然可以很容易地將舊的格式
+	改成新的格式而直接使用。此 .cin 的格式是針對 gen_inp 模組而設計。
+
+   c. bimspinyin (bimsphone 模組) 所使用的 bimscin:
+	現在 bimsphone 除了原有的注音自動選字以外，還增加了拼音自動選字
+	的輸入模式 (bimspinyin), 而在此模式下，需要一個 bimscin 格式的
+	資料檔方可運作。此資料檔即定義了注音與拼音之間的對應表。
+	
+
+6. 多平台支援:
+
+   理論上， xcin-2.5 可以在任何具備 I18N/locale 支援，使用 X11R6 的 UNIX
+   系統上執行。而目前已測試成功的計有以下平台:
+
+   a. GNU/Linux / GCC:  i386, Alpha  (使用 glibc-2.1.x 以上的系統)
+
+   b. FreeBSD / GCC:  i386  (FreeBSD-4.0 / 使用 ELF 的系統)
+
+   c. HP-UX / ANSI-C compiler:  32-bits HP workstation
+
+   至於 Solaris 以及 OpenBSD 的移植仍在進行中，需要大家多多測試與回報。
+
+
+------------------
+B. 發展簡史:
+   
+1. 1994/10/25, Edward Der-Hua Liu 在   tw.bbs.comp.linux 發表了第一版的 
+   xcin。當時的套件名稱是 big5-pack.tgz, 內含 xcin 與 crxvt。而 xcin 只
+   有輸入法程式本而已，其輸入法表格與中文字型等必須用程式自倚天中文系統
+   中轉換過來使用。
+
+2. 1997/03, XCIN 的維護工作由謝東翰 (Tung-Han Hsieh <thhsieh@linux.org.tw>)
+   接手。當時主要以修改其 Makefile，盡可能讓 xcin 成為獨立的 UNIX 套件，
+   而不要過分倚賴倚天中文系統為目標。
+
+3. 1997/03/10, 王緩正 <vvvv.bbs@bbs.cis.nctu.edu.tw> 發表了第一個對 xcin
+   的嘸蝦米 (http://www.liu.com.tw) 修正 patch: ``xcinbosh.tgz'', 從那時
+   起他陸續引入了方便的輸入功能，但都是以嘸蝦米輸入法為主。
+
+4. 於越來越多人對 xcin 加入貢獻，使得 source code 越顯得凌亂，難以維護。
+   故我們決定重新改寫 xcin, 希望能一舉解決所有的問題。而舊系列的 xcin 則
+   到了 1999/04 xcin-2.3.04-3 發表後，正式停止維護。
+
+5. 新一代的 xcin 在 1998 年底、1999 年初正式展開，當時主要的開發表包括:
+   a. 高嘉良: xcin 模組架構原始設計。
+
+   b, 蕭永慶: 引入 XIM server 設計 (IMdkit)、 Xi18n 與 locale 程式設計概
+              念、 xcin rcfile 讀取系統 siod lib。 
+
+   c. 莊明哲: Locale/I18N/XIM/rcfile 讀取系統建議與討論。 
+
+   d. 蕭百翔: 引入 libtabe，讓 xcin 擁有注音自動選字輸入能力 (bimsphone)。
+
+   e. Steve Underwood: IMdkit lib 問題修正、 xcin 輸入法模組架構的再改進。
+
+   f. 鄭原忠: 協助建立完整 I18N/zh_TW.Big5 locale 環境， 提供 xcin 測試與
+              開發平台。
+
+   g. 謝東翰: XCIN 系統整體規畫與程式碼編寫。
+
+   而 xcin 的開發公佈網站原本是由  陳永昇維護 (中文化 Linux 計劃網站)，
+   直到 1998/06 之後才移到中央研究院計算機中心 (http://www.sinica.edu.tw),
+   由袁天竑及其同仁協助維護。
+
+6. 1999/06/21 發表 xcin-2.5.0: xcin 基本模組架構，基本 XIM server， zh_hex, 
+   gen_inp, bimsphone 模組。 
+
+7. 1999/08/24 發表 xcin-2.5.1。
+
+8. 1999/10/15 發表 xcin-2.5.2。
+
+
+------------------
+C. 本版改進 (詳見 Changes 一文的說明):
+
+(版本: xcin-2.5.2.1, 需搭配 libtabe-0.1.8 以上)
+
+1. bimsphone 模組改進:
+   a. 目前 bimsphone 模組支援三種輸入模式:
+
+      bimsphone 模式:  即傳統的注音自動選字模式。
+      bimssimple 模式: 非自動選字注音輸入，用以提供 gen_inp 模組無法提供的
+		       的特殊注音輸入習慣。
+      bimspinyin 模式: 拼音自動選字模式。
+
+   b. 在 xcinrc 的 bimsphone 設定中，額外增加了如下的選項:
+
+      AUTO_SELECTION:  使用注音自動/非自動選字模式。
+      NSELKEY:         設定選擇鍵的個數。
+      SPACE_SELECTION: 開啟可用 space 鍵來選擇第一個重複字。
+      AUTO_UPCHAR:     在注音非自動選字模式中，開啟自動上字功能。
+
+      同時也支援 bimsphone_default 的全域設定。
+
+   c. 已完成組字但仍存放於 xcin 視窗的字串，以底線來標示各別完整的詞。
+
+   d. 在一個詞之前，按上鍵可進入選詞列表，按下鍵可進入選字列表。若無詞
+      可選，則按上鍵直接進入選字列表。
+
+   e. 增加倚天 26 鍵支援。
+
+2. gen_inp 模組改進:
+   在 xcinrc 的 gen_inp 設定中，加入 DISABLE_SEL_LIST 與 KEYSTROKE_REMAP
+   項目設定，以增加對行列 30 輸入法的支援。同時也支援 gen_inp_default 的
+   全域設定。
+
+3. zh_hex 模組改進:
+   在 xcinrc 的 zh_hex 設定中，加入 INP_CNAME_<encoding name> 的設定項，
+   使其可以同時為多個 encoding 設定其 INP_CNAME。
+
+4. 快速鍵選詞 (qphrase) 的擴充:
+   在 default.phr 中可以將快速鍵分成以下 4 個小節:
+   a. %trigger: 設定按下 trigger+X 的輸出詞，其中 trigger 預設是 ctrl+alt。
+   b. %shift:   設定按下 shift+X 的輸出詞。
+   c. %ctrl:    設定按下 ctrl+X 的輸出詞。
+   d. %alt:     設定按下 alt+X 的輸出詞。
+
+   同時在 xcinrc 中所有的模組都新增 MOD_PHR 選項，用以設定使用上述四個
+   qphrase 的模式。
+
+5. cin2tab 與 .cin 表格檔的改進:
+   a. cin2tab 新增 bimscin 編譯模式，用以編譯 bimsphone 的 bimspinyin 輸
+      入模式所需的資料檔，同時新增 bims_pinyin.cin 資料原始檔。
+
+   b. 將原始碼中所有的 .cin 表格移至 encoding 目錄下存放，其中 big5/big5hkscs
+      共用 .cin 檔，放在 big5 目錄下；而 gb2312/gbk 共用 .cin 檔，放在 gb
+      目錄下。而編譯過後的 .tab 檔則依不同內碼分別存放。同時也加入了幾個
+      新的 .cin 表格。
+
+   c. cin2tab 加入 -l <encoding/LC_CTYPE> 以及 -h、 -o 等命令列選項。
+
+   d. cin2tab gencin: 可以在 %chardef 與 %keyname 小節中使用十六進位碼代
+      替一般的中文字串。同時，如果 %chardef 小節中有超出內碼定義範圍的字
+      時， cin2tab 會直接忽略，而不會印出錯誤訊息。
+
+6. xcinrc 的改變:
+   a. 新增 DISABLE_WM_CTRL、KEEP_POSITION_ON、以及 DIFF_BEEP 選項。
+
+   b. 所有的輸入法設定可以採用 "<IM name>@<encoding>" 的設定格式，如此可
+      在同一個 xcinrc 檔中用同一個輸入法名為多個 encoding 做設定。
+
+7. 輸入法模組 API 改變:
+   a. inpinfo_t: 新增 lcch_grouping 與 mcch_grouping 項。
+		 新增 suggest_skeystroke 項。
+		 新增 zh_ascii 項。
+		 新增 gui_request 機制。
+
+   b. module_t:  新增 terminate() 介面函式。當輸入法模組結束運作時使用。
+
+   c. 新增輸入法模組靜態連接編譯模式。
+
+8. GUI 系統改進:
+   a. winlist_t 設計，使得 xcin 具備開啟多重視窗的能力。
+
+   b. 新增 OverTheSpot 類別視窗，以及 gui_request, menusel 類別視窗。
+
+   c. 新增 gui_main2 視窗，可以 xcinrc 的 START_MAINWIN2 與 MAINWIN2_GEOMETRY
+      控制。
+
+9. XIM 系統改進:
+   a. 新增 OverTheSpot input style, 同時修改工具程式 testprog 使其支援
+      OverTheSpot。在 xcinrc 中也增加了 INPUT_STYLE, OVERSPOT_DRAW_AREA3,
+      OVERSPOT_DRAW_LCCH, 與 OVERSPOT_USE_CLICOLOR 等選項。
+
+   b. get_ic_value(): 新增 XNPreeditState 的處理。
+
+   c. 修改 IMdkit, 新增 IMSyncXlib()，使 XIM server 可以主動發送 XIM_SYNC
+      訊號給 XIM client, 並等待 client 的 XIM_SYNC_REPLY 訊號。
+
+   d. 使用 IMdkit 可發送 XIM_SYNC 訊號的功能，在 xcin 結束前將目前連線中
+      的 XIM client 的訊號同步化。同時間 xcin 的結束過程修改如下：
+
+      1. Call xim_close(), turn on XCIN_RUN_EXIT flag, and check if currently
+         there is an IC on focus:
+
+         if yes: Send XIM Sync signal to the client, and waits for the reply.
+         if no:  turn on XCIN_RUN_EXITALL flag.
+
+      2. If XCIN_RUN_EXIT on, turn off any XIM action (do nothing but only
+         return True), but loop continuous, untill the reply for the Sync
+         signal from the client to xim_sync_reply_handler(). Then call
+         IMCloseIM() and turn on XCIN_RUN_EXITALL flag.
+
+      3. If XCIN_RUN_EXITALL on, stop the loop and terminate the XIM engine
+         and all the IM modules. Then exits.
+
+      同時 xcin 也攔截了 SIGTERM, SIGQUIT, SIGINT 三個 signal, 以達到完整
+      的程式結束處理。
+
+10. 新增 IMC 系統:
+    a. 將所有輸入法相關的資料結構自 IC 結構中分離，放入 IM_Context_t 結構中。
+       如此， IC 只負責來自 XIM client 的 XIC 的資料，而輸入法的處理運作則由
+       IMC 來負責。
+
+    b. 在 xcinrc 中新增 SINGLE_IM_CONTEXT 選項。
+
+11. 新增 HP-UX 與 ANSI C compiler 系統的移植。
+
+12. 許多 bug 的修正與文件更新。
+
+
+------------------
+D. 套件內容:
+
+1. xcin (安裝於 $(prefix)/bin/):
+   這是 xcin 輸入法主程式。
+
+2. cin2tab (安裝於 $(prefix)/bin/):
+   這是輸入法表格 .cin ==> .tab 的轉換程式。
+
+3. xcinrc (安裝於 $(prefix)/etc/):
+   這是 xcin 系統的公用設定檔。
+
+4. IM modules (安裝於 $(XCIN_DIR)/, 預設是 $(prefix)/lib/xcin/):
+   這是輸入法模組，需要時才會動態載入 xcin 中使用，目前已有:
+   zh_hex.so, gen_inp.so, bimsphone.so
+
+   ps. 在 HP-UX 平台中，由於尚未支援模組動態載入的部分，故實際上這些輸入
+       法模組是與 xcin 主程式靜態連結在一起的，故在此目錄中沒有這些檔案。
+
+5. tab 檔 (安裝於 $(XCIN_DIR)/tab/$(ENCODING)/):
+   這大部分是 gen_inp 輸入法表格檔與資料檔，依不同的 encoding 分別存放。
+   目前所包含的表格計有:
+
+   $(BIG5)/:
+	a. sys.tab:		big5 內碼資訊檔。
+	b. array30.tab:		行列 30 輸入法表格。
+        c. cj.tab:		倉頡輸入法表格。
+	d. phone.tab:		注音輸入法表格。
+        e. pinyin.tab:		拼音輸入法表格。
+        f. simplex.tab:		簡易輸入法表格。
+	g. bims_pinyin.tab:	bimspinyin 的注音、拼音對照表。
+	h. jyutping.tab:	粵語拼音輸入法表格。
+	i. jyutping0.tab:	粵語拼音輸入法表格 (沒有音調)。
+	j. default.phr:		qphrase 資料檔。
+
+   $(BIG5HKSCS)/:
+	a. sys.tab:		big5hkscs 內碼資訊檔。
+	b. cj.tab:		倉頡輸入法表格。
+	c. default.phr:		qphrase 資料檔。
+
+   $(GB2312)/:
+	a. sys.tab:		gb2312 內碼資訊檔。
+	b. jtcj_gb.tab:		倉頡輸入法表格。
+	c. pinyin.tab:		拼音輸入法表格。
+	d. phonegb2.tab:	注音輸入法表格。
+	e. shuangpin.tab:	雙拼輸入法表格。
+	f. wubizixing.tab:	五筆輸入法表格。
+	g. default.phr:		qphrase 資料檔。
+
+   $(GBK)/:
+	a. sys.tab:		gbk 內碼資訊檔。
+	b. default.phr:		qphrase 資料檔。
+
+   請注意: 這些內碼名稱隨著作業系統不同而不同，如下表所列:
+
+   GNU/Linux:	$(BIG5):	big5
+		$(BIG5HKSCS):	big5hkscs
+		$(GB2312):	gb2312
+		$(GBK):		gbk
+
+   FreeBSD:	$(BIG5):	big5
+		$(GB2312):	euc
+
+   HP-UX:	$(BIG5):	big5
+		$(BIG5HKSCS):	hkbig5
+		$(GB2312):	hp15cn
+
+
+6. testprog (放在 xcin-2.5/src/util/testprog/):
+   這是一個很簡單的 Xi18n 測試程式，與 xcin 的運作無關，只是用來測試看您的
+   系統是否已準備好 i18n 的環境，同時也可以讓您測試用 xcin 在其上直接輸入。
+   make install 時並不會將它安裝到您系統中的任何地方。
+
+7. 參考文件 (放在 xcin-2.5/doc/)。
+
+
+------------------
+E. 安裝與測試:
+
+由於 xcin-2.5 與舊版的 xcin 有相當大的不同，故當您要安裝、使用 xcin-2.5 前，
+請注意仔細閱讀以下文件:
+
+1. SETUP:  xcin-2.5 的安裝步聚。
+
+2. UserGuide:  xcin-2.5 與各 XIM client 使用快速指引。
+
+3. Usage 與 modules/*:  xcin-2.5 與其所附的輸入法模組的使用方式。
+
+4. FAQ:  常見問題與解答。
+
+5. Bugs:  xcin-2.5 目前尚未解決的問題。
+
+6. Todo:  未來的發展方向。
+
+若您想要自行準備 .cin 輸入法表格，或想將舊的 .cin 檔轉成 xcin-2.5 的 .cin
+檔，請參考:
+
+7. Cin:  .cin 表格檔格式說明以及 cin2tab 使用方法。
+
+有關 xcin-2.5 的版權宣告，請見:
+
+8. CopyRight:  xcin 版權宣告。
+
+9. COPYING:  GNU General Public License (含英文原版及中文 Big5 翻譯)
+
+若您對於 xcin 內部程式實作以及模組寫作有興趣，可以參考
+
+10. internal/*:  xcin 程式設計與模組架構文件。
+
+若您需要英文翻譯文件，請見:
+
+11. En/*:  xcin 文件英文翻譯 (部分)。
+
+
+若您有其他的問題與建議，歡迎與我們連絡。
+
+
+謝東翰 (Tung-Han Hsieh)  <thhsieh@linux.org.tw>
+Physics Department of National Taiwan University, R.O.C.
+XCIN Team.  <mailing-list:  xcin@linux.org.tw>
+	    <www:	    http://xcin.linux.org.tw>
+	    <ftp:	    ftp://xcin.linux.org.tw/pub/xcin>

@@ -1,0 +1,245 @@
+本文討論輸入法模組的 GUI Request: 的 API 介面。閱讀本文時，建議您可以同時
+參考: http://xcin.linux.org.tw/xcin-2.5/xcin_menu.png
+
+可以幫助您理解 :-))
+
+-------------------------
+1. 簡介:
+
+自 xcin-2.5.2 起輸入法模組開始支援 GUI Request 功能，它是提供輸入法模組
+開啟其他視窗以顯示資料的方式。由於 xcin 主視窗的空間有限，這對於需要顯
+示複雜資訊的輸入法模組而言可能不夠用，因而有這樣的設計。
+
+GUI Request 是與 winlist 架構整合在一起的，它可以是各種形態或功能的視窗，
+凡是可供輸入法模組用來顯示其資訊的，我都稱為 GUI Request 視窗。其在 winlist
+的定義中，wid 是設成 WTYPE_GUIREQ (見 include/gui.h)。
+
+而在目前，我只設計了一個 GUI Request 的視窗供輸入法模組使用，我稱它為
+Menu Selection window (簡稱 menusel), 它的功能就是顯示出一個選單，其
+source 就在 gui_menusel.c 中。未來若還有需要，可以再加入其他的 GUI Request
+視窗。
+
+輸入法模組可以透過 xcin 的函式呼叫來啟動、操作 GUI Request 視窗 (見後述)。
+由於 GUI Request 結構屬於 IMC 的一部分 (詳見 structer 一文的說明)，因此，
+若在 XCIN_SINGLE_IMC OFF 的狀態下，不同的 IMC 可以分別有它自己的一套 GUI
+Request window 群。這意思是說，您可以做到在 XIM client A 開啟一個 GUI Request
+window，而在 client B 開啟另一個 GUI Request window, 二者互相獨立。當然，
+如果在 XCIN_SINGLE_IMC ON 的狀態下，所有的 clients (或 IC) 分享同一個 IMC，
+則它底下的 GUI Request window 也同樣被所有的 clients 分享。
+
+在同一個 IMC 下，輸入法模組可以開啟多個 GUI Request window，而且開啟的種類
+並沒有限制。當然，目前只有一種，即 menusel, 因此若您高興的話，也可以同時開
+啟兩三個選單來用。目前我是設定每個 IMC 最多只能開出五個 GUI Request window，
+我想這樣在很多情況應該是夠用了。
+
+
+-------------------------
+2. 啟動 GUI Request:
+
+在 module.h 的定義中，有一個 greq_t 的 union，它就是用來操作 GUI Request 用
+的，其定義如下:
+
+typedef union {
+    int                 type;
+    greq_menusel_t      menusel;
+} greq_t;
+
+其中 type 就是用來指定您要啟動那一種 GUI Request window, 對於 menusel 而
+言，您要在這裏設為 GREQ_MENUSEL，而其所對應的資料結構即為 
+
+	greq_menusel_t   menusel;
+
+通常當我們在程式中要使用一個外來的 greq_t 資料時，也要先看看其 type 為何，
+然後再根據這個 type 來存取正確的 GUI Request 資料結構。
+
+當輸入法模組要開啟一個 GUI Request 視窗時，首先必須準備好一個 greq_t 的資
+料，然後透過
+
+int greq_register(int imid, greq_t *greq,
+		int (*greq_callback)(int, int, inpinfo_t *, greq_cb_t *));
+
+函式呼叫將此 GUI Request 註冊給 xcin。其各引數的意義如下:
+
+   1. imid: 即目前 inpinfo_t 的 imid 值，用來指示此 GUI Request 是屬於那
+	    一個 IMC。
+
+   2. greq: 即輸入法模組所準備好的 greq_t 資料指標。
+
+   3. greq_callback(): 這個可有可無，若無的話直接傳入 NULL 即可。這是輸入
+	    法模組為此 GUI Request 所準備的 callback 函式，用來當此 GUI
+	    Request 視窗遇到一些特殊事件時 (如視窗被滑鼠關閉 .... 等等)，
+	    xcin 可以透過此 callback 將此事件回報給輸入法模組，讓輸入法模
+	    組可以做後續的動作。此 callback 函式的宣告如下:
+
+	int (*greq_callback)(int cmd, int reqid,
+			     inpinfo_t *inpinfo, greq_cb_t *greq_cb);
+
+	    其中 cmd 為此事件的代碼，reqid 為受此事件影響的 GUI Request 的
+	    編號 (見後述)，inpinfo 為此 GUI Request 所處的 IMC 的 inpinfo
+	    結構，傳回給輸入法模組以便使用，而 greq_cb 則是其他額外的資料
+	    結構，不同的 GUI Request 可以視需要而加以利用。
+
+	    此 callback 如果執行成功時傳回 0，否則為其他值。視該 GUI Request
+	    與輸入法模組的設計而定。
+
+greq_register() 如果執行成功，它便會轉回該 GUI Request 在 xcin 中所代表的
+編號 (大於或等於 1)，此編號即稱為 reqid。以後若輸入法模組要操作此 GUI Request,
+除了要指定是那一個 IMC 的 GUI Request 以外 (即 inpinfo->imid)，同時還要指
+定其 reqid。這是由於輸入法模組可以在同一個 IMC 中開啟多個 GUI Request window,
+在這裏每一個這樣的 window 就是一個 greq_t，而不同的 window 就以 reqid 來區分。
+
+輸入法模組可以自由控制 greq_t 的 window 的產生與關閉 (destroy)。若要產生它，
+就用 greq_register() 來註冊一個即可，若要關閉它，則要透過
+
+	void greq_unregister(int imid, int reqid);
+
+函式來執行，這裡必須傳入此 GUI Request 所在的 IMC 的 imid 以及其 reqid。
+
+除此之外，輸入法模組也可以經由此函式得知目前的 IMC 總共開啟了那些 GUI Request:
+
+	void greq_query(int imid, int *n_greq, int **reqid_list_return);
+
+其中 imid 為此 IMC 的編號，而函式最後會傳回 *n_greq, 為目前 GUI Request 的個
+數，以及所有 GUI Request 的 reqid 陣列: *reqid_list_return。請注意輸入法模組
+不能任意將此陣列 free 掉。
+
+請注意，在有些情況下 xcin 會主動關掉目前正運作中的 GUI Request window, 例如:
+
+	1. 使用者用滑鼠點了視窗上的按鈕將它關掉時。
+	2. 使用者突然按 ctrl+alt+... 切換到別的輸入法時。
+
+這時候，如果該 GUI Request 有註冊一個 greq_callback() 函式時，xcin 通常會透
+過此函式通知輸入法模組，讓輸入法模組進行後續處理，然後才將該視窗關掉。
+
+至於是否可以暫時隱藏、顯示 GUI Request window (即 Map, Unmap), 則視該 GUI
+Request window 的定義而定，並非所有的 window 都需要此功能。
+
+底下簡介各 GUI Request 的操作方式與相關資料結構。
+
+
+-------------------------
+3. Menu Selection Window:
+
+此 GUI Request 簡稱 menusel，可以用來開一個選單視窗，供使用者來做項目選擇。
+menusel 所需的資料結構如下:
+
+typedef struct {
+    int type;				/* GUI Request type. */
+    unsigned short n_item;              /* number of item lists. */
+    unsigned short head_item;           /* head index of the item lists. */
+    unsigned short n_sel;               /* number of selection keys. */
+    char *selkeys;                      /* the selection keys. */
+    unsigned short focus_item;          /* index of the focused item. */
+    unsigned short focus_elem;          /* index of the focused element. */
+    ubyte_t enable_focus_elem;          /* use focus element facility or not. */
+    menu_item_t *item;                  /* the item lists. */
+} greq_menusel_t;
+
+Menusel 視窗分兩部分，左半邊稱為 item head, 右半邊稱為 item list, 如下圖:
+
+	head1  |  item1-1  item1-2  item1-3 ....
+	head2  |  item2-1  item2-2  item2-3 ....
+	.....  |  .......  .......  .......
+
+該視窗的大小是固定的，長度等於 xcin 第一主視窗的長度，高度最多是五列，如果
+n_item 的數目小於五的話，則列數就會等於 n_item 的值。 n_item 可以超過 5,
+而視窗顯示時是從 head_item 開始作第一列顯示。例如，您有一筆資料總共有 8
+個 item list, 但 head_item 是設成 2, 則顯示如下:
+
+   (item head)   (item elements)
+	head2  |  item2-1  item2-2  item2-3 ....
+	head3  |  item3-1  item3-2  item3-3 ....
+	head4  |  item4-1  item4-2  item4-3 ....
+	head5  |  item5-1  item5-2  item5-3 ....
+	head6  |  item6-1  item6-2  item6-3 ....
+
+視窗本身不會去攔捷處理任何輸入字鍵，因此，如果您要實作 menu 上下捲頁的功
+能，您可以在 module function keystroke() 接到上鍵時，將 head_item 減 1,
+接到下鍵時將它加 1 即可。
+
+n_sel 是指在一個 item list 中最多有幾個選擇項，但它只有在 selkeys 有設定
+時才有用， selkeys 是設定顯示出的選擇鍵，而 n_sel 就是 selkeys 的數目。
+例如，我可以設定:
+
+	greq_menusel->selkeys = "asdfghjkl;";
+	greq_menusel->n_sel = strlen(selkeys);
+
+如此顯示出來的 item list 就是:
+
+	headN  |  a itemN-a  s itemN-s  d itemN-d  ....
+
+注意每個 item 前面都會伴隨一個 selkey, 就是您在 greq_menusel->selkeys 中
+所設的內容。當然您在這裏可以設成 NULL, 則預設就直接以 "1234567890" 來套用。
+
+focus_item 是指那一個 item 要特別以反白標示，就好像游標停在那一個項目上一
+樣。在這裏反白會標示在該 item list 的 head 上，圖示如下 (標示在第二個 item):
+
+	head1  |  item1-1  item1-2  item1-3  ....
+       <head2> |  item2-1  item2-2  item2-3  ....
+	.....  |  .......  .......  .......
+
+如果將 enable_focus_elem 設為 1 時，則反白標示也可以標示在一個 item list 中
+的某個 element 上 (由 focus_elem 來指定)，例如 (標示在第二個 item 的第三個 
+element):
+
+	head1  |  item1-1  item1-2  item1-3  ....
+       <head2> |  item2-1  item2-2 <item2-3> ....
+	.....  |  .......  .......  .......
+
+若將 enable_focus_elem 設為 0, 則 item list 中不會有 element 的反白標示，且
+focus_elem 也不會有作用。
+
+最後的 menu_item_t *item 是指向每一個 item list 的陣列，如:
+
+	item[0].title     ==> head1
+	       .elements  ==> item1-1 item1-2 item1-3 ....
+	       .........
+	item[1].title     ==> head2
+	       .elements  ==> item2-1 item2-2 item2-3 ....
+	       .........
+
+其中每個 item list 的細部定義如下:
+
+typedef struct {
+    wch_t *title;                       /* title of the item list. */
+    wch_t *elements;                    /* elements of the item list. */
+    ubyte_t *elem_group;                /* grouping info. of the elements. */
+    unsigned short n_elem;              /* size of "elements" array. */
+    unsigned short head_idx;            /* head index of the item list. */
+    unsigned short n_sel_return;        /* num of selection returned by xcin. */
+} menu_item_t;
+
+其中 title 就是上面那幾個圖中某一 item 的 head, 而它的 element list 則是
+設在 wch_t *elements 中， n_elem 是 elements 陣列的個數。如果 elem_group
+是 NULL, 則每個 elements 的陣列原素就是一個選項，如果 elem_group 不是 NULL,
+則可以用它來指定多個 elements 陣列原素合成一個選項，例如:
+
+	elem_group = NULL		/* 每個 element 原素都是各別選項 */
+	title = head1
+	elements = {A}, {B}, {C}, {D}
+	-------------------------------------------------------------------
+	head1  |  1.{A}  2.{B}  3.{C}  4.{D}
+
+	elem_group = ....		/* 可以指定若干 element 原素合成一 */
+	title = head2			/* 個選項			   */
+	elements = {A}, {B}, {C}, {D}
+	-------------------------------------------------------------------
+	head2  |  1.{AB}  2.{C}  3.{D}
+
+至於 elem_group 的用法，與 inpinfo 中 lcch_grouping 與 mcch_grouping 的用
+法一模一樣，您可以參考 xcin-2.5/doc/internal/module 的說明，即可了解。
+
+至於 head_idx 它的作用與先前提的 gui_menusel_t->head_item 一樣，也是告訴
+xcin 說此 item list 要從那一個 element 開始畫起。
+
+由於 menusel 的寬度不見得足以容納所有的 item element, 如視窗畫不下時，xcin
+會透過 n_sel_return 回報說實際上只畫了幾個 element，故輸入法模組可以藉此做
+出必要的調整。
+
+最後提一點: 上述所提的所有的 index, 如 head_item, focus_item, focus_elem,
+head_idx 等，全部都是由 1 開始計數，而不是從 0 開始，請不要弄錯了。
+
+
+
+
+T.H.Hsieh

@@ -1,0 +1,68 @@
+CC              = @CC@
+CFLAGS          = @CFLAGS@
+CPPFLAGS        = @CPPFLAGS@
+DEFS            = @DEFS@
+LDFLAGS         = @LDFLAGS@
+INSTALL         = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA    = @INSTALL_DATA@
+LN_S 		= @LN_S@
+RANLIB		= @RANLIB@
+cf_sharelib	= @cf_sharelib@
+ld_sharelib	= @ld_sharelib@
+slib_ext	= @slib_ext@
+module_build	= @module_build@
+@SET_MAKE@
+
+x_includes      = @x_includes@
+x_libraries     = @x_libraries@
+extra_inc	= @extra_include@
+extra_lib	= @extra_library@
+
+program_prefix	= @program_prefix@
+srcdir		= @srcdir@
+top_srcdir	= @top_srcdir@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+
+xcin_binp	= $(program_prefix)@bindir@
+xcin_libp	= $(program_prefix)@xcin_dir@
+xcin_datap	= ${xcin_libp}/tab
+xcin_rcp	= $(program_prefix)@xcin_rcdir@
+xcin_manp	= $(program_prefix)@mandir@
+
+xcininc = -I$(top_srcdir)/src/include
+INC     = $(xcininc) $(x_includes)
+TARGET  = gen_inp.$(slib_ext)
+
+
+SRC = gen_inp.c
+OBJ = gen_inp.o
+
+.c.o:
+	$(CC) -c $(cf_sharelib) $(CFLAGS) $(INC) $(DEFS) -o $@ $<
+
+all: $(module_build)
+
+$(TARGET): $(OBJ)
+	$(ld_sharelib) -o $(TARGET) $(OBJ)
+
+linkobj: $(OBJ)
+	(cd ../im_comm; \
+	 rm -f gen_inp.o; \
+	 ln -s ../gen_inp/gen_inp.o .)
+
+gen_inp.o: gen_inp.c ../../include/xcintool.h ../../include/module.h \
+  gen_inp.h ../../util/cin2tab/gencin.h ../../include/constant.h \
+  ../../include/config.h
+
+
+.PHONY: clean distclean
+clean:
+	rm -f $(OBJ) $(TARGET) core *.a
+distclean: clean
+	rm -f Makefile .depend
+install: $(module_build)
+	if [ -f $(TARGET) ]; then \
+	    $(INSTALL_PROGRAM) $(TARGET) $(xcin_libp); fi
+

@@ -1,0 +1,475 @@
+本文簡述 xcin-2.5 的設計理念與整個程式架構。
+
+xcin-2.5 的設計理念為:
+
+1. 輸入法各自獨立且模組化。
+
+2. 使用者與往常一樣，只要準備好一個 .cin 檔，在 xcin 下就能馬上使用，多半
+   不需要為此輸入法多寫一個模組。
+
+3. 輸入法全然扮演一個類似 "server" 的角色，也就是 xcin 向輸入法提出請求，
+   而輸入法則根據請求做出回應。除此之外，輸入法不參與 xcin 其他部分的活動。
+
+4. xcin 完全按照 locale, XIM 的架構設計，儘可能朝標準化的方向走，希望從此
+   能完全解決 X window 下的中文輸入問題。
+
+基於這些理念，使得 xcin-2.5 與舊版的 xcin 已完全不一樣，其基本架構如下:
+
+                       IC manager <------> IMC system
+		           ||	             |
+		           ||	             |
+	               XIM system <----------+
+		           ||	             |
+		           ||	             |
+	               GUI system          module <----- cinput
+		  (winlist subsystem)        |
+		           ||	             |
+		           ||	             |
+                         xccore   <------ xcintool
+			   ||		     |
+			   ||		     |
+		         xcin_rc  <------  siod 
+
+以下就上圖的各部分做簡單的說明。
+
+
+--------------------------------------
+A. xcintool: (include/xcintool.h, lib/xcintool/*.c)
+
+   這是 xcin 最底層的工具函式庫，它只負責一些簡單而基本的操作。
+
+--------------------------------------
+B. siod & xcin_rc: (lib/siod/*, lib/xcintool/xcin_rc.c)
+
+   這是 xcin 的 rcfile 讀取系統。其公用函式呼叫介面與 xcintool 連結在一起，
+   而其核心則為 siod lib 。 siod 為一個混合 lisp 與 Scheme 語言的直譯器，這
+   使得 rcfile 的設定內容可以採用嚴緊而富彈性的 lisp / Scheme 語言。
+
+   xcin_rc 系統可以同時提供 xccore 與 module 讀取 rcfile 資料之用，同時
+   也可以做為 xcin 其他外部程式 (如 cin2tab) 共通的 rcfile 讀取介面。故我們
+   只需要一個 rcfile 即可做好所有的 xcin 相關設定。
+
+   所有經由 siod 與 rcfile 讀取系統所讀入的全域資料變數 (不包括 CINPUT 內的
+   細部設定) 全部儲存在 xcin_rc 資料結構中，當 xcin 有任何一個 module 啟動
+   並開始初始化時，此結構便會傳入該 module 的初始化函式中，則該 module 便可
+   以參考該結構中的資料做必要的設定動作。
+
+--------------------------------------
+C. xccore: (include/constant.h, include/xcin.h, xcin_main.c)
+
+   這是 xcin 主程式資料結構，它是由早期 clkao 兄所規劃的 xcin_core module
+   轉變過來的。它負責 xcin 啟動時一切的初始化動作，包括讀入命令列選項、設
+   定 locale 、執行 rcfile 讀取系統讀取 rcfile 、進行 xcin 其他部分的初始
+   化 .... 等等，同時它的資料結構還保有目前 xcin 所有的狀態資訊，包括 GUI、
+   XIM、以及輸入法狀態等。此資料結構為 xcin 主程式所私有，由 xcin 核心直接
+   控制，輸入法模組無法參考其內容。
+
+   此資料結構中， xccore.xcin_mode 用來記錄 xcin 的狀態，其作用有二: 一是記
+   錄來自 rcfile (xcinrc) 的設定組態，另一個是記錄 xcin 執行時期的狀態。
+
+
+--------------------------------------
+D. module: (include/module.h include/imodule.h include/cinput.h module.c)
+
+   這是 xcin 的輸入法模組核心，所有的可動態載入輸入法都是經由這裏進入 xcin
+   系統。此核心維護著所有輸入法的相關資料，讓 IMC 系統取用。有關其詳細細節
+   請參考 module 一文。
+
+
+--------------------------------------
+E. GUI system: (include/gui.h, gui.c)
+
+   這裡是 GUI 系統的核心部分，所有的 xcin 視窗繪圖與操作都是在這裏完成。
+   而其 gui_t 資料結構中儲存了整個系統的全域變數，如 xcin 視窗會用到的顏
+   色、字型名稱、X Server 的相關資訊 .... 等等。
+
+   整個 GUI 系統底下還分成兩個子系統，一為 FontSet 管理系統，二為 winlist
+   管理系統，示意圖如下:
+
+			GUI core
+			   |
+	      +------------+------------+
+              |                         |
+           FontSet sys		   winlist sys
+					|
+			     +----------+----------+-------------+
+			     |          |          |             |
+		       gui_main.c  gui_main2.c  gui_menusel.c  gui_overspot.c
+
+   FontSet 的部分較為單純，它負責統一維護整個 GUI 系統中所需的字型的開啟、
+   關閉 .... 等，避免字型的重複開啟，或者關閉了不該關的字型。
+
+   而 winlist 架構則附予 xcin 開啟多重視窗的能力，其實它可以被視為一個簡單
+   的 widget set，其資料結構如下:
+
+===========================================================================
+typedef struct winlist_s winlist_t;
+struct winlist_s {
+    Window window;		/* window of the winlist */
+    xtype_t wtype;		/* winlist type */
+    int imid;			/* IMC number */
+    xmode_t winmode;		/* the current mode of the window */
+
+    int pos_x, pos_y;
+    unsigned int width, height, c_width, c_height;
+    font_t *font;
+    unsigned short n_gc;
+    GC *wingc;
+
+    void *data;			/* Data for window drawing */
+    void (*win_draw_func)(gui_t *, winlist_t *);
+				/* Function to draw the window */
+    void (*win_attrib_func)(gui_t *, winlist_t *, XConfigureEvent *, int);
+				/* Function when XConfigureEvent received */
+    void (*win_destroy_func)(gui_t *, winlist_t *);
+				/* Function to destroy window */
+    winlist_t *next;
+};
+===========================================================================
+
+   其中 wtype 可以有三種 winlist 形別:
+
+	WTYPE_MAIN:	此為 xcin 主視窗，如 gui_main, gui_main2。
+	WTYPE_GUIREQ:   此為 xcin GUI Request 視窗，如 gui_menusel .... 等。
+	WTYPE_OVERSPOT: 此為 xcin OverTheSpot 視窗。
+
+   而 winmode 則標示了目前視窗的狀態:
+
+	WMODE_MAP:	表示目前視窗是顯示出來或隱藏。
+	WMODE_EXIT:	表示目前視窗是否正準備要關閉 (destroy)。
+
+   而以下三個函式的作用分別是:
+
+        win_draw_func:  用來畫視窗用的，如果程式運作中需要顯示或隱藏視
+                        窗時，請在此呼叫 gui_winmap_change。而用來畫視
+                        窗所需的資料就在 data pointer 所指位置。
+        win_attrib_func:  當此視窗接到 XConfigureEvent 時 (如視窗被滑鼠
+                        拖動，視窗被放大縮小 .... 等)，這個函式就會被呼
+                        叫，這時我們就可以用它來設定視窗新的 pos_x, pos_y,
+                        width, height, etc.
+        win_destroy_func:  當此視窗被 destroy 時會被呼叫，這時我們可以用
+                        它來做一些收尾的動作 (如果需要的話)
+
+   其中 win_attrib_func 與 win_destroy_func 可以設為 NULL, 則 xcin 會以預設
+   的方式來處理。
+
+   自 xcin-2.5.2 開始，其主視窗有兩種，圖示如下:
+
+		+-------------------------------------------+
+   第一主視窗:  |                     a                     |
+		+---------+---------+--------------+--------+
+		|    b    |    c    |      d       |   e    |
+		+---------+---------+--------------+--------+
+
+		+-------+-------+-------+
+   第二主視窗:  |   b   |   d   |   e   |
+		+-------+-------+-------+
+
+   a. 輸入法多重字顯示區。
+
+   b. 輸入法名與狀態顯示區 (如 [內碼][半形])。
+
+   c. 輸入法組字區。
+
+   d. 輸入法組字顯示區，可用做完成組字後，顯示該字完整的字鍵碼。
+
+   e. 輸入法英文名顯示區 (如 zh_hex, phone 等)。
+
+   對於第一主視窗而言，它主要是用在 Root input_style 上的，所有的 xcin 的組
+   字與狀態資訊都顯示在這裡。而且，當 rcfile 中某輸入法的 SINMD_IN_LINE1 設
+   為 "YES" 時，則原本在 d 的輸入法組字顯示會改在 a 區中顯示。
+
+   對於第二主視窗而言，它主要是用在 OverTheSpot input_style 上的，由於所有
+   的組字資訊都已移至 OverTheSpot 視窗，故在這裡所需顯示的資訊就減少很多，
+   因此此視窗就可以小很多。
+
+   GUI 系統是在以下兩種狀況下才進行繪圖的，一是接到 Expose event, 另一是
+   當任何輸入法狀態改變時。所謂輸入法狀態改變，包括切換輸入法、敲入任何
+   有意義的字鍵等等。這時 GUI 系統會跟據 gui_t->winchange 變數的值來判
+   斷是否有任何輸入法狀態的改變，因此當 XIM 系統若查覺有輸入法狀態改變時，
+   只要改變這個值，即可將結果反應在 xcin 視窗上。 winchange 狀態定義如下:
+
+   WIN_CHANGE_IM:  當它為 on 時，表示輸入法狀態已改變。
+
+   WIN_CHANGE_FOCUS:  當它為 on 時，表示目前輸入的 XIM clients 視窗已改變。
+
+   WIN_CHANGE_REDRAW:  當它為 on 時，表示 xcin 視窗需要重畫。通常是上述兩
+		       種情況發生時，才需要重畫視窗。
+
+   WIN_CHANGE_BELL:  表示需要發出第一種「嗶」聲。
+
+   WIN_CHANGE_BELL2:  表示需要發出第二種「嗶」聲。
+
+   WIN_CHANGE_BELLALL:  表示需要發出「嗶」聲，不論是第一種或第二種。
+
+   由於 GUI 系統在畫圖時是根據 xccore 中的輸入法狀態資料來畫的，而這
+   些狀態資料是來自於 xccore.ic 結構，即目前工作中的 IC (請見後頭的說
+   明)。因此，凡是反應在 xccore.ic 中的改變，會即時反應在 GUI 系統上。
+
+   除此之外， GUI 系統的繪圖模式有很多可以藉由輸入法與 XIM client 的溝
+   通介面: IC 的 inpinfo (見後述與 module 一文的說明) 組態來改變，如此
+   可以藉由 GUI 繪圖的改變，而充份反應目前輸入法所處的狀態。
+   
+   當 xcin 完成所有部分的初始化動作時，它就會進入 GUI 系統的 gui_loop()
+   函式迴圈持續執行，直到 xcin 結束為止。它的工作是等待下一個 X event
+   (XNextEvent()), 並把該 X event 交給 XFilterEvent() 來處理。如果它是
+   來自於 X apps 的 XIM event (即 X apps 進行中文輸入等動作) 時， Xlib 
+   會將此 event 傳給 XIM 系統來處理 (請見後頭的說明)。若不是這類的 X 
+   event, 才交由 gui_loop() 進行其他的動作 (如重畫視窗) ，然後週而復始。
+
+
+--------------------------------------
+F. XIM system (include/xcin_core.h, xim.c, fkey.c, lib/IMdkit)
+
+   這是處理 XIM 協定的核心，也是所有來自 module 系統的輸入法與 X apps 的
+   溝通介面。每一個使用 XIM 協定、可接受 xcin 輸入的 X window 視窗在開啟
+   後，都會送一個訊號到這裏，而 XIM 系統便產生一個 IC (Input Context) 給
+   它。 IC 記錄著目前輸入法的狀態與相關的 XIM 協定資料。
+
+   本系統並沒有直接與 Xlib 溝通，而是透過 IMdkit lib 與 Xlib 溝通。 IMdkit
+   並不是我們所發展的，它是 yhsiao 兄與 gamete 兄介紹給我們的，它可以處理 
+   Xlib 底層的複雜資料結構與協定，讓我們在使用 XIM 協定的過程可以簡化。在
+   初始化過程中，我們利用它的函式向 Xlib 註冊 xcin 的相關資料，讓之後啟動
+   的其他 X apps 知道有 xcin 這一個 XIM server。所註冊的資料重要的有:
+
+   IMServerName:  我們的 XIM server 名。若在 zh_TW.Big5 locale 環境下啟動
+	xcin 的話, 則 IMServerName 便會設為 "xcin", 否則的話會設為 
+	"xcin-<locale name>"。
+
+   IMLocale:  我們所使用的 LC_CTYPE locale。
+
+   IMInputStyles:  xcin 支援的輸入模式。目前 xcin 只支援 Root 與 OverTheSpot
+	這兩種輸入模式，未來我們會再加入其他支援。
+
+   IMProtocolHandler:  XIM event 處理函式，此為 XIM 處理中心。
+
+   IMOnKeysList:  註冊 trigger keys。 xcin 採用 XIM 動態連線的模式，也就是
+	當 X apps 在做英文 / 半形輸入時，使用者敲入的字鍵不會送入 xcin, 直
+	到他按下 trigger keys 切換成中文或全形輸入時， Xlib 才會將使用者敲
+	入的字鍵送給 xcin 處理。 xcin 註冊的 trigger keys 計有: 
+
+	中英切換: 預設為 ctrl+space
+
+	全形半形切換: 預設為 shift+space
+
+	輸入法切換: 預設為 ctrl+shift, shift+ctrl, 及 ctrl+alt+[0123456789-=]
+
+	快速片語輸入鍵: 預設為 shift+alt+<ascii key>
+
+	上述的 trigger keys 都可以藉由 rcfile 的設定而改變，且交由 fkey.c
+	維護。它會判斷使用者設定的 trigger keys 是否合法，並盡量避免衝突的
+	發生。
+
+   int im_protocol_handler(XIMS ims, IMProtocol *call_data) 函式是 xcin 註
+   冊的 IMProtocolHandler ，所有來自 Xlib (IMdkit) 的 XIM event 全部都會送
+   到這處理，其中 call_data 是這些 event 的內容。而這些 event 其時是來自於 
+   GUI 系統中 gui_loop() 函式所呼叫的 XNextEvent(), 經由 XFilterEvent() 過
+   濾，如果發現是屬於 XIM event, 則直接經由 IMdkit 送到這裏，而不再送回給 
+   gui_loop() 函式。 XIM event 計有:
+
+   XIM_OPEN:  當一個 X app 剛啟動，並且決定使用 xcin 做為 XIM server 時，
+	它就會送這個 event 給 xcin。
+
+   XIM_CLOSE:  當一個 X app 要結束前，它應該要送這個 event 給 xcin 通知說
+	要做一些清理的動作。
+
+   XIM_CREATE_IC:  當一個 X app 啟動後，它每開一個使用 XIM 的視窗，就會送這
+	個 event 過來。這時候 xcin 必須為它產生一個 IC 以儲存相關資料。
+
+   XIM_DESTROY_IC:  當 X app 某個使用 XIM 視窗要關閉前，它應該要送這個 
+	event 給 xcin 以通知 xcin 做一些繕後工作。這時 xcin 可以將屬於
+	此視窗的 IC 清理掉。
+
+   XIM_SET_IC_FOCUS:  當滑鼠點選某個使用 XIM 的 X app 視窗時，該視窗就會送
+	這個 event 給 xcin。這時 xcin 就必須進行切換 IC 的工作。
+
+   XIM_UNSET_IC_FOCUS:  當滑鼠點選其他的 X 視窗時，原先正工作中的使用 XIM 
+	視窗就會送這個 event 給 xcin, 然後才離開 focus。
+
+   XIM_TRIGGER_NOTIFY:  當原本的 X app 工作視窗沒有與 xcin 連線 (即處於英
+	數 / 半形輸入) 時，如果要進行中文 / 全形輸入，則當使用者按下
+	trigger key, IMdkit 便會送這個訊號給 xcin 。這時 xcin 必須進行為
+	此 IC 進行初始化的動作。
+
+   XIM_FORWARD_EVENT:  當使用者按下 trigger key 後，他往後在此視窗中敲入
+	的每一個字， xcin 都會接到這個 event, 同時 xcin 也會從 call_data
+	的其他內容中知道他按了那些按鍵，這時 xcin 會根據這些按鍵進行以下
+	的處理:
+
+	1. 是不是 trigger keys? 使用者可能在輸入中途切換輸入法，或恢復英
+	   文輸入等。如果是 trigger key, 則 xcin 會進行輸入法切換動作。
+
+	2. 若不是 trigger keys, 則 xcin 會將字鍵傳給目前輸入法的 keystroke()
+	   函式中，同時也將目前的輸入法狀態資料 inpinfo_t *inpinfo 傳送給
+	   它，讓它進行判斷與組字工作。然後 xcin 會根據它的傳回值決定下一
+	   步的行動。
+
+	3. 若輸入法的 keystroke 函式對於這個鍵沒有興趣，但目前是處於全形
+	   輸入狀態，或者說 keystroke 函式希望全形輸入法來處理這個字鍵，
+	   則 xcin 會將這個字鍵傳給全形輸入法模組處理。
+
+	4. 若輸入法的 keystroke() 函式或全形輸入法模組完成組字，並希望組
+	   出的字回傳給 X app 時， xcin 會將這個字回傳給 X app。
+
+	5. 若輸入法的 keystroke() 函式或全形輸入法模組表示這個字鍵對它們
+	   而言都沒有意義，則 xcin 會將這個字鍵還給 Xlib, Xlib 再將字鍵還
+	   給 X app。
+
+   XIM 系統的相關資料結構中，最重要的是 xccore.ic, 它是一個指向目前工作
+   中的 IC 的位址。
+
+
+--------------------------------------
+G. IC manager (include/IC.h, xim_IC.c)
+
+   這個部分實際上與 XIM 系統是一體的，它負責維護所有產生的 IC 串列。 IC
+   是一個很複雜的資料結構，它記錄了目前這個工作視窗的輸入法狀態。其定義
+   如下 (部分)
+
+===========================================================================
+typedef struct _IC IC; /* forward declaration */
+    CARD16              id;             /* ic id */
+    CARD16              connect_id;     /* id of connected client */
+    time_t              exec_time;      /* recent excution time */
+    xmode_t             ic_state;       /* status of the IC */
+    ic_rec_t            ic_rec;         /* the IC resource setting by client */
+    IM_Context_t       *imc;            /* the IM Context */
+    IC                 *next;
+};
+===========================================================================
+
+   以上的各欄位意義為:
+
+   id:  此 IC 的編號。
+
+   connect_id:  使用此 IC 的 X app 編號。
+
+   exec_time:  此 IC 最近的使用與執行時間。這是用於 garbage collection 用。
+	詳見以下的說明。
+
+   ic_state:  此 IC 的目前狀態，計有:
+	IC_NEWIC:	代表此 IC 為新產生的 IC。
+	IC_CONNECT:	此 IC 正處於中文輸入模式，即 client 正與 xcin 連線。
+	IC_FOCUS:	此 IC 為目前工作中的 IC。
+
+   ic_rec:  此 IC 中所有來自 XIM client 的資料，其中重要的包括:
+	ic_value_set:	  代表有那些 IC 的變數值有被 XIM client 設定。
+	ic_value_update:  代表有那些 IC 的變數值被 XIM client 更新過了。
+	input_style:	  此 IC 的 XIM 輸入模式。
+	client_win, focus_win:  XIM client 的 window。
+	pre_attr:	  此 IC 的組字變數值 (可被 XIM client 設定)。
+
+   imc:  指向 IMC 串列的指標 (見後述)。
+
+   由於 IC 是負責各 XIM clients 與 xcin 之間的溝通介面，每一個 XIM client 視
+   窗在 xcin 這邊都會指定一個 IC 來提供服務，故它們隨時掌握著各 XIM clients
+   的動態，保持它們的資料供 xcin 隨時取用。然而，它們不負責輸入法的部分。因
+   為各 IC 可能輸入法彼此各自獨立，也可能共用同一個輸入法結構，視其所使用的
+   IMC 為何而決定 (見後述)。
+
+
+   IC garbage collection:
+
+   由於並非所有的 XIM client 在結束時都會送 XIM_CLOSE 或 XIM_DESTROY_IC
+   給 xcin, 這會造成 xcin 所開啟使用的 IC 會逐漸累積，越來越多。再執行效
+   率與程式複雜度的考量下，同時也考慮了 racing condition， 故 xcin 目前
+   採用以下簡單的 garbage collection 機制:
+
+   xcin 大至上每隔 5 分鐘做檢查一次所有的 IC, 以確定其所屬的 client 還活
+   著。之所以用「大至上」這個字眼，是因為我沒有用 multi-thread 或 fork 
+   另一個 process 來精準控制時間，而是直接將檢查函式插入 
+   im_protocol_handler() 中, 這個函式是最常被呼叫的，諸如在 client 按任
+   一鍵、或甚至用滑鼠點選 client, 都有可能會呼叫到這個函式。因此，只要我
+   們持續使用任何一個 client, 就會不停地進入 im_protocol_handler()，故
+   在此直接安插檢查函式，應該是最簡單也最有效的辦法。
+
+   為了顧及 racing condition, 我在 IC 結構中多加了 time_t exec_time 這
+   個 variable, 每當這個 IC 被使用時， exec_time 就會被設入目前的時間，
+   而檢查函式最後只會挑超過 10 分鐘以上 idle 的 IC 進行檢查，如果發現該
+   IC 所屬的 window 不在了，就將此 IC 做資源回收。
+
+
+---------------------------------
+H. IM Context (IMC) System
+
+   IMC 是指 Input Method Context, 它就是輸入法的實際資料結構。在 xcin-2.5.1
+   及以前的版本中，IMC 的部分是直接寫在 IC 裏頭的，如此當您在用滑鼠切換
+   XIM client 視窗時，xcin 視窗內容 (也就是各 IC 的輸入法目前狀態) 也跟
+   著變。
+
+   然而，在某些情況下，我們不希望這樣，特別是在 bimsphone 輸入法上，我
+   們往往希望在切換 clients 時，輸入法的狀態不要改變，尤其是剛剛已輸入
+   到 xcin buffer 裏頭的那對字。為了達到此要求，才將 IMC 部分自 IC 中分
+   離。
+
+   現在 xcin 有兩種 mode: XCIN_SINGLE_IMC ON 及 XCIN_SINGLE_IMC OFF。在
+   XCIN_SINGLE_IMC OFF 時，每個 IC 都各自會有一個 IMC, 於是各 client 間
+   的輸入法狀態就完全獨立。若 XCIN_SINGLE_IMC ON 時，所有的 IC 都會分享
+   同一個 IMC, 於是各 client 間的輸入法狀態就完全一致。
+
+   IC 有它的生命週期，這與 client 的 Input Context 週期是一樣的。當一個
+   新的 client Input Context 產生時， xcin 這邊就產生一個新的 IC, 而當
+   client 的 Input Context 結束後， xcin 這邊的 IC 也結束了。
+
+   IMC 也有它的生命週期，但視 xcin 所處的 mode 而定。如果是 XCIN_SINGLE_IMC
+   ON 時，它的生命週期就與 xcin 主程式一樣長。如果是 XCIN_SINGLE_IMC OFF
+   時，它的生命週期就與 IC 一樣長。
+
+   IMC 的資料結構如下:
+
+==============================================================================
+typedef struct _IMC IM_Context_t;
+struct _IMC {
+    unsigned short      id;             /* id of this IMC */
+    unsigned int        icid;           /* id of the current attached IC */
+    ic_rec_t           *ic_rec;         /* point to the current IC resource */
+
+    inp_state_t         inp_state;      /* ic cinput state */
+    inp_state_t         inp_num;        /* ic cinput num */
+    inp_state_t         sinp_num;       /* ic cinput num (sinmd) */
+    imodule_t          *imodp;          /* current binding cinput module */
+    imodule_t          *s_imodp;        /* show keystroke cinput module */
+    inpinfo_t           inpinfo;        /* inp info referenced by gui */
+    unsigned int        skey_size;      /* sinmd_keystroke buf size. */
+    wch_t              *sinmd_keystroke;/* for keystroke of a published cch. */
+    unsigned int        cch_size;       /* cch buf size. */
+    char               *cch;            /* composed char for commit. */
+
+    int                 n_gwin;         /* IM GUI request window recorder. */
+    greq_win_t          gwin[MAX_GREQ_CNT];
+    Window              overspot_win;   /* OverTheSpot candidate window. */
+
+    IM_Context_t       *next;
+    IM_Context_t       *prev;
+};
+==============================================================================
+
+   其中 id 就是我們在其他地方所見到的 imid。如果 SINGLE_IM_CONTEXT 打開時，
+   則只有一個 IMC，其 imid 為 1；如果沒有打開，則其 imid 便會與 icid 一樣。
+
+   我們可以見到，這個結構中包含了所有的輸入法資料，包括使用那一個輸入法模組
+   (imodp 與 s_imodp)、輸入法的狀態 (inp_state, inp_num 與 sinp_num)、與各
+   輸入法模組的溝通介面 (inpinfo)、以及 OverTheSpot 視窗和 GUI Request 視窗
+   等等。至於 ic_rec 則是指向 IC 結構的 ic_rec，如此輸入法系統與 GUI 系統便
+   可隨時讀取 XIM client 的動態。可以說此結構是輸入法模組與 XIM 系統之間的
+   橋樑。
+
+   這裏還要提一下 IMC 的狀態:
+
+        IM_CINPUT ON:   此 IMC 進入中文輸入模式
+        IM_CINPUT OFF:  此 IMC 處於英文輸入模式
+        IM_2BYTES ON:   此 IMC 進入全形輸入模式
+        IM_2BYTES OFF:  此 IMC 處於半形輸入模式
+        IM_XIMFOCUS ON: 此 IMC 進入中文 focus 狀態
+        IM_XIMFOCUS OFF:此 IMC 離開中文 focus 狀態
+	IM_2BFOCUS ON:  此 IMC 進入全形 focus 狀態
+	IM_2BFOCUS OFF: 此 IMC 離開全形 focus 狀態
+
+   這裏討論 IM_CINPUT 與 IM_XIMFOCUS 就好，IM_2BYTES 原理與 IM_CINPUT 類
+   似。所謂 IMC 進入中文 focus 狀態，是指該 IMC 已切換到中文輸入模式，且
+   其所對應的 XIM client 視窗被滑鼠點選，成為前景視窗，接下來鍵盤打字就會
+   直接作用在該 client 視窗上。
+
+
+
+T.H.Hsieh

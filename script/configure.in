@@ -1,0 +1,560 @@
+dnl configure.in for xcin-2.5
+dnl
+dnl Process this file with autoconf to produce a configure script.
+dnl-----------------------------------------------------------------------
+AC_INIT(src/xcin_main.c)
+AC_CONFIG_AUX_DIR(script)
+AC_CONFIG_HEADER(config.h:script/config.h.in)
+AC_CANONICAL_HOST
+
+dnl-----------------------------------------------------------------------
+dnl xcin-2.5 configure special command line options.
+dnl-----------------------------------------------------------------------
+AC_ARG_ENABLE(debug,
+    [  --enable-debug            enable debug],
+    [if test x$enableval = xyes; then
+         AC_DEFINE(DEBUG) enable_debug=yes
+     fi])
+
+AC_ARG_WITH(xcin_rcdir,
+    [  --with-xcin-rcdir=PATH    set the xcin rcfile path.],
+    [if test x$withval != x; then
+	xcin_rcdir="$withval"
+     fi])
+
+AC_ARG_WITH(xcin_dir,
+    [  --with-xcin-dir=PATH      set the xcin main path.],
+    [if test x$withval != x; then
+	xcin_dir="$withval"
+     fi])
+
+AC_ARG_WITH(localedir,
+    [  --with-localedir=PATH     set the locale path (to install LC_MESSAGES).],
+    [if test x$withval != x; then
+	xcin_msgdir="$withval"
+     fi])
+
+AC_ARG_ENABLE(dynamic,
+    [  --disable-dynamic         do not build IM-module to be dynamic loadable.],
+    [if test x$enableval = xno; then
+	 no_dynamic=1
+     fi])
+
+build_bimsphone=bimsphone
+AC_ARG_ENABLE(bimsphone,
+    [  --disable-bimsphone       do not build bimsphone module.],
+    [if test x$enableval = xno; then
+	 build_bimsphone=''
+     fi])
+
+dnl build_going=
+dnl AC_ARG_ENABLE(going,
+dnl     [  --enable-going            also build going module.],
+dnl     [if test x$enableval = xyes; then
+dnl 	 build_going="going"
+dnl      fi])
+
+AC_ARG_WITH(extra_prefix,
+    [  --with-extra-prefix=PATH  set the extra include dir.],
+    [if test x$withval != x; then
+	 if test x$extra_prefix = x; then
+	     extra_prefix=$withval
+	 fi
+	 if test x$extra_include = x; then
+	     extra_include="-I$withval/include"
+	 fi
+	 if test x$extra_library = x; then
+	     extra_library="-L$withval/lib"
+	 fi
+     fi])
+
+AC_ARG_WITH(extra_inc,
+    [  --with-extra-inc=PATH     set the extra include dir.],
+    [if test x$withval != x; then
+	 extra_include="-I$withval"
+     fi])
+
+AC_ARG_WITH(extra_lib,
+    [  --with-extra-lib=PATH     set the extra library dir.],
+    [if test x$withval != x; then
+	 extra_library="-L$withval"
+     fi])
+
+AC_ARG_WITH(dbinc,
+    [  --with-dbinc=PATH         set the include dir of Berkeley DB 2.],
+    [if test x$withval != x; then
+	 db_include="-I$withval"
+     fi])
+
+AC_ARG_WITH(dblib,
+    [  --with-dblib=PATH         set the library dir of Berkeley DB 2.],
+    [if test x$withval != x; then
+	 db_library="-L$withval"
+     fi])
+
+AC_ARG_WITH(tabeinc,
+    [  --with-tabeinc=PATH       set the include dir of libtabe.],
+    [if test x$withval != x; then
+	 tabe_include="-I$withval"
+     fi])
+
+AC_ARG_WITH(tabelib,
+    [  --with-tabelib=PATH       set the library dir of libtabe.],
+    [if test x$withval != x; then
+	 tabe_library="-L$withval"
+     fi])
+
+AC_ARG_WITH(intlinc,
+    [  --with-intlinc=PATH       set the include dir of libintl (gettext).],
+    [if test x$withval != x; then
+	 intl_include="-I$withval"
+     fi])
+
+AC_ARG_WITH(intllib,
+    [  --with-intllib=PATH       set the library dir of libintl (gettext).],
+    [if test x$withval != x; then
+	 intl_library="-L$withval"
+     fi])
+
+dnl AC_ARG_WITH(goinc,
+dnl     [  --with-goinc=PATH         set the include dir of libgoing (going).],
+dnl     [if test x$withval != x; then
+dnl 	 going_include="-I$withval"
+dnl      fi])
+
+dnl AC_ARG_WITH(golib,
+dnl     [  --with-golib=PATH         set the library dir of libgoing (going).],
+dnl     [if test x$withval != x; then
+dnl 	 going_library="-L$withval"
+dnl      fi])
+
+if test "$program_prefix" != NONE; then
+    program_prefix="$program_prefix/"
+else
+    program_prefix=
+fi
+AC_SUBST(program_prefix)
+
+extra_modules="$build_bimsphone"
+AC_SUBST(extra_modules)
+
+
+dnl-----------------------------------------------------------------------
+dnl Check compiler: You can specify in 'CC=<..> ./configure'
+dnl-----------------------------------------------------------------------
+OLD_CFLAGS="$CFLAGS"
+AC_PROG_CC
+if test "x$GCC" != xyes; then
+    compiler_type=
+
+    AC_MSG_RESULT([checking for ANSI C compiler ....])
+    CFLAGS="$OLDCFLAGS -Aa"
+    AC_TRY_RUN([ int main(){return 0;} ], [ compiler_type=ANSIC ])
+fi
+CFLAGS="$OLD_CFLAGS"
+
+dnl-----------------------------------------------------------------------
+dnl Supply default CFLAGS, if not specified by `CFLAGS=flags ./configure'
+dnl-----------------------------------------------------------------------
+if test -z "$CFLAGS"; then
+    if test "x$GCC" = xyes; then
+	optimize_opt=-O2
+	CFLAGS='-Wall -fsigned-char'
+    else
+	optimize_opt=-O
+	if test "x$compiler_type" = xANSIC; then
+	    CFLAGS=-Aa
+	else
+	    CFLAGS=
+	fi
+    fi
+
+    if test "x$enable_debug" = xyes; then
+	CFLAGS="$CFLAGS -g"
+    else
+	CFLAGS="$CFLAGS $optimize_opt"
+    fi
+fi
+
+
+dnl-----------------------------------------------------------------------
+dnl Checks for programs.
+dnl-----------------------------------------------------------------------
+AC_PROG_CPP
+AC_PROG_LN_S
+AC_PROG_RANLIB
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+
+${INSTALL} -d testdir > /dev/null 2>&1
+if test ! -d testdir; then
+    INSTALL="$srcdir/script/install-sh -c"
+    AC_SUBST(INSTALL)
+fi
+rm -rf testdir
+AC_MSG_RESULT([checking for install -d: $INSTALL])
+
+
+dnl-----------------------------------------------------------------------
+dnl Setting extra_library and extra_include
+dnl-----------------------------------------------------------------------
+if test x$prefix != x && test $prefix != NONE; then
+    if test x$extra_include = x; then
+        extra_include=-I$prefix/include
+    fi
+    if test x$extra_library = x; then
+        extra_library=-L$prefix/lib
+    fi
+fi
+if test x$extra_prefix = x; then
+    extra_prefix=`echo $extra_library | sed 's|-L\(.*\)/lib$|\1|'`
+fi
+LDFLAGS="$LDFLAGS $extra_library"
+AC_SUBST(extra_include)
+AC_SUBST(extra_library)
+
+
+dnl-----------------------------------------------------------------------
+dnl Checks for gettext.
+dnl-----------------------------------------------------------------------
+AC_CHECK_PROG(GNU_GETTEXT, gettext, 1, 0)
+AC_SUBST(GNU_GETTEXT)
+
+AC_CHECK_FUNCS(gettext, 
+    [ intl_library=""
+      intl_include="" ],
+    [ OLD_LDFLAGS=$LDFLAGS
+      LDFLAGS="$OLD_LDFLAGS $intl_library"
+      AC_CHECK_LIB(intl, gettext, 
+	[ intl_library="$intl_library -lintl" 
+	  AC_DEFINE(HAVE_GETTEXT) ], 
+	[ LDFLAGS=$OLD_LDFLAGS
+	  intl_library=""
+	  intl_include="" ]) ])
+AC_SUBST(intl_include)
+AC_SUBST(intl_library)
+
+
+dnl-----------------------------------------------------------------------
+dnl Checks for Locale related library.
+dnl-----------------------------------------------------------------------
+AC_CHECK_LIB(xpg4, setlocale, [ locale_lib=-lxpg4 ], [ locale_lib="" ])
+AC_SUBST(locale_lib)
+
+
+dnl-----------------------------------------------------------------------
+dnl Checks for Host type & Dynamic library & options.
+dnl-----------------------------------------------------------------------
+AC_CHECK_FUNCS(dlopen, ,
+    [ AC_CHECK_LIB(dl, dlopen, 
+	[ dl_library=-ldl 
+	  AC_DEFINE(HAVE_DLOPEN) ], [ dl_library="" ]) ])
+
+case "$host_os" in
+    linux*)  
+	dl_library="$dl_library -rdynamic"
+        cf_sharelib='-fPIC'
+        ld_sharelib='gcc -shared -Wl,-soname,$@'
+        ld_shareexe=''
+        slib_ext='so'
+        env_libpath='LD_LIBRARY_PATH'
+	os_type=LINUX
+        AC_DEFINE(LINUX)
+	;;
+    freebsd*)
+	dl_library="$dl_library -export-dynamic"
+	cf_sharelib='-fPIC'
+        ld_sharelib='gcc -shared -Wl,-R,$@'
+        ld_shareexe=''
+        slib_ext='so'
+        env_libpath='LD_LIBRARY_PATH'
+	os_type=FREEBSD
+        AC_DEFINE(FREEBSD)
+	;;
+    hp*)
+	dl_unsupport=1
+        cf_sharelib='-n +Z'
+        ld_sharelib='ld -b +h $@'
+        ld_shareexe='-Wl,+s'
+        slib_ext='sl'
+        env_libpath='SHLIB_PATH'
+	os_type=HPUX
+        AC_DEFINE(HPUX)
+	;;
+    openbsd*)
+	dl_unsupport=1
+        cf_sharelib='-fPIC'
+        ld_sharelib='ld -x -Bforcearchive -Bshareable'
+        ld_shareexe=''
+        slib_ext='so'
+        env_libpath='LD_LIBRARY_PATH'
+	os_type=OPENBSD
+        AC_DEFINE(OPENBSD)
+	;;
+    netbsd*)
+	dl_unsupport=1
+        cf_sharelib='-fPIC'
+        ld_sharelib='ld -x -Bforcearchive -Bshareable'
+        ld_shareexe=''
+        slib_ext='so'
+        env_libpath='LD_LIBRARY_PATH'
+	os_type=NETBSD
+        AC_DEFINE(NETBSD)
+	;;
+    solaris*)
+	dl_unsupport=1
+	dl_library="$dl_library"
+	cf_sharelib='-fPIC'
+	ld_sharelib='gcc -shared -Wl,-R,$@'
+	ld_shareexe=''
+	slib_ext='so'
+	env_libpath='LD_LIBRARY_PATH'
+	os_type=SOLARIS
+	AC_DEFINE(SOLARIS)
+	;;
+    *)
+	AC_MSG_RESULT([Warning: xcin does not support this system yet.])
+	AC_MSG_RESULT([Warning: please report this to xcin@linux.org.tw])
+	dl_unsupport=1
+	dl_library="$dl_library"
+	cf_sharelib='-fPIC'
+	ld_sharelib='gcc -shared -Wl,-R,$@'
+	ld_shareexe=''
+	slib_ext='so'
+	env_libpath='LD_LIBRARY_PATH'
+	os_type=SOLARIS
+	AC_DEFINE(SOLARIS)
+	;;
+esac
+
+if test "$no_dynamic" != 1; then
+    if test "$dl_unsupport" != 1; then
+	AC_DEFINE(USE_DYNAMIC)
+	module_build='$(TARGET)'
+	linktabe=''
+    else
+	AC_MSG_RESULT([Warning: the dynamic loadable module is not supported.])
+    fi
+fi
+if test x"$module_build" = x; then
+    cf_sharelib=''
+    module_build=linkobj
+    linktabe='${tabe_lib} ${db_lib}'
+fi
+AC_SUBST(dl_library)
+AC_SUBST(cf_sharelib)
+AC_SUBST(ld_sharelib)
+AC_SUBST(ld_shareexe)
+AC_SUBST(slib_ext)
+AC_SUBST(env_libpath)
+AC_SUBST(module_build)
+AC_SUBST(linktabe)
+AC_SUBST(os_type)
+
+
+dnl-----------------------------------------------------------------------
+dnl Checks for Berkeley DB2 library.
+dnl-----------------------------------------------------------------------
+if test x$build_bimsphone = xbimsphone; then
+    mytarget='db'
+    LDFLAGS="$LDFLAGS $db_library"
+
+    AC_CHECK_LIB($mytarget, db_open, , [ mytarget=db2 ])
+    if test $mytarget != db; then
+      AC_CHECK_LIB($mytarget, db_open, ,
+      [ AC_MSG_RESULT([You need Berkeley DB2 to compile bimsphone module.])
+	AC_MSG_RESULT([Please use --with-dbinc and --with-dblib to configure.])
+	exit 1])
+    fi
+    db_library="$db_library -l$mytarget"
+fi
+AC_SUBST(db_include)
+AC_SUBST(db_library)
+
+
+dnl-----------------------------------------------------------------------
+dnl Checks for tabe & bims libraries.
+dnl-----------------------------------------------------------------------
+if test x$build_bimsphone = xbimsphone; then
+  if test x$tabe_library = x; then
+    tabe_data=$extra_prefix/share/tabe/tsiyin
+  else
+    tabe_data=`echo $tabe_library | sed 's|^-L\(.*\)/lib$|\1/share/tabe/tsiyin|'`
+  fi
+  if test ! -f $tabe_data/tsi.db; then
+    tabe_data=
+  fi
+  AC_SUBST(tabe_data)
+
+  LDFLAGS="$LDFLAGS $tabe_library"
+  AC_CHECK_LIB(tabe, tabeZhiInfoLookupYin, , 
+   [ AC_MSG_RESULT([You need libtabe to compile bimsphone module.])
+     AC_MSG_RESULT([Please use --with-tabeinc and --with-tabelib to configure.])
+     exit 1],
+   [ $db_library ])
+  AC_CHECK_LIB(bims, bimsInit, ,
+   [ AC_MSG_RESULT([You need libbims to compile bimsphone module.])
+     AC_MSG_RESULT([Please use --with-tabeinc and --with-tabelib to configure.])
+     exit 1],
+   [ -ltabe $db_library ])
+  tabe_library="$tabe_library -lbims -ltabe"
+fi
+AC_SUBST(tabe_include)
+AC_SUBST(tabe_library)
+	
+
+dnl-----------------------------------------------------------------------
+dnl Checks for going kernel libraries.
+dnl-----------------------------------------------------------------------
+dnl if test x$build_going = xgoing; then
+dnl     LDFLAGS="$LDFLAGS $going_library"
+dnl     AC_CHECK_LIB(going, goKernelInitial, , 
+dnl       [ AC_MSG_RESULT([You need libgoing to compile going module.])
+dnl 	AC_MSG_RESULT([Please use --with-goinc and --with-golib to configure.])
+dnl 	exit 1])
+dnl     going_library="$going_library -lgoing"
+dnl fi
+dnl AC_SUBST(going_include)
+dnl AC_SUBST(going_library)
+
+
+dnl-----------------------------------------------------------------------
+dnl Checks for header files.
+dnl-----------------------------------------------------------------------
+AC_HEADER_DIRENT
+AC_HEADER_STDC
+AC_HEADER_MAJOR
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS(fcntl.h \
+		limits.h \
+		malloc.h \
+		sys/ioctl.h \
+		sys/time.h \
+		unistd.h \
+		wchar.h)
+
+dnl-----------------------------------------------------------------------
+dnl Checks for typedefs, structures, and compiler characteristics.
+dnl-----------------------------------------------------------------------
+AC_C_CONST
+AC_TYPE_UID_T
+AC_TYPE_MODE_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_STRUCT_ST_BLKSIZE
+AC_STRUCT_ST_BLOCKS
+AC_STRUCT_ST_RDEV
+AC_HEADER_TIME
+AC_STRUCT_TM
+
+dnl-----------------------------------------------------------------------
+dnl Checks for library functions.
+dnl-----------------------------------------------------------------------
+AC_FUNC_FNMATCH
+AC_FUNC_GETPGRP
+AC_FUNC_MEMCMP
+AC_TYPE_SIGNAL
+AC_FUNC_STRFTIME
+AC_FUNC_UTIME_NULL
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS(getcwd \
+dnl	gethostname \
+	gettimeofday \
+	mkdir \
+	mktime \
+	putenv \
+	rmdir \
+	select \
+	strcspn \
+	strdup \
+	strerror \
+	strspn \
+	strstr \
+	strtol \
+	strtoul \
+	uname \
+	snprintf \
+	nl_langinfo)
+
+dnl-----------------------------------------------------------------------
+dnl Checks for socket library (for IMdkit)
+dnl-----------------------------------------------------------------------
+dnl
+dnl AC_CHECK_FUNCS(socket, [ socket_lib= ], [
+dnl    AC_CHECK_LIB(socket, socket, [ socket_lib=-lsocket ], 
+dnl	[ AC_MSG_RESULT([Your system does not support socket to compile xcin.])
+dnl	  exit 1 ], [ $extra_library ])
+dnl    ])
+dnl AC_SUBST(socket_lib)
+dnl
+
+dnl-----------------------------------------------------------------------
+dnl Checks for X11R6 library
+dnl-----------------------------------------------------------------------
+AC_PATH_X
+if test x$x_libraries != x; then
+    x_libraries="-L$x_libraries"
+    LDFLAGS="$LDFLAGS $x_libraries"
+fi
+if test x$x_includes != x; then
+    x_includes="-I$x_includes"
+fi
+AC_CHECK_LIB(X11, XmbDrawImageString, 
+    [ x_libraries="$x_libraries -lX11" ],
+    [ AC_MSG_RESULT([You need X11R6 to compile xcin.])
+      AC_MSG_RESULT([Please use --x-includes and --x-libraries to configure.])
+      exit 1 ])
+
+AC_SUBST(x_includes)
+AC_SUBST(x_libraries)
+
+
+dnl-----------------------------------------------------------------------
+dnl Output Makefiles and config.h
+dnl-----------------------------------------------------------------------
+if test -z "$xcin_rcdir"; then
+    xcin_rcdir=$sysconfdir
+fi
+if test -z "$xcin_dir"; then
+    xcin_dir=$libdir/xcin
+fi
+if test -z "$xcin_msgdir"; then
+    xcin_msgdir=$datadir/locale
+fi
+AC_SUBST(xcin_rcdir)
+AC_SUBST(xcin_dir)
+AC_SUBST(xcin_msgdir)
+
+AC_OUTPUT(Makefile:script/Makefile.in \
+	src/Makefile \
+ 	src/lib/Makefile \
+ 	src/lib/xcintool/Makefile \
+ 	src/lib/siod/Makefile \
+	src/lib/IMdkit/Makefile \
+	src/Cinput/Makefile \
+	src/Cinput/im_comm/Makefile \
+	src/Cinput/zh_hex/Makefile \
+	src/Cinput/gen_inp/Makefile \
+	src/Cinput/bimsphone/Makefile \
+	src/util/Makefile \
+	src/util/cin2tab/Makefile \
+	src/util/testprog/Makefile \
+	cin/Makefile \
+	cin/big5/Makefile \
+	cin/gb/Makefile \
+	etc/Makefile \
+	po/Makefile,
+	[ echo "#define XCIN_DEFAULT_RCDIR \"$xcin_rcdir\"" >> config.h
+	  echo "#define XCIN_DEFAULT_DIR \"$xcin_dir\"" >> config.h
+	  echo "#define XCIN_MSGLOCAT \"$xcin_msgdir\"" >> config.h ],
+	[ prefix=$prefix
+	  exec_prefix=$exec_prefix
+	  datadir=$datadir
+	  for i in 1 2 3 4 5
+	      do eval xcin_rcdir=$xcin_rcdir
+		 eval xcin_dir=$xcin_dir
+		 eval xcin_msgdir=$xcin_msgdir
+	      done ])
+
+AC_MSG_RESULT([making links ....])
+make -s makelinks

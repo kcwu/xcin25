@@ -1,0 +1,360 @@
+xcin-2.5.1-3:  1999/10/11
+------------------------------
+1. Fix a bug of symbolic link of libXimd.a in src/lib/Makefile.in.
+   Thanks to <JoeLu@freebsd.ee.ntu.edu.tw>.
+
+2. Fix a bug of gen_inp, memory model 2, tab reading.
+   Thanks to Carsten Jacobi <carsten@jakes.kawo1.rwth-aachen.de>.
+
+3. Change gen_inp to ignore the XK_KP_ keysym, so that it will not process
+   NumLock on keys.
+   Thanks to <loneeagle.bbs@bbs.ee.ntu.edu.tw>
+
+4. Change the xcin window raise behavior. Now xcin window will raise only
+   when it is working.
+   Thanks to <loneeagle.bbs@bbs.ee.ntu.edu.tw>
+
+5. Fix a bug in ic_destroy and im_close: point xccore->ic to null and redraw
+   xcin window.
+
+6. Several logical bugs of testprog has been fixed.
+
+7. Adjust the layout of xcinrc.in.
+
+8. xcin-2.5/doc update.
+
+
+xcin-2.5.1-2:  1999/9/23
+------------------------------
+1. bimsphone bug fix: don't send any irrelevent keys back to the XIM client
+   when bimsphone buffer is not empty, in order to work around with the 
+   problem of netscape.
+   Thanks to platin <platin@linux.org.tw>,
+	     hashao <hashao@china.com>.
+
+2. xcin-2.5/doc update.
+
+
+xcin-2.5-19990915:  1999/9/15
+------------------------------
+1. bimsphone bug fix: mcch choice problem for N%10 = 0 or 1, and '<', '>'
+   are not functional to change pages. Now page changes can be rotated, and
+   ',', '.' keys are also used for change pages.
+   Thanks to joe <joe@os.nctu.edu.tw>.
+
+2. bimsphone new function: add keyword SELEC_KEY in xcinrc to choose the
+   selection keys.
+   Thanks to Scott Tsai <scottt@tpts5.seed.net.tw>.
+
+3. gui.c & bimsphone bug fix: fix the displaying problem for mcch when
+   N%10 = 1.
+   Thanks to joe and Scott Tsai.
+
+
+xcin-2.5.1-1:  1999/9/3
+------------------------------
+1. Add GB cin tables: biaoxingma.cin, pinyin.cin, shuangpin.cin, wubizixing.cin
+   Thanks to Adoal Xu <adoal@iname.com>.
+
+2. Bug fix in bimsphone: now bimsphone in do Chinese input under NumLock ON.
+   (Thanks to the report from <hsin@med.cgu.edu.tw>)
+
+3. Bug fix in SB/2B funcion: now ignore ctrl & alt modified keys in 2B input.
+   (Thanks to the report from <bv1al@ms2.journalist.com.tw>)
+
+4. Bug fix in IC set focus when first start xcin.
+
+5. Documentation update.
+
+
+xcin-2.5.1:  1999/8/24
+------------------------------
+1. Documentation updates. Add the xcin-2.5/doc/README.En, the English
+   introduction.
+
+
+xcin-2.5.1-pre5:  1999/8/16
+------------------------------
+1. Rewrite check_ic_exist() and IC management in xim_IC.c, hopefully to 
+   avoid known bugs.
+
+2. Add an xcinrc option ICCHECK_DISABLE to turn off the ic checking.
+
+
+xcin-2.5.1-pre4:  1999/8/12
+------------------------------
+1. Add Big5 simplex.cin, update Big5 cj.cin.
+   Thanks to Voidoo <voidoo@glink.net.hk>
+
+2. Bug fix in cin2tab & gen_inp: mark the undefined char as 
+   ICODE_IDX_NOTEXIST.
+
+3. Bug fix in gen_inp: add "inpinfo->mcch_pgstate = MCCH_ONEPG" 
+   initialization/reset action.
+
+4. Bug fix in fkey.c: add key short name to be compatible with
+   Cinput/im_comm/keymap.c.
+
+5. Update in GPL Chinese translation (xcin-2.5/doc/COPYING).
+   Thanks to <ckhung@cyut.edu.tw>
+
+6. Separate libtabe completely from xcin. 
+   Configuration program and xcin.po updated.
+
+7. Simple change in xcin-2.5/src/lib/xcintool/open_data.c:
+   Add a functional to open obsulted path data file.
+
+
+xcin-2.5.1-pre3:  1999/8/1
+------------------------------
+1. Bug fix in fkey.c for FKEY_CHREP, FKEY_SIMD, and FKEY_IMFOCUS.
+
+2. Change in bimsphone: commit all when the char list window is full.
+
+3. Full implement of the wild card in gen_inp.
+   Bug fix in strcmp_wild() in xcintool.
+
+4. Add GB cin table: zhiranma.cin, adopted from xcingb-2.2 package.
+   Thanks to the author of xcingb-2.2: <fangh@hptc6.ihep.ac.cn>.
+
+
+xcin-2.5.1-pre2:  1999/7/26
+------------------------------
+1. Bug fix for IM focus function: add IM focus for 2B/SB switch.
+   (Thanks to Fernando <bv1al@new7.com.tw>)
+
+2. Add functional key configurable feature.
+
+
+xcin-2.5.1-pre1-1:  1999/7/16
+------------------------------
+1. Bug fix for gettext. Add msgmerge facility in xcin-2.5/script/generate.po.
+
+2. Small changes of module searching in module.c.
+
+
+xcin-2.5.1-pre1:  1999/7/13
+------------------------------
+1. libtabe/supports/bims/bims.c update. Thanks to
+	<joe@os.nctu.edu.tw> for Hsu keyboard patch
+	<Prince.bbs@miou.mat.ncku.edu.tw> for Eten keyboard patch
+
+2. Add GB ChanJei table. Thanks to
+	<blueslan@arphic.com.tw> 
+	<khon@tm.net.my>
+
+3. Add Big5 translated xcin.po file. Thanks to 
+   陳永昇 <cdchen@mail.about.net.tw>
+   邱智偉 <weichung@mail.cynix.com.tw>
+
+4. doc/COPYING (GPL translation) update.
+
+5. Fix bug of multi-cch choice in gen_inp.
+
+6. Replace the FreeBSD mergesort() function in xcintool library by the
+   my_merge_sort() function written by T.H.Hsieh.
+
+7. XCIN over all layout changed. Now "xcin_rc_t" contain the original data 
+   reading from rcfile, which will be passed to each IM module; while 
+   "core_config_t" combines the data of original "gui_conf_t" and "xim_conf_t"
+   which are the kernel data and will not be passed to the IM modules.
+
+8. Open the freedom (more freedom than GPL) of adoption of module.h and 
+   xcintool.h such that everyone can freely to write new xcin IM moudles.
+   The license of xcin is also modified to fit the requirement of GPL.
+
+9. Add a functional to print the internal comments of the modules
+   (command line option "-m").
+
+
+xcin-2.5.0-2:  1999/6/29
+------------------------------
+1. FAQ update.
+
+2. libtabe/supports/bims/bims.c update. bimsphone module improvement.
+
+3. Problem fix in cantonese.cin; Add setting of cantonese into xcinrc.
+
+4. Fix a bug of SPACE_RESET function in gen_inp.
+
+
+xcin-2.5.0-1:  1999/6/23
+------------------------------
+1. Fix db and dynamic linking flag problems in configure.in for FreeBSD.
+   Add libintl autoconf for FreeBSD.
+   Change the install procedure of xcin-2.5/cin.
+
+2. Fix a little bug of endkey functional of gen_inp.c
+
+3. Fix a little bug on IM focus functional.
+
+4. Small patch on bims.c of libtabe such that the un-interested keys
+   of bims can be returned ignored.
+
+
+xcin-2.5.0:  1999/6/21
+------------------------------
+1. Fix several bugs in Makefiles.
+
+2. Update documentation.
+
+3. Remove the documents: xcin-2.5/doc/local_prog. Now these document
+   will go into the package i18n_prog.tar.gz.
+
+4. Add po/ directory and a "xcin.pot" GNU gettext message file.
+
+
+xcin-2.5.0-pre3:
+------------------------------
+1. Add full autoconf facility.
+
+2. Fix a little bug in quick phrase: shif+alt+?
+
+
+xcin-2.5.0-pre2-4 (Bug fix):
+------------------------------
+1. gen_inp module is now re-designed. Now it can accept multiple keystrokes
+   for the same char. The cin2tab is also changed accordingly.
+
+   Change the keyword: "SPACE_IGNOR" to "SPACE_IGNORE".
+
+   Add a keyword: "AUTO_FULLUP" (thanks to cwhuang@linux.org.tw)
+
+2. General module interface changes slitly.
+
+3. libtabe update.
+
+4. Several improvement on bimsphone module.
+
+5. array.cin update: the %quickkey is removed and replaced by multiple
+   keystrokes feature of gen_inp.
+
+6. XNSeparatorofNestedList bug fixed. 
+   Add a new functional: IM focus (func key: ctrl+alt+f, keyword: IM_FOCUS_ON)
+
+7. Add simple garbage collection for unused IC.
+
+
+xcin-2.5.0-pre2-1 (Bug fix):
+------------------------------
+1. Bug fix in locale_setting.
+
+2. Bug fix in IMdkit, now xcin can start before the XIM clients.
+
+3. The IMDestroyCallback functionality of XIM clients has been realized.
+   It is independent of the XIM server and should be handled by Xlib.
+   Therefore, xcin can terminated be for any XIM client without the client
+   being crashed, provided that the client is free of bugs.
+
+4. Several fixes in libtabe:
+   a. the default open mode for .db files is changed to 0444.
+   b. the util programs is added in install process.
+
+5. Add "XKILL_DISABLE" option into xcinrc.
+
+6. Add locks in xim.c such that the xim_init(), switch_in(), xim_end(),
+   and switch_out() functions of modules will not be repeated called.
+
+7. Add doc: xcin-2.5/doc/locale-prog/ and example program: xcin-2.5/example.
+
+
+xcin-2.5.0-pre2:
+------------------------------
+1. Add libtabe and bimsphone module.
+	(Thanks to Pai-Hsiang Hsiao <shawn@iis.sinica.edu.tw>)
+
+2. Generalize the framework of module structer.
+	(Thanks to Steve Underwood <steveu@netpage.com.hk>
+
+3. Add the module ID tag into cin2tab and generalize its framework.
+
+4. Add "SPACE_RESET" and "AUTO_RESET" options to gen_inp module.
+
+5. Use ELF dynamic link facility to dlopen modules.
+
+
+xcin-2.5-pre1-5 (Bug fix):
+------------------------------
+1. Fix the IMdkit memory leak problem and remove the XIMP module from IMdkit.
+	(Thanks to Steve Underwood <steveu@netpage.com.hk>)
+
+2. Change some sentax of xcinrc such that the configuration of different
+   locales can be clearly specified. Now xcin is tested OK both in
+   zh_TW.Big5 & zh_CN.GB2312 locales.
+
+3. Fix bug in stable_sort and change the configure option QUICKSORT to
+   SYSSORT.
+
+4. Add license announcement doc of XCIN.
+
+5. Remove localedata/ and lcGen/ source from xcin source tree. They will be
+   maintained in i18n_tool package.
+
+6. Begin to add libtabe and bims source code and start the phone module
+   coding. These will be completed in xcin-2.5.0-pre2 release.
+
+
+xcin-2.5.0-pre1-4 (Bug fix):
+------------------------------
+1. Change Makefiles and configure to suitable for FreeBSD.
+	(Thanks to Keith Jang <jtjang@gcn.net.tw>
+		   Phantom Hong <phantoms@tpts7.seed.net.tw>)
+
+2. Rewrite a stable_sort & add QUICKSORT configure option to ensure the 
+   sorting stability.
+	(Thanks to Yung-Ching Hsiao <yhsiao@cae.wisc.edu>)
+
+3. Update array30.cin.
+	(Thanks to Reid Liu <reid@WormHole.dorm9.nccu.edu.tw>)
+
+4. Fix little bugs in documents and gui.c.
+	(Thanks to <RocBird.bbs@bbs.im.tku.edu.tw>)
+
+5. Add doc/FAQ document.
+
+6. Fix little bugs and make some improvement in gen_inp.c & gui.c.
+   Add an option "SINMD_IN_LINE1" in gen_inp module.
+	(Thanks to Steve Underwood <steveu@netpage.com.hk>)
+
+
+xcin-2.5.0-pre1
+------------------------------
+1. module_t 加入 show_keycode(), 用來顯示輸入完成的 keycode, 類似現在
+   xcin 的 -sinmd 功能。
+
+2. 新的 rcfile 讀取系統，採用蕭永慶兄所建議的 siod lib, rcfile 的語法
+   也改為 lisp/Scheme, 在設定上較前一版的更加靈活且嚴緊。
+
+3. 內部字元運作已不再使用 mbstowcs() 之類的函式做轉換，原因是該類函式
+   受限於 glibc 的轉換表。故目前 xcin 已全部改用 mbs 來處理字元。
+
+4. 完整的 im_comm (輸入法公用函式庫) 模組。
+
+5. 完整的 gen_inp (一般性輸入法模組) ，除了詞音的相關功能以外，過去
+   xcin-2.3.X 提供的所有功能，都已在此模組中實現了。
+
+6. 定義了 sys.cin (系統表格檔)，其內容是目前 locale 環境下的所有資訊。
+
+7. 重新實作了 cin2tab 程式，而 .cin 輸入法表格檔的格式也做了修正。
+
+
+xcin-2.5-19990217:
+------------------------------
+1. 新的 rcfile 讀取系統與介面函式，內部處理採用 wchar_t。
+
+2. 使用 locale 架構，所有的中文資料全部採用 wchar_t 來處理，而將轉碼部
+   分交給 glibc, 由 LC_CTYPE 的設定來處理。
+
+3. 使用 LC_MESSAGES 與 gettext 做訊息輸出。
+
+4. 只支援 XIM 協定。目前只支援 XIMPreeditNothing|XIMStatusNothing 模式。
+   已經能正確地在 xedit 中進行中文輸入。
+
+5. 輸入法模組動態載入。
+
+6. 目前已有內碼 (zh_hex) 輸入法與全形字輸入功能。
+
+
+
+
+T.H.Hsieh

@@ -1,0 +1,183 @@
+This is a very simple tutorial of the source of IMdkit library.
+It might be helpful when you want to study these complicated
+source code. This tutorial is not completed. Additional contents
+will be added in the future.
+
+
+****************************************************************************
+
+
+IMConn.c:	
+	XIM ims;
+
+	IMOpenIM():	_IMVaToNestedList, _FindModifiers, _GetIMS, 
+			ims->methods->setup   : xi18n_setup
+			ims->methods->openIM  : xi18n_openIM
+
+	IMCloseIM():	ims->methods->closeIM : xi18n_closeIM
+
+===========================================================
+i18nMethod.c:
+
+IMMethodsRec Xi18n_im_methods =
+{
+    xi18n_setup,	(ParseArgs, _Xi18nInitAttrList, _Xi18nInitExtension)
+
+    xi18n_openIM,	(CheckIMName: 
+				1. check trans.
+				2. set ims->protocol->methods;
+			 SetXi18nSelectionOwner: 
+				1. check the root window property for 
+				   XIM_SERVERS atom.
+				2. insert "@server=im_name" atom to root
+				   window property.
+				3. create "LOCALES" & "TRANSPORT" atoms.
+			 i18n_core->methods.begin ==> Xi18nXBegin
+
+			 _XRegisterFilterByType(
+				event=SelectionRequest, window=im_window,
+			        func=WaitXSelectionRequest(), data=ims))
+
+    xi18n_closeIM,	(i18n_core->methods.end ==> Xi18nXEnd
+
+			 _XUnregisterFilter(WaitXSelectionRequest())
+
+			 delete "@server=im_name" atom from root window
+			 property. )
+
+    xi18n_setIMValues,
+    xi18n_getIMValues,
+    xi18n_forwardEvent,
+    xi18n_commit,
+    xi18n_callCallback,
+    xi18n_preeditStart,
+    xi18n_preeditEnd,
+};
+ims->methods = Xi18n_im_methods;
+
+===========================================================
+i18nAttr.c:	(set the attributes)
+
+IMListOfAttr Default_IMattr[] =
+{
+    {XNQueryInputStyle, XimType_XIMStyles},
+    {(char *) NULL, (CARD16) 0}
+};
+
+IMListOfAttr Default_ICattr[] =
+{
+    {XNInputStyle,              XimType_CARD32},
+    {XNClientWindow,            XimType_Window},
+    {XNFocusWindow,             XimType_Window},
+    {XNFilterEvents,            XimType_CARD32},
+    {XNPreeditAttributes,       XimType_NEST},
+    {XNStatusAttributes,        XimType_NEST},
+    {XNFontSet,                 XimType_XFontSet},
+    {XNArea,                    XimType_XRectangle},
+    {XNAreaNeeded,              XimType_XRectangle},
+    {XNColormap,                XimType_CARD32},
+    {XNStdColormap,             XimType_CARD32},
+    {XNForeground,              XimType_CARD32},
+    {XNBackground,              XimType_CARD32},
+    {XNBackgroundPixmap,        XimType_CARD32},
+    {XNSpotLocation,            XimType_XPoint},
+    {XNLineSpace,               XimType_CARD32},
+    {XNPreeditState,            XimType_CARD32},
+    {XNSeparatorofNestedList,   XimType_SeparatorOfNestedList},
+    {(char *) NULL, (CARD16) NULL}
+};
+
+IMExtList Default_Extension[] =
+{
+    {"XIM_EXT_MOVE", XIM_EXTENSION, XIM_EXT_MOVE},
+    {"XIM_EXT_SET_EVENT_MASK", XIM_EXTENSION, XIM_EXT_SET_EVENT_MASK},
+    {"XIM_EXT_FORWARD_KEYEVENT", XIM_EXTENSION, XIM_EXT_FORWARD_KEYEVENT},
+    {(char *) NULL, (CARD8) NULL, (CARD8) NULL}
+};
+
+===========================================================
+i18nX.c:
+
+_Xi18nCheckXAddress(): "X/" transport, set i18n_core->methods.
+
+        i18n_core->methods.begin = Xi18nXBegin;
+		Create atom: xim_request     = "_XIM_PROTOCOL"
+		Create atom: connect_request = "_XIM_XCONNECT"
+		_XRegisterFilterByType(event=ClientMessage, window=im_window,
+				       func=WaitXConnectMessage(), data=ims)
+
+        i18n_core->methods.end = Xi18nXEnd;
+		_XUnregisterFilter(WaitXConnectMessage());
+
+        i18n_core->methods.send = Xi18nXSend;
+
+        i18n_core->methods.wait = Xi18nXWait;
+
+        i18n_core->methods.disconnect = Xi18nXDisconnect;
+
+WaitXConnectMessage:
+	if (event->message_type == connect_request)
+		ReadXConnectMessage
+
+ReadXConnectMessage:
+	check version: major_version = minor_version = 0;
+
+	_XRegisterFilterByType(event=ClientMessage, window=accept_win,
+			       func=WaitXIMProtocol, data=ims)
+
+	XSendEvent: to new_client, ClientMessage.
+
+WaitXIMProtocol:
+	if (event->vessage_type == xim_request) {
+		ReadXIMMessage();
+		_Xi18nMessageHandler();
+	}
+
+ReadXIMMessage:
+	get connect_id from event.
+
+	if (ev->format == 8) {
+		check for XIM_CONNECT & set byte_order.
+
+		return the message buf: header + data (length * 4)
+			header: CARD8  major_opcode;
+				CARD8  minor_opcode;
+				CARD16 length;
+	}
+	else if (ev->format == 32) {
+		XGetWindowProperty(from=accept_win);
+
+		return the property data.
+	}
+
+
+===========================================================
+i18nPtHdr.c:
+
+_Xi18nMessageHandler:
+	XIM_GET_IM_VALUES:	GetIMValuesMessageProc()
+
+GetIMValuesMessageProc:
+
+
+----------------------------------------------------------------------------
+/*
+ * Register a filter with the filter machinery by type code.
+ */
+void
+_XRegisterFilterByType(display, window, start_type, end_type,
+                       filter, client_data)
+    Display *display;
+    Window window;
+    int start_type;
+    int end_type;
+    Bool (*filter)(
+#if NeedNestedPrototypes
+                   Display*, Window, XEvent*, XPointer
+#endif
+                   );
+    XPointer client_data;
+----------------------------------------------------------------------------
+
+See X11/imInsClbk.c:	_XimFilterPropertyNotify,
+			_XimRegisterIMInstantiateCallback

@@ -1,0 +1,26 @@
+This is a very simple program which demonstrate the I18N, locale, and
+XIM supports programming. It also serves as an testing XIM client for
+xcin-2.5. For details about how to write a Xi18n program, please read
+the document comes with the package:  i18n_prog.tar.gz
+
+	i18n_prog/doc/index.html
+
+If you do not familiar with the I18N and XIM environment and are not
+sure if xcin can work correctly in your system, it would be a good
+idea to use this program for test. First you should build this program
+from the source code. Just go to the top source directory "xcin-2.5/"
+and run "configure" program if you haven't run it, and type "make"
+to build testprog. After that you can run this program and test it 
+with xcin.
+
+By default this program will not be installed into your system. It also
+comes with I18N message translation (po files). If you want to have the 
+internationalized message output, you should run "make install" in this
+directory, then the po files will be installed in the "po/" sub-dir
+properly, and you can set the LC_MESSAGES category properly to have the
+i18n message output.
+
+For detailed usage description of testprog, please run "testprog -h".
+
+
+T.H.Hsieh

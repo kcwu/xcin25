@@ -1,0 +1,210 @@
+注音輸入法模組: bimsphone
+
+1. 簡介:
+
+   本模組是專用的注音輸入法模組，直接採用了 libtabe 計畫
+
+	http://libtabe.sourceforge.net/
+
+   所開發的 libtabe 做為注音猜字引擎。它擁有類似舊版 xcin 的詞音輸入功能，
+   但具有更準確的猜字能力，相信對於注音輸入法的使用者而言會是個很有用的輸入
+   工具。
+
+   請注意本輸入法模組不同於 gen_inp 模組，它不使用 .cin 或 .tab 作為資料檔，
+   而是使用 tsi.db 與 yin.db 作為其資料檔。
+
+   目前本模組可支援兩種輸入法: 一為 bimsphone, 即 bims 注音輸入法，您可以進
+   一步選擇是否開啟自動選字功能，若開啟，則它在多重字選擇時，就有自動選字的
+   能力，類似過去的詞音輸入法或自然輸入法。若關閉，則為一般的注音輸入法，但
+   與 gen_inp 的 phone.cin 不同的是，它可以讓您選擇不同的鍵盤對映，同時對於
+   注音的輸入習慣有較好的詮釋。
+
+   另一種輸入法為 bimspinyin, 即 bims 拼音輸入法。與 gen_inp 的 pinyin.cin
+   不同的是，這裡多了多重字自動選字的功能，可以讓拼音輸入更便捷快速。
+
+   由於本模組的引擎: libtabe, 其在設計之初是以「音」導向的，而且其資料檔的
+   內容又特別以台灣地區的國語發音為標準，故事實上它可能只特別適用於台灣地區
+   的使用者。對於其他地區的使用者，目前沒有支援，也許未來會有所改進。
+
+
+2. 設定:
+
+   您只要在 xcin 的 rcfile 中加入如下幾行即可:
+
+===========================================================================
+(define bimsphone
+        '((MODULE       bimsphone)
+          (SETKEY	6)))
+===========================================================================
+
+   其中:
+
+   a. "define" 之後 "bimsphone" 是輸入法名。本模組只能接受 "bimsphone" 這個
+      輸入法名。
+
+   b. SETKEY: 指定本輸入法的啟動鍵。上例即為: ctrl+alt+6 。
+
+   c. MODULE: 指定輸入法模組名。在此一定要填入 "bimsphone" 。
+
+
+   除此之外，您可以須設定以下幾個選項:
+
+   d. N_SELECTION_KEY: 設定選則鍵個數: 其數字範圍必須是 5 到 10，預設是 9。
+
+   e. SELECTION_KEYS: 設定選擇鍵列表:
+	0  使用 1234567890 為選擇鍵
+	1  使用 asdfghjkl; 為選擇鍵
+      預設是 0。
+
+   f. PAGE_KEYS: 設定多重字 (詞) 選擇時的換頁鍵:
+	1. 使用 < 鍵往前捲頁， > 鍵往後捲頁。
+	2. 使用 , 鍵往前捲頁， . 鍵往後捲頁。
+	4. 使用左方向鍵往前捲頁，右方向鍵往後捲頁。
+      若您想要複選，只要將上述的數值任裏組合相加即可。若您設為 0 時，則只
+      有 space 鍵可以往後捲頁。預設為 4。
+
+   g. QPHRASE_MODE: 設定 modifier escape mode, 詳見 im_comm 一文的說明。
+
+
+   底下兩個是 bimsphone 輸入法的專屬設定:
+
+   h. AUTO_SELECTION: 設定是否啟動自動選字模式。
+
+   i. KEYMAP: 設定鍵盤對映:
+	0  為零壹鍵盤
+	1  為倚天鍵盤
+	2  為倚天 26 鍵盤
+	3  為許氏鍵盤 
+      預設是零壹鍵盤。
+
+
+   底下這個是 bimspinyin 輸入法的轉屬設定 (在此輸入法中，自動選字模式永遠是
+   開啟的，而且鍵盤對映永遠是零壹鍵盤，其中鍵盤對映只有在模組內部運作時才會
+   參考到):
+
+   j. PINPHO_MAP: 指定拼音碼與注音碼表照表。
+
+
+   底下的設定是當 AUTO_SELECTION 開啟時才會有作用:
+
+   k. TSI_FNAME: 詞庫資料檔檔名，您可以直接設該檔案的絕對路徑。若您只有指定
+	檔名，則 xcin 會到 $XCIN_DIR 底下搜尋。
+
+   l. YIN_FNAME: 音庫資料檔檔名，您可以直接設該檔案的絕對路徑。若您只有指定
+	檔名，則 xcin 會到 $XCIN_DIR 底下搜尋。
+
+   m. SPACE_SELECTION: 設定使用空白鍵直接選字，這時空白鍵將不能用來上字，要
+	上字時要使用 return 鍵。預設為 NO。
+
+   n. PHRASE_SELECTION: 是否開啟多重選詞功能。若設為 YES 時，則您第一次按
+	Up 鍵時，若有詞可選擇選詞，否則選字。若有詞可選，且目前是在選詞列
+	表時，再按一次 Up 鍵可以切換到選字列表，再按一次 Up 鍵可以切換到選
+	詞列表，如此循環。若設為 NO 時，則按 Up 鍵只能進入選字列表。其預設
+	值為 YES。
+
+   o. N_SELECTION_PHR: 設定選詞的個數: 其上限不得超過 NSELKEY 的值。
+
+
+   底下這個只有在 AUTO_SELECTION 關閉時才有效:
+
+   p. AUTO_UPCHAR: 是否起動自動上字功能，預設值為 NO。此選項只有在 
+	AUTO_SELECTION 關閉時才有效。
+
+
+3. 全域設定:
+
+   由於本模組的設定項目相當多，因此當您需要為許多輸入法進行設定時，可能會
+   很不方便。再者，很多人在輸入法的使用習慣多半是很固定的，故各輸入法所需
+   的設定可能大部分都相同，只有少部分不一樣。在這情況下，若使用輸入法的全
+   域設定，則可以大大減化 xcinrc 的內容。
+
+   本模組的全域設定方式如下:
+
+===========================================================================
+(define bimsphone_default
+        '((cmd1         value1)
+          (....         ......)))
+===========================================================================
+
+   也就是說，只要將上頭的 inpname (輸入法名) 改成 bimsphone_default 即可，
+   其餘的設定項與上頭所列的完全相同。通常我們會在這全域設定中設好所有項目，
+   做為所有採用 bimsphone 模組的輸入法預設值，而各別的輸入法只要針對與這裡
+   的預設值不同的部分進行設定即可。
+
+
+4. 範例:
+
+   首先我們先做一個輸入法的全域設定。這個全域設定與 locale 環境無關，故對於
+   任何 locale 都可適用:
+
+(define bimsphone_default
+        '((N_SELECTION_KEY      9)
+          (SELECTION_KEYS       0)      ; 0: "1234567890", 1: "asdfgjkl;"
+          (PAGE_KEYS            5)      ; 1:<> 2:,. 4:(Rt)(Lt)
+          (QPHRASE_MODE         1)      ; 1: shift, 2: ctrl, 4: alt
+        ;
+        ; This is only valid for "bimsphone*" IM name.
+          (AUTO_SELECTION       YES)
+          (KEYMAP               0)      ; 0: zozy, 1: et, 2: et26, 3: hsu
+        ;
+        ; This is only valid for "bimspinyin*" IM name.
+          (PINPHO_MAP           "bims_pinyin")
+        ;
+        ; The following has effect only when AUTO_SELECTION is YES
+          (TSI_FNAME            "tsi.db")
+          (YIN_FNAME            "yin.db")
+          (SPACE_SELECTION      NO)
+          (PHRASE_SELECTION     YES)
+          (N_SELECTION_PHR      4)
+        ;
+        ; The following has effect only when AUTO_SELECTION is NO
+          (AUTO_UPCHAR          YES)))
+
+接下來是各輸入法的細部設定。對於具備自動選字的注音輸入法，則以上的預設選
+項不需額外修改，即可使用:
+
+(define bimsphone@big5
+        '((SETKEY               6)
+          (MODULE               "bimsphone")))
+
+如果要關掉自動選字功能，而且要與 bimsphone 輸入法共存的話，則您必須使用另
+一個輸入法名，而且必須要以 bimsphone 為開頭，例如:
+
+(define bimsphoneS@big5
+        '((SETKEY               7)
+	  (AUTO_SELECTION	"YES")
+          (MODULE               "bimsphone")))
+
+如果要使用拼音輸入，則輸入法名必須要以 bimspinyin 為開頭:
+
+(define bimspinyin@big5
+        '((SETKEY               5)
+          (MODULE               "bimsphone")))
+
+
+5. 使用方式:
+
+   當您切換至 bimsphone 進行注音輸入時，您所輸入的中文字都會暫存在 xcin 的
+   視窗中，直到視窗已滿，或者您按下上字鍵 (如 space 或 return 鍵) 時字才會
+   送往 XIM client 視窗。若您在輸入中途， bimsphone 猜錯字時，您可以按左右
+   鍵使游標在 xcin 視窗中移動，待游標移到錯誤的字上時，按「上」鍵即可列出
+   同音字 (詞) 的選單列表，這時您可以用選字型選擇正確的字，或用 < > , . 等
+   鍵往前或往後翻頁。
+
+   若您在輸入中途臨時需要輸入英文時，您可以按下 CapsLock 鍵，則這時您的輸
+   入都會直接以英文輸出。請注意如果此時在 xcin 視窗中仍有中文字時，輸出的
+   英文會連同 xcin 視窗的中文字一起送出。
+
+   由於 bimsphone 擁有往前修正的功能，因此如果您打字中途發現 bimsphone 猜錯
+   字時，不必急著回頭改字，您可以持續再打一段字， bimsphone 可以根據您的語
+   意適度地往回修正錯誤，直到您打完一段句子後 (且這段句子仍留在 xcin 視窗時)，
+   若發現還是有錯字，再用左右鍵回去修改，如此可以加快打字的速度。
+
+   若 xcin 視窗中有中文字時，您的向方鍵只能用來移動 xcin 視窗的游標，或者
+   進入多動選字 (詞) 的模式，而不能用來移動 XIM client 上的游標。若您希望
+   移動 XIM client 上的游標，您必須先將 xcin 視窗中的字送出或清除，或者，
+   您也可以按下 CapsLock 鍵，這時方向鍵就可以用來移動 XIM client 的游標，
+   但不影響 xcin 視窗中的字 (字也不會送出，除非您這時打入英文字)。
+
+
+T.H.Hsieh  

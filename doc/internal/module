@@ -1,0 +1,629 @@
+本文簡述 xcin 輸入法 module 的架構，以及新增 module 的方法。
+
+----------------------------------------
+A. 內部架構 (include/module.h, include/imodule.h, include/cinput.h, module.c):
+
+   module 的設計目的是希望 programmer 可以很容易地加入新的輸入法支援，因
+   此我已盡量將它拆成兩個部分:
+
+	1. programmer interface (module.h)
+	2. internal implementation (imodule.h)
+
+   Programmer 可以完全不理會 internal 的細節，他只需要將 module.h 裏頭定
+   義的 module_t 資料結構填好即可。但可能有些人對於 internal 細節有興趣，
+   故本節對此稍作說明。
+
+   所謂「module 載入或被套用」其實是兩個階段，用以下的例子說明:
+
+   例如某位使用者按下 ctrl+alt+1 啟動 cj(倉頡) 輸入法，則 xcin 會到其內部
+   cinput 列表去找該輸入法並啟動它，其定義如下:
+
+=========================================================================
+typedef struct cinput_s {
+    char *modname;
+    char *objname;
+    imodule_t *inpmod;
+} cinput_t;
+
+cinput_t cinput[MAX_INP_ENTRY];
+=========================================================================
+
+   假設 xcin 跟據 rcfile 的設定，使用者有註冊使用 cj 輸入法，且該輸入法應
+   套用 gen_inp module, 其 setkey 是 1, 但該輸入法還沒被載入，則 cinput 的
+   內容如下:
+
+	cinput[1].modname = "gen_inp";
+	cinput[1].objname = "cj";
+	cinput[1].inpmod = NULL;
+
+   其中 inpmod 是真正已載入且已套用 cj 這個輸入法的 module, 若其值不是 NULL, 
+   表示該輸入法已經載入完畢且可以使用，則 xcin 會馬上使用它。反之， xcin 將
+   進行接下來的載入工作。
+
+   這時 xcin 會到 tmodule_t *mod_templet; 這個 list 中尋找看有沒有 "gen_inp"
+   這個 module 「套模」。 tmodule_t 是定義在 imodule.h 中，屬於 internal
+   的部分。如果找到了，則直接套用，這時程式會根據 tmodule_t 的資訊，產生
+   一個 imodule_t (定義在 imodule.h) 的結構，它有 conf data structer,
+   object name 為 "cj", 即直接套用 cj 輸入法。且 cinput[1].inpmod 也會指
+   向這個新產生出來的 imodule_t 結構。
+
+   萬一在 mod_templet 中找不到 "gen_inp" 的話，就要用 dlopen() 自硬碟的 
+   gen_inp.so 檔載入了。載入後，它就會加入 mod_templet list 裏頭，然後再
+   做出一個 cj 輸入法的 imodule_t 來使用。
+
+   這裏很重要的是: 一個 module 不是一個運作實體 (object), 它只是個套模，是
+   準備被某個輸入法拿來套用的，一個 module 套模可以被多種不同的輸入法套用。
+   因此，在 module 定義之初，其本身的資料結構是不存在的，而是要等它被某個輸
+   入法套用 (即產生 imodule_t) 時，系統才會 malloc() 一塊空間給它做資料結構，
+   並由 rcfile 讀取系統讀入設定值 (請見以下說明)。
+
+
+
+----------------------------------------
+B. 資料結構 (include/module.h):
+
+   由於 include/module.h 定義了 xcin module 介面，而 include/xcintool.h 宣
+   告了 xcin 相關的工具函式，這兩個 .h 檔都是在撰寫 xcin module 時所必須的，
+   為了鼓勵大家為 xcin 寫新模組，我們特別開放這兩個 .h 檔的版權: 儘管整個
+   xcin 套件屬於 GPL, 但任何人若需要為 xcin 寫新模組時，他們可以以任何形式
+   引用這兩個檔的內容，而不會影響到他們所寫的模組的版權狀態。詳見 CopyRight 
+   的聲明。
+
+   要加入新的輸入法 module, 您只要填好如下的資料結構並寫好相關的函式即可:
+
+=================================  module.h  ==============================
+typedef struct module_s  module_t;
+struct module_s {
+    char *name;
+    char *version;
+    char *comments;
+    char **valid_objname;
+    enum mtype module_type;
+
+    int conf_size;
+    int (*init) (void *conf, char *objname, xcin_rc_t *xc);
+        /* called when IM first loaded & initialized. */
+    int (*xim_init) (void *conf, inpinfo_t *inpinfo);
+        /* called when trigger key occures to switch IM. */
+    unsigned (*xim_end) (void *conf, inpinfo_t *inpinfo);
+        /* called just before xim_init() to leave IM, not necessary */
+    unsigned (*keystroke) (void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo);
+        /* called to input key code, and output chinese char. */
+    int (*show_keystroke) (void *conf, simdinfo_t *simdinfo);
+        /* called to show the key stroke */
+    int (*terminate) (void *conf);
+	/* called when xcin is going to exit. */
+};
+=============================================================================
+
+   請注意，由於 xcin 採用的是 module 被輸入法套用，加上每一個 IC (Input 
+   Context, 請見 structer 一文的說明) 的輸入狀態彼此獨立的設計，故輸入
+   法在 xcin 中所扮演的角色就好像是一個 server, 它靜靜地等待來自 xcin
+   的請求，並做出回應。因此，所有的輸入法 module 的內部資料結構應分兩個
+   部分: 該輸入法的公用設定，由 void *conf 變數傳入上述的 module 函式中；
+   另一個是每個 IC 的輸入狀態資料，這裏我們並沒有將整個 IC 結構傳入 module
+   函式裏，那是因為 IC 結構還牽涉到很多與 XIM 相關的細節，而我希望每個輸
+   入法 module 可以與這些細節完全無關，故在此是將 inpinfo_t *inpinfo 傳入
+   (對於 show_keystroke 而言傳入的是 simdinfo_t *simdinfo), inpinfo 這個
+   資料結構包含了目前 xcin 的狀態與輸入法的相關資訊，是二者間的溝通管道。
+
+
+   1. 該輸入法的公用設定:
+
+      這些設定主要是從 rcfile 讀取系統的資料所設定的，同時也可以用來保存
+      xim_init() 呼叫時來自 xcin_rc_t *xc (即 xcin_rc) 所需的資料。舉一個
+      例子:
+
+============================================================================
+(define cj
+        '((SETKEY         1)
+          (AUTO_COMPOSE   YES)
+          (AUTO_UPCHAR    YES)
+          (AUTO_FULLUP    NO)
+          (SPACE_AUTOUP   NO)
+          (SELKEY_SHIFT   NO)
+          (SPACE_IGNORE   NO)
+          (SPACE_RESET    YES)
+          (AUTO_RESET     NO)
+          (END_KEY        NO)
+          (WILD_ENABLE    NO)
+          (AUTO_SELECT    NO)
+          (SINMD_IN_LINE1 NO)
+          (BEEP_WRONG     YES)
+          (BEEP_DUPCHAR   YES)))
+============================================================================
+
+      上述的設定是在啟動 xcin 之後，任何場合下 (或在任何 IC 下) 都相同的。
+      但由於 cj 這個輸入法必須套用 "gen_inp" module, 且 "gen_inp" module
+      也可以被其他輸入法所套用，但別的輸入法在套用後，其上述的公用設定值不
+      見得與 cj 輸入法一樣。換句話說，有許多輸入法都可以套用 "gen_inp"
+      module, 使用該 module 的函式與功能，但各別輸入法的公用設定資料結構必
+      須分開。
+
+      因此，在上頭的 module_t 資料結構中，沒有「公用設定區」的欄位，相反的
+      我們有「公用設定區大小」的欄位: int conf_size; 這是 programmer 必須
+      指定的，因為每個不同的輸入法 module 其公用設定區資料結構可能不一樣。
+      系統會直到該 module 真正被某個輸入法套用後，才會根據 conf_size 的值
+      為此 module (輸入法) 分配一塊獨立的公用資料結構區域。
+
+      至於 module 中的函式要如何使用公用資料結構呢? 各位可以看到每個函式都
+      有一個 void *conf 欄位，也就是該資料結構會經由此欄位傳入。綜上所述，
+      當我們在寫程式時，我們必須遵守以下的範例:
+
+============================================================================
+typedef struct {		/* 這是此 module 自定的公用資料結構 */
+    char *inpname;
+    int  setkey;
+    ...........
+} my_module_datastr_t;
+
+int my_module_init(void *conf, char *objname, core_config_t *xc)
+/* 這是此 module 的 init() 函式 */
+{
+    my_module_datastr_t *cf = (my_module_datastr_t *)conf;
+
+    cf->inpname = .....;
+    cf->setkey = .....;
+}
+
+.................
+
+module_t module_ptr = {
+    ......
+    sizeof(my_module_datastr_t),	/* 這是 conf_size 欄位 */
+    ......
+    my_module_init,			/* 這是 init 欄位 */
+};
+============================================================================
+
+      請注意，最後的 module_ptr 這個名字是特殊的，一定要用這個名字，這樣
+      xcin 在使用 dlopen() 載入此 module 時，才能找到 module_t 裏頭的每個
+      欄位。
+
+
+   2. 每個 IC 的輸入狀態資料:
+
+      每個 IC 的輸入狀態資料是由各別輸入法 module 與 xcin 系統共同維護的。
+      當每個 X window 視窗準備接受 xcin 輸入時， xcin 就會為它產生一個 IC
+      同時也會有一個 inpinfo_t 資料結構來儲存 IC 輸入狀態資料:
+
+=============================================================================
+typedef struct inpinfo_s  inpinfo_t;
+struct inpinfo_s {
+    int imid;                           /* ID of current IM Context */
+    void *iccf;                         /* Internal data of IM for each IC */
+
+    char *inp_cname;                    /* IM Chinese name */
+    char *inp_ename;                    /* IM English name */
+    ubyte_t area3_len;                  /* Length of area 3 of window (n_char)*/
+    ubyte_t zh_ascii;                   /* The zh_ascii mode */
+    unsigned short xcin_wlen;           /* xcin window length */
+    unsigned guimode;                   /* GUI mode flag */
+
+    ubyte_t keystroke_len;              /* # chars of keystroke */
+    wch_t *s_keystroke;                 /* keystroke printed in area 3 */
+    wch_t *suggest_skeystroke;          /* keystroke printed in area 3 */
+
+    ubyte_t n_selkey;                   /* # of selection keys */
+    wch_t *s_selkey;                    /* the displayed select keys */
+    unsigned short n_mcch;              /* # of chars with the same keystroke */
+    wch_t *mcch;                        /* multi-char list */
+    ubyte_t *mcch_grouping;             /* grouping of mcch list */
+    byte_t mcch_pgstate;                /* page state of multi-char */
+
+    unsigned short n_lcch;              /* # of composed cch list. */
+    wch_t *lcch;                        /* composed cch list. */
+    unsigned short edit_pos;            /* editing position in lcch list. */
+    ubyte_t *lcch_grouping;             /* grouping of lcch list */
+
+    wch_t cch_publish;                  /* A published cch. */
+    char *cch;                          /* the string for commit. */
+};
+=============================================================================
+
+      而此資料結講會傳入某些特定的 module 函式中 (如 keystroke() 函式)，讓
+      module 參與處理。其每個欄位的意義如下:
+
+      imid:  目前使用本輸入法 module 的 IMC 的編號。
+
+      iccf:  有時候當輸入法模組需要為每一個 IC (事實上是每一個 IMC，每個
+	  IC 可以有各自的 IMC, 也可以共用一個 IMC。見 structer 一文的說明)
+	  各別產生資料結構時，則有兩個做法: 一是自行在該輸入法的公用設定
+	  區 (見第 1 點) 中自行維護一個 IMC 資料串列，然後藉由 imid 來視
+	  別這些資料串列是屬於那些 IMC。另一個較簡單的做法是利用 iccf 這
+	  個指標，讓它指到目前 IMC 所屬的資料結構，則每當某個 IMC 被使用
+	  時，iccf 就自然指到其所屬的資料結構了。
+
+	  請注意， xcin 不會替您維護此指標所指的資料結構，故當您要用此指
+	  標時，必須自行確定它確實指到真正的資料結構上，而且由於 inpinfo
+	  是所有輸入法共用的，故您必須確定每次在輸入法切換之際， iccf 的
+	  指向仍是正確的。一個簡單的做法是在 xim_init() (見後述) 中 malloc
+	  一個區域給 iccf, 而在 xim_end() (見後述) 中將它 free 掉。
+
+      inp_cname:  此輸入法的中文名。
+
+      inp_ename:  此輸入法的英文名。
+
+      area3_len:  組字區大小 (單位: 英文母字個數)
+
+      zh_ascii:   目前 xcin 是否處於全形輸入模式？是則其值為 1，否則為 0。
+
+      xcin_wlen:  這是由 xcin 所設定的，用來告訴輸入法模組目前 xcin 視窗的
+		  長度。
+
+      guimode:  輸入法模組可以用這個變數來設定 GUI 系統特定的顯示狀態:
+
+	  GUIMOD_SELKEYSPOT:  當目前輸入法處於多重字選擇時，此設定可以通知
+		GUI 系統是否將每個選擇鍵用顯眼的顏色 (Spot light) 來顯示。
+
+	  GUIMOD_SINMDLINE1:  此設定可以通知 GUI 系統在印出「輸入法字鍵碼」
+		時，是在原來位置印出，還是改在第一行印出。
+
+	  GUIMOD_LISTCHAR:  若此設定為 on, 則 GUI 系統會在 xcin 視窗的第一
+		行印出 inpinfo->lcch 字串的內容，並根據 inpinfo->edit_pos
+		畫出游標位置，這是用於 bimsphone 模組，當輸入中文字時，
+		中文字並不會馬上跑到 client 視窗裏，而是留在 xcin 視窗的
+		第一行，而游標則顯示了目前的輸入位置。若設為 off, 則 xcin 視
+		窗的第一行將用做多重字 (詞) 選擇的列表，即列出 inpinfo->mcch
+		的內容 (如果有內容的話)。
+
+      keystroke_len:  目前已輸入的字鍵碼長度。
+
+      s_keystroke:  目前已輸入的字鍵碼，即將顯示在 xcin 視窗中第二行第二
+	  區的內容。請注意 xcin 本身不會維護此緩衝區的內容，故各輸入法必
+	  須自行維護它，請見前面 iccf 的說明。
+
+      suggest_skeystroke:  此輸入法模組所建議的 keystroke 顯示字串。輸入
+	  模組可以決定是否要提供此資料。其用法是: 當某輸入法組字完成後，
+	  它可以將此字完整的 keystroke 填入此 buffer 中。 xcin 若發現用
+	  來顯示 ksystroke 的函式 (即 show_keystroke()) 所屬的輸入法與本
+	  輸入法相同時，它就會直接採用 suggest_skeystroke 的內容來顯示
+	  xcin 視窗中第二行第三區的資料，而不會去呼叫該輸入法的 
+	  show_keystroke() 函式。
+
+	  請注意 xcin 本身不會維護此緩衝區的內容，故各輸入法必須自行維護
+	  它，請見前面 iccf 的說明。
+
+      n_selkey:  本輸入法多重字選擇鍵的個數。
+
+      s_selkey:  本輸入法多重字選擇鍵列表。請注意 xcin 本身不會維護此緩衝
+	  區的內容，故各輸入法必須自行維護它。
+
+      n_mcch:  目前的多重字詞 buffer mcch 的字數。
+
+      mcch:  目前的多重字列表，此列表的大小不應超過 n_selkey 的值。請注意 
+	  xcin 本身不會維護此緩衝區的內容，故各輸入法必須自行維護它。
+
+      mcch_grouping:  mcch 的群列表。如果 mcch_grouping 為 NULL 時，則每個
+	  mcch 中的字即為一個獨立的選項，且 n_mcch 即為 mcch 中的字數。若
+	  mcch_grouping 不為 NULL 時，則第一個 mcch_grouping 的值代表總共
+	  有幾個選項，而其後每個 mcch_grouping 的值代表該選項在 mcch 中的
+	  字數。例如:
+
+		n_mcch = 9;
+		mcch_grouping[5] = {4, 2, 2, 1, 4}
+		mcch = {今日天氣佳風和日麗}
+
+	  其中第一個 4 即代表總共有 4 個選項。則 xcin 在多重字詞選擇時會將
+	  它解釋為
+
+		1.今日  2.天氣  3.佳  4.風和日麗
+
+	  若 mcch 與 n_mcch 的內容不變，但 mcch_grouping 為 NULL, 則 xcin 
+	  會將它解釋為
+
+		1.今  2.日  3.天  4.氣  5.佳  6.風  7.和  8.日  9.麗
+
+	  因此，若在一般多重字選擇時，您不需要 mcch_grouping, 故將它設為
+	  NULL 即可。若要選詞時，可以將詞的內容全部填入 mcch 中，並以
+	  mcch_grouping 做為各詞之間的區隔。
+
+      mcch_pgstate:  表示目前多重字的「頁」狀態，其中「一頁」代表 xcin 視
+	  窗第一行可以顯示的寬度。其值可以如下:
+
+	  MCCH_ONEPG:  多重字總數可以在一頁內顯示者。
+
+	  MCCH_BEGIN:  多重字總數超過一頁可顯示，此時正在第一頁。
+
+	  MCCH_MIDDLE: 多重字總數超過一頁可顯示，此時正在第一頁與最後一頁之間。
+
+	  MCCH_END:  多重字總數超過一頁可顯示，此時正在最後一頁。
+
+          有關 xcin 視窗中各顯示區位置與意義，請見 structer 一文的說明。
+
+      n_lcch:  lcch 緩衝區內中文字 (群) 的個數。
+
+      lcch:  bimsphone 及其他具類似「自然」輸入法用來列示已輸入的中文字串
+	  的緩衝區，見前面 guimode -> GUIMOD_LISTCHAR 的說明。請注意 xcin
+	  本身不維護此緩衝區，故各輸入法模組若要使用它時，必須自行維護它。
+	  請見前面 iccf 的說明。
+
+      edit_pos:  指示 lcch 中文字串列中目前的游標位置，請見前面
+	  guimode -> GUIMOD_LISTCHAR 的說明。
+
+      lcch_grouping:  lcch 的群列表。其與 lcch, n_lcch 的關係與 mcch_grouping
+	  mcch, n_mcch 之間的關係是完全相類比的。其作用是在類似 bimsphone 或
+	  「自然」輸入法中，在已輸入的中文字串的緩衝區下標示底線，以代表一個
+	  個有意義的詞。例如在緩衝區中已輸入了:
+
+		今日天氣佳風和日麗
+		--- ---   -------
+	  若此時 lcch_grouping 的內容為 {4, 2, 2, 1, 4} 且 n_lcch=9 時，則 
+	  xcin 會標示如上的底線。若 lcch_grouping 為 NULL 時，則 xcin 只會畫
+	  出那些字，而不會標上任何底線。
+
+      cch_publish:  表示目前已完成組字且可以「公佈」的中文字。它將被用來做
+	  「輸入法字鍵顯示」用，見後述。
+
+      cch:  用來存放輸入法模組準備 commit 給 XIM client 的字串。請注意 xcin
+	  本身不維護此緩衝區，故各輸入法模組若要使用它時，必須自行維護它。
+
+
+----------------------------------------
+C. module_t 的欄位說明:
+
+   以下各欄位若其後有標示 (*) 者表示必須要有，否則為可有可無 (即可設為 0 或
+   NULL)。
+
+   1. name (*):  模組名稱。
+
+   2. version (*):  
+
+      模組的版本。請注意系統的模組版本是採用日期字串，如 "19990217"。當系統
+      載入此模組時，它會檢查此模組的版本是不是與系統版本不一樣，是的話則不
+      載入 (原因是系統的模組架構可能已改變) 。因此，當您要為 xcin 加入新模
+      組時，請注意要針對目前 xcin 的模組定義與版本來寫。
+
+   3. comments:
+
+      本模組的簡短說明。可以藉由 xcin -m <module name> 來印出，詳見 Usage
+      一文的說明。
+
+
+   4. valid_objname:
+
+      指定可用來套用此 module 的輸入法名串列。此串列最後必須以一個 NULL item
+      結束。若不指定，則系統假設此 module 只能被名稱為 name 的輸入法 (與此
+      模組同名) 所套用。串列名稱可以用 * 或 ? 等萬用字元，例如:
+
+	{"my_inp", "my_inp_ext_*", "my_inp_ver??", NULL}
+
+      則凡是輸入法名稱為 "my_inp", "my_inp_ext_style1", "my_inp_ext_power",
+      "my_inp_ver99" .... 等等，都可以套用此模組。
+
+   5. module_type (*):
+
+      目前 xcin 只定義一種 module_type, 在此請設為 MOD_CINPUT。
+
+   6. conf_size (*):  本模組的公用設定資料結構大小。
+
+   7. int (*init) (void *conf, char *objname, xcin_rc_t *xc) (*):
+
+      本模組的初始化函式，是用於該模組第一次被載入及被某輸入法套用時才呼叫。
+      它的任務是做好所有的初始化動作，同時要將 rcfile 中所需的資料讀進來。
+      其各參數意義如下:
+
+      conf:  本模組的公用設定資料結構指標。
+
+      objname:  套用此模組的輸入法英文名稱。
+
+      xc:  指向 xcin_rc_t (xcin 全域設定資料結構) 的指標，此一指標有助於
+           此 module 獲取 xcin 的內部資訊 (如 locale 的設定)。此結構的定
+	   義如下:
+
+	typedef struct {
+	    char *lc_ctype;		/* LC_CTYPE locale category name */
+	    char *lc_messages;		/* LC_MESSAGES locale category name */
+	    char *encoding;		/* encoding name */
+	} locale_t;
+
+	typedef struct {
+	    char *rcfile;               /* rcfile name. */
+	    char *default_dir;          /* Default module directory. */
+	    char *user_dir;             /* User data directory. */
+	    locale_t locale;            /* Locale name. */
+	} xcin_rc_t;
+
+      本函式若成功傳回 True, 失敗傳回 False。
+
+
+   8. int (*xim_init) (void *conf, inpinfo_t *inpinfo) (*)
+
+      本函式在一個新的 IC (新的 window 準備接受 xcin 輸入) 產生時，或某個
+      IC 不同的輸入法切換時被呼叫。這時它必須做好必要的動作為此 IC 初始化，
+      同時也要初始化此 IC 的輸入狀態 (即設定 inpinfo)。
+
+      請注意，由於 inpinfo 是屬於 IC 資料結構之一，並不屬於各 module, 各 
+      module 只是用它來與 xcin 做溝通而已。換句話說， inpinfo 是所有輸入法 
+      module 共用的。因此，當某個輸入法準備被某個 IC 使用時，該 IC 便會呼叫 
+      本函式，則本函式必須為 inpinfo 中每個欄位設定初值 (因為它們目前的值可
+      能是上個使用它的輸入法模組所設的，不適用於目前的輸入法模組)，並且視需
+      要 malloc 緩衝區給 inpinfo->iccf, inpinfo->s_keystroke, inpinfo->lcch,
+      與 inpinfo->cch 使用。
+
+      本函式若成功傳回 True, 失敗傳回 False。
+
+
+   9. unsigned int (*xim_end) (void *conf, inpinfo_t *inpinfo) (*)
+
+      每當某個 IC 結束時，或不同的輸入法切換時， xcin 在呼叫另一個輸入法的 
+      xim_init() 之前會先呼叫目前這個輸入法的 xim_end()。我們可以在此做一些
+      結束前的工作，例如視需要清除或 free  inpinfo->iccf, inpinfo->s_keystroke, 
+      inpinfo->lcch, 與 inpinfo->cch 緩衝區 .... 等。
+
+      本函式的傳回值可以與 keystroke() 的傳回值一樣，故可用於 commit 字串，
+      見後述。
+
+
+  10. unsigned int (*keystroke) (void *conf, 
+		inpinfo_t *inpinfo, keyinfo_t *keyinfo) (*)
+
+      此函式定義本輸入法 module 的字鍵處理方式。每當使用者敲入一個按鍵，
+      xcin 便會呼叫此函式。這時本函式必須解釋此字鍵的意義，視需要改變 xcin 
+      視窗的狀態，同時將結果傳回給 xcin 進行後續處理動作。其中 conf 與 
+      inpinfo_t 欄位如前所述，而 keyinfo_t 結構的定義如下:
+
+typedef struct {
+    KeySym keysym;                      /* X11 key code. */
+    unsigned int keystate;              /* X11 key state/modifiers */
+    char keystr[16];                    /* X11 key name (in ascii) */
+    int keystr_len;                     /* key name length */
+} keyinfo_t;
+
+
+      本函式的傳回值可以是如下任意的 | (bitwise OR) 組合:
+
+      IMKEY_ABSORB:  表示本輸入法將這個字鍵靜靜的吸收了， xcin 不需要做其
+		他後續動作。此用法多半用於組字的中途。
+
+      IMKEY_COMMIT:  表示本輸入法已完成組字，這時 xcin 會將 inpinfo->cch
+		這個中文字傳給目前的 X app, 而 X app 會將這個字顯示在其視
+		窗上。
+
+      IMKEY_IGNORE:  表示這個字鍵對本輸入法而言是完全沒有意義的，本輸入法
+		不處理這個字鍵，請 xcin 將此字鍵交由其他部分處理。
+
+      IMKEY_BELL:  表示本輸入法要求 xcin 發出「嗶」一聲。
+
+      IMKEY_BELL2: 表示本輸入法要求 xcin 發出另一種「嗶」一聲。現在 xcin
+		支援兩種「嗶」聲，通常用以代表目前有多重字可以選擇，或者
+		使用者輸入錯誤。輸入法模組可以視需要支援它或只用 IMKEY_BELL
+		亦可。
+
+      IMKEY_SHIFTESC:  表示目前使用者同時還按下了 shift 鍵與其他字鍵，而且本
+		輸入法將不處理這個字鍵，而請 xcin 將此字鍵轉交全形/半形輸入
+		模組處理。
+
+      IMKEY_SHIFTPHR:  表示目前使用者同時還按下了 shift 鍵與其他字鍵，但與
+		IMKEY_SHIFTESC 不同的是，這回卻是交給 qphrase 來處理，也就是
+		快速片語輸入功能。輸入法模組可以視需要支援此功能。
+
+      IMKEY_CTRLPHR:  表示目前使用者同時還按下了 ctrl 鍵與其他字鍵，用來做快
+		速片語輸入 (qphrase)，其作用與 IMKEY_SHIFTPHR 相同。
+
+      IMKEY_ALTPHR:  表示目前使用者同時還按下了 alt 鍵與其他字鍵，用來做快速
+		片語輸入 (qphrase)，其作用與 IMKEY_SHIFTPHR 相同。
+
+      IMKEY_FALLBACKPHR:  表示目前使用者按下了某字鍵，但該字鍵本輸入法不做處
+		理，故可以交給快速片語輸入 (qphrase)，其作用與 IMKEY_SHIFTPHR
+		相同。
+
+  11. int (*show_keystroke) (void *conf, simdinfo_t *simdinfo);
+
+      本函式用來顯示某個特定中文字的字鍵碼。 xcin 會視需要呼叫此函式，並
+      將此函式所需的資料經由 simdinfo 結構傳入，以結構定義如下:
+
+typedef struct {
+    int imid;                           /* ID of current Input Context */
+    unsigned short xcin_wlen;           /* xcin window length */
+    unsigned short guimode;             /* GUI mode flag */
+    wch_t cch_publish;                  /* A published cch. */
+    wch_t *s_keystroke;                 /* keystroke of cch_publish returned */
+} simdinfo_t;
+
+      其中 cch_publish 即為 xcin 希望此函式顯示字鍵碼的中文字，而所得的
+      字鍵碼則經由 s_keystroke 傳回給 xcin 。
+
+      請注意， xcin 並不維護 s_keystroke 緩衝區，故本函式必須自行維護它。
+      一個簡單的做法是本函式自行宣告一個 static 的緩衝區，然後將 s_keystroke
+      指向它，例如:
+
+	  static wch_t my_keystroke[BUF_SIZE];
+	  simdinfo->s_keystroke = my_keystroke;
+	  .........
+
+  12. int (*terminate) (void *conf);
+
+      當 xcin 將要永久停用某個輸入法時 (例如 xcin 將結束運作時)，如果此函式
+      有定義時，就會呼叫此函式讓此輸入法 (模組) 進行結束前的工作，如關閉資
+      料檔 .... 等。
+
+
+----------------------------------------
+D. 模組的初始化工作:
+
+模組的初始化工作分為兩個層面，其一是輸入法第一次被載入使用時，必須將其資料
+結構全部做初始化；其二是每次使用者切換到此輸入法時的 inpinfo_t 結構的初始
+化工作。這兩個工作分別由輸入法模組的 int (*init)() 與 int (*xim_init)() 兩
+個函式來完成。
+
+先來看後者的部分。由於輸入法模組與 xcin 之間的連繫管道是透過 inpinfo_t 結
+構來達成，然而 inpinfo_t 並不是屬於模組本身的資料結構，它是屬於 IMC 的一部
+分。也就是說，每當 IMC 變換輸入法 (也就是使用者切換到其他的輸入法) 時，其
+inpinfo_t 結構就會被新的輸入法拿來使用。因此，每個輸入法在每次被切入使用時，
+它都必須要重設一次 inpinfo_t 的內容。
+
+至於前者的部分，當一個輸入法第一次被載入使用時，它必須做好一切的初始化工作，
+其中包括了：
+
+1. 決定輸入法名稱：
+
+   由於自 xcin-2.5.2 開始，xcinrc 的設定檔已支援 <IM_name>@<encoding> 的格
+   式，例如 cj@big5 代表的即是 Big5 編碼的倉頡輸入法。因此
+
+	int (*init) (void *conf, char *objname, xcin_rc_t *xc);
+
+   函式所傳入的 objname 往往和 xcinrc 中所設定的輸入法名稱不一樣。因此必須
+   先決定 xcinrc 中真正的輸入法名稱。其方式為呼叫 xcin 的函式:
+
+	int get_objenc(char *objname, objenc_t *objenc);
+
+   其中 objname 即為 (*init)() 所傳入的 objname。而此函式所傳回的 objenc_t
+   的結構如下:
+
+typedef struct {
+    char objname[50];		/* 輸入法名稱 */
+    char encoding[50];		/* 內碼名稱 */
+    char objloadname[100];	/* xcinrc 檔中所設定的輸入法名
+				   (即格式 <IM_name>@<encoding> */
+} objenc_t;
+
+
+2. 讀取 xcinrc 的設定:
+
+   xcinrc 的設定讀取是經由
+
+	int get_resource(char **cmd_list, char *value, int v_size, 
+        	         int n_cmd_list)
+
+   的呼叫。其中 cmd_list 用來標示 xcinrc 檔中某個小節的某個項目。要注意的是，
+   通常輸入法設定都是集中在該輸入法的小節中，也就是 cmd_list[0] 必須指明為該
+   輸入法的名稱。例如，當我們要讀取倉頡輸入法的 AUTO_COMPOSE 選項的值時，其
+   在 xcinrc 檔的設定為:
+
+	(define cj
+		'((AUTO_COMPOSE  1)
+		  .................))
+
+   則 get_resource() 的呼叫方式則為:
+
+	char *cmd[2], value[256];
+	cmd[0] = "cj";
+	cmd[1] = "AUTO_COMPOSE";
+	if (get_resource(cmd, value, sizeof(value), 2)) {
+	    /* we have read the value of AUTO_COMPOSE */
+	}
+	
+   然而，對於一個輸入法模組而言，由於可以被多種輸入法套用，故輸入法名稱是無
+   法事先知道的，故不能如上例那樣使用 "cj" 字串。但這裡也不能直接用上述的
+   objname 來代入，因為 xcinrc 檔的設定也可能是這樣:
+
+	(define cj@big5
+		'((AUTO_COMPOSE  1)
+		  .................))
+
+   因此正確的寫法是用先前呼叫的 get_objenc() 的傳回值來代入:
+
+	objenc_t objenc;
+	........ .......
+
+	if (get_objenc(objname, &objenc) == -1)
+	    return False;
+	cmd[0] = objenc.objloadname;
+	............................
+
+   其餘和上例一樣，如此便可正確地讀取 xcinrc 的設定了。
+
+
+
+T.H.Hsieh

@@ -1,0 +1,248 @@
+本文簡述 xcin-2.5 安裝步驟與準備工作:
+
+---------------------------------
+A. 系統需求:
+
+由於 xcin-2.5 以後全部採用 Xi18n 與 locale 而設計，因此在安裝本程式前，
+您必須在您的系統中準備好 I18N 與適當的 locale 環境，同時您的系統中必需
+要有完整的 X11R6 系統以及所需的字型。如果您不確定您的系統的 I18N 與 locale
+環境是否已安裝妥當，您可以參考 FAQ 文件的 QA.2, QA.3 的說明來進行檢查。
+或者參考:
+
+	ftp://xcin.linux.org.tw/pub/xcin/i18n/i18n_tool.tar.gz
+
+內附的說明文件。
+
+目前 xcin-2.5 已可在 GNU/Linux, FreeBSD, 以及 HP-UX 等系統下成功安裝，
+各系統的安裝需求如下:
+
+1. GNU/Linux: 
+     a. 使用 glibc-2.1.x 以上 (雖然經由一些特殊處理，也可以將 xcin 安裝在 
+	glibc-2.0.x 的系統中，但這會導至許多潛在問題，我們不建議這麼做)。
+     b. gcc-2.7.2 以上。
+     c. XFree86-3.3.6 以上 (雖然經由一些特殊處理，也可以將 xcin 安裝在所有
+	的 XFree86-3.3.X 系統中，但這會導至一些潛在問題，故我們不建議這麼做)。
+     d. 適當的 locale 支援, 如 zh_TW.Big5, zh_CN.GB2312 .... 等，及相對應
+	的中文字型。由於並非所有的 GNU/Linux 系統套件都會有這些 locale 支
+	援，故如果您的系統沒有的話，您可以參考
+	    ftp://xcin.linux.org.tw/pub/xcin/i18n/i18n_tool.tar.gz
+	來建立您的 locale 環境。
+
+2. FreeBSD:
+     a. 建議 FreeBSD-4.0 以上，支援 locale 與 ELF。
+     b. gcc-2.7.2 以上。
+     c. XFree86-3.3.6 以上 (雖然經由一些特殊處理，也可以將 xcin 安裝在所有
+	的 XFree86-3.3.X 系統中，但這會導至一些潛在問題，故我們不建議這麼做)。
+     d. 適當的 locale 支援, 如 zh_TW.Big5, zh_CN.EUC .... 等，及相對應的中
+	文字型。
+
+3. HP-UX:
+     a. 建議 HP-UX B.10.XX 以上的系統。
+     b. ANSI C compiler。
+     c. 適當的 locale 支援，如 zh_TW.big5, zh_HK.hkbig5 .... 等，及相對應的
+	中文字型。
+
+
+---------------------------------
+B. 安裝 xcin-2.5:
+
+1. Berkeley DB2:
+   如果您安裝 xcin-2.5 時想要安裝 bimsphone 模組，則您需要 Berkeley DB2，
+   否則的話不需要。請注意若您不想安裝 bimsphone，您必須在 configure xcin 
+   時加入 --disable-bimsphone 選項 (詳見後述)，如此當 xcin 在 configure
+   時才不會去檢查 Berkeley DB2。
+
+   如果您用的是 GNU/Linux glibc-2.1.X 的話，系統中已內含了 Berkeley DB2, 
+   故您可直接進行 xcin-2.5 的安裝。若您的系統沒有 Berkeley DB2, 您可以到
+   以下這幾個地方找到它:
+
+	http://www.sleepycat.com
+	ftp://xcin.linux.org.tw/pub/xcin/misc/db-2.7.4.tar.gz
+
+2. libtabe:
+   自 xcin-2.5.1 及以後的版本， libtabe 已自 xcin 套件中分離並獨立維護，
+   若您安裝 xcin-2.5 時想要安裝 bimsphone 模組，則您還需要 libtabe，否則
+   的話不需要。請注意若您不想安裝 bimsphone，您必須在 configure xcin 時
+   加入  --disable-bimsphone 選項 (詳見後述)，如此當 xcin 在 configure 時
+   才不會去檢查 libtabe。
+
+   您可以在這裏找到穩定版的 libtabe 套件:
+
+	ftp://xcin.linux.org.tw/pub/xcin/libtabe/libtabe-<version>.tar.gz
+
+   或在這裡找到尚在發展中版本的 libtabe 套件:
+
+	ftp://xcin.linux.org.tw/pub/xcin/libtabe/devel/libtabe-<version>.tar.gz
+
+   請注意，由於 xcin 是隨著 libtabe 一同發展的，因此不同版本的 xcin 需要其
+   相對應的 libtabe 版本一同安裝才行。為了方便起見，您總是可以在和下載 xcin
+   相同的 ftp 站目錄下找到其正確的 libtabe 版本。例如: 如果您打算安裝 xcin
+   穩定版，則您必須安裝穩定版 xcin 所需的 libtabe 套件:
+
+	ftp://xcin.linux.org.tw/pub/xcin/xcin/libtabe-<version>.tar.gz
+
+   另一方面，如果您打算安裝最新的發展中 xcin 版本，則您也必須安裝
+
+	ftp://xcin.linux.org.tw/pub/xcin/xcin/devel/libtabe-<version>.tar.gz
+
+   中最新的 libtabe 版本。有關本版 xcin 套件所需的 libtabe 版本，請見 README
+   一文中第 C 節的說明。
+
+   若您的系統有 shared library 的支援，建議您將 libtabe compile 成 shared
+   library, 以結省硬碟空間。以下是快速安裝指引 (詳見 libtabe 的文件說明):
+
+	gzip -dc libtabe-<version>.tar.gz | tar -xvf -
+	cd libtabe
+	./configure --prefix=<path> --enable-shared
+	make install
+
+3. GNU Gettext: 
+   在 GNU/Linux 與 FreeBSD 系統中，如果您希望 xcin 可以做多國語言訊息顯示的
+   話，您的系統中必須安裝 GNU Gettext 套件。否則的話不需要。
+
+4. xcin 穩定版原始碼可以在這裏取得:
+
+	ftp://xcin.linux.org.tw/pub/xcin/xcin/
+
+   若您想試試最新的測試版，則您可以在這裏取得:
+
+	ftp://xcin.linux.org.tw/pub/xcin/xcin/devel/
+
+   xcin 的原始套件檔名通常為: xcin-<version>.tar.gz, 其中 <version> 為版
+   本名，若您在其中見到 pre 的字眼或日期編號，表示它是測試版，否則為穩定
+   版。當您取得您所需的版本後，請用以下的方式將它解開:
+
+	gzip -dc xcin-<version>.tar.gz | tar -xvf -
+
+   完成後您會得到一個 xcin-2.5 的目錄。
+
+5. 請到 xcin-2.5 目錄下，執行 configure 程式。一般說來，如果 xcin 所需的
+   額外 library (如 Berkeley DB2, libtabe 等) 都放在相同的位置，您只要執行:
+
+	./configure --prefix=<安裝路徑> \
+		    --with-extra-prefix=<額外 library 的所在路徑>
+
+   即可。除此之外， configure 還可以接受其他參數，您可以視需要加入。其各
+   參數的意義如下:
+
+	--help
+	    列出使用說明。
+
+	--prefix=PATH (預設值為 /usr/local)
+	    設定安裝路徑為 PATH ，則 xcin 將安裝到以下的目錄中:
+
+		執行檔:  $PATH/bin
+		資料檔:  $PATH/lib/xcin
+		設定檔:  $PATH/etc
+
+	--binpath=PATH (預設值為 ${prefix}/bin)
+	    設定 xcin 執行檔的安裝路徑為 PATH
+
+	--with-xcin-dir=PATH (預設值為 ${prefix}/lib/xcin)
+	    設定 xcin 資料檔的安裝路徑為 PATH
+
+	--with-xcin-rcdir=PATH (預設值為 ${prefix}/etc)
+	    設定 xcin 設定檔的安裝路徑為 PATH
+
+	--with-localedir=PATH (預設值為 ${prefix}/share/locale)
+	    設定系統 locale 目錄路徑，用來安裝 xcin LC_MESSAGES 訊息檔。
+
+	--with-extra-prefix=PATH (預設值為 ${prefix})
+	    設定額外 library 的所在路徑為 $PATH。由於安裝 xcin-2.5 您需要 
+	    Berkeley DB2, libtabe .... 等額外的 lib, 您除了可以一一設定這
+	    些 lib 的所在路徑以外 (見後頭的選項說明)，若這些 lib 都安裝在
+	    相同位置，則您也可以在這裏直接設定它們的所在位置，如此一來就
+	    不需要打一長串的 configure 參數了。
+
+	    本選項值一旦決定之後，則 configure 便會自動設定以下兩個參數:
+
+		extra_include=-I$extra_prefix/include
+		extra_library=-L$extra_prefix/lib
+
+	    而在 configure 與 compile 階段，所需的額外 lib 與 include 都
+	    會依上述那兩個變數值來做搜尋。
+
+	--with-extra-inc=PATH (預設值為 ${extra_prefix}/include)
+	    設定額外的 library 的 include 位置。
+
+	--with-extra-lib=PATH (預設值為 ${extra_prefix}/lib)
+	    設定額外的 library 的 lib 位置。
+
+	--disable-bimsphone (預設是 enable)
+	    不安裝 bimsphone 模組。由於安裝 bimsphone 模組需要 Berkeley DB2
+	    以及 libtabe，在預設情況下 xcin configure 程式會檢查這兩個套件
+	    是否存在於您的系統中，若不存在則印出錯誤訊息並停止後續動作。若
+	    您不想安裝 bimsphone 模組時，您必須在 configure 時加入此選項，
+	    則 configure 程式將不會檢查 Berkeley DB2 以及 libtabe, 同時在編
+	    譯時也不會去編譯 bimsphone。
+
+	--with-dbinc=PATH (預設值為 ${extra_include})
+	    設定您系統的 Berkeley DB2 include 路徑為 PATH
+
+	--with-dblib=PATH (預設值為 ${extra_library})
+	    設定您系統的 Berkeley DB2 library 路徑為 PATH
+
+	--with-tabeinc=PATH (預設值為 ${extra_include})
+	    設定您系統的 libtabe include 路徑為 PATH
+
+	--with-tabelib=PATH (預設值為 ${extra_library})
+	    設定您系統的 libtabe library 路徑為 PATH
+
+	--with-intlinc=PATH (預設值為 ${extra_include})
+	    設定您系統的 libintl include 路徑為 PATH (for gettext)
+
+	--with-intllib=PATH (預設值為 ${extra_library})
+	    設定您系統的 libintl library 路徑為 PATH (for gettext)
+
+	--x-includes=PATH (沒有預設值)
+	    設定您系統的 X Window include 檔的路徑為 PATH
+
+	--x-libraries=PATH (沒有預設值)
+	    設定您系統的 X Window library 的路徑為 PATH
+
+	--enable-debug
+	    開啟 Debug 選項。
+
+   請注意，如果您使用的是 GNU/Linux glibc-2.1.2 以前 (包括 2.1.2) 的系統
+   時，在 configure 完成後，會產生一個 config.h 檔。請修改該檔案的內容，
+   將底下這一行刪除:
+
+#define HAVE_NL_LANGINFO 1
+
+6. 開始編譯:
+	make
+	make install
+
+7. 修改 $RCPATH/xcinrc 的內容，依據您的 locale 環境做適當的設定:
+
+   一般而言，若是 GNU/Linux、FreeBSD、或者是 HP-UX 系統，其 xcinrc 的預設
+   值已可以使用，故不需要額外修改。但對於不同的 UNIX 系統，其 locale 環境
+   與所使用的字型可能都不一樣，故必須做適當的設定。有關 xcinrc 的設定說明
+   請見 Usage 與 modules/* 的說明。
+
+8. 各 UNIX 平台的額外注意事項:
+
+   HP-UX:
+	HP-UX 的預設 CDE 環境啟動時，其 xmodmap 的組態可能會造成 xcin 某些
+	功能鍵失效。請您做如下的檢查: 執行 xmodmap，並注意其 mod1 的值，如
+	果您見到的是
+		mod1        Meta_L (0x22),  Meta_R (0x42),  Mode_switch (0x84)
+
+	這時您必須執行:
+		xmodmap -e "remove mod1 = Mode_switch"
+
+	將 Mode_switch 的設定解除，換句話說，只需保留 Meta_L 與 Meta_R 的設
+	定即可。您也可以將這個指令寫在適當的地方，以便每次 login 進入 CDE 環
+	境時都會自動執行。詳見 xmodmap 的 man page 以及您的 CDE 說明文件。
+
+9. 若在 $XCINPATH/tab/ 底下找不到您慣用的輸入法表格，請參考 Cin 一文的說
+   明來修改、編寫您的 .cin 檔。
+
+
+---------------------------------
+C. 測試:
+
+相關的測試與操作細節，請見 UserGuide 與 Usage 二文的說明。
+
+
+T.H.Hsieh

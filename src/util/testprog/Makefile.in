@@ -1,0 +1,83 @@
+CC              = @CC@
+CFLAGS          = @CFLAGS@
+CPPFLAGS        = @CPPFLAGS@
+DEFS            = @DEFS@ -DMSGLOCAT=\"$(srcdir)/po\"
+LDFLAGS         = @LDFLAGS@
+INSTALL         = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA    = @INSTALL_DATA@
+GNU_GETTEXT	= @GNU_GETTEXT@
+@SET_MAKE@
+
+x_includes      = @x_includes@
+x_libraries     = @x_libraries@
+extra_inc	= @extra_include@
+extra_lib	= @extra_library@
+locale_lib      = @locale_lib@
+intl_inc	= @intl_include@
+intl_lib	= @intl_library@
+
+#
+# XCIN installation path.
+#
+srcdir		= @srcdir@
+top_srcdir	= @top_srcdir@
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+
+xcin_binp	= @bindir@
+xcin_libp	= @xcin_dir@
+xcin_datap	= ${xcin_libp}/tab
+xcin_pop	= @datadir@
+xcin_rcp	= @xcin_rcdir@
+xcin_manp	= @mandir@
+
+#
+# Compiling valuables.
+#
+xcininc = -I${top_srcdir}/src/include
+xcinlib = -L${top_srcdir}/src/lib
+INC     = $(xcininc) $(x_includes) $(extra_inc) $(intl_inc)
+LIB     = $(extra_lib) $(x_libraries) $(locale_lib) $(intl_lib)
+
+BIN = testprog
+SRC = testprog.c
+OBJ = testprog.o
+LC_MESG = zh_TW
+
+.c.o:
+	$(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ $<
+
+all: $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) -o $@ $(OBJ) $(LIB)
+
+install: $(BIN)
+	if [ "$(GNU_GETTEXT)" = 1 ]; then \
+	    cd po; \
+	    for l in $(LC_MESG); do \
+	        if [ ! -d $$l/LC_MESSAGES ]; then \
+	            $(INSTALL) -d $$l/LC_MESSAGES; fi; \
+	        msgfmt -o $$l/LC_MESSAGES/testprog.mo testprog-$$l.po; \
+	    done; \
+	fi
+
+pot: testprog.c
+	if [ "$(GNU_GETTEXT)" = 1 ]; then \
+	    xgettext --keyword=N_ --keyword=_ -o po/testprog.pot testprog.c; \
+	    for l in $(LC_MESG); do \
+	        msgmerge po/testprog-$$l.po po/testprog.pot >testprog-$$l.po;\
+	        mv testprog-$$l.po po; \
+	    done;\
+	fi
+
+testprog.o: testprog.c ../../include/config.h
+
+
+.PHONY: clean distclean install
+clean:
+	rm -f *.o $(BIN) core
+distclean: clean
+	( cd po; rm -rf $(LC_MESG) )
+	rm -f Makefile .depend

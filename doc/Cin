@@ -1,0 +1,256 @@
+本文簡述 xcin 的輸入法表格系統，包括編譯程式 cin2tab 以及 .cin 檔的格式。
+所有的 .cin 檔均以 # 作為注解符號。
+
+A. sys.cin:
+
+   這是 xcin 的系統表格檔，並不是用作輸入法表格，其檔名必須是 sys.cin。本檔
+   記錄了與 locale 相關的基本資訊，其格式如下:
+
+   1. %sys: 這是一個示別標記，必須出現在所有資料之前，此標記表示此檔為
+      系統表格檔。
+
+   2. INPN_ENGLISH: 輸入法狀態顯示字串: "英數"。
+
+      INPN_SBYTE: 輸入法狀態顯示字串: "半形"。
+
+      INPN_2BYTES: 輸入法狀態顯示字串: "全形"。
+
+      INPN_ZHHEX: 輸入法狀態顯示字串: "內碼"。
+
+   3. 以下標記代表 xcin 在輸出全形 ASCII 字時所應輸出的字串 (或內碼)，列表
+      如下:
+
+		ASCII_space		# 空白鍵
+		ASCII_exclam		# 驚歎號 !
+		ASCII_quotedbl		# 雙引號 "
+		ASCII_numbersign	# 井字號 #
+		ASCII_dollar		# 錢字號 $
+		ASCII_percent		# 百分比符號 %
+		ASCII_ampersand		# and 符號 &
+		ASCII_apostrophe	# 單符號 '
+		ASCII_parenleft		# 圓括號 (
+		ASCII_parenright	# 圓括號 )
+		ASCII_asterisk		# 星號 *
+		ASCII_plus		# 加號 +
+		ASCII_comma		# 逗號 ,
+		ASCII_minus		# 減號 -
+		ASCII_period		# 點號 .
+		ASCII_slash		# 斜線 /
+		ASCII_0
+		ASCII_1
+		ASCII_2
+		ASCII_3
+		ASCII_4
+		ASCII_5
+		ASCII_6
+		ASCII_7
+		ASCII_8
+		ASCII_9
+		ASCII_colon		# 冒號 :
+		ASCII_semicolon		# 分號 ;
+		ASCII_less		# 小於 <
+		ASCII_equal		# 等於 =
+		ASCII_greater		# 大於 >
+		ASCII_question		# 問號 ?
+		ASCII_at		# 小老鼠 @
+		ASCII_A
+		ASCII_B
+		ASCII_C
+		ASCII_D
+		ASCII_E
+		ASCII_F
+		ASCII_G
+		ASCII_H
+		ASCII_I
+		ASCII_J
+		ASCII_K
+		ASCII_L
+		ASCII_M
+		ASCII_N
+		ASCII_O
+		ASCII_P
+		ASCII_Q
+		ASCII_R
+		ASCII_S
+		ASCII_T
+		ASCII_U
+		ASCII_V
+		ASCII_W
+		ASCII_X
+		ASCII_Y
+		ASCII_Z
+		ASCII_bracketleft	# 方括號 [
+		ASCII_backslash		# 反斜線 \
+		ASCII_bracketright	# 方括號 ]
+		ASCII_asciicircum	# 符號 ^
+		ASCII_underscore	# 底線 _
+		ASCII_grave		# 符號 `
+		ASCII_a
+		ASCII_b
+		ASCII_c
+		ASCII_d
+		ASCII_e
+		ASCII_f
+		ASCII_g
+		ASCII_h
+		ASCII_i
+		ASCII_j
+		ASCII_k
+		ASCII_l
+		ASCII_m
+		ASCII_n
+		ASCII_o
+		ASCII_p
+		ASCII_q
+		ASCII_r
+		ASCII_s
+		ASCII_t
+		ASCII_u
+		ASCII_v
+		ASCII_w
+		ASCII_x
+		ASCII_y
+		ASCII_z
+		ASCII_braceleft		# 大括號 {
+		ASCII_bar		# or |
+		ASCII_braceright	# 大括號 }
+		ASCII_asciitilde	# 符號 ~
+
+   4. 內碼範圍: 格式為:
+
+	%charcode begin
+	plane1 		0x??-0x??
+	plane2 		0x??-0x??
+	plane3 		0x??-0x??
+	plane4 		0x??-0x??
+	%charcode end
+
+      其中 0x?? 是 16 進位的數字。 plane1,2,3,4 分別代表一個中文字的第一、
+      二、三、四個內碼，當然，並非所有的內碼都會用到四個碼，例如 Big5 與 GB
+      只需二個碼即可，故這種情況只需設 plane1 與 plane2 即可。另外，有些內
+      碼的某個 plane 可能有幾段內碼範圍，例如 Big5 碼的 plane1 有兩段內碼範
+      圍，則可以重複設兩次 plane1。
+
+
+
+B. 一般性輸入法 (gen_inp) 表格檔:
+
+   此表格檔是專為 gen_inp 模組而設計的。其格式如下:
+
+   1. %gen_inp: 這是一個示別標記，必須出現在所有資料之前，此標記表示此檔為
+      gen_inp 模組專用的 cin 檔。
+
+   2. %ename: 此輸入法的英文名。
+
+   3. %cname: 此輸入法的中文名。
+
+   4. %selkey: 此輸入法的重複字選擇鍵。
+
+   5. %keyname begin
+	key  char
+	...  ....
+      %keyname end	
+
+      字鍵與其所代表的全形字。 key 為字鍵， char 為全形字。
+
+   6. %endkey: 此輸入法的結束字鍵。
+
+   8. %chardef begin
+	keycode  char	[*]
+	.......  ....
+      %chardef end
+
+      輸入法字鍵碼 (keycode) 與其所定義的中文字 (char)。此即為所有中文字的輸
+      入法列表。若同一個中文字有多個輸入法字鍵碼時，我們可以在其中一個字鍵碼
+      上標示一個 * 號，表示此字鍵碼為該中文字的「代表碼」，例如:
+
+	abcd	現
+	abce	現	*
+	abcf	現
+	....	..
+
+      則第二行的 "abce" 即為「現」字的「代表碼」，當本輸入法要顯示此字的字
+      鍵碼時，即以此碼來做為顯示。
+
+
+C. bimsphone 注音、拼音碼對映檔 (bims_pinyin.cin):
+
+   此表格是專門為 bimsphone 的 bimspinyin 輸入模式而設計的，其格式如下:
+
+   1. %bimspin: 這是一個示別標記，必須出現在所有資料之前，此標記表示此檔為
+      bimsphone 模組的 bimspinyin 專用的 cin 檔。
+
+   2. %tone1, %tone2, %tone3, %tone4, %tone5: 分別為注音符號的一聲、二聲、
+      三聲、四聲、與輕聲其在拼音碼的代表鍵。通常一聲是以 space 鍵為代表，
+      故在此情況下 %tone1 不需要設定。
+
+   3. %yinmap begin
+	<pinyin>	<ZhuYin>
+	........	........
+      %yinmap end
+
+      拼音碼與注音碼對映表。其中 <pinyin> 為拼音碼，而 <ZhuYin> 為注音碼。
+      在這裡為了方便起見，最好將所有可能的注音碼全部列出。
+
+
+D. cin2tab:
+
+   本程式是 .cin 表格檔編譯程式，它可以編譯上述三種 .cin 檔，編出的附檔名為
+   .tab。由於它在編譯一般性輸入法的表格檔時，必須參考 sys.tab 的資訊，故在
+   編譯其他表格檔之前，必須先要有 sys.tab 檔。若直接執行 cin2tab ，則它會
+   印出如下的訊息:
+
+CIN2TAB version (xcin <version number>)
+Usage: cin2tab [-v] [-r <rcfile>] [-s <sysfn>] [-l <encoding>]
+               [-o output] <cin_fn>
+
+Supported module header names:
+        %sys, %gen_inp, %bimspin, 
+
+   其中: 
+
+   1. -v 則印出更多的警告訊息 (目前此選項沒有作用)。
+   2. -r 指定 rcfile 檔名。
+   3. -s 指定系統表格檔名。
+   4. -l 指定用來編譯的內碼名稱 (亦可輸入完整的 locale 名)。
+   5. -o 指定輸出檔的檔名。預設的檔名為原來的檔名去掉 .cin 加上 .tab 的附檔名。
+
+   一般而言，如果 rcfile 與 sys.tab 都放在預設位置時，您不必下 -r 與 -l 這兩
+   個參數。若編譯成功， cin2tab 會印出類似如下的訊息:
+
+$ cin2tab cj
+CIN2TAB version (<version number>)
+cin2tab: use module: gencin version <gencin version number>
+cin2tab: number of keyname: 26
+cin2tab: max length of keystroke: 5
+cin2tab: total char number of this encoding: 13973
+cin2tab: number of char defined: 13233
+cin2tab: number of keystroke code defined: 13233
+cin2tab: number of defined char ignored: 4229
+cin2tab: memory model: 1
+
+   第二行意指編譯本 .cin 檔所用的編譯模組 (gencin) 及其版本號碼。
+
+   第三行意指本輸入法定義了 26 個有意義的字鍵。
+
+   第四行意指本輸入法最大的字鍵數。
+
+   第五行意指本 locale 的中文內碼所能包含的最大字數。
+
+   第六行意指本輸入法所定義的字數。若此數字大於第五行的數字，則表示有某些中
+	文字定義了多個 keystroke 。
+
+   第七行意指本輸入法所定義的 keystroke (輸入法字鍵碼) 的個數。
+
+   第八行意指在編譯本 .cin 檔時，忽略而不編譯的字數。會忽略的原因多半是該字
+	超出了目前 locale 內碼系統的編碼範圍。就以上的倉頡輸入法表格而言，
+	它除了內含 Big5 的字以外，同時還內含了 Big5HKSCS 字 (即香港外字集)。
+	故在 zh_TW.Big5 locale 下，只會編譯 Big5 的字，而忽略了 Big5HKSCS 字。
+
+   第九行意指本輸入法表格採用的記憶體模式。模式 1 代表只用一個 4 bytes 空
+	間表示中文字的 keystroke, 這是在最大字鍵數小於等於 5 時。模式 2 代
+	表用 8 bytes 空間表示中文字的 keycode, 這是在最大字鍵數大於等於 6
+	時。最大字鍵數的上限為 10。
+
+
+T.H.Hsieh

@@ -1,0 +1,163 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: testprog 2.5.2\n"
+"POT-Creation-Date: 2000-08-28 22:07+0800\n"
+"PO-Revision-Date: 2000-08-28 12:00+0800\n"
+"Last-Translator: Tung-Han Hsieh <thhsieh@linux.org.tw>\n"
+"Language-Team: Chinese <zh-l10n@linux.org.tw>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=big5\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: testprog.c:120
+msgid "destroy_callback_func\n"
+msgstr "destroy_callback 函式\n"
+
+#: testprog.c:139
+msgid "Cannot open the connection to XIM server.\n"
+msgstr "無法與 XIM 輸入法程式建立連線。\n"
+
+#: testprog.c:167
+msgid "input method doesn't support any style\n"
+msgstr "XIM 輸入法程式不支援任何輸入模式\n"
+
+#: testprog.c:175
+#, c-format
+msgid "XIM server support input_style = %s\n"
+msgstr "XIM 輸入法程式支援 %s 輸入模式\n"
+
+#: testprog.c:181
+#, c-format
+msgid "XIM server support unknown input_style = %x\n"
+msgstr "XIM 輸入法程式支援未知的輸入模式: %x\n"
+
+#: testprog.c:192 testprog.c:205
+#, c-format
+msgid "Use input style: %s\n"
+msgstr "使用輸入模式: %s\n"
+
+#: testprog.c:197
+#, c-format
+msgid "The input style %s is not supported.\n"
+msgstr "輸入模式 %s 沒有支援。\n"
+
+#: testprog.c:234
+msgid "Cannot create XIC.\n"
+msgstr "無法產生 XIC。\n"
+
+#: testprog.c:249
+msgid "XSetLocaleModifiers false.\n"
+msgstr "函式 XSetLocaleModifiers 呼叫失敗。\n"
+
+#: testprog.c:254
+msgid "XRegisterIMInstantiateCallback false.\n"
+msgstr "函式 XRegisterIMInstantiateCallback 呼叫失敗。\n"
+
+#: testprog.c:289
+msgid "Unprinted char.\n"
+msgstr "無法印出的字。\n"
+
+#: testprog.c:293
+#, c-format
+msgid "Get char: %s\n"
+msgstr "接收到一個字: %s\n"
+
+#: testprog.c:399
+msgid "string text property error.\n"
+msgstr "字串的 text property 錯誤。\n"
+
+#: testprog.c:441
+msgid "Error: you should specify the fontset.\n"
+msgstr "錯誤: 您必須設定字型 fontset。\n"
+
+#: testprog.c:470
+msgid "Error: cannot create fontset.\n"
+msgstr "錯誤: 無法產生字型 fontset。\n"
+
+#: testprog.c:475
+msgid "Error: fonts not consistant to fontset.\n"
+msgstr "錯誤: 字型與 fontset 沒有一對一對應。\n"
+
+#: testprog.c:494
+msgid "XOpenDisplay false.\n"
+msgstr "函式 XOpenDisplay 呼叫失敗。\n"
+
+#: testprog.c:516
+msgid "This is the Xi18n test program."
+msgstr "這是 Xi18n 測試程式。"
+
+#: testprog.c:553
+msgid "setlocale LC_CTYPE false.\n"
+msgstr "設定 locale LC_CTYPE 失敗。\n"
+
+#: testprog.c:558
+msgid "setlocale LC_MESSAGES false.\n"
+msgstr "設定 locale LC_MESSAGES 失敗。\n"
+
+#: testprog.c:567
+msgid "XSupportsLocale false.\n"
+msgstr "函式 XSupportsLocale 呼叫失敗。\n"
+
+#: testprog.c:577
+msgid "Use \"-h\" option to see help.\n"
+msgstr "請用選項 \"-h\" 參考使用說明。\n"
+
+#: testprog.c:581
+msgid "Usage: testprog -fontset <fontset> -im <im_name> -pt <im_style>\n"
+msgstr "使用方式: testprog -fontset <fontset> -im <im_name> -pt <im_style>\n"
+
+#: testprog.c:582
+msgid "Example:\n"
+msgstr "例如:\n"
+
+#: testprog.c:583
+msgid "  export LC_CTYPE=<locale name>.\n"
+msgstr ""
+
+#: testprog.c:584
+msgid "  export LC_MESSAGES=<locale name>.\n"
+msgstr ""
+
+#: testprog.c:585
+msgid "  export XMODIFIERS=\"@im=<im_name>\".\n"
+msgstr ""
+
+#: testprog.c:586
+msgid "  zh_TW.Big5 fontset: \"-*-big5-0,-*-iso8859-1\".\n"
+msgstr ""
+
+#: testprog.c:587
+msgid "  zh_CN.GB2312 fontset: \"-*-gb2312.1980-0,-*-iso8859-1\".\n"
+msgstr ""
+
+#: testprog.c:617
+msgid "Event: Expose.\n"
+msgstr "事件: Expose.\n"
+
+#: testprog.c:622
+msgid "Event: GraphicsExpose.\n"
+msgstr "事件: GraphicsExpose.\n"
+
+#: testprog.c:627
+msgid "Event: ConfigureNotify.\n"
+msgstr "事件: ConfigureNotify.\n"
+
+#: testprog.c:633
+msgid "Event: FocusIN.\n"
+msgstr "事件: FocusIN.\n"
+
+#: testprog.c:641
+msgid "Event: FocusOut.\n"
+msgstr "事件: FocusOut.\n"
+
+#: testprog.c:648
+msgid "Event: KeyPress.\n"
+msgstr "事件: KeyPress.\n"
+
+#: testprog.c:657
+msgid "Event: ClientMessage.\n"
+msgstr "事件: ClientMessage.\n"

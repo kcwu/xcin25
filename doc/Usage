@@ -1,0 +1,638 @@
+本文簡述 xcin 相關操作細節:
+
+1. 命令列參數與環境變數:
+
+   直接執行 xcin -h, 您會見到以下的使用說明:
+
+===========================================================================
+XCIN (Chinese XIM server) version xcin <version number>
+(module ver: <version number>, syscin ver: xcin-<version number>).
+(use "-h" option for help)
+
+xcin: locale "zh_TW.Big5" encoding "big5"
+
+Usage:  xcin [-h] [-d DISPLAY] [-x XIM_name] [-r rcfile]
+Options:  -h: print this message.
+          -m: print the comment of module "mod_name"
+          -d: set X Display.
+          -x: register XIM server name to Xlib.
+          -r: set user specified rcfile.
+
+Useful environment variables:  $XCIN_RCFILE.
+===========================================================================
+
+   以前 xcin 大量的命令列選項已移至 rcfile 中 (見第 2 點的說明)。除了命
+   令列選項與 rcfile 之外， xcin 還可接受以下的環境變數:
+
+   LC_CTYPE:     設定字元處理的 locale, 預設是 "zh_TW.Big5"
+   LC_MESSAGES:  設定訊息輸出的 locale, 預設是 "C" 或 "POSIX" (英文)
+   XCIN_RCFILE:  預設的 rcfile 檔名
+
+
+   如果有某項設定同時在命令列選項、環境變數、以及 rcfile 出現時，則 xcin
+   內定的優先次序為:
+
+	命令列選項 > 環境變數 > user rcfile > default rcfile > xcin default
+
+   若不設任何命令列選項與環境變數， xcin 以內定值來啟動。 xcin 內定是讀取
+   $RCPATH/xcinrc 做為預設的 rcfile, 其中 $RCPATH 值是 configure/make 時
+   給定的 (預設是 /usr/local/etc 或 /etc)。 xcin 只會讀取一個 rcfile, 其
+   搜尋 rcfile 的順序為:
+
+	$HOME/.xcin/xcinrc	(假設您的 XCIN_USER_DIR 是設為 ".xcin", 見下述)
+	$HOME/.xcinrc
+	$RCPATH/xcinrc		(系統預設的 rcfile)
+
+   因此，一般使用者若不滿意系統預設的 rcfile 設定值，原則上只要將系統預設
+   的 rcfile 拷備一份到 $HOME/.xcin/ 或 $HOME/ 下，再將它修改成自己喜好的
+   組態即可。
+
+
+***************************************************************************
+***************************************************************************
+***************************************************************************
+
+
+2. XIM (X Input Method) server:
+
+   在 XIM 架構中，程式分成兩種，一為 XIM server, 另一為 XIM client 。 XIM
+   server 是用來提供輸入法的程式，而 XIM client 則是一般 X Window 應用程式,
+   它們必須要支援 XIM 的協定，才能接受來自 XIM server 的字串輸入。
+
+   xcin-2.5 是一個 XIM server, 它用以提供 XIM client 中文 (如 Big5 或 GB
+   碼) 輸入。在一個執行中的 X Window 系統中 (X Display), 可以同時跑好幾個
+   XIM server, 每一個 XIM server 都有一組唯一的標簽來做為識別: (LC_CTYPE,
+   XIM_name) 。其中 LC_CTYPE 即為 locale 名，例如我們用的是 "zh_TW.Big5",
+   而 XIM_name 則為 xcin 註冊在此 X Display 中的 XIM server 名。在 locale
+   的環境中，一個 locale 可以跑多個以不同 XIM_name 啟動的 xcin。同時如果您
+   需要同時輸入 Big5 與 GB 的文字，您必須分別以 zh_TW.Big5 與 GB 的 locale 
+   以及不同的 XIM_name 來跑 xcin, 則以 zh_TW.Big5 locale 起動的 xcin 便會
+   以 Big5 顯示/輸入中文，反之以 GB locale 起動的 xcin 便會以 GB 顯示/輸入
+   中文。
+
+   同理，每一個 XIM client (如 rxvt) 啟動時也必須同時設定其 locale 與希望
+   與之建立連線的 XIM server 名 (即 XIM_name), 如此，在 zh_TW.Big5 locale
+   下啟動的 XIM client 就可以接受來自 zh_TW.Big5 locale 下啟動的 xcin 的輸
+   入， GB locale 的情況亦然。
+
+   在預設的情況下， xcin 若是在 zh_TW.Big5 locale 下啟動的，則它所註冊的
+   XIM_name 為 "xcin" 。若是在別的 locale 下啟動，例如: zh_CN.GB2312, 則
+   它所註冊的 XIM_name 為 "xcin" 後頭再加 -"locale 名"，例如:
+
+	xcin-zh_CN.GB2312
+
+   當然，我們也可以在命令列選項中使用 -x 的選項來指定 xcin 用來註冊的名字。
+
+   除此之外，標準的 XIM server 還可以支援數種不同的 input_style, 而目前 xcin
+   支援兩種 input_style: 
+
+	Root:  即組字區與狀態區全部都在 xcin 視窗中。
+
+	OverTheSpot:  xcin 會在 XIM client 的輸入游標附近開一個小視窗，用
+		      來顯示組字區的資料。此小視窗會隨著游標移動。
+
+   未來 xcin 會再支援其他的 input_style。
+
+   當 xcin 啟動時，所有上述的 XIM server 組態都會顯示出來，以供 XIM client
+   設定時參考，例如在預設情況下直接在 zh_TW.Big5 locale 下啟動 xcin (不加
+   任何選項)，則 xcin 會印出如下訊息:
+
+XCIN (Chinese XIM server) version xcin <version number>.
+(module ver: <version number>, syscin ver: <version number>).
+(use "-h" option for help)
+
+xcin: locale "zh_TW.Big5" encoding "big5"
+xcin: XIM server "xcin" transport "X/"
+xcin: inp_styles: Root OverTheSpot 
+
+   其意義是: locale (LC_CTYPE) 環境為 "zh_TW.Big5", 其內碼名稱為 "big5"，
+   XIM_name 為 "xcin", XIM 傳輸模式是 "X protocol", 而 inp_style 為 "Root"
+   以及 "OverTheSpot"。
+
+   xcin 同時採用動態連結的方式與 XIM client 運作。當我們用「英數」、「半形」
+   輸入時， xcin 與 XIM client 是處於「斷線」的狀態，故我們輸入的是一般
+   ascii 碼。但當我們按下任何一個觸發鍵 (trigger key，詳見後述) 時，就恢
+   復了 XIM client 與 server 之間的連線，而進行中文或全形字的輸入。
+
+
+***************************************************************************
+***************************************************************************
+***************************************************************************
+
+
+3. rcfile 格式 (請同時參考 xcinrc 檔):
+
+   xcin-2.5 的 rcfile 採用 siod 做為語法分析器，其語法為 lisp/Scheme 的混
+   合。其語法如下:
+
+   a. 如一行中有 ';' 字元，則從此字元開始一直到行末都會視為注解。
+
+   b. (define $cmd $value):
+	設定 $cmd 的值為 $value 。若 $value 值只是單純字串，則必須用一對
+	雙引號 " 括起來。例如:
+
+	(define FG_COLOR "white")	; 設定前景色為白色
+
+	$value 也可以是下一層的 $cmd, $value 的子集，則這些子集外圍必須
+        再加一層括號，例如:
+
+	; 設定輸入法 zh_hex 其中文名為 "Big5 內碼"，且 BEEP_WRONG 值為
+	; "YES" 。請注意以下的括號配對。
+	(define zh_hex  '((INP_CNAME   "Big5 內碼")
+			  (BEEP_WRONG  "YES")))
+        
+   xcin-2.5 的架構分為 xcin 主程式與輸入法模組 (module) 兩部分。而 rcfile
+   的設定分成三節: 主程式全域設定、主程式各 locale 的設定、以及各輸入法的
+   細部設定。其中各輸入法的細部設定與該輸入法所套用的模組有關，其詳細內容
+   請參考 doc/modules/ 的說明文件。以下解釋 xcin 主程式的 rcfile command 
+   關鍵字意義 (見 xcinrc 檔):
+
+ 
+   a. 主程式全域設定:
+   ------------------
+   XCIN_DEFAULT_DIR:
+	xcin 預設資料目錄，該目錄存放輸入法表格、輸入法模組、及其他相關檔案。
+
+   XCIN_USER_DIR:
+	使用者自定的資料目錄。若它不是絕對路徑，則是以使用者的 $HOME 目錄開始。
+
+   INDEX_FONT:
+	用來顯示英文輸入法名 (於 xcin 視窗的右下角) 的字型名。
+
+   FG_COLOR:
+	xcin 視窗的前景色。
+
+   BG_COLOR:
+	xcin 視窗的背景色。
+
+   M_FG_COLOR:
+	xcin 視窗的特殊顯示前景色 (如組字區、重複字選擇鍵)。
+
+   M_BG_COLOR:
+	xcin 視窗的特殊顯示背景色 (如組字區、重複字選擇鍵)。
+
+   ULINE_COLOR:
+	xcin 視窗片語標示線的顏色。
+
+   GRID_COLOR:
+	xcin 視窗表格格線的顏色。
+
+   X_GEOMETRY:
+	xcin 視窗開啟的大小、位置。
+
+   START_MAINWIN2:
+	是否開啟 xcin 第二主視窗？由於在 OverTheSpot 的輸入模式下，所有的
+	組字狀態資訊都移到了 OverTheSpot 視窗 (即出現在游標附近的小視窗)
+	中，故原本的 xcin 主視窗就顯得太大而佔空間。因此，若開啟 xcin 第
+	二主視窗時，則在英數模式，或使用 OverTheSpot 輸入時，xcin 就會以
+	較小的第二主視窗來顯示必要資訊。但若使用 Root 輸入時，則 xcin 會
+	自動變換成第一主視窗。
+
+   MAINWIN2_GEOMETRY:
+	xcin 第二主視窗開啟的大小、位置。
+
+   XCIN_HIDE:
+	是否在英文與半形輸入時隱藏 xcin?
+
+   XKILL_DISABLE:
+	是否將「可在 Window Manager 下直接關閉 xcin 」功能關掉?
+
+   ICCHECK_DISABLE:
+	是否將 IC 檢查功能關閉。此功能用於定時檢查所有 XIM client 的 IC
+	與視窗是否存在。
+
+   SINGLE_IM_CONTEXT:
+	是否讓所有的 XIM client 共享輸入法資料結構。預設為 NO, 即各 XIM
+	client 的輸入法資料結構是分開的，因此各 XIM client 的輸入法狀態
+	各自獨立。若將它設為 YES 時，則所有的 XIM client 將會擁有相同的
+	輸入法狀態。
+
+   IM_FOCUS_ON:
+	預設啟動輸入法鎖定功能，詳見後述。
+
+   KEEP_POSITION_ON:
+	是否開啟保持 xcin 視窗位置的功能。若此項選開啟時，則當我們在切
+	換虛擬桌面時， xcin 會自動出現在目前使用的虛擬桌面上。同時當我
+	們將 xcin 視窗移動超出螢幕邊界時， xcin 也會跑回原來的位置。此
+	功能可以適用於一些簡單的 Window Manager, 例如 fvwm 系列，如果
+	該 Window Manager 沒有提供將某視窗永遠固定於目前工作中的虛擬桌
+	面時，則可以嘗試打開此選項。但如果您使用的 Window Manager 有提
+	供此功能時，建議您將此選項關掉，以避免其他可能的問題。本選項預
+	設是關。
+
+   DISABLE_WM_CTRL:
+	是否關閉讓 Window Manager 可以控制 xcin 視窗的機制？預設為 NO,
+	也就是 Window Manager 可以控制 xcin 的視窗，包括您可以用滑鼠拖
+	拉、縮放 xcin 視窗，可用滑鼠操作視窗標題列的按扭 (依不同 Window
+	Manager 而有不同) 將視窗關閉、縮放、最小化 .... 等等，以及
+	Window Manager 可以視需要更動視窗部分組態 .... 等。由於不同的
+	Window Manager 其對應用程式視窗的支配情況有很大的差異，有的時
+	候反而會影響 xcin 本身的運作，故在此情況下您可以將此選項打開，
+	以杜絕 Window Manager 的干擾。
+
+   DIFF_BEEP:
+	是否開啟不同「嗶」聲的功能？ xcin 發出「嗶」聲的情況有兩種，一為
+	使用者輸入錯誤時，另一為遇到重複字需要選擇時。通常依不同的輸入法
+	模組的設計，以及 xcinrc 中各輸入法的設定不同，而可能以上兩種情況
+	都會發出「嗶」聲，或者只有其中一種情況會發出「嗶」聲。在預設情況
+	下，以上兩種情況的「嗶」聲都是相同的，但如果您打開此選項時，則二
+	者所發出的嗶聲會有所區別。
+
+   LOCALE:
+	列出 xcinrc 檔中所設定的所有 locale 名稱。此選項可有可無，但若您
+	是使用 glibc-2.2 以上的系統，建議您最好還是加入此選項，以避免 locale
+	名稱設定的問題。
+
+   INPUT_STYLE:
+	設定 XIM server 可接受的 input_style。其值可以為 (可多重設定):
+
+	Root:  即傳統的 xcin 視窗。輸入時組字區與狀態區在 xcin 視窗中。
+
+	OverTheSpot:  除了傳統的 xcin 視窗外，輸入時 xcin 會在您目前游
+	       標所在位置附近另外顯示一個視窗，而輸入時的組字區會顯示在那。
+
+   OVERSPOT_USE_USRCOLOR:
+	是否使用 xcin 自定的顏色 (即使用者在 xcinrc 中所設定的顏色) 來做
+	為 OverTheSpot 視窗的顏色？預設為是，此時該視窗多半是以彩色顯示。
+	若關閉此選項，則 xcin 會使用 XIM client 所指定的顏色做為 OverTheSpot 
+	視窗的顏色，而且只有前景色與背景色而已。
+
+   OVERSPOT_USE_USRFONTSET:
+	是否由使用者決定 OverTheSpot 視窗所用的字型？預設為否，即 xcin
+	會用 XIM client 所指定的字型給 OverTheSpot 視窗使用。若打開此選
+	項，則使用者所設定的字型便會立即生效 (見後述)。
+
+   OVERSPOT_WINDOW_ONLY:
+	是否只啟動 OverTheSpot 視窗？預設為否，也就是 xcin 會至少啟動一
+	個主視窗 (不論是第一主視窗或第二主視窗) 來顯示狀態訊息。若開啟此
+	選項，則 xcin 不再顯示任何主視窗，所有的組字訊息與部分狀態訊息都
+	會全部移到 OverTheSpot 視窗來顯示。如此一來，xcin 視窗在整個螢幕
+	桌面所佔的面積將縮到最小。
+
+	請注意，由於 OverTheSpot 視窗本身就是一個很小的視窗，故無法容納
+	太多的訊息顯示。因此原本顯示在 xcin 主視窗中的資訊，只能有一小部
+	分移到這裡來顯示，而其餘的資訊就沒辦法了。
+
+   FKEY_ZHEN:  (預設 "ctrl space")
+	設定英數/中文切換鍵。
+
+   FKEY_2BSB:  (預設 "shift space")
+	設定全形/半形切換鍵。
+
+   FKEY_CIRIM:  (預設 "ctrl shift")
+	設定正向循環切換輸入法切換鍵。
+
+   FKEY_CIRRIM:  (預設 "shift ctrl")
+	設定逆向循環切換輸入法切換鍵。
+
+   FKEY_CHREP:  (預設 "ctrl alt r")
+	設定重複上次輸出的功能鍵。
+
+   FKEY_SIMD:  (預設 "ctrl alt i")
+	設定循環切換字碼顯示 (simd) 的功能鍵。
+
+   FKEY_IMFOCUS:  (預設 "ctrl alt f")
+	設定輸入法鎖定 (IM Focus) 的功能鍵。
+
+   FKEY_IMN:  (預設 "ctrl alt")
+	設定各輸入法切換輔助鍵。例如設為 "ctrl alt" 時, 則輸入 ctrl+alt+1
+	即可切入 setkey 為 1 的輸入法。
+
+   FKEY_QPHRASE:  (預設 "shift alt")
+	設定快速片語的切換輔助鍵。例如設為 "shift alt" 時，則輸入
+	shift+alt+o 則會輸出 o 碼所代表的片語。
+
+   有關各功能鍵的設定方式與說明，請參考第 4 節。
+
+
+   b. 主程式各 locale 的設定:
+   --------------------------
+   在這裏，您必須為每一個您會用到的 locale 分別做設定，其語法為:
+
+	(define "locale name"   '(( "detailed settings" ....)))
+
+   例如您會用到 zh_TW.Big5 與 zh_CN.GB2312, 則您在 xcinrc 中的設定看起來會像
+   這樣:
+
+==========================================================================
+	(define "zh_TW.Big5"   '((cmd1  "value1")
+				 (....  ........)))
+	(define "zh_CN.GB2312" '((cmd1  "value1")
+				 (....  ........)))
+==========================================================================
+
+   以下介紹所有的關鍵字與其意義:
+
+   DEFAULT_IM:
+	預設的輸入法名。
+
+   DEFAULT_IM_MODULE:
+	預設的輸入法模組名。
+
+   DEFAULT_IM_SINMD:
+	預設的輸入法字鍵顯示 (sinmd) 名稱。當您在做中文輸入時，每輸入一個
+	中文字，則 xcin 視窗第二行的右半邊會出現您剛剛所輸入的字鍵。而這個
+	選項就是用來設定顯示的方式。若是設定成任何一種輸入法名時，則不管您
+	切換到那一個輸入法，它都會以您所設定的輸入法名來顯示。若是設定成 
+	"DEFAULT" 時，則它會以您目前所用的輸入法來顯示 (當您切換輸入法時，
+	顯示也會跟者切換)。
+
+   PHRASE:
+	指定快速鍵片語資料檔。快速鍵片語輸入即為 shift+alt+?, 其中 ? 是任
+	何一個 ASCII 字鍵，例如要打出頓號我們會用 shift+alt+i 。
+
+   CINPUT:
+	指定此 locale 下欲使用的輸入法名稱。
+
+   FONTSET:
+	locale 所需的字型組的字型名。其格式為:
+		"<字型名 1>,<字型名 2>,...."
+
+	即不同字型名之間以逗號分開。由於不同的系統、不同的 locale 下所需的
+	FONTSET 設定都不一樣，故您必須根據您的環境來做設定。舉例來說，在
+	GNU/Linux 或 FreeBSD (即使用 XFree86 的系統)，zh_TW.Big5 locale 下
+	其 FONTSET 必須要有一個英文字型 (字型名以 iso8859-1 結束) 以及一個
+	Big5 中文字型 (字型名以 big5-0 結束)，故這裏的 FONTSET 就要設定為:
+
+		"-sony-*-24-*-iso8859-1,-*-24-240-*-big5-0"
+
+   OVERSPOT_FONTSET:
+	前者 FONTSET 是設定 xcin 主視窗所用的字型，而這裏的 OVERSPOT_FONTSET
+	則是設定 OverTheSpot 視窗的字型，且設定方式與 FONTSET 完全相同。一
+	般而言，FONTSET 所設的字型點數可以比較大，而 OVERSPOT_FONTSET 的可
+	以比較小。
+
+	請注意，如果您的 OVERSPOT_USE_USRFONTSET 選項沒打開的話，則除非 XIM
+	client 沒有指定字型給 xcin, xcin 才會使用 OVERSPOT_FONTSET 的字型設
+	定，否則的話這個設定無效。因此，如果您希望這個設定可以立即生效，則
+	您必須將 OVERSPOT_USE_USRFONTSET 也打開。
+
+	除此之外，您也可以將此選項的值設為 NONE，即完全取消此選項的設定，則
+	xcin 會直接使用 XIM client 所提供的字型。萬一 XIM client 不提供的話，
+	則 xcin 也會使用 FONTSET 的字型來顯示。
+
+
+   c. 各輸入法的細部設定:
+   ----------------------
+   XCIN 採用了輸入法模組 (module) 的架構，不同的輸入法模組提供了不同類形的
+   輸入法必要的功能與特色，以供套用，然而並非所有的輸入法都可以套用所有的
+   輸入法模組，而且不同的輸入法模組被套用的方式也不盡相同，必須視該輸入法
+   模組的設計而定。因此，當我們要為每個輸入法做細部設定時，必須指定要套用
+   那一個輸入法模組，如果不指定時，則 xcin 會以上述的 DEFAULT_IM_MODULE 設
+   定來做為本輸入法所套用的模組。
+
+   同時，現在 xcin 也不再硬性規定 ctrl+alt+3 一定就是輸入法，或者 ctrl+alt+6 
+   就一定是詞音輸入法 .... 等等。所有要用的輸入法都必需列在前述的 CINPUT 設
+   定項中，並且做好底下的輸入法細部設定，如此才能夠載入使用。而 DEFAULT_IM 
+   與 DEFAULT_IM_SINMD 所指定的輸入法名稱也必須包含在 CINPUT 設定項中 (除非
+   DEFAULT_IM_SINMD 是設成 "DEFAULT")。如果沒有的話，則 xcin 會自動試圖選擇
+   其他在 CINPUT 中的輸入法來做為 DEFAULT_IM 或 DEFAULT_IM_SINMD。
+
+   當 rcfile 有了上述的設定之後，接下來便是要為所有在 CINPUT 指定要使用的
+   輸入法做細部設定了。其格式如下 (舉例):
+
+============================================================================
+(define zh_hex 				; 這是 CINPUT 中有列的其中一個輸入法名
+        '((INP_CNAME    "Big5 內碼")	; 以下是本輸入法的細部設定
+          (SETKEY       0)
+          (MODULE       zh_hex)
+          (......	......)))
+
+(define cj@big5
+        '((SETKEY       1)
+	  (......	......)))
+============================================================================
+
+   各位可以見到，所有輸入法的細步設定是個自獨立的，故不會像舊版的 xcin 那
+   樣，做一個輸入法的細部設定，則所有的輸入法都受到影響。請注意到在倉頡輸
+   入法中， "cj" 之後的 "@big5" 的字樣，此字樣可加可不加，若加上的話，則
+   xcin 只有在使用 Big5 內碼的 locale 下 (如 zh_TW.Big5 locale) 才會讀取
+   這個 "cj" 輸入法的設定。如此，您就可以將不同內碼的輸入法設定寫在同一個
+   設定檔中，而且各自使用不同的 SETKEY (見後述) 而不會互相衝突。例如:
+
+	(define pinyin@big5
+		'((SETKEY	4)
+		  (......	......)))
+	(define pinyin@gb2312
+		'((SETKEY	1)
+		  (......	......)))
+
+   每個輸入法的細部設定的細節，依其所套用的 module 而有不同，其相關說明請
+   見 modules/ 目錄中各模組的說明文件。以下說明各模組均可使用的細部設定項:
+
+   1. INP_CNAME:
+	設定此輸入法的中文名，可有可無。但是否採用此設定則視該 module 的
+	實作而定。
+
+   2. SETKEY:
+	定義該輸入法的切換鍵值，如內碼為 ctrl+alt+0, 倉頡為 ctrl+alt+1。請
+	注意在同一個 locale 中，其使用的每個輸入法必須要分別設不同的 SETKEY,
+	彼此不能有衝突。
+
+   3. MODULE:
+	指定本輸入法欲套用的模組名。若不指定，則會以 DEFAULT_IM_MODULE 所
+	設定的模組來套用。請注意，並非所有的模組都可以套用所有的輸入法，例
+	如 zh_hex 模組只能套用 zh_hex 輸入法，不能拿來套用倉頡輸入法。故如
+	果您做了不恰當的指定，將可能造成套用失敗，則 xcin 會顯示警告訊息，
+	並忽略此輸入法。
+
+   所有的輸入法與 module 只會在需要時才載入，故使用者可以在 rcfile 中設定
+   5, 6 個輸入法，但只有當使用者真正會用到的 (即有按 ctrl+alt+? 切換到的)
+   那幾個才會真正載入。
+
+   除此之外，某些具備複雜設定的輸入法模組，例如 gen_inp 以及 bimsphone 兩
+   個模組，都會支援「模組預設值」的設定項。此類的設定項名稱為:
+		<模組名稱>_default
+
+   則在此設定項中，您可以將使用此模組的輸入法的所有共同選項在這裏一次就做
+   好設定，如此就不需要在各輸入法中再詳細設定一大堆選項。例如 cj 與 array30 
+   這兩個輸入法都是使用 gen_inp 模組，故您可以做如下的設定:
+
+	(define gen_inp_default
+	        '((AUTO_COMPOSE         YES)
+	          (AUTO_UPCHAR          YES)
+	          (AUTO_FULLUP          NO)
+		  (............		.....)))
+	(define cj@big5
+		'((SETKEY		1)))
+	(define array30@big5
+		'((SETKEY		8)
+		  (AUTO_UPCHAR		NO)))
+
+   如此一來，cj 除了 SETKEY 以外，其餘所有的設定都會與 gen_inp_default 相
+   同。而 array30 除了 SETKEY 與 AUTO_UPCHAR 以外，其餘也和 gen_inp_default
+   相同。故使用 gen_inp_default 可以幫您大大簡化整個設定過程。並非所以的輸
+   入法模組都支援上述的「模組預設值」的設定項，詳見各模組的文件說明。
+
+   所有和 locale 相關的資料檔，包括所有的 .tab, 以及快速鍵片語輸入的資料檔
+   等，預設都是放在 $XCIN_DEFAULT_DIR/tab/$ENCODING/ 的目錄中，使用者也可
+   以自行準備您的 .cin 與 .tab 檔，放在您的 $XCIN_USER_DIR 目錄中
+   (例如 $HOME/.xcin/)。xcin 啟動時搜尋這些資料檔的順序為:
+
+	1. $XCIN_USER_DIR/tab/$ENCODING/
+	2. $XCIN_USER_DIR/tab/
+	3. $XCIN_USER_DIR/
+	4. $XCIN_DEFAULT_DIR/tab/$ENCODING/
+	5. $XCIN_DEFAULT_DIR/tab/
+	6. $XCIN_DEFAULT_DIR/
+
+
+***************************************************************************
+***************************************************************************
+***************************************************************************
+
+
+4. Trigger keys & Special keys:
+
+   Trigger keys 用來「觸發」 XIM client 與 XIM server 的連線。目前歸類
+   為觸發鍵的計有:
+
+   a. FKEY_ZHEN:  			中文 / 英文切換。
+					(預設 "ctrl space")
+   b. FKEY_IMN + [0123456790-=]:  	選擇輸入法。
+					(預設 "ctrl alt")
+   c. FKEY_2BSB:  			全形 / 半形切換。
+					(預設 "shift space")
+   d. FKEY_CIRIM:  			依序切換輸入法 (正向切換)。
+					(預設 "ctrl shift")
+   e. FKEY_CIRRIM:  			依序切換輸入法 (反向切換)。
+					(預設 "shift ctrl")
+   f. FKEY_QPHRASE + [0-9a-z....]:	快速片語輸出。
+					(預設 "shift alt")		
+
+   其中快速片語輸出較為特殊，當原來 xcin 是處於英數輸入時，若使用
+   FKEY_QPHRASE 觸發鍵，則 XIM client 會與 xcin 進行短暫連線，當完成片
+   語的輸出後，隨即回復離線狀態。換句話說，在英數輸入時可以直接輸出片
+   語，但 xcin 仍保持在英數輸入的模式下。
+
+   除此之外， xcin 尚有一些不歸類為「觸發鍵」的功能鍵，也就是說您必須
+   在 XIM client 與 xcin 連線時才能使用它 (即 xcin 處於中文或全形輸入
+   時) ，這些功能鍵包括:
+
+   a. FKEY_CHREP (預設 "ctrl alt r")
+      可以重複此 XIM client 剛剛輸入的中文字。
+
+   b. FKEY_SIMD (預設 "ctrl alt i")
+      可以循序切換輸入法字鍵顯示 (sinmd), 若 DEFAULT_IM_SINMD 原先是設定
+      成 "DEFAULT" 時，則按下此特殊鍵後 "DEFAULT" 模式即取消。
+
+   c. FKEY_IMFOCUS (預設 "ctrl alt f")
+      可以開啟、關閉輸入法鎖定功能。當輸入法鎖定功能開啟時，xcin 視窗右下
+      角的輸入法名之前會多一個 "*" 號。此功能開啟時，每當有新的應用程式啟
+      動 (即有新的 IC 產生)，則此應用程式會自動進入目前鎖定的輸入法，而不
+      會以預設的英數輸入啟動。當您在切換輸入法時，其鎖定的輸入法也隨之改變。
+
+      (此功能的引入，是為了讓 xcin 能順利在 netscape-4.5/6 Root 輸入模式
+       下輸入，詳見 FAQ 的說明)
+
+   上述所有的功能鍵或觸發鍵，都可以依使用者的喜好在 rcfile 中進行設定，
+   例如:
+
+	(define FKEY_CHREP     "ctrl alt r")
+
+   即是設定重複上次輸出鍵為 ctrl+alt+r, 請注意在此所有的字鍵名要有雙引號
+   括起來，同時每個字鍵名必須用空格分開。字鍵的組合最多只能有三個鍵，且
+   若設定多個鍵時，請注意有順序之分: 最後一個鍵稱之為「實鍵 (keysym) 」，
+   而其餘的稱之為「輔助鍵 (modifier)」，操作順序為先按「輔助鍵」，再按「
+   實鍵」，則該功能鍵組合才會有動作。
+
+   因此，您要注意 "ctrl shift" 與 "shift ctrl" 的分別，前者 shift 為實鍵，
+   而後者它卻變成了輔助鍵，故您按此二鍵的順序不同， xcin 會有不同的反應。
+
+   同時要注意並非所有的鍵都可以做為輔助鍵，但所有的鍵都可以做為實鍵。目前
+   xcin 定義可用的輔助鍵計有:
+
+	shift, L-shift, R-shift, 	(此三鍵作用完全相同，以下類推)
+	ctrl, L-ctrl, R-ctrl,
+	alt, L-alt, R-alt,
+
+   至於 xcin 所定義可用的實鍵請見以下的列表。
+
+   xcin 所定義的實鍵列表
+-------------------------------------------------------------------------
+	鍵名			備注
+    ===================================================
+        "shift",       		與 L-shift 同義
+        "L-shift",     
+        "R-shift",     
+        "ctrl",        		與 L-ctrl 同義
+        "L-ctrl",      
+        "R-ctrl",      
+        "alt",         		與 L-alt 同義
+        "L-alt",       
+        "R-alt",       
+        "esc",         		ESC 鍵
+        "f1",          		F<n> 功能鍵區， <n> 為數字
+        "f2",          
+        "f3",          
+        "f4",          
+        "f5",          
+        "f6",          
+        "f7",          
+        "f8",          
+        "f9",          
+        "f10",         
+        "f11",         
+        "f12",         
+        "grave",       		「 ` 」反引號
+        "1",           		數字鍵區
+        "2",           
+        "3",           
+        "4",           
+        "5",           
+        "6",           
+        "7",           
+        "8",           
+        "9",           
+        "0",           
+        "-",           
+        "=",           
+        "tab",         
+        "space",       
+        "backspace",   
+        "a",           		英文鍵區
+        "b",           
+        "c",           
+        "d",           
+        "e",           
+        "f",           
+        "g",           
+        "h",           
+        "i",           
+        "j",           
+        "k",           
+        "l",           
+        "m",           
+        "n",           
+        "o",           
+        "p",           
+        "q",           
+        "r",           
+        "s",           
+        "t",           
+        "u",           
+        "v",           
+        "w",           
+        "x",           
+        "y",           
+        "z",           
+        "[",           
+        "]",           
+        "semicolon",   		「 ; 」分號
+        "apostrophe",  		「 ' 」單引號
+        "comma",       		「 , 」逗號
+        "period",      		「 . 」小數點
+        "slash",       		「 / 」正斜線
+        "backslash",   		「 \ 」反斜線
+    ===================================================
+
+
+***************************************************************************
+***************************************************************************
+***************************************************************************
+
+
+5. 有關各 module 的細部設定說明，請見 modules/ 目錄中的文件。
+
+
+T.H.Hsieh

@@ -1,0 +1,405 @@
+本文詳述 xcin 與 XIM client 啟動的相關步驟。有關 xcin 的細部操作與 xcinrc
+的設定細節，請參考 Usage 一文。
+
+---------------------------
+A. 啟動 xcin 與 XIM client:
+
+xcin-2.5 是一個 XIM server, 它只能對 XIM client 輸入中文。故當您要測試時，
+請先確定您的輸入對象是 XIM client 。有關各 XIM client 與 xcin-2.5 搭配的細
+節，請參考第 B 節的說明，在此我們先以 xcin-2.5 套件內附的 testprog 程式做為
+例子，詳述整個操作方式。
+
+原則上，啟動 XIM server (即 xcin) 與 XIM client 的步驟有四:
+
+1. 設定 locale:
+
+   所謂的 locale 即代表您操作環境的語系，這是透過環境變數的設定來達成的。
+   首先您必須確定您的系統中的 locale 名稱，再依據該名稱進行以下的步驟。您
+   可以在您的系統中執行 locale -a 的命令，或者看 /usr/share/locale 目錄下
+   的內容，如此可以幫助您找出正確的 locale 名稱。
+
+   通常 locale 名稱有固定的格式如下:
+
+	<語言名稱>_<地區名稱>.<字集內碼名稱>
+
+   以我們台灣地區所使用的 Big5 環境為例，在不同的作業系統下其 locale 名稍
+   有不同，以下是簡單的列表:
+
+	GNU/Linux 與 FreeBSD:	zh_TW.Big5
+	HP-UX:			zh_TW.big5
+
+   其中 "zh" 代表的是 "中文"，"TW" 代表的是台灣地區，而 "Big5" 或 "big5"
+   則代表 Big5 字集。同理，若是大陸地區使用 GB2312 字集，則 locale 名稱為
+
+	GNU/Linux:		zh_CN.GB2312
+
+   要注意的是，由於目前 xcin 只能支援以下幾個內碼字集: 
+
+	Big5, GB2312, Big5HKSCS, GBK
+
+   故您在設定 locale 時請注意不要挑到沒有支援的字集名稱，例如 zh_TW.utf8 
+   這樣的 locale 就不在支援之列。
+
+
+   當您找到您系統中正確的 locale 名稱時，您就可以進行以下的步驟。首先要設
+   定 locale。以下就以 zh_TW.Big5 locale 做為例子，設定的方式有很多種，例
+   如最簡單的，當您在一個視窗下執行:
+
+   (在 sh, ksh, 或 bash 下)
+        LANG=zh_TW.Big5; export LANG
+   (在 csh 或 tcsh 下)
+        setenv LANG zh_TW.Big5
+
+   則您在該視窗下的語系就會換成 zh_TW.Big5 了，包括字元處理 (LC_CTYPE) 以
+   及訊息輸出 (LC_MESSAGES) 以及其他部分。此後您在該視窗下執行任何程式，只
+   要該程式有支援 I18N 標準，則該程式就會以 zh_TW.Big5 語系運作。
+
+   若您不希望將整個語系全部換成 zh_TW.Big5, 而只想將最主要的部分換過去，其
+   他部分保持用英文語系就好，則您可以不要設定 LANG 環境變數，改以這樣設定:
+
+   (在 sh, ksh, 或 bash 下)
+        LC_CTYPE=zh_TW.Big5; export LC_CTYPE
+   (在 csh 或 tcsh 下)
+        setenv LC_CTYPE zh_TW.Big5
+
+   這是將字元處理換成 zh_TW.Big5 語系，這是最重要的部分，當您要執行任何 I18N
+   程式且希望該程式用我們的語系來運作，則您必須設好這部分。
+
+   若您希望更進一步，希望程式的訊息輸出也是中文的話，您必須再多設定這一步:
+
+   (在 sh, ksh, 或 bash 下)
+        LC_MESSAGES=zh_TW.Big5; export LC_MESSAGES
+   (在 csh 或 tcsh 下)
+        setenv LC_MESSAGES zh_TW.Big5
+
+   請注意，您必須先完成上述設定之後，往後執行的程式才會使用我們所指定的語系。
+   當然，您也可以將上述設定加入您的 $HOME/.profile (for sh, ksh 或 bash) 或 
+   $HOME/.cshrc (for csh 或 tcsh) 中，每次您登入系統後就自動執行，而不需要每
+   次都設定一次。
+
+
+2. 執行 xcin 程式，若成功啟動，您會見到如下訊息:
+
+============================================================================
+XCIN (Chinese XIM server) version xcin <version number>.
+(module ver: <version number>, syscin ver: <version number>).
+(use "-h" option for help)
+
+xcin: locale "zh_TW.Big5" encoding "big5"
+xcin: XIM server "xcin" transport "X/"
+xcin: inp_styles: Root OverTheSpot 
+============================================================================
+
+   請特別注意最後兩行的訊息，用雙引號括起來的那些字，它們可能會隨著您在第一
+   步 locale 設定的不同而改變，而且它們也是您在往後啟動 XIM client 時的設定
+   指引。以上例而言，該訊息的各欄位意義如下:
+
+	locale: 這是啟動 xcin 時的 locale 名稱，這裏即為 "zh_TW.Big5"。
+
+	encoding: 這是此 locale 所使用的內碼名稱，在這裡一律用小寫英文表示。
+
+        XIM server: 這是 xcin 的 <XIM server name>, 其名稱就叫做 "xcin"。每
+		個 XIM server 都會有一個獨特的名稱，以做為其他 XIM client 與
+		之連線示別之用。請注意依啟動 xcin 時的 locale 環境不同，這裏
+		所顯示出來的 <XIM server name> 的值也會有所不同。
+
+	transport: 這是 XIM server/client 的連線方式名稱。
+
+        inp_styles: 這是目前 xcin 所支援的 input style (輸入模式) 的名稱。以
+		上例而言，xcin 同時以兩種 input style 啟動，即 Root 以及
+		OverTheSpot, 可供 XIM client 來選用。您可以在 xcinrc 檔的設
+		定來決定要啟動那些 input style, 詳見 Usage 一文的說明。
+
+
+3. 在啟動 XIM client 之前，要先設定環境變數:
+
+   (在 sh, ksh 或 bash 下)
+        XMODIFIERS="@im=<name>"; export XMODIFIERS
+   (在 csh 或 tcsh 下)
+        setenv XMODIFIERS "@im=<name>"
+
+   其中 <name> 即是上述的 <XIM server name> 了。以上例而言，您要這樣設定:
+
+   (在 sh, ksh 或 bash 下)
+        XMODIFIERS="@im=xcin"; export XMODIFIERS
+   (在 csh 或 tcsh 下)
+        setenv XMODIFIERS "@im=xcin"
+
+   而實際設定方式要視您執行 xcin 後所見到的訊息而定。當然，若您早已知道
+   <XIM server name> 是什麼，您也可以將它寫到 $HOME/.profile 或 $HOME/.cshrc
+   中，每次登入系統時自動執行。
+
+4. 這時，您可以直接啟動 XIM client 了。要稍微注意的是，某些 XIM client 可能
+   不是很聰明，它可能無法正確設定 Input style 與 xcin 相配合，這時您必須要
+   根據該 XIM client 的說明文件，指定正確的 Input style 給它。
+
+
+以下就以 xcin-2.5 的範例程式 testprog 為例，將上述步驟做一個總結。這個程式
+放在 xcin-2.5/src/util/testprog/ 底下，如果發現它還沒編譯好，請先打 "make" 
+先將它編譯好。若我要用 zh_TW.Big5 的話，我要這樣下指令 (for bash):
+
+        LC_CTYPE=zh_TW.Big5; export LC_CTYPE
+        xcin &
+        XMODIFIERS="@im=xcin"; export XMODIFIERS
+        ./testprog -fontset "-*-big5-0,-*-iso8859-1"
+
+若我要用 zh_CN.GB2312 輸入簡體字的話，我要這樣下指令 (for bash):
+
+        LC_CTYPE=zh_CN.GB2312; export LC_CTYPE
+        xcin &
+        XMODIFIERS="@im=xcin-zh_CN.GB2312"; export XMODIFIERS
+        ./testprog -fontset "-*-gb2312.1980-0,-*-iso8859-1"
+
+其中有關 testprog 詳細的用法，您可以直接執行:
+
+        testprog -h
+
+則它就會列出如下的訊息:
+
+========================================================================
+Use "-h" option to see help.
+Usage: testprog -fontset <fontset> -im <im_name> -pt <im_style>
+Example:
+  export LC_CTYPE=<locale name>.
+  export LC_MESSAGES=<locale name>.
+  export XMODIFIERS="@im=<im_name>".
+  zh_TW.Big5 fontset: "-*-big5-0,-*-iso8859-1".
+  zh_CN.GB2312 fontset: "-*-gb2312.1980-0,-*-iso8859-1".
+========================================================================
+
+至於其他的 XIM client 啟動方式，原理完全相同，就不再重複。以下只簡述各
+XIM client 應注意的相關操作細節。
+
+
+
+----------------------------------
+B. 各種 XIM Client 的相關操作細節:
+
+以下所列的是我親自試過的，但 XIM client 絕不只這些。若其他朋友有其他 XIM
+client 試驗成功的經驗，歡迎您將方法告訴我們，我們很樂意將它列在下頭。
+
+1. xedit:
+****************************
+   請您在您的 $HOME/.Xresources 中加入以下幾行:
+
+xtDefaultFontSet: -*-big5-0,-adobe-*-iso8859-1
+xedit*international: True
+xedit*fontSet: -*-16-*-big5-0,-adobe-*-16-*-iso8859-1
+.Xedit.shellext.inputMethod:    xcin
+.Xedit.shellext.preeditType:    Root
+
+   並執行  xrdb -merge ~/.Xresources  或重新進入 X Window 。然後按照 A
+   節的方式啟動 xcin 與 xedit 。
+
+
+2. rxvt-2.6.x/2.7.x:
+****************************
+   此版的 rxvt 可以在
+
+        ftp://ftp.rxvt.org/pub/rxvt/
+        ftp://xcin.linux.org.tw/pub/xcin/rxvt/
+
+   抓到，其安裝步驟為:
+
+   For rxvt-2.6.x:
+	a. configure --enable-xim --enable-big5
+	b. make
+
+   For rxvt-2.7.x:
+	a. configure --enable-languages --enable-xim
+	b. make
+
+   然後按照 A 節的方式啟動 xcin 與 rxvt。其中啟動 rxvt 時請加入如下的參數:
+
+   For rxvt-2.6.x:
+	rxvt -pt Root -fm <中文字型名> -fn <英文字型名>
+
+   For rxvt-2.7.x:
+	rxvt -pt Root -fm <中文字型名> -fn <英文字型名> -km <使用內碼名>
+	其中 <使用內碼名> 可以是 big5 或 gb。
+
+   rxvt 大部分的選項也可以直接寫在 $HOME/.Xresources 裏頭，詳情請見 rxvt 內
+   附的文件說明。
+
+   PS. rxvt 目前仍有若干問題有待修正，詳見 http://xcin.linux.org.tw/rxvt/
+       上的說明。
+
+
+3. netscape-4.5/4.6/4.7:
+************************
+   請您在您的 $HOME/.Xresources 中加入以下幾行:
+
+Netscape*useStderrDialog:  False
+Netscape*preeditType:  OverTheSpot
+Netscape*fontList: \
+	-*-helvetica-bold-r-*-120-*-iso8859-1;-*-big5-0:
+Netscape*XmLGrid*fontList: \
+	-*-helvetica-medium-r-*-120-*-iso8859-1;-*-big5-0:,\
+	-*-helvetica-bold-r-*-120-*-iso8859-1;-*-big5-0:=BOLD,\
+	-*-helvetica-medium-o-*-120-*-iso8859-1;-*-big5-0:=ITALIC
+
+   並執行  xrdb -merge ~/.Xresources  或重新進入 X Window 。然後按照 A 節的
+   方式啟動 xcin 與 netscape。
+
+
+4. XEmacs20:
+****************************
+   我這裏是拿 Debian-2.1 的 xemacs20 package 來測試的。在 Debian package
+   中 xemacs20 主程式部分有以下三個 package:
+
+	xemacs20-mule-canna-wnn_<version>.deb
+	xemacs20-mule_<version>.deb
+	xemacs20-nomule_<version>.deb
+
+   這三者是三選一。按照各 package 的說明，第一個的 binary 支援多國語系顯
+   示，同時也支援亞洲語系的輸入法，其中也包括 XIM。而第二個的 binary 只支
+   援多國語系顯示，不包含任何亞洲語系的輸入法。至於第三個則完全沒有多國語
+   系的支援。由於 xcin-2.5 是使用 XIM 協定，而在上述三個 xemacs package 中
+   只有第一個在編譯時有加入 XIM 支援 (即 configure 時加上 --with-xim=xlib),
+   故在此就必須選用第一個 package。當然，在裝第一個 package 時，您還要裝其
+   他相關 package 才行，詳見
+
+	dpkg --info xemacs20-mule-canna-wnn_20.4-13.deb
+
+   至於其他非 Debian 的系統，我想同樣的。如果您要自行 make xemacs, 請記得
+   在 configure 時要加上 --with-xim=xlib 的選項，必要時可能還需要安裝 mule
+   套件，其中 mule 為多國語系支援。若是使用 RPM 的系統或 FreeBSD 系統，則
+   您在選擇安裝套件時也盡量選擇有 mule 與 XIM 的支援的套件。
+
+   假設您的 xemacs 已正確無誤地安裝完成了，剩下就是設定的部分，以 Big5 為例，
+   您可以在 $HOME/.Xresources 加入以下這一行:
+
+Emacs*FontSet: -*-big5-0,-adobe-*-iso8859-1
+
+   並執行  xrdb -merge ~/.Xresources  或重新進入 X Window 。然後按照 A 節的
+   方式啟動 xcin 與 xemacs。這時候，您按下 trigger key (如 ctrl+space) 可以
+   切換到中文輸入，但輸入到 xemacs 的字仍然是亂碼。這時您可以用滑鼠點選以下
+   的選單
+
+	Mule -> Set language environment -> Chinese-BIG5
+
+   即可解決此問題。
+
+
+5. LyX: 
+****************************
+   (請注意，由於 lyx 的 Big5 與 XIM 的支援可能已沒有人持續進行維護，故以下的
+    內容只留作參考用，讓有興趣的朋友可以試試看。如果您無法試成功，請您直接去
+    參考 CLE (Chinese Linux Extension: http://cle.linux.org.tw) 的 lyx 套件，
+    我們將不再對以下的內容提供支援)
+
+   LyX 在 i18n 與 XIM 的部分發展已接近完成階段，但仍有問題，仍持續在改進中，
+   在此我以 CLE 小組目前的 lyx-1.0.1-i18np07.1.src.rpm 為例，說明其安裝方式
+   以及如何與 xcin 搭配使用。
+
+   請至 CLE ftp 站中抓回 lyx-1.0.1-i18np07.1.src.rpm, 若您是使用 CLE 或 RedHat
+   的系統，可以直接抓回 binary rpm 來安裝即可。若您需要重新 compile, 則當您將
+   此 rpm 解開後，您會有以下這幾個檔:
+
+	lyx-1.0.1.tar.gz
+	lyx-1.0.1-I18N-0.7-0626.patch
+	lyx-1.0.1-zh_TW.Big5.po
+
+   請先將 lyx-1.0.1.tar.gz 解開，然後加入 patch:
+
+	patch -p0 < lyx-1.0.1-I18N-0.7-0626.patch
+	mv lyx-1.0.1-zh_TW.Big5.po lyx-1.0.1/po/zh_TW.Big5.po
+
+   但這樣還不夠，在中文 table 與 XIM 功能上仍有問題，故請您再抓回這兩個 patch:
+
+	ftp://xcin.linux.org.tw/pub/xcin/misc/lyx/wycc-990914.patch.gz
+	ftp://xcin.linux.org.tw/pub/xcin/misc/lyx/lyx-thh-19990928.diff.gz
+
+   並將它們加進去
+
+	zcat wycc-990914.patch.gz | patch -p0
+	zcat lyx-thh-19990928.diff.gz | patch -p0
+
+   未來這些 patch 也許會進入 CLE 的 lyx 套件中。
+
+   但您安裝完畢後，您還要確定您是否有適當的字型用以執行 lyx。 lyx 需要以下的
+   中文字型:
+
+	-*-sung-bold-i-*--*-*-*-*-*-*-big5-0
+	-*-sung-medium-i-*--*-*-*-*-*-*-big5-0
+	-*-sung-bold-r-*--*-*-*-*-*-*-big5-0
+	-*-sung-medium-r-*--*-*-*-*-*-*-big5-0
+
+   其中 * 可以用任何值代入。然而，您的系統可能不一定安裝了上述這些字型，而且您
+   也可能不願意裝它們。若是這種情況，可以使用 fonts alias 的技巧，將您系統中原
+   有的字型取一些別名，以對應到上述這四個字型上。例如，您的系統中只裝了:
+
+	-twmoe-kai-medium-r-normal-fs-16-160-75-75-c-160-big5-0
+	-twmoe-kai-medium-r-normal-fs-24-240-75-75-c-240-big5-0
+
+   這兩個字型，這時您就可以修改您的 /usr/X11R6/lib/X11/fonts/chinese/fonts.alias
+   加入以下幾行:
+
+-twmoe-sung-bold-i-normal--16-160-75-75-c-160-big5-0 \
+-twmoe-kai-medium-r-normal-fs-16-160-75-75-c-160-big5-0
+-twmoe-sung-bold-i-normal--24-240-75-75-c-240-big5-0 \
+-twmoe-kai-medium-r-normal-fs-24-240-75-75-c-240-big5-0
+
+-twmoe-sung-medium-i-normal--16-160-75-75-c-160-big5-0 \
+-twmoe-kai-medium-r-normal-fs-16-160-75-75-c-160-big5-0
+-twmoe-sung-medium-i-normal--24-240-75-75-c-240-big5-0 \
+-twmoe-kai-medium-r-normal-fs-24-240-75-75-c-240-big5-0
+
+-twmoe-sung-bold-r-normal--16-160-75-75-c-160-big5-0 \
+-twmoe-kai-medium-r-normal-fs-16-160-75-75-c-160-big5-0
+-twmoe-sung-bold-r-normal--24-240-75-75-c-240-big5-0 \
+-twmoe-kai-medium-r-normal-fs-24-240-75-75-c-240-big5-0
+
+-twmoe-sung-medium-r-normal--16-160-75-75-c-160-big5-0 \
+-twmoe-kai-medium-r-normal-fs-16-160-75-75-c-160-big5-0
+-twmoe-sung-medium-r-normal--24-240-75-75-c-240-big5-0 \
+-twmoe-kai-medium-r-normal-fs-24-240-75-75-c-240-big5-0
+
+   (請注意 \ 代表下一行與本行接在一起的意思)，然後重新進入 X Window, 按照 B 
+   節的方式啟動 xcin 與 lyx, 這時您即可在 lyx 中直接輸入中文了。
+
+   另外提一個小技巧: 如果您沒有 root 權限，無法修改系統的 fonts.alias 時，或
+   者您根本不想為了 lyx 而修改您的 fonts.alias, 您也可以在任何位置造一個目錄，
+   然後將上述幾行寫到該目錄下的 fonts.alias 檔中 (例如: 
+   /usr/local/lib/lyx/font/fonts.alias), 則您再寫一個內容如下的 script:
+
+=============================================================
+#!/bin/sh
+
+xset fp+ /usr/local/lib/lyx/font
+lyx $@			# 這裏請按照 B 節的方式來啟動 lyx
+xset fp- /usr/local/lib/lyx/font
+=============================================================
+
+   如此，只有當要使用 lyx 時才讓那些 fonts.alias 生效，而不用時就讓它失效。
+
+   最後一提，若您設定 LANG 或 LC_MESSAGES 環境變數為 zh_TW.Big5 時，您可能
+   會見到所有的 lyx 選單上的字全部變成亂碼，這是因為 lyx 使用了 non-free 的
+   libforms 做 widget set, 但該 widget set 還未做 I18N 化的原故。解決方式就
+   是將 LC_MESSAGES 環境變數設為 C, 乾脆直接顯示英文，或使用 xa+cv 來做中文
+   顯示。
+
+
+****************************************************************************
+
+若您有其他 XIM client 測試成功的經驗，麻煩您告訴我們，我們非常樂於分享
+您的經驗。
+
+
+--------------------------
+C. 其他已知的 XIM client:
+
+底下所列的是其他已知的 XIM client, 但我沒有親自試驗過，有興趣的朋友可以自行
+測試:
+
+1. vim-5.4/5.5.
+
+2. GNOME:  http://www.gnome.org
+
+3. KDE 2.X:  http://www.kde.org
+
+4. Mozilla M16/M17:  http://www.mozilla.org
+
+
+T.H.Hsieh
+
