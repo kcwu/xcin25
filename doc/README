@@ -169,7 +169,7 @@ B. 發展簡史:
 ------------------
 C. 本版改進 (詳見 Changes 一文的說明):
 
-(版本: xcin-2.5.2.3, 需搭配 libtabe-0.1.8 以上)
+(版本: xcin-2.5.3-pre1, 需搭配 libtabe-0.2.2 以上)
 
 1. bimsphone 模組改進:
    a. 目前 bimsphone 模組支援三種輸入模式:
@@ -328,7 +328,8 @@ D. 套件內容:
 	g. bims_pinyin.tab:	bimspinyin 的注音、拼音對照表。
 	h. jyutping.tab:	粵語拼音輸入法表格。
 	i. jyutping0.tab:	粵語拼音輸入法表格 (沒有音調)。
-	j. default.phr:		qphrase 資料檔。
+	j. telecode.tab:	電報碼輸入法表格。
+	k. default.phr:		qphrase 資料檔。
 
    $(BIG5HKSCS)/:
 	a. sys.tab:		big5hkscs 內碼資訊檔。

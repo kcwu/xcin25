@@ -138,7 +138,7 @@ B. History:
 ------------------
 C. What's New (Please refer to Changes document for details):
 
-(version: xcin-2.5.2.3, needs libtabe-0.1.8 and above):
+(version: xcin-2.5.3-pre1, needs libtabe-0.2.2 and above):
 
 1. Improvement for bimsphone module:
    a. Now bimsphone supports 3 input modes:
@@ -272,7 +272,8 @@ D. Contents of the package:
 	g. bims_pinyin.tab:	The ZhuYin-PinYin mapping table for bimspinyin.
 	h. jyutping.tab:	Jyut-Pinyin input method.
 	i. jyutping0.tab:	Jyut-Pinyin input method (no tone).
-	j. default.phr:		Data for qphrase.
+	j. telecode.tab:	Telephony code input method.
+	k. default.phr:		Data for qphrase.
 
    $(BIG5HKSCS)/:
 	a. sys.tab:		big5hkscs encoding information.
