@@ -156,21 +156,21 @@ XCIN 開發計畫的網頁是在:
 另外我們還有一個 CVS server，所有 xcin 與 libtabe 最新的原始碼都可以在 CVS
 server 上找到，它們的使用方式為:
 
-	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home2/xcin login
+	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home/service/cvsroot/xcin login
 
 這時它會問您 password, 請輸入 xcin。然後，如果您要第一次下載原始碼時，您可以
 用以下的指令:
 
     下載 xcin:
-	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home2/xcin checkout xcin
+	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home/service/cvsroot/xcin checkout xcin
 
     下載 libtabe:
-	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home2/xcin checkout libtabe
+	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home/service/cvsroot/xcin checkout libtabe
 
 如果您之前已自 CVS 中下載 xcin 或 libtabe 的原始碼了，但想要更新原始碼的內容
 時，可以到 xcin 或 libtabe 的目錄底下，執行:
 
-	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home2/xcin update
+	cvs -z9 -d :pserver:xcin@xcin.linux.org.tw:/home/service/cvsroot/xcin update
 
 另外，我們還有一個 xcin 的 mailing list, 用來討論 xcin 的相關問題，以及 xcin
 的發展 .... 等等，它的位址是:

@@ -77,12 +77,16 @@ xcin-2.5.3-pre3:  2001/12
 25. Partial Darwin support.
     Thanks to <glee@gnupilgrims.org>.
 
-26. Port xcin to Cygwin.
+26. Port xcin to Cygwin. (partial)
     Thanks to weijr <weijr@magic.b81.org>.
 
 27. Fix bug in gui_onspot_init(): It should call XCreateSimpleWindow().
 
 28. Clean out the un-useful codes of GUI-MONITOR.
+
+29. Correct the cvs repository location in FAQ.
+    Thanks to Kuo-Chieh Ting <kcting@Bayou.UH.EDU>.
+
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
