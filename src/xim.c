@@ -71,9 +71,7 @@ xim_commit(IC *ic, char *str)
         }
         strcpy(ic->imc->cch, str);
     }
-#ifdef DEBUG
-    DebugLog(1, xccore->xcin_rc.verbose, "commit str: %s\n", str);
-#endif
+    DebugLog(1, verbose, "commit str: %s\n", str);
 
     cch_str_list[0] = str;
     XmbTextListToTextProperty(xccore->gui.display, cch_str_list, 1,
