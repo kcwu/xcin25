@@ -22,7 +22,7 @@
 #ifndef  _CONSTANT_H
 #define  _CONSTANT_H
 
-#define  XCIN_VERSION  		"2.5.3-pre1"
+#define  XCIN_VERSION  		"2.5.3-pre2"
 
 #ifndef  XCIN_DEFAULT_RCDIR
 #define  XCIN_DEFAULT_RCDIR	"/usr/local/etc"
