@@ -430,10 +430,10 @@ read_core_config_IM(void)
 	/* setkey should be uniquely defined */
 	set_data(&setkey, RC_INT, value, 0, 0);
 	if (setkey < 0 || setkey > MAX_IM_ENTRY)
-	    perr(XCINMSG_ERROR,_(fmt),xcin_core.xcin_rc.rcfile,objname,cmd[1],
+	    perr(XCINMSG_ERROR,N_(fmt),xcin_core.xcin_rc.rcfile,objname,cmd[1],
 		N_("invalid range of value"));
 	else if(IM_check_registered(setkey) == True)
-	    perr(XCINMSG_ERROR,_(fmt),xcin_core.xcin_rc.rcfile,objname,cmd[1],
+	    perr(XCINMSG_ERROR,N_(fmt),xcin_core.xcin_rc.rcfile,objname,cmd[1],
 		N_("value conflict with other module"));
 
 	cmd[1] = "MODULE";

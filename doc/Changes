@@ -50,6 +50,15 @@ xcin-2.5.3-pre3:  2001/12
 17. Add comments of source codes from <pyeh@phys.ntu.edu.tw>.
 
 
+18. Fix by <thhsieh@linux.org.tw>:
+    Add ez input method table (for gen_inp).
+    Thanks to woodman <tuen@bigfoot.com>.
+
+19. Fix by <thhsieh@linux.org.tw>:
+    Using N_() for all the message output by perr().
+    Thanks to Kuang-che Wu <kcwu@kcwu.homeip.net>.
+
+
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
 1. Fix memory leakage problem in IMdkit: i18nIc.c.

@@ -33,7 +33,7 @@ xcin_malloc(size_t n_bytes, int reset)
     char *s;
 
     if ((s = malloc(n_bytes)) == NULL)
-	perr(XCINMSG_IERROR, _("xcin_malloc: memory exhaust.\n"));
+	perr(XCINMSG_IERROR, N_("xcin_malloc: memory exhaust.\n"));
     if (reset)
 	memset(s, 0, n_bytes);
     return s;
@@ -45,6 +45,6 @@ xcin_realloc(void *pt, size_t n_bytes)
     char *s;
 
     if ((s = realloc(pt, n_bytes)) == NULL)
-	perr(XCINMSG_IERROR, _("xcin_realloc: memory exhaust.\n"));
+	perr(XCINMSG_IERROR, N_("xcin_realloc: memory exhaust.\n"));
     return s;
 }

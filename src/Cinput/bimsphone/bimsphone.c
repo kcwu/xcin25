@@ -209,8 +209,8 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 	if (cf->mode & BIMSPH_MODE_AUTOSEL) {
 	    if (dp[BIMSP_ZHUYIN] != NULL) {
 		perr(XCINMSG_WARNING,
-		    _("bimsphone: zhuyin mode with auto-selection is"
-		      "already loaded, ignore.\n"));
+		    N_("bimsphone: zhuyin mode with auto-selection is"
+		       "already loaded, ignore.\n"));
 		clean_exit(cf);
 		return False;
 	    }
@@ -218,8 +218,8 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 	else {
 	    if (bimsp_zhuyin_noauto != 0) {
 		perr(XCINMSG_WARNING,
-		    _("bimsphone: zhuyin mode without auto-selection is"
-		      "already loaded, ignore.\n"));
+		    N_("bimsphone: zhuyin mode without auto-selection is"
+		       "already loaded, ignore.\n"));
 		clean_exit(cf);
 		return False;
 	    }
@@ -231,7 +231,7 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 
 	if (dp[BIMSP_PINYIN] != NULL) {
 	    perr(XCINMSG_WARNING,
-		_("bimsphone: pinyin mode is already loaded, ignore.\n"));
+		N_("bimsphone: pinyin mode is already loaded, ignore.\n"));
 	    clean_exit(cf);
 	    return False;
 	}

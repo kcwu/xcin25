@@ -2,6 +2,7 @@ big5 = 		sys.tab.$(BIG5ENC) \
 		array30.tab.$(BIG5ENC) \
 		bims_pinyin.tab.$(BIG5ENC) \
 		cj.tab.$(BIG5ENC) \
+		ez.tab.$(BIG5ENC) \
 		phone.tab.$(BIG5ENC) \
 		pinyin.tab.$(BIG5ENC) \
 		pinyin0.tab.$(BIG5ENC) \
@@ -14,6 +15,7 @@ big5hkscs =	sys.tab.$(BIG5HKENC) \
 		array30.tab.$(BIG5HKENC) \
 		bims_pinyin.tab.$(BIG5HKENC) \
 		cj.tab.$(BIG5HKENC) \
+		ez.tab.$(BIG5HKENC) \
 		phone.tab.$(BIG5HKENC) \
 		pinyin.tab.$(BIG5HKENC) \
 		simplex.tab.$(BIG5HKENC) \
@@ -37,6 +39,9 @@ bims_pinyin.tab.$(BIG5ENC): bims_pinyin.cin sys.tab.$(BIG5ENC)
 	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ bims_pinyin.cin
 cj.tab.$(BIG5ENC): cj.cin sys.tab.$(BIG5ENC)
+	$(build) -r $(xcinrc) -l $(BIG5ENC) \
+		-s sys.tab.$(BIG5ENC) -o $@ cj.cin
+ez.tab.$(BIG5ENC): ez.cin sys.tab.$(BIG5ENC)
 	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ cj.cin
 phone.tab.$(BIG5ENC): phone.cin sys.tab.$(BIG5ENC)
@@ -70,6 +75,9 @@ bims_pinyin.tab.$(BIG5HKENC): bims_pinyin.cin sys.tab.$(BIG5HKENC)
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
 		-s sys.tab.$(BIG5HKENC) -o $@ bims_pinyin.cin
 cj.tab.$(BIG5HKENC): cj.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ cj.cin
+ez.tab.$(BIG5HKENC): ez.cin sys.tab.$(BIG5HKENC)
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
 		-s sys.tab.$(BIG5HKENC) -o $@ cj.cin
 phone.tab.$(BIG5HKENC): phone.cin sys.tab.$(BIG5HKENC)

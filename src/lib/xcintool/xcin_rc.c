@@ -103,7 +103,7 @@ read_resource(char *rcfile)
     struct repl_hooks hook;
 
     if (! rcfile)
-	perr(XCINMSG_ERROR, _("null rcfile name.\n"));
+	perr(XCINMSG_ERROR, N_("null rcfile name.\n"));
 
     init_storage();
     init_subrs();
@@ -115,7 +115,7 @@ read_resource(char *rcfile)
 
     rc_fp = open_file(rcfile, "rt", XCINMSG_ERROR);
     if (repl_driver(0, 0, &hook) != 0)
-	perr(XCINMSG_ERROR, _("rcfile \"%s\" reading error.\n"), rcfile);
+	perr(XCINMSG_ERROR, N_("rcfile \"%s\" reading error.\n"), rcfile);
     fclose(rc_fp);
 }
 
@@ -272,7 +272,7 @@ find_rcfile(char *rcfn, int rcfn_size, char *user_home, char *user_dir)
         return;
 
     /* Cannot find any rcfile. */
-    perr(XCINMSG_ERROR, _("rcfile not found.\n"));
+    perr(XCINMSG_ERROR, N_("rcfile not found.\n"));
 }
 
 
@@ -312,7 +312,7 @@ read_xcinrc(xcin_rc_t *xrc, char *rcfile)
 
     if (path[0] && check_file_exist(path, FTYPE_FILE)==False) {
 	perr(XCINMSG_WARNING, 
-		_("rcfile \"%s\" does not exist, ignore.\n"), path);
+		N_("rcfile \"%s\" does not exist, ignore.\n"), path);
 	path[0] = '\0';
     }
     if (! path[0])

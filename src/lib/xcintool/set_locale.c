@@ -65,7 +65,7 @@ set_lc_ctype(char *loc_name, char *loc_return, int loc_size,
 		    s = "(NULL)";
 	    }
 	    perr(exitcode, 
-		 _("C locale \"%s\" is not supported by your system.\n"), s);
+		 N_("C locale \"%s\" is not supported by your system.\n"), s);
 	}
 	setlocale(LC_CTYPE, "C");
 	return False;
@@ -136,7 +136,7 @@ set_lc_ctype_env(char *loc_name, char *loc_return, int loc_size,
 	    loc = getenv("LANG");
 	if (! loc) {
 	    perr(exitcode, 
-		 _("Don't know how to set C locale from the environment.\n"));
+		 N_("Don't know how to set C locale from the environment.\n"));
 	    return False;
 	}
     }

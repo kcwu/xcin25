@@ -146,23 +146,23 @@ load_module(char *modname, enum mtype mod_type, char *version,
 #endif
 #endif
     {
-	perr(XCINMSG_IWARNING, _("module symbol \"module_ptr\" not found.\n"));
+	perr(XCINMSG_IWARNING, N_("module symbol \"module_ptr\" not found.\n"));
 	err = 1;
     }
     if (!err && module->module_type != mod_type) {
 	perr(XCINMSG_IWARNING,
-	     _("invalid module type, type %d required.\n"), mod_type);
+	     N_("invalid module type, type %d required.\n"), mod_type);
 	err = 1;
     }
     if (!err && strcmp(module->version, version) != 0) {
 	perr(XCINMSG_IWARNING,
-	     _("invalid module version: %s, version %s required.\n"),
+	     N_("invalid module version: %s, version %s required.\n"),
 	     module->version, version);
     }
 
     if (err) {
         perr(XCINMSG_WARNING,
-	     _("cannot load module \"%s\", ignore.\n"), modname);
+	     N_("cannot load module \"%s\", ignore.\n"), modname);
 	if (ld)
 #ifdef HAVE_DLOPEN
 	    dlclose(ld);
@@ -219,11 +219,11 @@ void
 module_comment(mod_header_t *modp, char *mod_name)
 {
     if (modp) {
-	perr(XCINMSG_NORMAL, _("module \"%s\":"), mod_name);
+	perr(XCINMSG_NORMAL, N_("module \"%s\":"), mod_name);
 	if (modp->comments)
-	    perr(XCINMSG_EMPTY, "\n\n%s\n", _(modp->comments));
+	    perr(XCINMSG_EMPTY, "\n\n%s\n", N_(modp->comments));
 	else
-	    perr(XCINMSG_EMPTY, _("no comments available.\n"));
+	    perr(XCINMSG_EMPTY, N_("no comments available.\n"));
     }
 }
 
