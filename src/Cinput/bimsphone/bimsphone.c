@@ -643,11 +643,23 @@ modifier_escape(phone_conf_t *cf, inpinfo_t *inpinfo,
 static unsigned int
 check_qphr_fallback(phone_conf_t *cf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 {
+    unsigned int ret=0;
+
     if ((cf->modesc & QPHR_FALLBACK) &&
 	(keyinfo->keystr_len == 1) && (inpinfo->guimode & GUIMOD_LISTCHAR))
-	return IMKEY_FALLBACKPHR;
+	ret = IMKEY_FALLBACKPHR;
     else
-        return (inpinfo->n_lcch) ? IMKEY_ABSORB : IMKEY_IGNORE;
+        ret = (inpinfo->n_lcch) ? IMKEY_ABSORB : IMKEY_IGNORE;
+
+    if (ret != IMKEY_ABSORB && ret != IMKEY_IGNORE) {
+	if (inpinfo->n_lcch) {
+	    commit_string(inpinfo, inpinfo->iccf, inpinfo->n_lcch);
+	    inpinfo->cch_publish.wch = (wchar_t)0;
+	    editing_status(cf, inpinfo, (phone_iccf_t *)inpinfo->iccf);
+	    ret |= IMKEY_COMMIT;
+	}
+    }
+    return ret;
 }
 
 /*----------------------------------------------------------------------------

@@ -19,6 +19,9 @@ xcin-2.5.3-pre3:  2001/12
 
 6. Readd xim_IC.c: check_ic_exist().
 
+7. Fix qphrase fallback mode bug in bimsphone.
+   THanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>
+
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
