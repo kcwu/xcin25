@@ -63,6 +63,8 @@ xcin-2.5.3-pre3:  2001/12
 21. Fix I18N message bug in xcin/lib/xcintool/perr.c.
     Thanks to Kuang-che Wu <kcwu@kcwu.homeip.net>.
 
+22. Fix FreeBSD gb2312 encoding name from euc to euccn.
+    Thanks to statue <statue.bbs@bbs.sayya.org>.
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------

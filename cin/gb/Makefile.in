@@ -12,7 +12,7 @@ all-LINUX:
 	( GB2312ENC=gb2312 GBKENC=gbk make -f Rules make-gb2312 make-gbk )
 
 all-FREEBSD:
-	( GB2312ENC=euc make -f Rules make-gb2312 )
+	( GB2312ENC=euccn make -f Rules make-gb2312 )
 
 all-OPENBSD:
 	( GB2312ENC=euc make -f Rules make-gb2312 )
@@ -33,7 +33,7 @@ install-LINUX:
 	( GB2312ENC=gb2312 GBKENC=gbk make -f Rules install_gb2312 install_gbk )
 
 install-FREEBSD:
-	( GB2312ENC=euc make -f Rules install_gb2312 )
+	( GB2312ENC=euccn make -f Rules install_gb2312 )
 
 install-OPENBSD:
 	( GB2312ENC=euc make -f Rules install_gb2312 )

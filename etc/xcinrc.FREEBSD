@@ -168,20 +168,20 @@
 ;
 ;  Here are detailed configuration of each IM (for zh_CN.EUC locale).
 ;
-(define pinyin@euc
+(define pinyin@euccn
 	'((SETKEY		1)))
 
-(define shuangpin@euc
+(define shuangpin@euccn
 	'((SETKEY		2)))
 
-(define jtcj_gb@euc
+(define jtcj_gb@euccn
 	'((SETKEY		3)))
 
-(define phonegb2@euc
+(define phonegb2@euccn
 	'((SETKEY		4)
 	  (END_KEY		YES)))
 
-(define wubizixing@euc
+(define wubizixing@euccn
 	'((SETKEY		5)))
 
 ;
