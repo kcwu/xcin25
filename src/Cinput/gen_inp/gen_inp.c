@@ -1285,7 +1285,7 @@ gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	    inpinfo->mcch_grouping = NULL;
 
 	    if ((keyinfo->keystate & Mod1Mask) &&	/* alt-Num/space */
-		(('1'<=keystr[0] && keystr[0]<='9') || 
+		(('0'<=keystr[0] && keystr[0]<='9') ||
 		 ((cf->mode & INP_MODE_SPACEAUTOUP) && keysym==XK_space))) {
 		int choice=-1;
 
