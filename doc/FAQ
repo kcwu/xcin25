@@ -549,7 +549,8 @@ PATH=$PATH:/usr/X11R6/bin:/usr/local/bin; export PATH
 LC_CTYPE=zh_TW.Big5; export LC_CTYPE
 XMODIFIERS="@im=xcin"; export XMODIFIERS
 xcin &
-exec <start_your_WM>
+<start_your_WM>
+killall xcin
 ========================== Cut Here ====================================
 
 其中 <start_your_WM> 是啟動您的 Window Manager 的指令。請注意當您在啟
@@ -557,6 +558,15 @@ exec <start_your_WM>
 例如您使用 fvwm 的話，則該指令就是 fvwm。若您使用 KDE 的話，則該指令就
 應該是 startkde。請您查閱您的系統說明文件找出您的 Window Manager 的啟
 動指令。
+
+請注意，在啟動您的 Window Manager 時，建議您不要使用:
+
+	exec <start_your_WM>
+
+的方式，而是採用如上的方式。主要原因是，我們希望當您要 logout 時，xcin
+可以在所有的 Window Manager、X-Apps 都結束後，最後才結束，如此可以避免
+掉當 XIM server (即 xcin) 與 XIM client (即其他的 X-Apps) 同部結束時可
+能發生的桌面環境當住的問題。
 
 如果，您不是由文字模式下進入 X Window 系統的，而是直接由圖形介面 login
 進入系統的 (例如從 xdm login)，則您要編寫您的 $HOME/.xsession 檔案，讓
