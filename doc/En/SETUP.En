@@ -18,11 +18,11 @@ The requirement of these systems are:
 1. GNU/Linux:
      a. Need glibc-2.1.x and above (although xcin could also be installed in
 	glibc-2.0.x system through some special arrangements, but it might
-	introduce many possible problems, so we do not recommand this).
+	introduce many possible problems, so we do not recommend this).
      b. Need gcc-2.7.2 and above.
      c. Need XFree86-3.3.6 and above (although xcin could also be installed in
 	all the XFree86-3.3.X systems through some special arrangements, but it
-	might introduce many possible problems, so we do not recommand this).
+	might introduce many possible problems, so we do not recommend this).
      d. Need suitable locale supports, such as zh_TW.Big5, zh_CN.GB2312 ....
 	etc, and their corresponding Chinese fonts. Because not all the 
 	GNU/Linux distributions support these locales, if your system does
@@ -32,19 +32,19 @@ The requirement of these systems are:
 
 2. FreeBSD:
      a. FreeBSD-4.0 and above systems which support locale and ELF are 
-	recommanded.
+	recommended.
      b. Need gcc-2.7.2 and above.
      c. Need XFree86-3.3.6 and above (although xcin could also be installed 
 	in all the XFree86-3.3.X systems via some special arrangements, but 
-	it might introduce many possible problems, so it is not recommanded).
+	it might introduce many possible problems, so it is not recommended).
      d. Need suitable locale supports, such as zh_TW.Big5, zh_CN.EUC .... etc,
 	and their corresponding Chinese fonts.
 
 3. HP-UX:
-     a. HP-UX B.10.XX and above systems are recommanded.
+     a. HP-UX B.10.XX and above systems are recommended.
      b. Need ANSI C compiler.
      c. Need suitable locale supports, such as zh_TW.big5, zh_HK.hkbig5 .... 
-	etc, and their cooresponding Chinese fonts.
+	etc, and their corresponding Chinese fonts.
 
 
 ---------------------------------
@@ -97,7 +97,7 @@ B. Install xcin-2.5:
    For the correct version of libtabe for this xcin version, please see the
    description of section C in the "README" file.
 
-   If your system has the support to shared library, it is recommanded to
+   If your system has the support to shared library, it is recommended to
    compile libtabe to be the shared library. In the following is the quick 
    installation guide (see the documents in libtabe for details):
 
@@ -132,7 +132,7 @@ B. Install xcin-2.5:
 5. Change to xcin-2.5 directory and run configure program. Generally speaking,
    if the extra libraries (such as Berkeley DB2, libtabe .... etc) needed by
    xcin are all placed in the same position of the system, you only need to
-   excute:
+   execute:
 
 	 ./configure --prefix=<installation path> \
 		     --with-extra-prefix=<path of extra libraries>
@@ -147,12 +147,12 @@ B. Install xcin-2.5:
 	    Set the installation path to PATH, then xcin will be installed in
 	    the following directories,
 
-		excutables:  $PATH/bin
+		executables:  $PATH/bin
 		data files:  $PATH/lib/xcin
 		configuration files:  $PATH/etc
 
 	--binpath=PATH (default is ${prefix}/bin)
-	    Set the installation path of xcin excutables to PATH.
+	    Set the installation path of xcin executables to PATH.
 
 	--with-xcin-dir=PATH (default is ${prefix}/lib/xcin)
 	    Set the installation path of xcin data files to PATH.
@@ -256,9 +256,9 @@ B. Install xcin-2.5:
 		xmodmap -e "remove mod1 = Mode_switch"
 
 	to unset the Mode_switch. In other words, only keep the Meta_L and
-	Meta_R settings. You can put this command in suiable place such that 
+	Meta_R settings. You can put this command in suitable place such that 
 	everytime when you login into CDE environment, this command will be
-	excuted automatically. For details please read the man page of xmodmap
+	executed automatically. For details please read the man page of xmodmap
 	and your CDE documentations.
 
 9. If you cannot find your favorite input method tables in $XCINPATH/tab/,

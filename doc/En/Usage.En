@@ -51,7 +51,7 @@ Useful environment variables:  $XCIN_RCFILE.
    Hence, if a normal user does not like the configuration of the system 
    default rcfile, in principle he only needs to copy the system default
    rcfile into $HOME/.xcin/ or $HOME/ directory and modify its configuration
-   to his favoriates.
+   to his favorites.
 
 ***************************************************************************
 ***************************************************************************
@@ -96,7 +96,7 @@ Useful environment variables:  $XCIN_RCFILE.
    Besides, the standard XIM server can also support several input_styles.
    Currently xcin support 2 kinds of input_style:
 
-	Root:  the preedit information and status information are both in
+	Root:  the pre-edit information and status information are both in
 	       xcin main window.
 	OverTheSpot:  xcin will open a small window near the input cursor
 		      of the XIM client to display the preedit information,
@@ -154,7 +154,7 @@ xcin: inp_styles: Root OverTheSpot
 			  (BEEP_WRONG  "YES")))
 
    The main structer of xcin-2.5 contains xcin main program and IM (Input
-   Method) modules. The configuration of rcfile is roughly devided to 3
+   Method) modules. The configuration of rcfile is roughly divided to 3
    parts: main program global configuration, locale setting, and the detailed
    settings of each input method. The setting of each input method is related
    to the IM module which it use. For details please refer to the documents
@@ -184,11 +184,11 @@ xcin: inp_styles: Root OverTheSpot
 
    M_FG_COLOR:
 	The specially displayed foreground color (e.g., the preedit area,
-	mutiple characters for selection).
+	multiple characters for selection).
 
    M_BG_COLOR:
 	The specially displayed background color (e.g., the preedit area,
-	mutiple characters for selection).
+	multiple characters for selection).
 
    ULINE_COLOR:
 	The color of phrases marking underline of xcin windows.
@@ -204,12 +204,12 @@ xcin: inp_styles: Root OverTheSpot
 	input_style, all the preedit information are moved into the 
 	OverTheSpot window (the small window appeared near the cursor of
 	the XIM client), so the original xcin main window seems to be too
-	large and waste a lot of space of the disktop. Therefore, if the
+	large and waste a lot of space of the desktop. Therefore, if the
 	xcin 2nd main window is opened, then in the English input mode or
 	the OverTheSpot input_style, xcin will use the smaller 2nd main
 	window to display necessary information. But when the Root input_style
 	is enabled, the xcin will automatically switch to the original main
-	windown.
+	windows.
 
    MAINWIN2_GEOMETRY:
 	The size and position of xcin 2nd main window.
@@ -238,15 +238,15 @@ xcin: inp_styles: Root OverTheSpot
 
    KEEP_POSITION_ON:
 	Keep the position of the xcin window or not? If this option is opened,
-	then xcin window will automatically appeared on the disktop when we
-	switch between the virtual disktops. Also when we move the xcin window
-	out of the boundary of the screen (or, disktop), xcin will come back
+	then xcin window will automatically appeared on the desktop when we
+	switch between the virtual desktop. Also when we move the xcin window
+	out of the boundary of the screen (or, desktop), xcin will come back
 	to its original position. This option is useful to some simple Window
 	Managers, e.g., fvwm series. If the Window Manager does not provide
-	the function to fix the applicatiion window on the working virtual
+	the function to fix the application window on the working virtual
 	desktop, then you can try to enable this option. But if your Window
 	Manager dose provide this functionality, it is suggested to disable
-	this option to aviod other possible problems. By default this option
+	this option to avoid other possible problems. By default this option
 	is not enabled.
 
    DISABLE_WM_CTRL:
@@ -267,14 +267,14 @@ xcin: inp_styles: Root OverTheSpot
 	and the other is that there are duplicated characters to choose.
 	Depending on the design of the IM module and the configuration of
 	the input methods in the xcinrc file, xcin may beep when both of the
-	situations occures, or only beep when one of the situations occures.
+	situations occurs, or only beep when one of the situations occurs.
 	By default the beeps of both situation are the same. But if you turn
 	on this option, then the two beeps will be different.
 
    LOCALE:
 	In this option all the locale name set in the xcinrc file could be
 	listed here. This option is optional. However, if you are using
-	glibc-2.2 system, it is recommanded to use this option in order to
+	glibc-2.2 system, it is recommended to use this option in order to
 	avoid the locale naming problem.
 
    INPUT_STYLE:
@@ -393,7 +393,7 @@ xcin: inp_styles: Root OverTheSpot
 	it will display the recalling keystroke of the input method you
 	specified here. If it is set to "DEFAULT", then it will use the input
 	method you are using to display the recalling keystroke (when you
-	switch to other input method, the recolling keystroke will also
+	switch to other input method, the recalling keystroke will also
 	be switched).
 
    PHRASE:
@@ -451,7 +451,7 @@ xcin: inp_styles: Root OverTheSpot
    as the IM module for this input method.
 
    Now xcin does not impose the ctrl+alt+3 switch as the phone IM, or the
-   ctrl+alt+6 as the intellegent phone IM, .... etc. All the needed input
+   ctrl+alt+6 as the intelligent phone IM, .... etc. All the needed input
    methods should be specified in the CINPUT setting, plus the suitable
    detailed configurations as described in the following, then they will be
    loaded when using. Note that the input methods specified in DEFAULT_IM
@@ -587,7 +587,7 @@ xcin: inp_styles: Root OverTheSpot
 
    The quick phrases output is a little special. If initially xcin under 
    the English input mode (i.e., xcin is not connected to the XIM clients),
-   pressing the FKEY_QPHRASE trigger key will cause the temparay connection
+   pressing the FKEY_QPHRASE trigger key will cause the temporary connection
    between the XIM client and xcin, and after the output of the quick phrase,
    it will go back to the un-connected status. In other words, in the English
    input mode one can output the quick phrase directly, but still keeps xcin
@@ -618,7 +618,7 @@ xcin: inp_styles: Root OverTheSpot
        input Chinese into netscape-4.5/6, in Root input_style. Read the
        description of FAQ for details).
 
-   All the functional keys or tirgger keys are configurable in the rcfile.
+   All the functional keys or trigger keys are configurable in the rcfile.
    For example:
 
 	(define FKEY_CHREP     "ctrl alt r")

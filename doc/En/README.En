@@ -9,7 +9,7 @@ days; while now it is supported by the XCIN Project (http://xcin.linux.org.tw).
 The current release of XCIN is xcin-2.5 series (developed during 1999-2000), 
 which makes a big jump from the old releases (e.g., xcin-2.3 and older 
 versions). The whole program structer is redesigned, the various input 
-methods are modulized, the custumization is more flexible, and the core 
+methods are modulized, the customization is more flexible, and the core 
 system is more stable and solid. The XIM protocol is also supported starting 
 from this series (although several XIM patches for old versions have already 
 appeared before xcin-2.5). The XIM supports is not completed yet, and is 
@@ -28,7 +28,7 @@ Features of xcin-2.5 includes:
 
    XCIN has its own configuration file, which is formatted in Lisp/Scheme
    language. This configuration file offers a wide flexibility to customize
-   the Chinese input enviroment.
+   the Chinese input environment.
 
 2. Support XIM and I18N/locale architecture:
 
@@ -54,7 +54,7 @@ Features of xcin-2.5 includes:
 	       many kinds of input methods. It also provides comprehensive
 	       configurable options for customization.
 
-   c. bimsphone: This is an intellegent character guessing IM module. It is
+   c. bimsphone: This is an intelligent character guessing IM module. It is
 		 based on the pronunciation input and pick out the correct
 		 character from a set of candidates according to the phrase
 		 or syntax already input.
@@ -90,7 +90,7 @@ B. History:
    system.
 
 2. 1997/03, Tung-Han Hsieh <thhsieh@linux.org.tw> took care of the 
-   maintainance. At that time the main progress is to modify the Makefile
+   maintenance. At that time the main progress is to modify the Makefile
    such that xcin could be as an independent UNIX package as possible,
    instead of depending on the Eten Chinese system.
 
@@ -101,9 +101,9 @@ B. History:
 
 4. Many and many people contributed to xcin, and the xcin source code became
    dirty and difficult to maintain. Therefore, we decide to redesign xcin
-   with the hope to fix all the problems. The maintainance of old series of 
-   xcin continuoused until 1999/04 the release of xcin-2.3.04-3. After that,
-   this work stoped.
+   with the hope to fix all the problems. The maintenance of old series of 
+   xcin continued until 1999/04 the release of xcin-2.3.04-3. After that,
+   this work stopped.
 
 5. A new design of xcin began in 1998/1999. At that time the main contributors
    includes:
@@ -117,10 +117,10 @@ B. History:
       XIM/rcfile reading system.
 
    d. Hsiao, Pai-Hsiang: Introduce libtabe such that xcin has the ZhuYin
-      input method with the ability to do intellegent character selection
+      input method with the ability to do intelligent character selection
       (libtabe).
 
-   e. Cheng, Yuan-Chung: Help to estabilish the completed I18N/zh_TW.Big5
+   e. Cheng, Yuan-Chung: Help to establish the completed I18N/zh_TW.Big5
       locale environment, to provide a test and development platform for xcin.
 
    In the beginning, the web-site of xcin is maintained by Cd Chen. In 1998/06
@@ -145,11 +145,11 @@ C. What's New (Please refer to Changes document for details):
 1. Improvement for bimsphone module:
    a. Now bimsphone supports 3 input modes:
 
-      bimsphone mode:  traditional intellegent character selection.
-      bimssimple mode: no intellegent character selection function, but
+      bimsphone mode:  traditional intelligent character selection.
+      bimssimple mode: no intelligent character selection function, but
 		       provides many ZuYin input method specific function
 		       which does not appear in gen_inp module.
-      bimspinyin mode: pinyin intellegent character selection.
+      bimspinyin mode: pinyin intelligent character selection.
 
    b. New options: AUTO_SELECTION, NSELKEY, SPACE_SELECTION, and AUTO_UPCHAR
       are added into xcinrc configuration file.
@@ -192,7 +192,7 @@ C. What's New (Please refer to Changes document for details):
 
    d. cin2tab gencin: It can accept hex codes instead of the character string
       in the %chardef and %keyname sections. If there are characters outside
-      the defined encoding range, it will just ignore them instead of stoping
+      the defined encoding range, it will just ignore them instead of stopping
       with error messages.
 
 6. Changes in xcinrc:
@@ -226,10 +226,10 @@ C. What's New (Please refer to Changes document for details):
    c. IMdkit is modified to support XIM_SYNC sending from XIM server side.
 
    d. XCIN now will send XIM_SYNC signal to the connecting client before
-      quiting, to insure that the connection will be properly shutdown.
+      quitting, to insure that the connection will be properly shutdown.
 
 10. Add IMC system:
-    a. Saparate the input method related data structer from the IC structer
+    a. Separate the input method related data structer from the IC structer
        and put them into IM_Context_t structer. So that the IC will only
        handle the XIC requests, while the operation of IM modules are 
        managed by IMC.
@@ -342,13 +342,13 @@ to read the following documents carefully before you install and use it:
 6. Todo:  The future plan.
 
 If you want to prepare your .cin input method table, or to convert the old
-.cin sytle to the new style, please refer to:
+.cin style to the new style, please refer to:
 
 7. Cin:  Format of .cin table and the usage of cin2tab.
 
 For the copyright and license of xcin-2.5, please refer to:
 
-8. CopyRight:  xcin license.
+8. Copyright:  xcin license.
 
 9. COPYING:  GNU General Public License 
    (includes English original and Big5 translation)

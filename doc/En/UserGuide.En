@@ -64,7 +64,7 @@ the XIM client:
    then in this terminal, the whole language environment is changed to 
    zh_TW.Big5, including character set handling (LC_CTYPE), message output
    (LC_MESSAGES) and other aspects. From now on every program running under
-   this termiinal will operate under the zh_TW.Big5 locale as long as it
+   this terminal will operate under the zh_TW.Big5 locale as long as it
    support the I18N standard.
 
    If you do not want to switch the whole language environment to zh_TW.Big5,
@@ -90,7 +90,7 @@ the XIM client:
 
    You can also add the above commands into your $HOME/.profile (for sh, ksh,
    or bash) or $HOME/.cshrc (for csh or tcsh), then everytime you login these
-   commands will be excuted automatically instead of you running them manually.
+   commands will be executed automatically instead of you running them manually.
 
 
 2. Run xcin program. If success, you will see the following message:
@@ -148,7 +148,7 @@ xcin: inp_styles: Root OverTheSpot
    The actual setting value depends on the message you see when starting xcin.
    Of course, if you can expect what the message of xcin will be, you can
    also write the above commands into $HOME/.profile or $HOME/.cshrc such
-   that they can be excuted automatically when login.
+   that they can be executed automatically when login.
 
 4. Now you can start the XIM client. Please note that some XIM clients might
    not be so clever to determine the correct input style to make the connection
@@ -160,14 +160,14 @@ Now we take the "testprog" provided in xcin-2.5 package as the example to
 demonstrate the above procedures. This is a very simple XIM client for test.
 You can find it under "xcin-2.5/src/util/testprog/" directory. If it is not
 compiled yet, please type "make" to build it up. If we want to use the
-"zh_TW.Big5" locale, we can excute the following commands under bash:
+"zh_TW.Big5" locale, we can execute the following commands under bash:
 
         LC_CTYPE=zh_TW.Big5; export LC_CTYPE
         xcin &
         XMODIFIERS="@im=xcin"; export XMODIFIERS
         ./testprog -fontset "-*-big5-0,-*-iso8859-1"
 
-On the other hand, if we want to use "zh_CN.GB2312", the needed comands are
+On the other hand, if we want to use "zh_CN.GB2312", the needed commands are
 
         LC_CTYPE=zh_CN.GB2312; export LC_CTYPE
         xcin &
@@ -267,7 +267,7 @@ Netscape*XmLGrid*fontList: \
         -*-helvetica-bold-r-*-120-*-iso8859-1;-*-big5-0:=BOLD,\
         -*-helvetica-medium-o-*-120-*-iso8859-1;-*-big5-0:=ITALIC
 
-   and excute "xrdb -merge ~/.Xresources" or reenter X Window system. Then
+   and execute "xrdb -merge ~/.Xresources" or reenter X Window system. Then
    use the procedures described in section A to start xcin and netscape.
 
 
