@@ -24,6 +24,8 @@ xcin-2.5.3-pre2:  2001/
 8. Add the first xcin man page: xcin.1.
    Thanks to <cyril_huang@yahoo.com>.
 
+9. Fix gui_overspot.c: window position not exceed the boundary of the desktop.
+   Thanks to Chung-Hung Chen <alone@mis.mgt.ncu.edu.tw>.
 
 xcin-2.5.3-pre1:  2001/10/19
 ------------------------------

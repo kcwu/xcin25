@@ -86,16 +86,16 @@ overspot_location(gui_t *gui, winlist_t *win,
 	    errstatus = 0;
 	    return False;
 	}
-
-	if (*pos_x + win->width > gui->display_width)
-	    *pos_x = gui->display_width - win->width;
-	if (*pos_y + win->height > gui->display_height)
-	    *pos_y = *pos_y - 40 - win->height;
     }
     else {
 	*pos_x = win->pos_x;
 	*pos_y = win->pos_y;
     }
+
+    if (*pos_x + win->width > gui->display_width)
+	*pos_x = gui->display_width - win->width - 5;
+    if (*pos_y + win->height > gui->display_height)
+	*pos_y = *pos_y - 40 - win->height;
     return True;
 }
 
