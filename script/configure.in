@@ -432,9 +432,33 @@ AC_SUBST(with_db_lib)
 
 
 dnl-----------------------------------------------------------------------
+dnl Checks for X11R6 library
+dnl-----------------------------------------------------------------------
+LIBS="$OLD_LIBS"
+AC_PATH_X
+if test x$x_libraries != x; then
+    x_libraries="-L$x_libraries"
+    LDFLAGS="$LDFLAGS $x_libraries"
+fi
+if test x$x_includes != x; then
+    x_includes="-I$x_includes"
+fi
+AC_CHECK_LIB(X11, XmbDrawImageString, 
+    [ x_libraries="$x_libraries -lX11" ],
+    [ AC_MSG_RESULT([You need X11R6 to compile xcin.])
+      AC_MSG_RESULT([Please use --x-includes and --x-libraries to configure.])
+      exit 1 ])
+
+LDFLAGS="$OLD_LDFLAGS $libs"
+AC_SUBST(x_includes)
+AC_SUBST(x_libraries)
+
+
+dnl-----------------------------------------------------------------------
 dnl Checks for tabe & bims libraries.
 dnl-----------------------------------------------------------------------
 LIBS="$OLD_LIBS"
+CPP="$CPP $x_includes"
 if test x$with_tabe_lib = x; then
     tabe_data=$extra_prefix/share/tabe/tsiyin
 else
@@ -462,29 +486,6 @@ with_tabe_lib="$with_tabe_lib -lbims -ltabe"
 
 AC_SUBST(with_tabe_inc)
 AC_SUBST(with_tabe_lib)
-
-
-dnl-----------------------------------------------------------------------
-dnl Checks for X11R6 library
-dnl-----------------------------------------------------------------------
-LIBS="$OLD_LIBS"
-AC_PATH_X
-if test x$x_libraries != x; then
-    x_libraries="-L$x_libraries"
-    LDFLAGS="$LDFLAGS $x_libraries"
-fi
-if test x$x_includes != x; then
-    x_includes="-I$x_includes"
-fi
-AC_CHECK_LIB(X11, XmbDrawImageString, 
-    [ x_libraries="$x_libraries -lX11" ],
-    [ AC_MSG_RESULT([You need X11R6 to compile xcin.])
-      AC_MSG_RESULT([Please use --x-includes and --x-libraries to configure.])
-      exit 1 ])
-
-LDFLAGS="$OLD_LDFLAGS $libs"
-AC_SUBST(x_includes)
-AC_SUBST(x_libraries)
 
 
 dnl-----------------------------------------------------------------------
