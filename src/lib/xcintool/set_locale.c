@@ -28,10 +28,9 @@
 #endif
 
 #include <stdlib.h>
-#include <locale.h>
 #include <string.h>
 #include <ctype.h>
-#include "constant.h"
+#include <locale.h>
 #include "xcintool.h"
 
 #ifdef HAVE_GETTEXT
@@ -41,50 +40,114 @@
 #  include <langinfo.h>
 #endif
 
-void 
-locale_setting(char **lc_ctype, char **lc_messages, char **encoding, 
-	       int exitcode)
+int
+set_lc_ctype(char *loc_name, char *loc_return, int loc_size, 
+	     char *enc_return, int enc_size, int exitcode)
 {
-    char *locale = NULL, *s;
+    char *loc=NULL, *s;
 
-#ifdef HAVE_GETTEXT
-    if (lc_messages)
-        *lc_messages = setlocale(LC_MESSAGES, "");
-    textdomain("xcin");
-    bindtextdomain("xcin", XCIN_MSGLOCAT);
-#endif
+    loc_return[0] = '\0';
+    enc_return[0] = '\0';
 
-    locale = setlocale(LC_CTYPE, "");
-    if (! locale) {
-	locale = getenv("LC_ALL");
-	if (! locale)
-	    locale = getenv("LC_CTYPE");
-	if (! locale)
-	    locale = getenv("LANG");
-	if (! locale)
-	    locale = "C";
-	perr(exitcode, 
-	     N_("C locale \"%s\" is not supported by your system.\n"), locale);
-	locale = NULL;
+    if (loc_name == NULL)
+	loc_name = "";
+    if (! (loc = setlocale(LC_CTYPE, loc_name))) {
+	if (exitcode != 0) {
+	    if (loc_name[0] != '\0')
+		s = loc_name;
+	    else {
+		s = getenv("LC_ALL");
+		if (! s)
+		    s = getenv("LC_CTYPE");
+		if (! s)
+		    s = getenv("LANG");
+		if (! s)
+		    s = "(NULL)";
+	    }
+	    perr(exitcode, 
+		 _("C locale \"%s\" is not supported by your system.\n"), s);
+	}
+	setlocale(LC_CTYPE, "C");
+	return False;
     }
-    if (lc_ctype)
-        *lc_ctype = locale;
-    if (locale && encoding) {
-	*encoding = NULL;
+    if (loc_return && loc_size > 0)
+	strncpy(loc_return, loc, loc_size);
 
+/* Determine the encoding */
+    if (enc_return && enc_size > 0) {
 #ifdef HAVE_NL_LANGINFO
 	if ((s = nl_langinfo(CODESET)))
-	    *encoding = (char *)strdup(s);
+	    strncpy(enc_return, s, enc_size);
 #else
-	if ((s = strrchr(locale, '.')))
-	    *encoding = (char *)strdup(s+1);
+	if ((s = strrchr(loc, '.')))
+	    strncpy(enc_return, s+1, enc_size);
 #endif
-	if (*encoding) {
-	    s = *encoding;
+	if (enc_return[0] != '\0') {
+	    s = enc_return;
 	    while (*s) {
 		*s = (char)tolower(*s);
 		s ++;
 	    }
 	}
     }
+    return True;
+}
+
+int
+set_lc_messages(char *loc_name, char *loc_return, int loc_size)
+{
+    char *loc=NULL;
+
+    if (! (loc = setlocale(LC_MESSAGES, loc_name)))
+	return False;
+    if (loc_return && loc_size > 0)
+	strncpy(loc_return, loc, loc_size);
+#ifdef HAVE_GETTEXT
+    textdomain("xcin");
+    bindtextdomain("xcin", XCIN_MSGLOCAT);
+#endif
+    return True;
+}
+
+int
+set_lc_ctype_env(char *loc_name, char *loc_return, int loc_size, 
+		 char *enc_return, int enc_size, int exitcode)
+{
+    char *loc=NULL, *s;
+
+    loc_return[0] = '\0';
+    enc_return[0] = '\0';
+
+    if (loc_name == NULL)
+	loc_name = "";
+    if (loc_name[0] != '\0')
+	loc = loc_name;
+    else {
+	loc = getenv("LC_ALL");
+	if (! loc)
+	    loc = getenv("LC_CTYPE");
+	if (! loc)
+	    loc = getenv("LANG");
+	if (! loc) {
+	    perr(exitcode, 
+		 _("Don't know how to set C locale from the environment.\n"));
+	    return False;
+	}
+    }
+    if (loc_return && loc_size > 0)
+	strncpy(loc_return, loc, loc_size);
+
+/* Determine the encoding */
+    if (enc_return && enc_size > 0) {
+	if ((s = strrchr(loc, '.')))
+	    strncpy(enc_return, s+1, enc_size);
+	if (enc_return[0] != '\0') {
+	    s = enc_return;
+	    while (*s) {
+		*s = (char)tolower(*s);
+		s ++;
+	    }
+	}
+    }
+    return True;
 }

@@ -138,9 +138,9 @@ turncat_fn(char *fn, char *ext_rm, char *ext_add)
 }
 
 void
-load_systab(char *sysfn)
+load_systab(char *sysfn, xcin_rc_t *xrc)
 {
-    FILE *fp;
+    FILE *fp=NULL;
     char  version[40], true_fn[256];
     charcode_t ccp[WCH_SIZE];
 
@@ -151,14 +151,20 @@ load_systab(char *sysfn)
 	}
 	strncpy(true_fn, sysfn, 256);
     }
-    else
-	fp = open_data("sys.tab", "rb", NULL, true_fn, 256, XCINMSG_ERROR);
+    else {
+	char sub_path[256];
+	snprintf(sub_path, 256, "tab/%s", xrc->locale.encoding);
+	if (check_datafile("sys.tab", sub_path, xrc, true_fn, 256)==True)
+	    fp = open_file(true_fn, "rb", XCINMSG_ERROR);
+	else
+	    perr(XCINMSG_ERROR, "data file \"sys.tab\" does not exist.\n");
+    }
 
     if (fread(version, sizeof(char), MODULE_ID_SIZE, fp) != MODULE_ID_SIZE ||
 	strcmp(version, "syscin"))
 	perr(XCINMSG_ERROR, N_("%s: invalid tab file.\n"), true_fn);
     if (fread(version, sizeof(SYSCIN_VERSION), 1, fp) != 1 ||
-	! check_version(SYSCIN_VERSION, version, 5))
+	strcmp(SYSCIN_VERSION, version) != 0)
 	perr(XCINMSG_ERROR, N_("%s: invalid version.\n"), true_fn);
 
     if (fseek(fp, CIN_CNAME_LENGTH*3+sizeof(wch_t)*N_ASCII_KEY, SEEK_CUR)==-1 ||
@@ -224,10 +230,31 @@ print_usage(void)
     perr(XCINMSG_EMPTY, "\n\n");
 }
 
+static void
+cin2tab_setlocale(locale_t *locale)
+{
+    char loc_return[128], enc_return[128];
+    int ret;
+
+    if (locale->encoding != NULL)
+	return;
+
+    ret = set_lc_ctype("", loc_return, 128, enc_return, 128, XCINMSG_WARNING);
+    if (ret == True) {
+	locale->lc_ctype = (char *)strdup(loc_return);
+	locale->encoding = (char *)strdup(enc_return);
+    }
+    else {
+	set_lc_ctype_env("", loc_return, 128, enc_return, 128, XCINMSG_WARNING);
+	locale->lc_ctype = (char *)strdup(loc_return);
+	locale->encoding = (char *)strdup(loc_return);
+    }
+}
+
 int
 main(int argc, char **argv)
 {
-    char *rcfile=NULL, *s, *cmd[1];
+    char *s;
     int rev;
 #ifdef HPUX
     extern char *optarg;
@@ -235,42 +262,33 @@ main(int argc, char **argv)
 #endif
 
     set_perr("cin2tab");
-    locale_setting(&(cintab.lc_ctype),NULL,&(cintab.encoding),XCINMSG_WARNING);
-    if (! cintab.lc_ctype)
-	cintab.lc_ctype = getenv("LC_CTYPE");
-/*
- *  Print Message.
- */
+    set_lc_messages("", NULL, 0);
+    cintab.xrc.argc = argc;
+    cintab.xrc.argv = argv;
     if (argc < 2) {
 	print_usage();
         exit(0);
     }
-/*
- *  Command line option.
- */
     opterr = 0;
-    while ((rev = getopt(argc, argv, "vhr:s:l:o:")) != EOF) {
+    while ((rev = getopt(argc, argv, "v:hr:s:l:o:")) != EOF) {
         switch (rev) {
 	case 'v':
-	    cintab.verbose = 1;
+	    cintab.xrc.verbose = atoi(optarg);
 	    break;
 	case 'h':
 	    print_usage();
 	    exit(0);
-        case 'r':
-            rcfile = (char *)strdup(optarg);
-            break;
 	case 's':
 	    cintab.sysfn = (char *)strdup(optarg);
 	    break;
 	case 'l':
 	    if ((s = strchr(optarg, '.')) != NULL) {
-		cintab.lc_ctype = (char *)strdup(optarg);
-		cintab.encoding = (char *)strdup(s+1);
+		cintab.xrc.locale.lc_ctype = (char *)strdup(optarg);
+		cintab.xrc.locale.encoding = (char *)strdup(s+1);
 	    }
 	    else
-		cintab.encoding = (char *)strdup(optarg);
-	    s = cintab.encoding;
+		cintab.xrc.locale.encoding = (char *)strdup(optarg);
+	    s = cintab.xrc.locale.encoding;
 	    while (*s) {
 		*s = (char)tolower(*s);
 		s ++;
@@ -284,36 +302,20 @@ main(int argc, char **argv)
             break;
         }
     }
+    cin2tab_setlocale(&(cintab.xrc.locale));
+
     perr(XCINMSG_EMPTY, N_("CIN2TAB version (%s) encoding=%s\n"),
-	XCIN_VERSION, cintab.encoding);
+	XCIN_VERSION, cintab.xrc.locale.encoding);
 
     if (! argv[optind])
 	perr(XCINMSG_ERROR, N_("no cin file specified.\n"));
-    if (! cintab.encoding)
+    if (! cintab.xrc.locale.encoding)
 	perr(XCINMSG_ERROR, N_("no valid encoding specified.\n"));
     cintab.fname = (char *)strdup(argv[optind]);
     cintab.fname_cin = turncat_fn(argv[optind], "cin", "cin");
     if (! cintab.fname_tab)
 	cintab.fname_tab = turncat_fn(argv[optind], "cin", "tab");
-/*
- *  Read rcfile.
- */
-    if (! (s = getenv("HOME")))
-	s = getenv("home");
-    strncpy(cintab.user_dir, s, 256);
-    s = cintab.user_dir + strlen(cintab.user_dir) + 1;
-    *(s-1) = '/';
 
-    rcfile = read_xcinrc(rcfile, cintab.user_dir);
-    cmd[0] = "XCIN_DEFAULT_DIR";
-    if (! get_resource(cmd, cintab.default_dir, 256, 1))
-	perr(XCINMSG_ERROR, 
-		N_("%s: XCIN_DEFAULT_DIR: value not found.\n"), rcfile);
-    cmd[0] = "XCIN_USER_DIR";
-    if (! get_resource(cmd, s, 256-(int)(s-cintab.user_dir), 1))
-	perr(XCINMSG_ERROR, N_("%s: XCIN_USER_DIR: value not found.\n"), s);
-
-    set_open_data(cintab.default_dir, cintab.user_dir, "tab", cintab.encoding);
     cin2tab();
     return 0;
 }

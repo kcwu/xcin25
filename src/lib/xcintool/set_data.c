@@ -23,20 +23,18 @@
 #  include "config.h"
 #endif
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include "xcintool.h"
 
 static int
 on_or_off(char *s)
 {
-    if (!strcmp(s, "ON")   || !strcmp(s, "on")   || 
-	!strcmp(s, "YES")  || !strcmp(s, "yes")  ||
-        !strcmp(s, "TRUE") || !strcmp(s, "True") || !strcmp(s, "true"))
+    if (! strcasecmp(s, "on") || ! strcasecmp(s, "yes") ||
+	! strcasecmp(s, "true"))
         return 1;
-    else if (!strcmp(s, "OFF")   || !strcmp(s, "off")   || 
-	     !strcmp(s, "NO")    || !strcmp(s, "no")    ||
-	     !strcmp(s, "False") || !strcmp(s, "False") || !strcmp(s, "false"))
+    else if (! strcasecmp(s, "off") || ! strcasecmp(s, "no") ||
+	     ! strcasecmp(s, "false"))
         return 0;
     else
 	return -1;
@@ -126,7 +124,7 @@ set_data(void *ref, int type, char *value, unsigned long flag_mask, int bufsize)
 	break;
 	
     default:
-	perr(XCINMSG_IERROR, N_("set_rc(): unknown rctype: %d.\n"), type);
+	perr(XCINMSG_IERROR, _("set_rc(): unknown rctype: %d.\n"), type);
     }
 }
 

@@ -141,14 +141,22 @@ overspot_draw_multich(gui_t *gui, winlist_t *win,
 
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
+/*
 	if ((len = wch_mblen(selkey))) {
+*/
+	if (selkey->wch != (wchar_t)0) {
+	    len = (selkey->s[1] != '\0') ? 2 : 1;
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[spot_GC_idx], x, y, (char *)selkey->s, len);
 	    x += (XmbTextEscapement(win->font->fontset, 
 			(char *)selkey->s, len) + 2);
         }
         for (j=0; j<n; j++, cch++) {
+/*
 	    if (! (len = wch_mblen(cch))) {
+*/
+	    len = (cch->s[1] != '\0') ? 2 : 1;
+	    if (cch->wch == (wchar_t)0) {
 		toggle_flag = -1;
 		break;
 	    }
@@ -222,16 +230,24 @@ overspot_draw_multichBW(gui_t *gui, winlist_t *win,
     bufidx ++;
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
+/*
 	if ((len = wch_mblen(selkey))) {
+*/
+	if (selkey->wch != (wchar_t)0) {
+	    len = (selkey->s[1] != '\0') ? 2 : 1;
 	    nwchs_to_mbs(buf+bufidx, selkey, 1, BUFSIZE-bufidx);
 	    strncat(buf, " ", BUFSIZE-bufidx-len);
 	    bufidx += (len + 1);
 	}
 	for (j=0; j<n; j++, cch++) {
+/*
 	    if (! (len = wch_mblen(cch))) {
+*/
+	    if (cch->wch != (wchar_t)0) {
 		toggle_flag = -1;
 		break;
 	    }
+	    len = (selkey->s[1] == '\0') ? 2 : 1;
 	    nwchs_to_mbs(buf+bufidx, cch, 1, BUFSIZE-bufidx);
 	    bufidx += len;
 	}
@@ -318,8 +334,10 @@ draw_lcch(gui_t *gui, winlist_t *win, int x, int y, inpinfo_t *inpinfo)
 		win->font->fontset, win->wingc[GC_idx], x, y, buf, len);
 	    x += XmbTextEscapement(win->font->fontset, buf, len);
 	}
-
+/*
 	len = wch_mblen(tmp);
+*/
+	len = (tmp->s[1] == '\0') ? 2 : 1;
 	XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 		win->wingc[GCM_idx], x, y, (char *)tmp->s, len);
 	x += XmbTextEscapement(win->font->fontset, (char *)tmp->s, len);
@@ -386,7 +404,10 @@ draw_inpname(gui_t *gui, winlist_t *win, int x, int y, IM_Context_t *imc)
 	    s++;
 	}
 	if (! inpn) {
+/*
 	    extract_char(imc->inpinfo.inp_cname, buf, sizeof(buf));
+*/
+	    strncpy(buf, imc->inpinfo.inp_cname, 2);
 	    inpn = buf;
 	}
     }
@@ -538,9 +559,17 @@ gui_overspot_init(gui_t *gui, IM_Context_t *imc, xmode_t xcin_mode)
 	display_mode |= OVERSPOT_USE_USRFONTSET;
     if ((xcin_mode & XCIN_OVERSPOT_WINONLY))
 	display_mode |= OVERSPOT_DRAW_EMPTY;
+/*
     extract_char(gui->inpn_english, inpn_english, 11);
     extract_char(gui->inpn_sbyte, inpn_sbyte, 11);
     extract_char(gui->inpn_2bytes, inpn_2bytes, 11);
+*/
+    strncpy(inpn_english, gui->inpn_english, 2);
+    strncpy(inpn_sbyte, gui->inpn_sbyte, 2);
+    strncpy(inpn_2bytes, gui->inpn_2bytes, 2);
+    inpn_english[2] = '\0';
+    inpn_sbyte[2] = '\0';
+    inpn_2bytes[2] = '\0';
 
     win = gui_new_win();
     win->wtype = WTYPE_OVERSPOT;

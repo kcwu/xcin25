@@ -21,7 +21,7 @@
 
 /*
  *  The xcin_rc subsystem is changed to use SIOD (Small-frontpoint 
- *  Implementation Of the Scheme programming language. The format
+ *  Implementation Of the Scheme programming language). The format
  *  of the rcfile should be written in LISP/Scheme programming language.
  *
  *  Thanks to the contribution of Yung-Ching Hsiao <yhsiao@cae.wisc.edu>
@@ -38,12 +38,12 @@
 #include "xcintool.h"
 #include "../siod/siod.h"
 
-#define NSTRINGP(x) NTYPEP(x, tc_string)
-#define STRINGP(x) TYPEP(x, tc_string)
+/* #define NSTRINGP(x) NTYPEP(x, tc_string)	*/
+/* #define STRINGP(x) TYPEP(x, tc_string)	*/
 
-/* STRINGP(x) == (string? obj) in lisp */
-/* NULLP(x) == (null? obj) in lisp */
-/* NNULLP(x) == (not (null? obj)) in lisp */
+/* STRINGP(x) == (string? obj) in lisp		*/
+/* NULLP(x) == (null? obj) in lisp		*/
+/* NNULLP(x) == (not (null? obj)) in lisp	*/
 
 /* in scheme:
  *  (define mysymbol "Hello")
@@ -52,7 +52,7 @@
  *  symbol value = "Hello"
  *  cintern(symbol_name): returns the LISP symbol ``mysymbol''
  *  symbol_value(LISP_symbol, LISP_env): returns the symbol value.
- *   where, LISP_env is the interpreter "context" to evaluate the symbol.
+ *  where, LISP_env is the interpreter "context" to evaluate the symbol.
  */
 
 static FILE *rc_fp;
@@ -62,24 +62,18 @@ static FILE *rc_fp;
  *  so we don't need the C function call to retrive. It is left here for
  *  reference.
  *
-static LISP get_value(char *symbol_name) 
-{
-    return symbol_value(cintern(symbol_name), NIL);
-}
+ *  static LISP get_value(char *symbol_name)
+ *  {
+ *     return symbol_value(cintern(symbol_name), NIL);
+ *  }
  */
 
-static void no_puts(char *unused) 
+static LISP myread(void)
 {
-/* no operation */
-}
-
-
-static LISP myread() 
-{
-    if (feof(rc_fp)) 
-	return err(NULL , NIL);
-    return 
-	lreadf(rc_fp);
+    if (feof(rc_fp))
+	return err(NULL, NIL);
+    else
+	return lreadf(rc_fp);
 }
 
 
@@ -89,17 +83,17 @@ static LISP myread()
 
 ---------------------------------------------------------------------------*/
 
-void
+static void
 read_resource(char *rcfile)
 {
     struct repl_hooks hook;
 
     if (! rcfile)
-	perr(XCINMSG_ERROR, N_("null rcfile name.\n"));
+	perr(XCINMSG_ERROR, _("null rcfile name.\n"));
 
     init_storage();
     init_subrs();
-    hook.repl_puts = no_puts;
+    hook.repl_puts = NULL;
     hook.repl_read = myread;
     hook.repl_eval = NULL;
     hook.repl_print = NULL;
@@ -107,19 +101,20 @@ read_resource(char *rcfile)
 
     rc_fp = open_file(rcfile, "rt", XCINMSG_ERROR);
     if (repl_driver(0, 0, &hook) != 0)
-	perr(XCINMSG_ERROR, N_("rcfile \"%s\" reading error.\n"), rcfile);
+	perr(XCINMSG_ERROR, _("rcfile \"%s\" reading error.\n"), rcfile);
     fclose(rc_fp);
 }
 
 static char isep=' ';
 
 int
-get_resource(char **cmd_list, char *value, int v_size, int n_cmd_list)
+get_resource(xcin_rc_t *xrc, char **cmd_list,
+	     char *value, int v_size, int n_cmd_list)
 {
     char *buf, *s, *vbuf, *v, word[1024];
     int buf_size=1024;
 
-    buf = malloc(buf_size);
+    buf = xcin_malloc(buf_size, 0);
 
     if (n_cmd_list == 1) {
 	if (strlen(cmd_list[0]) >= buf_size - 1) {
@@ -157,10 +152,10 @@ get_resource(char **cmd_list, char *value, int v_size, int n_cmd_list)
     }
     if (repl_c_string(buf, 0, 0, buf_size) != 0 || ! buf[0]) {
 	free(buf);
-	return 0;
+	return False;
     }
     s = buf;
-    v = vbuf = malloc(buf_size);
+    v = vbuf = xcin_malloc(buf_size, 0);
     while (get_word(&s, word, 1024, "()")) {
 	if (word[0] != '(' && word[0] != ')')
 	    v += sprintf(v, "%s%c", word, isep);
@@ -169,28 +164,28 @@ get_resource(char **cmd_list, char *value, int v_size, int n_cmd_list)
 
     if (v <= vbuf) {
 	free(vbuf);
-	return 0;
+	return False;
     }
     *(v-1) = '\0';
     if (! strcmp(vbuf, "**unbound-marker**")) {
 	free(vbuf);
-	return 0;
+	return False;
     }
     else {
         strncpy(value, vbuf, v_size);
         free(vbuf);
-        return 1;
+        return True;
     }
 }
 
 int
-get_resource_long(char **cmd_list, char *value, int v_size, 
-		  int n_cmd_list, int sep)
+get_resource_long(xcin_rc_t *xrc, char **cmd_list,
+		  char *value, int v_size, int n_cmd_list, int sep)
 {
     int r;
 
     isep = sep;
-    r = get_resource(cmd_list, value, v_size, n_cmd_list);
+    r = get_resource(xrc, cmd_list, value, v_size, n_cmd_list);
     isep = ' ';
     return r;
 }
@@ -201,56 +196,56 @@ get_resource_long(char **cmd_list, char *value, int v_size,
 
 ----------------------------------------------------------------------------*/
 
-
 static void
-find_rcfile(char *user_home, char *rcfn, int rcfn_size)
+find_rcfile(char *rcfn, int rcfn_size, char *user_home, char *user_dir)
 {
+    if (user_home) {
     /* User: $HOME/.xcin/xcinrc */
-    snprintf(rcfn, rcfn_size, "%s/%s/%s",
-        user_home, XCIN_USER_DIR, XCIN_DEFAULT_RC);
-    if (check_file_exist(rcfn, FTYPE_FILE))
-        return;
-
+	snprintf(rcfn, rcfn_size, "%s/%s", user_dir, XCIN_DEFAULT_RC);
+	if (check_file_exist(rcfn, FTYPE_FILE) == True)
+	    return;
+    }
+    if (user_dir) {
     /* User: $HOME/.xcinrc */
-    snprintf(rcfn, rcfn_size, "%s/.%s", user_home, XCIN_DEFAULT_RC);
-    if (check_file_exist(rcfn, FTYPE_FILE))
-        return;
+	snprintf(rcfn, rcfn_size, "%s/.%s", user_home, XCIN_DEFAULT_RC);
+	if (check_file_exist(rcfn, FTYPE_FILE) == True)
+	    return;
+    }
 
     /* Default: /etc/xcinrc */
     snprintf(rcfn, rcfn_size, "%s/%s", XCIN_DEFAULT_RCDIR, XCIN_DEFAULT_RC);
-    if (check_file_exist(rcfn, FTYPE_FILE))
+    if (check_file_exist(rcfn, FTYPE_FILE) == True)
         return;
 
     /* Cannot find any rcfile. */
-    perr(XCINMSG_ERROR, N_("rcfile not found.\n"));
+    perr(XCINMSG_ERROR, _("rcfile not found.\n"));
 }
 
-char *
-read_xcinrc(char *rcfn, char *user_home)
+void
+read_xcinrc(xcin_rc_t *xrc, char *rcfile)
 /*
- *  rcfn: can be the one which comes from the shell prompt arguement.
- *  rcfn can be found in "user_home" or "default" places. Where "default"
- *  	is hard coded.
- *  the returned value is the actually path of the rcfile.
+ *  rcfn: can be the one which comes from the shell prompt arguement,
+ *	  or from the environment variable assignment.
+ *  rcfn can be found in "user_home" or "default" places.
  */
 {
-    static char rcfile[256];
-    char *s;
-
-    rcfile[0] = '\0';
-    if (rcfn && rcfn[0])
-	strncpy(rcfile, rcfn, 256);
+    char path[512]={'\0'}, *s;
+/*
+ *  Check xcin rcfile.
+ */
+    if (rcfile && rcfile[0])
+	strncpy(path, xrc->rcfile, 511);
     else if ((s = getenv("XCIN_RCFILE")))
-	strncpy(rcfile, s, 256);
+	strncpy(path, s, 511);
 
-    if (rcfile[0] && ! check_file_exist(rcfile, FTYPE_FILE)) {
-        perr(XCINMSG_WARNING, 
-		N_("rcfile \"%s\" does not exist, ignore.\n"), rcfile);
-	rcfile[0] = '\0';
+    if (path[0] && check_file_exist(path, FTYPE_FILE)==False) {
+	perr(XCINMSG_WARNING, 
+		_("rcfile \"%s\" does not exist, ignore.\n"), path);
+	path[0] = '\0';
     }
-    if (! rcfile[0])
-        find_rcfile(user_home, rcfile, 256);
+    if (! path[0])
+	find_rcfile(path, 511, xrc->usrhome, xrc->user_dir);
 
-    read_resource(rcfile);
-    return rcfile;
+    read_resource(path);
+    xrc->rcfile = (char *)strdup(path);
 }

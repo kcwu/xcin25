@@ -129,17 +129,25 @@ win_draw_multich(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
 
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
+/*
 	if ((len = wch_mblen(selkey))) {
+*/
+	if (selkey->wch != (wchar_t)0) {
+	    len = (selkey->s[1] != '\0') ? 2 : 1;
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[spot_GC_idx], x, y, (char *)selkey->s, len);
 	    x += (XmbTextEscapement(win->font->fontset, 
 			(char *)selkey->s, len) + 5);
 	}
 	for (j=0; j<n; j++, cch++) {
+/*
 	    if (! (len = wch_mblen(cch))) {
+*/
+	    if (cch->wch == (wchar_t)0) {
 		toggle_flag = -1;
 		break;
 	    }
+	    len = (cch->s[1] != '\0') ? 2 : 1;
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[GC_idx], x, y, (char *)cch->s, len);
 	    x += XmbTextEscapement(win->font->fontset, (char *)cch->s, len);
@@ -223,8 +231,10 @@ win_draw_listcch(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
                 win->font->fontset, win->wingc[GC_idx], x, y, str, len);
 	    x += XmbTextEscapement(win->font->fontset, str, len);
 	}
-
+/*
 	len = wch_mblen(tmp);
+*/
+	len = 4;
         XmbDrawImageString(gui->display, win->window,
             win->font->fontset, win->wingc[GCM_idx], x, y, (char *)tmp->s, len);
 	x += XmbTextEscapement(win->font->fontset, (char *)tmp->s, len);
@@ -454,7 +464,8 @@ x_set_geometry(gui_t *gui, winlist_t *win, char *value, Bool *negx, Bool *negy)
 }
 
 static void 
-set_wm_property(gui_t *gui, winlist_t *win, Bool negative_x, Bool negative_y)
+set_wm_property(gui_t *gui, winlist_t *win, xcin_rc_t *xrc,
+		Bool negative_x, Bool negative_y)
 {
     char *win_name, *icon_name = "xcin";
     XTextProperty windowName, iconName;
@@ -495,7 +506,7 @@ set_wm_property(gui_t *gui, winlist_t *win, Bool negative_x, Bool negative_y)
     class_hints.res_class = "xcin";
 
     XSetWMProperties(gui->display, win->window, &windowName, 
-		&iconName, gui->argv, gui->argc, &size_hints, 
+		&iconName, xrc->argv, xrc->argc, &size_hints, 
 		&wm_hints, &class_hints);
     XFree(windowName.value);
     XFree(iconName.value);
@@ -554,7 +565,7 @@ xcin_mainwin_init(gui_t *gui, xccore_t *xccore)
 
 /*  Winlist Setup  */
     cmd[0] = "X_GEOMETRY";
-    if (! get_resource(cmd, geometry, 256, 1))
+    if (! get_resource(&(xccore->xcin_rc), cmd, geometry, 256, 1))
 	geometry[0] = '\0';
     x_set_geometry(gui, win, geometry, &negative_x, &negative_y);
 
@@ -570,7 +581,7 @@ xcin_mainwin_init(gui_t *gui, xccore_t *xccore)
 
 /*  Window Manager Property Setup  */
     if (! (xccore->xcin_mode & XCIN_NO_WM_CTRL)) {
-	set_wm_property(gui, win, negative_x, negative_y);
+	set_wm_property(gui, win, &(xccore->xcin_rc), negative_x, negative_y);
 	if (! (xccore->xcin_mode & XCIN_XKILL_OFF))
             XSetWMProtocols(gui->display, win->window, &(gui->wm_del_win), 1);
     }

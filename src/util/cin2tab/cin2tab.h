@@ -22,22 +22,20 @@
 #ifndef _CIN2TAB_H
 #define _CIN2TAB_H
 
+#include "xcintool.h"
+
 typedef struct {
-    char default_dir[256];
-    char user_dir[256];
-    char *lc_ctype;
-    char *encoding;
+    xcin_rc_t xrc;
     char *fname;
     char *fname_cin;
     char *fname_tab;
     char *sysfn;
     FILE *fr, *fw;
     int lineno;
-    byte_t verbose;
 } cintab_t;
 
 extern int cmd_arg(char *cmd, int cmdlen, ...);
 extern int read_hexwch(unsigned char *wch_str, char *arg);
-extern void load_systab(char *sysfn);
+extern void load_systab(char *sysfn, xcin_rc_t *xrc);
 
 #endif

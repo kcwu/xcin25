@@ -270,9 +270,12 @@ gencin(cintab_t *cintab)
     int i;
     char cmd[64], arg[64];
 
+    if (cintab->sysfn == NULL)
+	check_xcin_path(&(cintab->xrc), XCINMSG_ERROR);
+
     strncpy(th.version, GENCIN_VERSION, VERLEN);
-    strncpy(th.encoding, cintab->encoding, ENCLEN);
-    load_systab(cintab->sysfn);
+    strncpy(th.encoding, cintab->xrc.locale.encoding, ENCLEN);
+    load_systab(cintab->sysfn, &(cintab->xrc));
     ccode_info(&ccinfo);
 
     while (cmd_arg(cmd, 64, arg, 64, NULL)) {

@@ -23,24 +23,18 @@
 #  include "config.h"
 #endif
 
-#include <unistd.h>
-#ifdef HPUX
-#  define _INCLUDE_POSIX_SOURCE
-#endif
-#include <sys/stat.h>
+#include <stdlib.h>
+#include <string.h>
 #include "xcintool.h"
 
-int check_file_exist(char *path, int type)
+void *
+xcin_malloc(size_t n_bytes, int reset)
 {
-    struct stat buf;
+    char *s;
 
-    if (stat(path, &buf) != 0)
-	return  0;
-
-    if (type == FTYPE_FILE)
-	return  S_ISREG(buf.st_mode);
-    else if (type == FTYPE_DIR)
-	return  S_ISDIR(buf.st_mode);
-    else
-	return  0;
+    if ((s = malloc(n_bytes)) == NULL)
+	perr(XCINMSG_IERROR, _("xcin_malloc: memory exhaust.\n"));
+    if (reset)
+	memset(s, 0, n_bytes);
+    return s;
 }

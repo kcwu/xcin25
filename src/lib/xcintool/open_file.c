@@ -34,6 +34,6 @@ open_file(char *fn, char *md, int exitcode)
 
     if ((f = fopen(fn, md)) == NULL && 
 	exitcode!=XCINMSG_EMPTY && exitcode!=XCINMSG_NORMAL)
-        perr(exitcode, N_("cannot open file:  %s.\n"), fn);
+        perr(exitcode, _("cannot open file:  %s.\n"), fn);
     return f;
 }

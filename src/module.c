@@ -27,18 +27,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_DLOPEN
-#  include <dlfcn.h>
-#  define load_mod_dynamic load_mod_ldso
-#endif
-
 #include "xcintool.h"
 #include "imodule.h"
 
-static tmodule_t *mod_templet;
-static imodule_t *imodules;     /* imodule: head of list;                  *
-                                 * imodule->next: next to the head;        *
-                                 * imodule->prev: end element of the list; */
+struct _immod_list_s {
+    module_t *modp;
+    int ref;
+    struct _immod_list_s *next;
+};
+
+static struct _immod_list_s *immod;
 static cinput_t cinput[MAX_INP_ENTRY];
 
 /*---------------------------------------------------------------------------
@@ -52,10 +50,8 @@ check_module(module_t *modp, char *ldso_name)
 {
     char *str=NULL;
 
-    if (! modp->name)
-	str = "name";
-    else if (! modp->version)
-	str = "version";
+    if (! modp->conf_size)
+	str = "conf_size";
     else if (! modp->init)
 	str = "init";
     else if (! modp->xim_init)
@@ -71,97 +67,42 @@ check_module(module_t *modp, char *ldso_name)
 	perr(XCINMSG_IWARNING,
 	    N_("undefined symbol \"%s\" in module \"%s\", ignore.\n"),
 	    str, ldso_name);
-	return  0;
-    }
-    if (! check_version(MODULE_VERSION, modp->version, 0)) {
-        perr(XCINMSG_IWARNING, 
-	    N_("not valid module \"%s\" with version \"%s\", ignore.\n"),
-            modp->name, (modp->version) ? modp->version : "(null)");
 	return  False;
     }
     return  True;
 }
 
 
-#ifdef HAVE_DLOPEN
-static tmodule_t *
-load_mod_ldso(char *modname, int mod_type, xcin_rc_t *xc)
+static struct _immod_list_s *
+load_IM_module(char *modname, xcin_rc_t *xrc)
 {
-    char modn[128], ldso_fn[256];
-    char *s, err=0;
     module_t *modp;
-    tmodule_t *tmodp;
-    void *ldso;
-    
-    if (! (s = strrchr(modname, '.')) || strcmp(s, ".so"))
-        sprintf(modn, "%s.so", modname);
-    else
-	strncpy(modn, modname, 256);
+    struct _immod_list_s *mlist;
 
-    if (strchr(modname, '/')) {
-	if (! (ldso = dlopen(modn, RTLD_LAZY)))
-	    err = 1;
+    modp = (module_t *)load_module(modname,MTYPE_IM,MODULE_VERSION,xrc,NULL);
+    if (modp == NULL || check_module(modp, modname) == False) {
+	unload_module((mod_header_t *)modp);
+	return NULL;
     }
-    else {
-        sprintf(ldso_fn, "%s/%s", xc->user_dir, modn);
-        if (! (ldso = dlopen(ldso_fn, RTLD_LAZY))) {
-            sprintf(ldso_fn, "%s/%s", xc->default_dir, modn);
-            if (! (ldso = dlopen(ldso_fn, RTLD_LAZY)))
-		err = 1;
-	}
-    }
-    if (err) {
-	perr(XCINMSG_IWARNING, N_("dlerror: %s\n"), dlerror());
-	perr(XCINMSG_WARNING, N_("module \"%s\" not found, ignore.\n"), modn);
-	return  NULL;
-    }
-    modp = (module_t *)dlsym(ldso, "module_ptr");
-    if (! modp || ! check_module(modp, ldso_fn)) {
-	dlclose(ldso);
-	return  NULL;
-    }
+    mlist = xcin_malloc(sizeof(struct _immod_list_s), 0);
+    mlist->modp = modp;
+    mlist->ref  = 0;
+    mlist->next = immod;
+    immod = mlist;
 
-    tmodp = calloc(1, sizeof(tmodule_t));
-    tmodp->ldso = ldso;
-    tmodp->name = modp->name;
-    tmodp->version = modp->version;
-    tmodp->comments = modp->comments;
-    tmodp->valid_objname = modp->valid_objname;
-    tmodp->module_type = modp->module_type;
-    tmodp->conf_size = modp->conf_size;
-    tmodp->init = modp->init;
-    tmodp->xim_init = modp->xim_init;
-    tmodp->xim_end = modp->xim_end;
-    tmodp->keystroke = modp->keystroke;
-    tmodp->show_keystroke = modp->show_keystroke;
-    tmodp->terminate = modp->terminate;
-
-    if (! mod_templet)
-        mod_templet = tmodp;
-    else {
-        mod_templet->prev->next = tmodp;
-        tmodp->prev = mod_templet->prev;
-    }
-    mod_templet->prev = tmodp;
-
-    return  tmodp;
+    return mlist;
 }
-#endif
-
 
 static imodule_t * 
-creat_module(tmodule_t *templet, char *objname)
+creat_module(module_t *templet, char *objname)
 {
     imodule_t *imodp;
 
-    if (! templet)
-	return  NULL;
-
-    imodp = calloc(1, sizeof(imodule_t));
-    imodp->name = templet->name;
-    imodp->version = templet->version;
-    imodp->comments = templet->comments;
-    imodp->module_type = templet->module_type;
+    imodp = xcin_malloc(sizeof(imodule_t), 1);
+    imodp->name = templet->module_header.name;
+    imodp->version = templet->module_header.version;
+    imodp->comments = templet->module_header.comments;
+    imodp->module_type = templet->module_header.module_type;
     imodp->conf = calloc(1, templet->conf_size);
     imodp->init = templet->init;
     imodp->xim_init = templet->xim_init;
@@ -176,36 +117,35 @@ creat_module(tmodule_t *templet, char *objname)
 }
 
 imodule_t *
-load_module(char *modname, char *objenc, int mod_type, xcin_rc_t *xc)
+load_IM(char *modname, char *objenc, xcin_rc_t *xrc)
 {
-    imodule_t *imodp=imodules;
-    tmodule_t *tmodp=mod_templet;
+    struct _immod_list_s *mlist=immod;
+    imodule_t *imodp;
     char **objn, objname[64], *s;
-
+    int i;
 /*
  *  See that if the desired module with obj_name has been created.
  */
-    while (imodp) {
-	if (imodp->module_type == mod_type && !strcmp(imodp->name, modname) && 
-	    !strcmp(imodp->objname, objenc))
-	    return  imodp;
-	imodp = imodp->next;
+    for (i=0; i<MAX_INP_ENTRY; i++) {
+	if (cinput[i].inpmod &&
+	    !strcmp(cinput[i].inpmod->name, modname) &&
+	    !strcmp(cinput[i].inpmod->objname, objenc))
+	    return  cinput[i].inpmod;
     }
-
 /*
  *  Search the templet.
  */
     strncpy(objname, objenc, 64);
     if ((s = strrchr(objname, '@')))
 	*s = '\0';
-    while (tmodp) {
-	if (tmodp->module_type != mod_type || strcmp(modname, tmodp->name)) {
-	    tmodp = tmodp->next;
+    while (mlist) {
+	if (strcmp(modname, mlist->modp->module_header.name) != 0) {
+	    mlist = mlist->next;
 	    continue;
 	}
-	objn = tmodp->valid_objname;
+	objn = mlist->modp->valid_objname;
 	if (! objn) {
-	    if (! strcmp_wild(tmodp->name, objname))
+	    if (! strcmp_wild(mlist->modp->module_header.name, objname))
 		break;
 	}
 	else {
@@ -217,49 +157,21 @@ load_module(char *modname, char *objenc, int mod_type, xcin_rc_t *xc)
 	    if (*objn)
 		break;
 	}
-	tmodp = tmodp->next;
+	mlist = mlist->next;
     }
-
 /*
  *  Load modules from dynamic libs and run module init.
  */
-    if (! tmodp)
-	tmodp = load_mod_dynamic(modname, mod_type, xc);
-    imodp = creat_module(tmodp, objenc);
-
-    if (! imodp)
+    if (! mlist && (mlist = load_IM_module(modname, xrc)) == NULL)
 	return NULL;
-    if (imodp->init(imodp->conf, objenc, xc) != True) {
+    imodp = creat_module(mlist->modp, objenc);
+    if (imodp->init(imodp->conf, objenc, xrc) != True) {
 	free(imodp->conf);
 	free(imodp);
 	return NULL;
     }
-
-/*
- *  Load module OK. Now put the module into link list.
- */
-    if (! imodules)
-        imodules = imodp;
-    else {
-        imodules->prev->next = imodp;
-        imodp->prev = imodules->prev;
-    }
-    imodules->prev = imodp;
+    mlist->ref ++;
     return imodp;
-}
-
-void
-module_comment(char *modname, xcin_rc_t *xc)
-{
-    tmodule_t *tmodp;
-
-    if ((tmodp = load_mod_dynamic(modname, MOD_CINPUT, xc))) {
-	perr(XCINMSG_NORMAL, N_("module \"%s\":"), modname);
-	if (tmodp->comments)
-	    perr(XCINMSG_EMPTY, "\n\n%s\n", tmodp->comments);
-	else
-	    perr(XCINMSG_EMPTY, N_("no comments available\n"));
-    }
 }
 
 /*----------------------------------------------------------------------------

@@ -32,28 +32,6 @@
 
 ---------------------------------------------------------------------------*/
 
-typedef struct tmodule_s  tmodule_t;
-struct tmodule_s {
-    char *name;
-    char *version;
-    char *comments;
-    char **valid_objname;
-    enum mtype module_type;
-    void *ldso;
-
-    int conf_size;
-    int (*init) (void *conf, char *objanme, xcin_rc_t *xc);
-    int (*xim_init) (void *conf, inpinfo_t *inpinfo);
-    unsigned int (*xim_end) (void *conf, inpinfo_t *inpinfo);
-    int (*switch_in) (void *conf, inpinfo_t *inpinfo);
-    int (*switch_out) (void *conf, inpinfo_t *inpinfo);
-    unsigned int (*keystroke) (void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo);
-    int (*show_keystroke) (void *conf, simdinfo_t *simdinfo);
-    int (*terminate) (void *conf);
-
-    tmodule_t *prev, *next;
-};
-
 typedef struct imodule_s  imodule_t;
 struct imodule_s {
     char *name;
@@ -71,23 +49,18 @@ struct imodule_s {
     unsigned int (*keystroke) (void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo);
     int (*show_keystroke) (void *conf, simdinfo_t *simdinfo);
     int (*terminate) (void *conf);
-
-    imodule_t *prev, *next;
 };
 
 typedef struct {
     char *modname;
     char *objname;
     imodule_t *inpmod;
-    ubyte_t with_enc;
+    int with_enc;
 } cinput_t;
 
 typedef char numlist_t;
 
-extern imodule_t *load_module(char *modname, char *objname, 
-			int mod_type, xcin_rc_t *xc);
-extern void module_comment(char *modname, xcin_rc_t *xc);
-
+extern imodule_t *load_IM(char *modname, char *objenc, xcin_rc_t *xrc);
 extern cinput_t *get_cinput(int idx);
 extern cinput_t *get_cinput_next(int idx, int *idx_ret);
 extern cinput_t *get_cinput_prev(int idx, int *idx_ret);

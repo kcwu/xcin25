@@ -26,16 +26,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include "constant.h"
 #include "xcintool.h"
-
-/* For international message output (gettext) */
-#ifdef HAVE_GETTEXT
-#  include <libintl.h>
-#  define _(STRING) gettext(STRING)
-#else
-#  define _(STRING) STRING
-#endif
 
 static char *errhead;
 
@@ -76,7 +67,7 @@ perr(int msgcode, const char *fmt,...)
 	break;
     }
     va_start(ap, fmt);
-    vfprintf(fout, _(fmt), ap);
+    vfprintf(fout, fmt, ap);
     va_end(ap);
     if (exitcode)
         exit(exitcode);

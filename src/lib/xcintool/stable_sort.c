@@ -33,11 +33,11 @@
     and should be very careful. So we provide a stable_sort() function
     defined in xcintool.h. If the autoconf cannot find a "stable" sorting
     function in the system library, then the "my_merge_sort()" here will
-    be linked as the stable_sort(). This is a simple sorting function
-    using merge sort algorithm written by me. It is proved that both the
-    merge sort and insertion sort algorithms are "stable_sort", but the
-    performace are very different between them: merge sort == O(n log n);
-    while insertion sort == O(n^2).
+    be linked as the stable_sort(). This is a simple sorting function using
+    the merge sort algorithm. It is proved that both the merge sort and
+    insertion sort algorithms are "stable_sort", but the performace are very
+    different between them: merge sort == O(n log n); while insertion sort
+    == O(n^2).
 
     By Tung-Han Hsieh
 --------------------------------------------------------------------------*/
@@ -46,6 +46,7 @@
 #  include "config.h"
 #endif
 
+#ifndef HAVE_MERGESORT
 #include <stdlib.h>
 #include <string.h>
 #include "xcintool.h"
@@ -115,11 +116,11 @@ separate(void *base, size_t nmemb, size_t size,
 }
 
 void
-my_merge_sort(void *base, size_t nmemb, size_t size,
+xcin_mergesort(void *base, size_t nmemb, size_t size,
               int (*compar)(const void *, const void *))
 {
-    buf = malloc(nmemb * size);    
+    buf = xcin_malloc(nmemb*size, 0);    
     separate(base, nmemb, size, compar);
     free(buf);
 }
-
+#endif

@@ -59,82 +59,82 @@ extern int verbose;
 ----------------------------------------------------------------------------*/
 
 static void
-phone_resource(phone_conf_t *cf, char *objname,
+phone_resource(phone_conf_t *cf, xcin_rc_t *xrc, char *objname,
 	       char *ftsi, char *fyin, char *fpinyin)
 {
     char *cmd[2], value[256];
 
     cmd[0] = objname;
     cmd[1] = "INP_CNAME";                               /* inp_names */
-    if (get_resource(cmd, value, 256, 2)) {
+    if (get_resource(xrc, cmd, value, 256, 2)) {
 	if (cf->inp_cname)
 	    free(cf->inp_cname);
         cf->inp_cname = (char *)strdup(value);
     }
 
     cmd[1] = "N_SELECTION_KEY";
-    if (get_resource(cmd, value, 256, 2)) {
+    if (get_resource(xrc, cmd, value, 256, 2)) {
 	int n_selkey = atoi(value);
 	if (n_selkey >= N_MAX_SELECTION/2 && n_selkey <= N_MAX_SELECTION)
 	    cf->n_selkey = (byte_t)n_selkey;
     }
     cmd[1] = "SELECTION_KEYS";
-    if (get_resource(cmd, value, 256, 2)) {
+    if (get_resource(xrc, cmd, value, 256, 2)) {
 	int selnum;
 	selnum = atoi(value);
 	if (selnum >= 0 && selnum < N_SELMAPS)
 	    cf->selmap = (byte_t)selnum;
     }
     cmd[1] = "PAGE_KEYS";
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	cf->page_key = (ubyte_t)(atoi(value) % 256);
     cmd[1] = "QPHRASE_MODE";
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	cf->modesc = (ubyte_t)(atoi(value) % 256);
 
     cmd[1] = "AUTO_SELECTION";
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, BIMSPH_MODE_AUTOSEL, 0);
     cmd[1] = "KEYMAP";
-    if (get_resource(cmd, value, 256, 2)) {
+    if (get_resource(xrc, cmd, value, 256, 2)) {
 	int mapnum = atoi(value);
 	if (mapnum >= 0 && mapnum < N_KEYMAPS)
 	    cf->keymap = (byte_t)mapnum;
     }
     cmd[1] = "PINPHO_MAP";
-    if (get_resource(cmd, value, 256, 2)) {
+    if (get_resource(xrc, cmd, value, 256, 2)) {
 	char *s = strrchr(value, '.');
 	if (! s || strcmp(s+1, "tab"))
 	    strncat(value, ".tab", 256);
 	strcpy(fpinyin, value);
     }
     cmd[1] = "TSI_FNAME";
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	strcpy(ftsi, value);
     cmd[1] = "YIN_FNAME";
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	strcpy(fyin, value);
 
     cmd[1] = "SPACE_SELECTION";
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, BIMSPH_MODE_SPACESEL, 0);
     cmd[1] = "PHRASE_SELECTION";
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, BIMSPH_MODE_PHRASESEL, 0);
     cmd[1] = "N_SELECTION_PHR";
-    if (get_resource(cmd, value, 256, 2)) {
+    if (get_resource(xrc, cmd, value, 256, 2)) {
 	int n_selphr = atoi(value);
 	if (n_selphr <= cf->n_selkey)
 	    cf->n_selphr = n_selphr;
     }
 
     cmd[1] = "AUTO_UPCHAR";
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, BIMSPH_MODE_AUTOUPCH, 0);
 }
 
 static int
-phone_init(void *conf, char *objname, xcin_rc_t *xc)
+phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 {
     phone_conf_t *cf = (phone_conf_t *)conf, cfd;
     objenc_t objenc;
@@ -155,8 +155,8 @@ phone_init(void *conf, char *objname, xcin_rc_t *xc)
     }
     else
 	cfd.inp_cname = (char *)strdup("ª`­µ");
-    phone_resource(&cfd, "bimsphone_default", ftsi, fyin, fpinyin);
-    phone_resource(&cfd, objenc.objloadname, ftsi, fyin, fpinyin);
+    phone_resource(&cfd, xrc, "bimsphone_default", ftsi, fyin, fpinyin);
+    phone_resource(&cfd, xrc, objenc.objloadname, ftsi, fyin, fpinyin);
 
 /*
  *  Global setup.
@@ -176,14 +176,18 @@ phone_init(void *conf, char *objname, xcin_rc_t *xc)
 	cf->keymap = cfd.keymap;
     }
     else {
-	char truefn[256];
+	char truefn[256], sub_path[256];
 
 	/* For PinYin mode, always fix to Auto-Selection. */
 	cf->mode |= BIMSPH_MODE_AUTOSEL;
 	/* Only fixed to Zozy */
 	cf->keymap = (byte_t)0;
 
-	fp = open_data(fpinyin, "r", NULL, truefn, 256, XCINMSG_WARNING);
+	snprintf(sub_path, 256, "tab/%s", xrc->locale.encoding);
+	if (check_datafile(fpinyin, sub_path, xrc, truefn, 256) == True)
+	    fp = open_file(truefn, "r", XCINMSG_WARNING);
+	else
+	    fp = NULL;
 	if (fp == NULL) {
 	    perr(XCINMSG_WARNING, 
 		N_("bimsphone: %s: cannot open pinyin data file: %s.\n"),
@@ -197,19 +201,16 @@ phone_init(void *conf, char *objname, xcin_rc_t *xc)
  *  Further auto-selection setup.
  */
     if ((cf->mode & BIMSPH_MODE_AUTOSEL)) {
-	char tsi_fname[256], yin_fname[256];
+	char tsi_fname[256], yin_fname[256], sub_path[256];
 
-	if ((fp = open_data(ftsi, "r", NULL, tsi_fname, 256, XCINMSG_WARNING)))
-	    fclose(fp);
-	else {
+	snprintf(sub_path, 256, "tab/%s", xrc->locale.encoding);
+	if (check_datafile(ftsi, sub_path, xrc, tsi_fname, 256) == False) {
 	    perr(XCINMSG_WARNING, 
 		N_("bimsphone: %s: cannot open data file: %s\n"),
 		objenc.objloadname, ftsi);
 	    return False;
 	}
-	if ((fp = open_data(fyin, "r", NULL, yin_fname, 256, XCINMSG_WARNING)))
-	    fclose(fp);
-	else {
+	if (check_datafile(fyin, sub_path, xrc, yin_fname, 256) == False) {
 	    perr(XCINMSG_WARNING, 
 		N_("bimsphone: %s: cannot open data file: %s\n"),
 		objenc.objloadname, fyin);
@@ -953,18 +954,18 @@ phone_show_keystroke(void *conf, simdinfo_t *simdinfo)
     static wch_t keystroke_list[5];
     phone_conf_t *cf = (phone_conf_t *)conf;
     char *str, *str1;
-    unsigned int code;
-    struct ZhiInfo zhi_info;
+    struct TsiDB *tdb;
+    struct TsiYinDB *ydb;
+    struct TsiInfo zhi;
 
-    if (simdinfo->cch_publish.wch) {
-	code = ((unsigned int)(simdinfo->cch_publish.s[0])) << 8;
-	code |= (unsigned int)(simdinfo->cch_publish.s[1]);
-	memset(&zhi_info, 0, sizeof(struct ZhiInfo));
-	zhi_info.code = (ZhiCode)code;
-
-        if (tabeZhiInfoLookupYin(&zhi_info) == 0) {
+    if (simdinfo->cch_publish.wch && bimsReturnDBPool(&tdb, &ydb) > 0) {
+	zhi.tsi = simdinfo->cch_publish.s;
+	zhi.refcount = 0;
+	zhi.yinnum = 0;
+	zhi.yindata = NULL;
+	if (tabeTsiInfoLookupZhiYin(tdb, &zhi) == 0) {
     	    simdinfo->s_keystroke = keystroke_list;
-	    str = (char *)tabeYinToZuYinSymbolSequence(zhi_info.yin[0]);
+	    str = (char *)tabeYinToZuYinSymbolSequence(zhi.yindata[0]);
 
 	    if ((cf->mode & BIMSPH_MODE_PINYIN))
 		str1 = pho2pinyinw(cf->pinyin, str);
@@ -975,6 +976,8 @@ phone_show_keystroke(void *conf, simdinfo_t *simdinfo)
 	    free(str);
 	    return True;
 	}
+	free(tdb);
+	free(ydb);
     }
     simdinfo->s_keystroke = NULL;
     return False;
@@ -1000,11 +1003,11 @@ static char phone_comments[] = N_(
 	"This module is free software, as part of xcin system.\n");
 
 module_t module_ptr = {
-    "bimsphone",				/* name */
-    MODULE_VERSION,				/* version */
-    phone_comments,				/* comments */
+    { MTYPE_IM,					/* module_type */
+      "bimsphone",				/* name */
+      MODULE_VERSION,				/* version */
+      phone_comments },				/* comments */
     phone_valid_objname,			/* valid_objname */
-    MOD_CINPUT,					/* module_type */
     sizeof(phone_conf_t),			/* conf_size */
     phone_init,					/* init */
     phone_xim_init,				/* xim_init */

@@ -37,14 +37,16 @@ static qphr_t qphr[50], qphr_shift[50], qphr_ctrl[50],
 static char true_fn[256];
 
 void
-qphrase_init(char *phrase_fn)
+qphrase_init(xcin_rc_t *xrc, char *phrase_fn)
 {
     char *s, buf[256], cmd[15], var[80];
     int lineno=0, key;
     qphr_t *qp = qphr;
-    FILE *fp;
+    FILE *fp=NULL;
    
-    fp = open_data(phrase_fn, "rt", NULL, true_fn, 256, XCINMSG_WARNING);
+    snprintf(buf, 256, "tab/%s", xrc->locale.encoding);
+    if (check_datafile(phrase_fn, buf, xrc, true_fn, 256) == True)
+	fp = open_file(true_fn, "rt", XCINMSG_WARNING);
     if (! fp)
 	return;
 

@@ -236,8 +236,8 @@ change_IM(IC *ic, int inp_num)
 	if (! (cp = get_cinput(inp_num)))
 	    return False;
 
-        if (! cp->inpmod && ! (cp->inpmod = load_module(cp->modname, 
-		cp->objname, MOD_CINPUT, &(xccore->xcin_rc)))) {
+        if (! cp->inpmod && ! (cp->inpmod = load_IM(cp->modname, 
+		cp->objname, &(xccore->xcin_rc)))) {
 	    perr(XCINMSG_WARNING, 
 		N_("cannot load IM: %s, ignore.\n"), cp->objname);
 	    free_cinput(cp);
@@ -357,7 +357,11 @@ call_simd(IC *ic)
 	return;
     }
 
+/*
     skey_len = wchs_len(skey);
+*/
+    for (skey_len=0; skey[skey_len].wch != (wchar_t)0; skey_len++);
+
     if (imc->skey_size < skey_len+1) {
 	imc->skey_size = skey_len+1;
 	imc->sinmd_keystroke = realloc(
@@ -375,8 +379,8 @@ change_simd(IC *ic)
 
     do {
 	if ((cp = get_cinput_next(imc->sinp_num+1, &idx))) {
-	    if (! cp->inpmod && ! (cp->inpmod = load_module(cp->modname, 
-			cp->objname, MOD_CINPUT, &(xccore->xcin_rc)))) {
+	    if (! cp->inpmod && ! (cp->inpmod = load_IM(cp->modname, 
+			cp->objname, &(xccore->xcin_rc)))) {
 		perr(XCINMSG_WARNING, 
 			N_("cannot load IM: %s, ignore.\n"), cp->objname);
 		free_cinput(cp);

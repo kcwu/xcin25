@@ -74,7 +74,11 @@ inpstate_content2(gui_t *gui, winlist_t *win, IC *ic,
 	    s++;
 	}
 	if (! inpn) {
+/*
 	    extract_char(ic->imc->inpinfo.inp_cname, buf, 11);
+*/
+	    strncpy(buf, ic->imc->inpinfo.inp_cname, 2);
+	    buf[2] = '\0';
 	    inpn = buf;
 	}
     }
@@ -262,7 +266,8 @@ x_set_geometry(gui_t *gui, winlist_t *win, char *value, Bool *negx, Bool *negy)
 }
 
 static void 
-set_wm_property(gui_t *gui, winlist_t *win, Bool negative_x, Bool negative_y)
+set_wm_property(gui_t *gui, winlist_t *win, xcin_rc_t *xrc,
+		Bool negative_x, Bool negative_y)
 {
     char *win_name, *icon_name = "xcin";
     XTextProperty windowName, iconName;
@@ -303,7 +308,7 @@ set_wm_property(gui_t *gui, winlist_t *win, Bool negative_x, Bool negative_y)
     class_hints.res_class = "xcin";
 
     XSetWMProperties(gui->display, win->window, &windowName, 
-		&iconName, gui->argv, gui->argc, &size_hints, 
+		&iconName, xrc->argv, xrc->argc, &size_hints, 
 		&wm_hints, &class_hints);
     XFree(windowName.value);
     XFree(iconName.value);
@@ -335,9 +340,17 @@ xcin_mainwin2_init(gui_t *gui, xccore_t *xccore)
     char *cmd[1], geometry[256];
 
 /*  Initially Setup  */
+/*
     extract_char(gui->inpn_english, xmw2.inpn_english, 11);
     extract_char(gui->inpn_sbyte, xmw2.inpn_sbyte, 11);
     extract_char(gui->inpn_2bytes, xmw2.inpn_2bytes, 11);
+*/
+    strncpy(xmw2.inpn_english, gui->inpn_english, 2);
+    strncpy(xmw2.inpn_sbyte, gui->inpn_sbyte, 2);
+    strncpy(xmw2.inpn_2bytes, gui->inpn_2bytes, 2);
+    xmw2.inpn_english[2] = '\0';
+    xmw2.inpn_sbyte[2] = '\0';
+    xmw2.inpn_2bytes[2] = '\0';
     xmw2.star_pix = XTextWidth(gui->indexfont, "*", 1);
 
     win = gui_new_win();
@@ -349,7 +362,7 @@ xcin_mainwin2_init(gui_t *gui, xccore_t *xccore)
 
 /*  Winlist Setup  */
     cmd[0] = "MAINWIN2_GEOMETRY";
-    if (! get_resource(cmd, geometry, 256, 1))
+    if (! get_resource(&(xccore->xcin_rc), cmd, geometry, 256, 1))
 	geometry[0] = '\0';
     x_set_geometry(gui, win, geometry, &negative_x, &negative_y);
     border = ((xccore->xcin_mode & XCIN_NO_WM_CTRL)) ? 3 : 1;
@@ -364,7 +377,7 @@ xcin_mainwin2_init(gui_t *gui, xccore_t *xccore)
 
 /*  Window Manager Property Setup  */
     if (! (xccore->xcin_mode & XCIN_NO_WM_CTRL)) {
-	set_wm_property(gui, win, negative_x, negative_y);
+	set_wm_property(gui, win, &(xccore->xcin_rc), negative_x, negative_y);
 	if (! (xccore->xcin_mode & XCIN_XKILL_OFF))
             XSetWMProtocols(gui->display, win->window, &(gui->wm_del_win), 1);
     }

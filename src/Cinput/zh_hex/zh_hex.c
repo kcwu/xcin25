@@ -71,7 +71,7 @@ cname_analy(char *inp_cname, char *value, int slen)
 }
 
 static int
-zh_hex_init(void *conf, char *objname, xcin_rc_t *xc)
+zh_hex_init(void *conf, char *objname, xcin_rc_t *xrc)
 {
     char *cmd[2], value[50], buf[100];
     objenc_t objenc;
@@ -84,11 +84,11 @@ zh_hex_init(void *conf, char *objname, xcin_rc_t *xc)
 
     cmd[1] = buf;
     snprintf(buf, 100, "INP_CNAME_%s", objenc.encoding);
-    if (get_resource(cmd, value, 50, 2))		/* inp_names */
+    if (get_resource(xrc, cmd, value, 50, 2))		/* inp_names */
 	cname_analy((char *)cf->inp_cname, value, sizeof(cf->inp_cname));
     else {
 	cmd[1] = "INP_CNAME";
-	if (get_resource(cmd, value, 50, 2))		/* inp_names */
+	if (get_resource(xrc, cmd, value, 50, 2))	/* inp_names */
 	    cname_analy((char *)cf->inp_cname, value, sizeof(cf->inp_cname));
     }
     if (cf->inp_cname[0] == '\0')
@@ -96,7 +96,7 @@ zh_hex_init(void *conf, char *objname, xcin_rc_t *xc)
     cf->inp_ename = (char *)strdup(objenc.objname);
 
     cmd[1] = "SETKEY";						/* setkey */
-    if (get_resource(cmd, value, 50, 2))
+    if (get_resource(xrc, cmd, value, 50, 2))
         cf->setkey = (byte_t)atoi(value);
     else {
         perr(XCINMSG_WARNING, N_("%s: %s: value not found.\n"), 
@@ -105,7 +105,7 @@ zh_hex_init(void *conf, char *objname, xcin_rc_t *xc)
     }
 
     cmd[1] = "BEEP_WRONG";					/* beep_mode */
-    if (get_resource(cmd, value, 50, 2))
+    if (get_resource(xrc, cmd, value, 50, 2))
 	set_data(&(cf->beep_mode), RC_BFLAG, value, INP_MODE_BEEPWRONG, 0);
 
     ccode_info(&(cf->ccode_info));
@@ -316,11 +316,11 @@ static char zh_hex_comments[] = N_(
 
 
 module_t module_ptr = {
-    "zh_hex",					/* name */
-    MODULE_VERSION,				/* version */
-    zh_hex_comments,				/* comments */
+    { MTYPE_IM,					/* module_type */
+      "zh_hex",					/* name */
+      MODULE_VERSION,				/* version */
+      zh_hex_comments },			/* comments */
     zh_hex_valid_objname,			/* valid_objname */
-    MOD_CINPUT,					/* module_type */
     sizeof(zh_hex_conf_t),			/* conf_size */
     zh_hex_init,				/* init */
     zh_hex_xim_init,				/* xim_init */

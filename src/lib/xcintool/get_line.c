@@ -37,15 +37,18 @@ get_line(char *str, int str_size, FILE *f, int *lineno, char *ignore_ch)
 
     str[0] = '\0';
     while (!feof(f)) {
-        fgets(str, str_size, f);
-        (*lineno)++;
+	fgets(str, str_size, f);
+	if (lineno)
+	    (*lineno)++;
 
-        for (s_ignor = ignore_ch; *s_ignor != '\0'; s_ignor++) {
-            if ((s = strchr(str, *s_ignor)) != NULL)
-                *s = '\0';
+	if (ignore_ch) {
+	    for (s_ignor=ignore_ch; *s_ignor != '\0'; s_ignor++) {
+		if ((s = strchr(str, *s_ignor)) != NULL)
+		    *s = '\0';
+	    }
         }
-        if (str[0] != '\0')
-            return 1;
+	if (str[0] != '\0')
+	    return True;
     }
-    return 0;
+    return False;
 }

@@ -15,13 +15,15 @@ CURRENT_VER	= @CURRENT_VER@
 REVISION_VER	= @REVISION_VER@
 AGE_VER		= @AGE_VER@
 
+LIB = $(dl_lib)
+
 .PHONY: install clean distclean depend make_subdir build_IMdkit
 
 all: $(SUBSYS)
 
 $(LXCIN_NAME): make_subdir
 	( OBJS=`ls $(LXCIN_OBJ)`; \
-	  $(LIBTOOL) --mode=link $(CC) -o $@ $$OBJS -rpath $(libdir) \
+	  $(LIBTOOL) --mode=link $(CC) -o $@ $$OBJS $(LIB) -rpath $(libdir) \
 		-version-info $(CURRENT_VER):$(REVISION_VER):$(AGE_VER) )
 
 make_subdir:

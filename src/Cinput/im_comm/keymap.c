@@ -19,6 +19,9 @@
     xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
 */      
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
 
 #include <string.h>
 #include "module.h"

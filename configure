@@ -5431,7 +5431,7 @@ test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 ${INSTALL} -d testdir > /dev/null 2>&1
 if test ! -d testdir; then
-    INSTALL="$srcdir/script/install-sh -c"
+    INSTALL='\$(top_srcdir)/script/install-sh -c'
     
 fi
 rm -rf testdir
@@ -8277,9 +8277,9 @@ fi
 
 LIBS="$OLD_LIBS"
 CPPFLAGS="$CPPFLAGS $x_includes"
-echo $ac_n "checking for tabeZhiInfoLookupYin in -ltabe""... $ac_c" 1>&6
-echo "configure:8282: checking for tabeZhiInfoLookupYin in -ltabe" >&5
-ac_lib_var=`echo tabe'_'tabeZhiInfoLookupYin | sed 'y%./+-%__p_%'`
+echo $ac_n "checking for tabeTsiDBOpen in -ltabe""... $ac_c" 1>&6
+echo "configure:8282: checking for tabeTsiDBOpen in -ltabe" >&5
+ac_lib_var=`echo tabe'_'tabeTsiDBOpen | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -8291,10 +8291,10 @@ cat > conftest.$ac_ext <<EOF
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
     builtin and then its argument prototype would still apply.  */
-char tabeZhiInfoLookupYin();
+char tabeTsiDBOpen();
 
 int main() {
-tabeZhiInfoLookupYin()
+tabeTsiDBOpen()
 ; return 0; }
 EOF
 if { (eval echo configure:8301: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then

@@ -79,8 +79,6 @@ struct gui_s {
     Display *display;
     int display_width, display_height;
     int screen;
-    int argc;
-    char **argv;
 
     Window root;
     Atom wm_del_win;

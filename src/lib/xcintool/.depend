@@ -5,39 +5,33 @@
 # You need GCC and perl to generate me.
 #
 
-perr.lo: perr.c  ../../../config.h ../../../src/include/constant.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ perr.c
-open_file.lo: open_file.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ open_file.c
-open_data.lo: open_data.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ open_data.c
-copy_file.lo: copy_file.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ copy_file.c
-check_file_exist.lo: check_file_exist.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ check_file_exist.c
-check_version.lo: check_version.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ check_version.c
+check_file.lo: check_file.c  ../../../config.h ../../../src/include/xcintool.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ check_file.c
+debug.lo: debug.c  ../../../config.h ../../../src/include/xcintool.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ debug.c
 get_line.lo: get_line.c  ../../../config.h ../../../src/include/xcintool.h
 	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ get_line.c
 get_word.lo: get_word.c  ../../../config.h ../../../src/include/xcintool.h
 	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ get_word.c
+load_module.lo: load_module.c  ../../../config.h ../../../src/include/xcintool.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ load_module.c
+open_file.lo: open_file.c  ../../../config.h ../../../src/include/xcintool.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ open_file.c
+perr.lo: perr.c  ../../../config.h ../../../src/include/xcintool.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ perr.c
 set_data.lo: set_data.c  ../../../config.h ../../../src/include/xcintool.h
 	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ set_data.c
-strcmp_wild.lo: strcmp_wild.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ strcmp_wild.c
-xcin_rc.lo: xcin_rc.c  ../../../config.h ../../../src/include/constant.h ../../../src/include/xcintool.h ../siod/siod.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ xcin_rc.c
-set_locale.lo: set_locale.c  ../../../config.h ../../../src/include/constant.h ../../../src/include/xcintool.h
+set_locale.lo: set_locale.c  ../../../config.h ../../../src/include/xcintool.h
 	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ set_locale.c
-wchs_to_mbs.lo: wchs_to_mbs.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ wchs_to_mbs.c
-wchs_len.lo: wchs_len.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ wchs_len.c
 stable_sort.lo: stable_sort.c  ../../../config.h ../../../src/include/xcintool.h
 	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ stable_sort.c
-debug.lo: debug.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ debug.c
-snprintf.lo: snprintf.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ snprintf.c
-extract_char.lo: extract_char.c  ../../../config.h ../../../src/include/xcintool.h
-	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ extract_char.c
+strcmp_wild.lo: strcmp_wild.c  ../../../config.h ../../../src/include/xcintool.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ strcmp_wild.c
+xcin_malloc.lo: xcin_malloc.c  ../../../config.h ../../../src/include/xcintool.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ xcin_malloc.c
+xcin_rc.lo: xcin_rc.c  ../../../config.h ../../../src/include/constant.h ../../../src/include/xcintool.h ../siod/siod.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ xcin_rc.c
+xcin_snprintf.lo: xcin_snprintf.c  ../../../config.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ xcin_snprintf.c
+wchs_to_mbs.lo: wchs_to_mbs.c  ../../../config.h ../../../src/include/xcintool.h
+	@$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(DEFS) $(INC) -c -o $@ wchs_to_mbs.c

@@ -50,26 +50,8 @@
 extern "C" { 
 #endif 
 
-#define  MODULE_VERSION         "20000831"
+#define  MODULE_VERSION         "20010918"
 
-/*--------------------------------------------------------------------------
-
-	XCIN Core Configuration
-
---------------------------------------------------------------------------*/
-
-typedef struct {
-    char *lc_ctype;
-    char *lc_messages;
-    char *encoding;
-} locale_t;
-
-typedef struct {
-    char *rcfile;               /* rcfile name. */
-    char *default_dir;          /* Default module directory. */
-    char *user_dir;             /* User data directory. */
-    locale_t locale;            /* Locale name. */
-} xcin_rc_t;
 
 typedef struct {
     char objname[50];
@@ -219,18 +201,10 @@ typedef struct {
 
 ---------------------------------------------------------------------------*/
 
-/*  Module type classification.  */
-enum mtype {
-    MOD_CINPUT
-};
-
 typedef struct module_s  module_t;
 struct module_s {
-    char *name;
-    char *version;
-    char *comments;
+    mod_header_t module_header;
     char **valid_objname;
-    enum mtype module_type;
 
     int conf_size;
     int (*init) (void *conf, char *objname, xcin_rc_t *xc);
@@ -302,7 +276,7 @@ extern char *halfchar_ascii(inpinfo_t *inpinfo, int mode, keyinfo_t *keyinfo);
 extern KeySym keysym_ascii(int ch);
 
 /* Quick key phrase: %trigger, %shift, %ctrl, %alt  */
-extern void qphrase_init(char *phrase_fn);
+extern void qphrase_init(xcin_rc_t *xrc, char *phrase_fn);
 extern char *qphrase_str(int ch, int class);
 extern char *get_qphrase_list(void);
 

@@ -108,7 +108,6 @@ strcmp_wild(char *s1, char *s2)
 		ret = 1;
 	}
     }
-    return  ret;
+    return ret;
 }
-
 

@@ -226,7 +226,7 @@ AC_PROG_INSTALL
 
 ${INSTALL} -d testdir > /dev/null 2>&1
 if test ! -d testdir; then
-    INSTALL="$srcdir/script/install-sh -c"
+    INSTALL='\$(top_srcdir)/script/install-sh -c'
     AC_SUBST(INSTALL)
 fi
 rm -rf testdir
@@ -509,7 +509,7 @@ AC_SUBST(tabe_data)
 
 LIBS="$OLD_LIBS"
 CPPFLAGS="$CPPFLAGS $x_includes"
-AC_CHECK_LIB(tabe, tabeZhiInfoLookupYin, , 
+AC_CHECK_LIB(tabe, tabeTsiDBOpen, , 
     [ AC_MSG_RESULT([You need libtabe to compile bimsphone module.])
       AC_MSG_RESULT([Please use --with-tabe-lib to configure.])
       exit 1], [ $test_db_lib ])

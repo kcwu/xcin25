@@ -30,10 +30,6 @@
 #include "module.h"
 #include "gen_inp.h"
 
-#ifdef DEBUG
-extern int verbose;
-#endif
-
 /*----------------------------------------------------------------------------
 
         gen_inp_init()
@@ -55,7 +51,7 @@ loadtab(gen_inp_conf_t *cf, FILE *fp, char *encoding)
 	perr(XCINMSG_WARNING, N_("gen_inp: %s: reading error.\n"), cf->tabfn);
 	return False;
     }
-    if (! check_version(GENCIN_VERSION, cf->header.version, 5)) {
+    if (strcmp(GENCIN_VERSION, cf->header.version) > 0) {
 	perr(XCINMSG_WARNING, N_("gen_inp: %s: invalid version.\n"), cf->tabfn);
 	return False;
     }
@@ -143,64 +139,64 @@ setup_kremap(gen_inp_conf_t *cf, char *value)
 }
 
 static void
-gen_inp_resource(gen_inp_conf_t *cf, char *objname)
+gen_inp_resource(gen_inp_conf_t *cf, xcin_rc_t *xrc, char *objname)
 {
     char *cmd[2], value[256];
 
     cmd[0] = objname;
 
     cmd[1] = "INP_CNAME";				/* inp_names */
-    if (get_resource(cmd, value, 256, 2)) {
+    if (get_resource(xrc, cmd, value, 256, 2)) {
 	if (cf->inp_cname)
 	    free(cf->inp_cname);
         cf->inp_cname = (char *)strdup(value);
     }
     cmd[1] = "AUTO_COMPOSE";				/* auto compose */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
         set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_AUTOCOMPOSE, 0);
 
     cmd[1] = "AUTO_UPCHAR";				/* auto_up char */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
         set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_AUTOUPCHAR, 0);
     cmd[1] = "SPACE_AUTOUP";				/* space key auto_up */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_SPACEAUTOUP, 0);
     cmd[1] = "SELKEY_SHIFT";				/* selkey shift */
-    if (get_resource(cmd, value, 256, 2))	
+    if (get_resource(xrc, cmd, value, 256, 2))	
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_SELKEYSHIFT, 0);
 
     cmd[1] = "AUTO_FULLUP";				/* auto full_up */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
         set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_AUTOFULLUP, 0);
     cmd[1] = "SPACE_IGNORE";				/* space ignore */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_SPACEIGNOR, 0);
 
     cmd[1] = "AUTO_RESET";				/* auto reset error */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_AUTORESET, 0);
     cmd[1] = "SPACE_RESET";				/* space reset error */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_SPACERESET, 0);
 
     cmd[1] = "SINMD_IN_LINE1";				/* sinmd in line1 mode*/
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_SINMDLINE1, 0);
     cmd[1] = "WILD_ENABLE";				/* wild key enable */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_WILDON, 0);
     cmd[1] = "BEEP_WRONG";				/* beep mode: wrong */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_BEEPWRONG, 0);
     cmd[1] = "BEEP_DUPCHAR";				/* beep mode: dupchar */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_BEEPDUP, 0);
     cmd[1] = "QPHRASE_MODE";				/* qphrase mode */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	cf->modesc = (ubyte_t)(atoi(value) % 256);
 
     cmd[1] = "DISABLE_SEL_LIST";			/* disable selkey */
-    if (get_resource(cmd, value, 256, 2)) {
+    if (get_resource(xrc, cmd, value, 256, 2)) {
 	if (cf->disable_sel_list)
 	    free(cf->disable_sel_list);
 	if (strcmp(value, "NONE"))
@@ -209,7 +205,7 @@ gen_inp_resource(gen_inp_conf_t *cf, char *objname)
 	    cf->disable_sel_list = NULL;
     }
     cmd[1] = "KEYSTROKE_REMAP";
-    if (get_resource(cmd, value, 256, 2)) {
+    if (get_resource(xrc, cmd, value, 256, 2)) {
 	if (cf->kremap)
 	    free(cf->kremap);
 	if (strcmp(value, "NONE") == 0) {
@@ -221,15 +217,15 @@ gen_inp_resource(gen_inp_conf_t *cf, char *objname)
     }
 
     cmd[1] = "END_KEY";					/* end key enable */
-    if (get_resource(cmd, value, 256, 2))
+    if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_ENDKEY, 0);
 }
 
 static int
-gen_inp_init(void *conf, char *objname, xcin_rc_t *xc)
+gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
 {
     gen_inp_conf_t *cf = (gen_inp_conf_t *)conf, cfd;
-    char *s, value[128], truefn[256];
+    char *s, value[128], truefn[256], sub_path[256];
     objenc_t objenc;
     FILE *fp;
     int ret;
@@ -237,8 +233,8 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xc)
     memset(&cfd, 0, sizeof(gen_inp_conf_t));
     if (get_objenc(objname, &objenc) == -1)
 	return False;
-    gen_inp_resource(&cfd, "gen_inp_default");
-    gen_inp_resource(&cfd, objenc.objloadname);
+    gen_inp_resource(&cfd, xrc, "gen_inp_default");
+    gen_inp_resource(&cfd, xrc, objenc.objloadname);
 /*
  *  Resource setup.
  */
@@ -280,8 +276,11 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xc)
     ccode_info(&(cf->ccinfo));
     if (! (s = strrchr(cf->inp_ename, '.')) || strcmp(s+1, "tab"))
         snprintf(value, 50, "%s.tab", cf->inp_ename);
-    if ((fp = open_data(value, "rb", NULL, truefn, 256, XCINMSG_WARNING))) {
+    snprintf(sub_path, 256, "tab/%s", xrc->locale.encoding);
+    if (check_datafile(value, sub_path, xrc, truefn, 256) == True) {
 	cf->tabfn = (char *)strdup(truefn);
+	if ((fp = open_file(truefn, "rb", XCINMSG_WARNING)) == NULL)
+	    return False;
         ret = loadtab(cf, fp, objenc.encoding);
 	fclose(fp);
     }
@@ -1171,11 +1170,11 @@ static char gen_inp_comments[] = N_(
 	"This module is free software, as part of xcin system.\n");
 
 module_t module_ptr = {
-    "gen_inp",					/* name */
-    MODULE_VERSION,				/* version */
-    gen_inp_comments,				/* comments */
+    { MTYPE_IM,					/* module_type */
+      "gen_inp",				/* name */
+      MODULE_VERSION,				/* version */
+      gen_inp_comments },			/* comments */
     gen_inp_valid_objname,			/* valid_objname */
-    MOD_CINPUT,					/* module_type */
     sizeof(gen_inp_conf_t),			/* conf_size */
     gen_inp_init,				/* init */
     gen_inp_xim_init,				/* xim_init */

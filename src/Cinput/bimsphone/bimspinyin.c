@@ -19,6 +19,10 @@
     xcin@linux.org.tw, or the maintainer Tung-Han Hsieh: thhsieh@linux.org.tw
 */
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <X11/keysym.h>

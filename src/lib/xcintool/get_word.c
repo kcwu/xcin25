@@ -37,19 +37,19 @@ get_word(char **line, char *word, int word_size, char *token)
     char *strend;
 
     if (word_size < 2)
-	return 0;
+	return False;
 
     while (*str && (*str==' ' || *str=='\t' || *str=='\n'))
         ++str;
     if (! (*str)) {
         *line = str;
-        return 0;
+        return False;
     }
     else if (token && (ret = strchr(token, *str))) {
 	*line = str + 1;
 	word[0] = *ret;
 	word[1] = '\0';
-	return 1;
+	return True;
     }
 
     if (quote == *str) {
@@ -82,6 +82,6 @@ get_word(char **line, char *word, int word_size, char *token)
     while (*strend && (*strend==' ' || *strend=='\t' || *strend=='\n')) 
         ++strend;
     *line = strend;
-    return 1;
+    return True;
 }
 

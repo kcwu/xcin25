@@ -3,10 +3,9 @@ top_srcdir = @top_srcdir@
 include $(top_srcdir)/Rules
 
 INC =	$(xcininc) $(intl_inc)
-SRC =	perr.c open_file.c open_data.c copy_file.c check_file_exist.c \
-	check_version.c get_line.c get_word.c set_data.c strcmp_wild.c \
-	xcin_rc.c set_locale.c wchs_to_mbs.c wchs_len.c stable_sort.c \
-	debug.c snprintf.c extract_char.c
+SRC =	check_file.c debug.c get_line.c get_word.c load_module.c open_file.c \
+	perr.c set_data.c set_locale.c stable_sort.c strcmp_wild.c \
+	xcin_malloc.c xcin_rc.c xcin_snprintf.c wchs_to_mbs.c
 
 OBJ =   $(SRC:.c=.lo)
 
