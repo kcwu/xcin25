@@ -304,11 +304,12 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	} 
 	else if (match (XNPreeditState, pre_attr)) {
 	    pre_attr->value = (void *)xcin_malloc(sizeof(XIMPreeditState), 0);
+	    pre_attr->value_length = sizeof(XIMPreeditState);
 	    if ((ic->imc->inp_state & IM_CINPUT) ||
 		(ic->imc->inp_state & IM_2BYTES))
-		*(long*)pre_attr->value = XIMPreeditEnable;
+		*(XIMPreeditState *)pre_attr->value = XIMPreeditEnable;
 	    else
-		*(long*)pre_attr->value = XIMPreeditDisable;
+		*(XIMPreeditState *)pre_attr->value = XIMPreeditDisable;
 	}
 	else if (match (XNLineSpace, pre_attr)) {
             pre_attr->value = (void *)xcin_malloc(sizeof(long), 0);
