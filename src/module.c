@@ -334,8 +334,10 @@ IM_free(int idx)
     if (imp->imodp) {
 	if (imp->imodp->terminate)
 	    imp->imodp->terminate(imp->imodp->conf);
-	unload_module((mod_header_t *)imp->imodp->modp);
-	free(imp->imodp->conf);
+	if (imp->imodp->modp)
+	    unload_module((mod_header_t *)imp->imodp->modp);
+	if (imp->imodp->conf)
+	    free(imp->imodp->conf);
 	free(imp->imodp);
 	imp->imodp = NULL;
     }

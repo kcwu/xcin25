@@ -1124,6 +1124,8 @@ xim_close(IC *ic)
 void
 xim_terminate(void)
 {
-    IMCloseIM(ims);
-    XSync(xccore->gui.display, False);
+    if (ims)
+	IMCloseIM(ims);
+    if (xccore)
+	XSync(xccore->gui.display, False);
 }

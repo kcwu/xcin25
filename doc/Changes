@@ -37,6 +37,10 @@ xcin-2.5.3-pre3:  2001/12
 12. Fix bugs in xcinrc.NetBSD.
     Thanks to Rui-Xiang Guo <rxg@ms25.url.com.tw>.
 
+13. Fix bug in module.c and xim.c: 
+    Check pointers to prevent xcin crash when xcin terminate.
+    Thanks to Geoffrey Lee <snailtalk@linux-mandrake.com>.
+
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
