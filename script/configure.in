@@ -92,7 +92,7 @@ AC_ARG_WITH(iconv_inc,
 
 AC_ARG_WITH(iconv_lib,
     [  --with-iconv-lib=PATH     set the include dir of iconv library.],
-    [  test x$withval != x && with_iconv_inc="-I$withval" ],
+    [  test x$withval != x && with_iconv_lib="-L$withval" ],
     [  with_iconv_lib='' ])
 
 dnl-----------------------------------------------------------------------
@@ -178,7 +178,7 @@ fi
 dnl-----------------------------------------------------------------------
 dnl libtool commands.
 dnl-----------------------------------------------------------------------
-AC_LIBTOOL_DLOPEN
+dnl AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
@@ -301,7 +301,9 @@ if test $found = n; then
 	[ found=y; with_dl_lib=-ldl; AC_DEFINE(HAVE_DLOPEN) ], [ found=n ])
 fi
 
-AC_CHECK_FUNCS(shl_load, [ found=y ], [ found=n ])
+if test $found = n; then
+    AC_CHECK_FUNCS(shl_load, [ found=y ], [ found=n ])
+fi
 if test $found = n; then
     for f in dl dld; do
 	AC_CHECK_LIB($f, shl_load,
