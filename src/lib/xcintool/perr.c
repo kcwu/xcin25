@@ -67,7 +67,7 @@ perr(int msgcode, const char *fmt,...)
 	break;
     }
     va_start(ap, fmt);
-    vfprintf(fout, fmt, ap);
+    vfprintf(fout, _(fmt), ap);
     va_end(ap);
     if (exitcode)
         exit(exitcode);
