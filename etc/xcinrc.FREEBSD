@@ -113,8 +113,8 @@
     (PHRASE		"default.phr")
     (CINPUT		(cj simplex phone bimspinyin bimsphone jyutping
 			 array30 jyutping0 zh_hex))
-    (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-big5-0")
-    (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-16-*-big5-0")))
+    (FONTSET		"-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-big5-0")
+    (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-medium-r-*-16-*-big5-0")))
 ;
 ;  Here are detailed configuration of each IM (for zh_TW.Big5 locale).
 ;
@@ -164,8 +164,8 @@
     (PHRASE		"default.phr")
     (CINPUT		(pinyin shuangpin jtcj_gb wubizixing phonegb2
 			 array30 zh_hex))
-    (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-gb2312.1980-0")
-    (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-16-*-gb2312.1980-0")))
+    (FONTSET		"-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-gb2312.1980-0")
+    (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-medium-r-*-16-*-gb2312.1980-0")))
 ;
 ;  Here are detailed configuration of each IM (for zh_CN.EUC locale).
 ;

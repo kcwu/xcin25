@@ -114,10 +114,12 @@
     (PHRASE		"default.phr")
     (CINPUT		(cj simplex phone bimspinyin bimsphone jyutping
 			 array30 jyutping0 zh_hex))
-    (FONTSET		("-sony-*-24-*-iso8859-1,-*-24-*-hpbig5-"
-			 "-*-24-*-cns11643.1992-1,-*-24-*-cns11643.1992-2"))
-    (OVERSPOT_FONTSET	("-sony-*-16-*-iso8859-1,-*-16-*-hpbig5-"
-			 "-*-16-*-cns11643.1992-1,-*-16-*-cns11643.1992-2"))))
+    (FONTSET		("-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-hpbig5-"
+			 "-*-medium-r-*-24-*-cns11643.1992-1"
+			 "-*-medium-r-*-24-*-cns11643.1992-2"))
+    (OVERSPOT_FONTSET	("-sony-*-16-*-iso8859-1,-*-medium-r-*-16-*-hpbig5-"
+			 "-*-medium-r-*-16-*-cns11643.1992-1"
+			 "-*-medium-r-*-16-*-cns11643.1992-2"))))
 ;
 ;  Here are detailed configuration of each IM (for zh_TW.big5 locale).
 ;
@@ -167,8 +169,8 @@
     (PHRASE		"default.phr")
     (CINPUT		(pinyin shuangpin jtcj_gb wubizixing phonegb2
 			 array30 zh_hex))
-    (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-gb2312.1980-1")
-    (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-16-*-gb2312.1980-1")))
+    (FONTSET		"-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-gb2312.1980-1")
+    (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-medium-r-*-16-*-gb2312.1980-1")))
 ;
 ;  Here are detailed configuration of each IM (for zh_CN.GB2312 locale).
 ;
@@ -207,7 +209,7 @@
     (DEFAULT_IM_SINMD	"DEFAULT")
     (PHRASE		"default.phr")
     (CINPUT             (cj zh_hex))
-    (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-big5hkscs-0")
+    (FONTSET		"-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-big5hkscs-0")
     (OVERSPOT_FONTSET	"NONE")))
 ;
 ;  Here are detailed configuration of each IM (for zh_HK.Big5HKSCS locale).
@@ -257,7 +259,7 @@
     (DEFAULT_IM_SINMD	"DEFAULT")
     (PHRASE		"default.phr")
     (CINPUT		(zh_hex))
-    (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-gbk-0")
+    (FONTSET		"-sony-*-24-*-iso8859-1,-*-medium-r-*-24-*-gbk-0")
     (OVERSPOT_FONTSET	"NONE")))
 
 ;
