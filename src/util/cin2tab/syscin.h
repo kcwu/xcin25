@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 
-#define SYSCIN_VERSION  "20000210"
+#define SYSCIN_VERSION  "20040928"
 
 #define CIN_CNAME_LENGTH	20	/* Chinese name buffer size */
 
