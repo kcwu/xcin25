@@ -69,8 +69,14 @@ find_module(char *path, int path_size, xcin_rc_t *xrc, char *sub_path)
     char fn[BUFLEN], str[BUFLEN], *s, *modname=NULL;
     FILE *fp;
 
-    if (check_datafile(path, sub_path, xrc, fn, BUFLEN) == False)
+    if (check_datafile(path, sub_path, xrc, fn, BUFLEN) == False) {
+	s = strstr(path, ".la");
+	if(s) {
+	    strcpy(s,".so");
+	    return check_datafile(path, sub_path, xrc, path, BUFLEN);
+	}
 	return False;
+    }
 
     fp = open_file(fn, "rt", XCINMSG_IERROR);
     while (get_line(str, BUFLEN, fp, NULL, "#\n") == True) {
