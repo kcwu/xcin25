@@ -151,6 +151,10 @@ phone_resource(phone_conf_t *cf, xcin_rc_t *xrc, char *objname,
     cmd[1] = "AUTO_UPCHAR";
     if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, BIMSPH_MODE_AUTOUPCH, 0);
+
+    cmd[1] = "TSI_GUESS";
+    if (get_resource(xrc, cmd, value, 256, 2))
+	set_data(&(cf->mode), RC_IFLAG, value, BIMSPH_MODE_TSIGUESS, 0);
 }
 
 static void
@@ -307,6 +311,8 @@ phone_init(void *conf, char *objname, xcin_rc_t *xrc)
 	}
 	else
 	    cf->n_selphr = 0;
+	if ((cfd.mode & BIMSPH_MODE_TSIGUESS)) 
+	    cf->mode |= BIMSPH_MODE_TSIGUESS;
 
 	if ((cdp = bimsInit(tsi_fname, yin_fname)) == NULL) {
 	    clean_exit(cf);
@@ -901,6 +907,10 @@ phone_xim_init(void *conf, inpinfo_t *inpinfo)
 	    free(inpinfo->lcch);
 	return False;
     }
+    if ((cf->mode & BIMSPH_MODE_TSIGUESS))
+	bimsToggleTsiGuess(inpinfo->imid);
+    else
+	bimsToggleNoTsiGuess(inpinfo->imid);
 }
 
 static unsigned int
