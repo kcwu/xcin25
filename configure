@@ -8422,7 +8422,8 @@ else
       exit 1
 fi
 
-test_tabe_lib="$test_tabe_lib -lbims -ltabe"
+test_bims_lib="$test_tabe_lib -lbims"
+test_tabe_lib="$test_tabe_lib -ltabe"
 
 with_extra_lib="-L$with_extra_lib -rpath $with_extra_lib"
 
@@ -8437,8 +8438,10 @@ else
     with_db_lib="$test_db_lib -rpath $with_db_lib"
 fi
 if test x$with_tabe_lib = x; then
+    with_bims_lib="$test_bims_lib"
     with_tabe_lib="$test_tabe_lib"
 else
+    with_bims_lib="$test_bims_lib -rpath $with_tabe_lib"
     with_tabe_lib="$test_tabe_lib -rpath $with_tabe_lib"
 fi
 if test x$with_intl_lib = x; then
@@ -8451,6 +8454,7 @@ if test x$with_iconv_lib = x; then
 else
     with_iconv_lib="$test_iconv_lib -rpath $with_iconv_lib"
 fi
+
 
 
 
@@ -8688,6 +8692,7 @@ s%@with_db_inc@%$with_db_inc%g
 s%@with_db_lib@%$with_db_lib%g
 s%@with_tabe_inc@%$with_tabe_inc%g
 s%@with_tabe_lib@%$with_tabe_lib%g
+s%@with_bims_lib@%$with_bims_lib%g
 s%@with_intl_inc@%$with_intl_inc%g
 s%@with_intl_lib@%$with_intl_lib%g
 s%@with_iconv_inc@%$with_iconv_inc%g

@@ -37,6 +37,8 @@
 #define INP_MODE_SINMDLINE1  0x00000200 /* Enable sinmd in line1 mode. */
 #define INP_MODE_SPACERESET  0x00000400 /* Enable space reset error mode. */
 #define INP_MODE_AUTORESET   0x00000800 /* Enable auto reset error mode. */
+#define INP_MODE_HINTSEL     0x00001000 /* Enable hint selection. */
+#define INP_MODE_HINTTSI     0x00002000 /* Enable hint tsi. */
 #define INP_MODE_BEEPWRONG   0x00010000 /* Beap when type a wrong char. */
 #define INP_MODE_BEEPDUP     0x00020000 /* Beap when exists duplet chars. */
 
@@ -66,7 +68,11 @@ typedef struct {
     icode_t *ic2;
     icode_idx_t *icidx;
     ichar_t *ichar;
+
+    struct TsiDB *tsidb;	/* tsi db */
 } gen_inp_conf_t;
+
+#define HINTSZ	100
 
 typedef struct {
     char keystroke[INP_CODE_LENGTH+1];
@@ -74,6 +80,13 @@ typedef struct {
     wch_t *mcch_list;
     int *mkey_list;
     unsigned int n_mcch_list, mcch_hidx, mcch_eidx, n_mkey_list;
+
+    char commithistory[HINTSZ];	/* committed words */
+    int showtsiflag;		/* show tsi flag */
+    int nreltsi;
+    char reltsi[HINTSZ];	/* related tsi */
+    int tsiindex[HINTSZ];	/* index of tsi */
+    ubyte_t tsigroup[HINTSZ];	/* group of tsi */
 } gen_inp_iccf_t;
 
 

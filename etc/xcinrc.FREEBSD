@@ -74,7 +74,10 @@
           (DISABLE_SEL_LIST     "NONE")
 	  (KEYSTROKE_REMAP	"NONE")
           (BEEP_WRONG           YES)
-          (BEEP_DUPCHAR         NO)))
+          (BEEP_DUPCHAR         NO)
+          (TSI_FNAME            "%tabe_data%tsi.db")
+	  (HINT_SELECT		NO)
+	  (HINT_TSI		NO)))
 
 (define bimsphone_default
         '((N_SELECTION_KEY      9)

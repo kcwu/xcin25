@@ -49,6 +49,7 @@ db_inc		= @with_db_inc@
 db_lib		= @with_db_lib@
 tabe_inc	= @with_tabe_inc@
 tabe_lib	= @with_tabe_lib@
+bims_lib	= @with_bims_lib@
 
 #
 # XCIN devel resources.

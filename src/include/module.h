@@ -177,6 +177,7 @@ typedef struct {
 
     wch_t cch_publish;			/* A published cch. */
     char *cch;				/* the string for commit. */
+    char *mcch_hint;			/* mcch selection hint. */
 } inpinfo_t;
 
 typedef struct {

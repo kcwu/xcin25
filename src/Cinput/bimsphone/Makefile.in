@@ -3,7 +3,7 @@ top_srcdir	= @top_srcdir@
 include $(top_srcdir)/Rules
 
 INC     = $(xcininc) $(x_includes) $(tabe_inc) $(db_inc)
-LIB     = $(xcinlib) $(tabe_lib) $(db_lib)
+LIB     = $(xcinlib) $(bims_lib) $(tabe_lib) $(db_lib)
 TARGET  = bimsphone.la
 
 SRC = bimsphone.c bimspinyin.c

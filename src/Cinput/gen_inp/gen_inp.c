@@ -26,6 +26,7 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
+#include <tabe.h>
 #include "xcintool.h"
 #include "module.h"
 #include "gen_inp.h"
@@ -139,7 +140,7 @@ setup_kremap(gen_inp_conf_t *cf, char *value)
 }
 
 static void
-gen_inp_resource(gen_inp_conf_t *cf, xcin_rc_t *xrc, char *objname)
+gen_inp_resource(gen_inp_conf_t *cf, xcin_rc_t *xrc, char *objname, char *ftsi)
 {
     char *cmd[2], value[256];
 
@@ -219,13 +220,23 @@ gen_inp_resource(gen_inp_conf_t *cf, xcin_rc_t *xrc, char *objname)
     cmd[1] = "END_KEY";					/* end key enable */
     if (get_resource(xrc, cmd, value, 256, 2))
 	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_ENDKEY, 0);
+
+    cmd[1] = "HINT_SELECT";
+    if (get_resource(xrc, cmd, value, 256, 2))
+	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_HINTSEL, 0);
+    cmd[1] = "HINT_TSI";
+    if (get_resource(xrc, cmd, value, 256, 2))
+	set_data(&(cf->mode), RC_IFLAG, value, INP_MODE_HINTTSI, 0);
+    cmd[1] = "TSI_FNAME";
+    if (get_resource(xrc, cmd, value, 256, 2))
+	strcpy(ftsi, value);
 }
 
 static int
 gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
 {
     gen_inp_conf_t *cf = (gen_inp_conf_t *)conf, cfd;
-    char *s, value[128], truefn[256], sub_path[256];
+    char *s, value[128], truefn[256], sub_path[256], ftsi[256];
     objenc_t objenc;
     FILE *fp;
     int ret;
@@ -233,8 +244,9 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
     memset(&cfd, 0, sizeof(gen_inp_conf_t));
     if (get_objenc(objname, &objenc) == -1)
 	return False;
-    gen_inp_resource(&cfd, xrc, "gen_inp_default");
-    gen_inp_resource(&cfd, xrc, objenc.objloadname);
+    ftsi[0] = '\0';
+    gen_inp_resource(&cfd, xrc, "gen_inp_default", ftsi);
+    gen_inp_resource(&cfd, xrc, objenc.objloadname, ftsi);
 /*
  *  Resource setup.
  */
@@ -291,7 +303,27 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
 	if ((cfd.mode & INP_MODE_ENDKEY))
 	    cf->mode |= INP_MODE_ENDKEY;
     }
-    return  ret;
+
+    if (cfd.mode & (INP_MODE_HINTSEL | INP_MODE_HINTTSI)) {
+	snprintf(sub_path, 256, "tab/%s", xrc->locale.encoding);
+	if (check_datafile(ftsi, sub_path, xrc, truefn, 256) == True) {
+	    cf->tsidb = tabeTsiDBOpen(DB_TYPE_DB, truefn,
+			DB_FLAG_READONLY|DB_FLAG_SHARED|DB_FLAG_NOUNPACK_YIN);
+	    if (cf->tsidb == NULL)
+		perr(XCINMSG_WARNING,
+		    N_("gen_inp: cannot open tsi db file: %s\n"), ftsi);
+	    else {
+		if (cfd.mode & INP_MODE_HINTSEL)
+		    cf->mode |= INP_MODE_HINTSEL;
+		if (cfd.mode & INP_MODE_HINTTSI)
+		    cf->mode |= INP_MODE_HINTTSI;
+	    }
+	}
+    }
+    else
+	cf->tsidb = NULL;
+
+    return ret;
 }
 
 
@@ -335,7 +367,8 @@ gen_inp_xim_init(void *conf, inpinfo_t *inpinfo)
 	    inpinfo->s_selkey[i+1].s[0] = cf->header.selkey[i];
     }
     inpinfo->n_mcch = 0;
-    inpinfo->mcch = xcin_malloc(inpinfo->n_selkey*sizeof(wch_t), 1);
+    i = (cf->tsidb) ? HINTSZ : inpinfo->n_selkey;
+    inpinfo->mcch = xcin_malloc(i * sizeof(wch_t), 1);
     inpinfo->mcch_grouping = NULL;
     inpinfo->mcch_pgstate = MCCH_ONEPG;
 
@@ -372,7 +405,7 @@ gen_inp_xim_end(void *conf, inpinfo_t *inpinfo)
 
 /*----------------------------------------------------------------------------
 
-        gen_inp_keystroke(), gen_inp_show_keystroke
+	gen_inp_keystroke()
 
 ----------------------------------------------------------------------------*/
 
@@ -1115,6 +1148,225 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
     return IMKEY_IGNORE;
 }
 
+
+/*----------------------------------------------------------------------------
+
+	Selection/Tsi hint, by Kuang-che Wu <kcwu@ck.tp.edu.tw>.
+
+----------------------------------------------------------------------------*/
+
+static void
+record_commit(gen_inp_iccf_t *iccf, char *cmtstr)
+{
+    char *history=iccf->commithistory;
+    int len=strlen(cmtstr);
+
+    if(len > HINTSZ)
+	memcpy(history, cmtstr+len-HINTSZ, HINTSZ);
+    else {
+	memmove(history, history+len, HINTSZ-len);
+	memcpy(history+HINTSZ-len, cmtstr, len);
+    }
+}
+
+#define TSISZ	10
+typedef struct candidate {
+    int matchlen;
+    long int ref;
+    int len;
+    char str[TSISZ*2+1];
+} candidate_t;
+
+static int
+insert_candidate(int ncandi, candidate_t candi[], candidate_t *one, int max)
+{
+    int i;
+
+    for(i=0; i<ncandi; i++) {
+	if(! (one->matchlen < candi[i].matchlen ||
+	      one->ref <= candi[i].ref))
+	    break;
+	else if(candi[i].len == one->len &&
+		memcmp(candi[i].str, one->str, one->len*2) == 0)
+	    return ncandi;
+    }
+    if(i < max) {
+	memmove(candi+i+1, candi+i, sizeof(candi[0])*(max-i-1));
+	memcpy(candi+i, one, sizeof(candidate_t));
+	if(ncandi < max)
+	    ncandi++;
+    }
+    return ncandi;
+}
+
+static int
+may_next(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, wch_t word)
+{
+    struct TsiInfo tsi;
+    char tmp[TSISZ*2+1], tsi_str[1024];
+    char *histend;
+    int match;
+
+    histend = iccf->commithistory+HINTSZ;
+    tsi.tsi = (ZhiStr)tsi_str;
+    for(match=TSISZ-1; match>=1; match--) {	/* Max Tsi len = TSISZ-1 */
+	memcpy(tmp, histend-match*2, match*2);
+	memcpy(tmp+match*2, word.s, 2);
+	tmp[match*2+2] = '\0';
+	strncpy(tsi_str, tmp, 1024);
+
+	if (cf->tsidb->CursorSet(cf->tsidb, &tsi, 1) == 0) {
+	    if (strncmp(tsi_str, tmp, match*2+2) == 0)
+		return True;
+	}
+    }
+    return False;
+}
+
+static int
+guess_next(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf,
+	   candidate_t candi[], int maxcandi)
+{
+    struct TsiInfo tsi;
+    char *histend, tsi_str[1024];
+    int ncandi=0, match, guess, slen, errno;
+    candidate_t one;
+
+    histend = iccf->commithistory+HINTSZ;
+    tsi.tsi = (ZhiStr)tsi_str;
+    for(match=TSISZ-1; match>=1; match--) {	/* Max Tsi len = TSISZ-1 */
+	strncpy(tsi_str, histend-match*2, 1024);
+	if (HINTSZ < match || tsi_str[0]=='\0')
+	    continue;
+
+	for (guess=TSISZ-1-match; guess>=1; guess--) {
+	    if (guess-match > 2)
+		continue;
+
+	    errno = cf->tsidb->CursorSet(cf->tsidb, &tsi, 1);
+	    while (errno == 0) {
+		if (memcmp(tsi_str, histend-match*2, match*2))
+		    break;
+		slen = strlen(tsi_str)/2;
+		if (slen == (match+guess)) {
+		    one.matchlen = match;
+		    one.ref = tsi.refcount;
+		    one.len = slen-match;
+		    strncpy(one.str, tsi_str+match*2, (slen-match)*2);
+		    ncandi = insert_candidate(ncandi, candi, &one, maxcandi);
+		}
+		errno = cf->tsidb->CursorNext(cf->tsidb, &tsi);
+	    }
+	}
+    }
+    return ncandi;
+}
+
+static unsigned int
+gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
+{
+    static char cch_s[HINTSZ], mcch_hint[HINTSZ];
+
+    gen_inp_conf_t *cf = (gen_inp_conf_t *)conf;
+    gen_inp_iccf_t *iccf = (gen_inp_iccf_t *)inpinfo->iccf;
+    KeySym keysym = keyinfo->keysym;
+    char *keystr = keyinfo->keystr;
+    unsigned int ret, i;
+
+    if (! cf->tsidb) 
+	return gen_inp_keystroke(conf,inpinfo,keyinfo);
+
+    if (cf->mode & INP_MODE_HINTTSI) {
+	if(iccf->showtsiflag) {
+	    inpinfo->n_mcch=0;
+	    inpinfo->mcch_grouping=NULL;
+	}
+    }
+    if ((cf->mode & INP_MODE_HINTTSI) &&
+	iccf->showtsiflag &&
+	(keyinfo->keystate & Mod1Mask) &&	/* alt-Num or alt-space */
+	(('1'<=keystr[0] && keystr[0]<='9') || 
+	 ((cf->mode & INP_MODE_SPACEAUTOUP) && keysym == XK_space))) {
+	int choice=-1;
+
+	ret = IMKEY_ABSORB;
+	if (keysym == XK_space)
+	    choice = 1;
+	else if (keystr[0] >= '1' && keystr[0] <= '9')
+	    choice = (int)(keystr[0] - '0');
+	if (cf->mode & INP_MODE_SELKEYSHIFT)
+	    choice ++;
+	if (choice >= 1 && choice <= iccf->nreltsi) {
+	    strncpy(cch_s, iccf->reltsi+iccf->tsiindex[choice-1], 
+		    iccf->tsigroup[choice]*2);
+	    cch_s[iccf->tsigroup[choice]*2] = 0;
+	    inpinfo->cch = cch_s;
+	    ret |= IMKEY_COMMIT;
+	}
+    }
+    else
+	ret = gen_inp_keystroke(conf, inpinfo, keyinfo);
+
+    if (ret & IMKEY_COMMIT)
+	record_commit(iccf, inpinfo->cch);
+
+    if (cf->mode & INP_MODE_HINTTSI) {
+	if (ret != IMKEY_IGNORE)
+	    iccf->showtsiflag = 0;
+	if (ret & IMKEY_COMMIT) {
+	    int ncandi;
+	    candidate_t candi[SELECT_KEY_LENGTH];
+
+	    ncandi = guess_next(cf, iccf, candi, inpinfo->n_selkey);
+	    iccf->nreltsi = 0;
+	    iccf->tsiindex[0] = 0;
+	    for (i=0; i<ncandi; i++) {
+		int n = iccf->nreltsi;
+		memcpy(iccf->reltsi+iccf->tsiindex[n], candi[i].str,
+		       candi[i].len*2);
+		iccf->tsigroup[n+1] = candi[i].len;
+		iccf->tsiindex[n+1] = iccf->tsiindex[n] + candi[i].len*2;
+		iccf->nreltsi ++;
+	    }
+	    iccf->showtsiflag = 1;
+	}
+	if (iccf->showtsiflag) {
+	    inpinfo->n_mcch = iccf->tsiindex[iccf->nreltsi];
+	    inpinfo->mcch_grouping    = iccf->tsigroup;
+	    inpinfo->mcch_grouping[0] = iccf->nreltsi;
+
+	    for (i=0; i<inpinfo->n_mcch; i++) {
+		inpinfo->mcch[i].s[0] = iccf->reltsi[i*2];
+		inpinfo->mcch[i].s[1] = iccf->reltsi[i*2+1];
+	    }
+	}
+    }
+
+    if (cf->mode & INP_MODE_HINTSEL) {
+/*	if (ret==IMKEY_ABSORB && (inpinfo->guimode & GUIMOD_SELKEYSPOT)) { */
+	if ((inpinfo->guimode & GUIMOD_SELKEYSPOT)) {
+	    inpinfo->mcch_hint = mcch_hint;
+	    for (i=0; i<inpinfo->n_mcch; i++) {
+		if (may_next(cf, iccf, inpinfo->mcch[i]))
+		    inpinfo->mcch_hint[i] = 1;
+		else
+		    inpinfo->mcch_hint[i] = 0;
+	    }
+	}
+	else
+	    inpinfo->mcch_hint = NULL;
+    }
+    return ret;
+}
+
+
+
+/*----------------------------------------------------------------------------
+
+	gen_inp_show_keystroke()
+
+----------------------------------------------------------------------------*/
+
 static int 
 gen_inp_show_keystroke(void *conf, simdinfo_t *simdinfo)
 {
@@ -1180,7 +1432,7 @@ module_t module_ptr = {
     gen_inp_init,				/* init */
     gen_inp_xim_init,				/* xim_init */
     gen_inp_xim_end,				/* xim_end */
-    gen_inp_keystroke,				/* keystroke */
+    gen_inp_keystroke_wrap,			/* keystroke */
     gen_inp_show_keystroke,			/* show_keystroke */
     NULL					/* terminate */
 };

@@ -140,7 +140,7 @@ static int
 overspot_draw_multich(gui_t *gui, winlist_t *win, 
 		      int x, int y, inpinfo_t *inpinfo)
 {
-    int i, j, n_groups, n, len=0, toggle_flag, spot_GC_idx;
+    int i, j, n_groups, n, x2, len=0, toggle_flag, spot_GC_idx;
     wch_t *selkey, *cch;
     char *pgstate;
 
@@ -180,9 +180,14 @@ overspot_draw_multich(gui_t *gui, winlist_t *win,
 		toggle_flag = -1;
 		break;
 	    }
+	    x2 = x + XmbTextEscapement(win->font->fontset, (char *)cch->s, len);
+	    if (inpinfo->mcch_hint &&
+		inpinfo->mcch_hint[(int)(cch-inpinfo->mcch)])
+        	XDrawLine(gui->display, win->window, win->wingc[GCLINE_idx],
+        			x, y+2, x2, y+2);
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[GC_idx], x, y, (char *)cch->s, len);
-	    x += XmbTextEscapement(win->font->fontset, (char *)cch->s, len);
+	    x = x2;
         }
 	x += FIELD_STEP;
     }
@@ -428,6 +433,7 @@ draw_inpname(gui_t *gui, winlist_t *win, int x, int y, IM_Context_t *imc)
 	    extract_char(imc->inpinfo.inp_cname, buf, sizeof(buf));
 */
 	    strncpy(buf, imc->inpinfo.inp_cname, 2);
+	    buf[2] = '\0';
 	    inpn = buf;
 	}
     }

@@ -523,7 +523,8 @@ AC_CHECK_LIB(bims, bimsInit, ,
     [ AC_MSG_RESULT([You need libbims to compile bimsphone module.])
       AC_MSG_RESULT([Please use --with-tabelib to configure.])
       exit 1], [ -ltabe $test_db_lib ])
-test_tabe_lib="$test_tabe_lib -lbims -ltabe"
+test_bims_lib="$test_tabe_lib -lbims"
+test_tabe_lib="$test_tabe_lib -ltabe"
 
 dnl-----------------------------------------------------------------------
 dnl Set proper paths of libraries.
@@ -541,8 +542,10 @@ else
     with_db_lib="$test_db_lib -rpath $with_db_lib"
 fi
 if test x$with_tabe_lib = x; then
+    with_bims_lib="$test_bims_lib"
     with_tabe_lib="$test_tabe_lib"
 else
+    with_bims_lib="$test_bims_lib -rpath $with_tabe_lib"
     with_tabe_lib="$test_tabe_lib -rpath $with_tabe_lib"
 fi
 if test x$with_intl_lib = x; then
@@ -564,6 +567,7 @@ AC_SUBST(with_db_inc)
 AC_SUBST(with_db_lib)
 AC_SUBST(with_tabe_inc)
 AC_SUBST(with_tabe_lib)
+AC_SUBST(with_bims_lib)
 AC_SUBST(with_intl_inc)
 AC_SUBST(with_intl_lib)
 AC_SUBST(with_iconv_inc)
