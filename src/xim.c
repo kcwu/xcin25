@@ -411,10 +411,10 @@ xim_close_handler(XIMS ims, IMCloseStruct *call_data)
 {
     DebugLog(2, ("XIM_CLOSE\n"));
 
-    if ((xccore->xcin_mode & XCIN_RUN_EXIT))
-	return True;
-    ic_clean_all(call_data->connect_id, xccore);
-    xccore->gui.winchange |= WIN_CHANGE_IM;
+    if (! (xccore->xcin_mode & XCIN_RUN_EXIT)) {
+	ic_clean_all(call_data->connect_id, xccore);
+	xccore->gui.winchange |= WIN_CHANGE_IM;
+    }
     return True;
 }
 
@@ -437,9 +437,9 @@ xim_destroy_ic_handler(XIMS ims, IMDestroyICStruct *call_data, int *icid)
     *icid = call_data->icid;
     DebugLog(2, ("XIM_DESTORY_IC: icid=%d\n", *icid));
 
-    if ((xccore->xcin_mode & XCIN_RUN_EXIT))
-	return True;
-    return ic_destroy(*icid, xccore);
+    if (! (xccore->xcin_mode & XCIN_RUN_EXIT))
+	ic_destroy(*icid, xccore);
+    return True;
 }
 
 static int 
