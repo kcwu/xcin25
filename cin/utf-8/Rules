@@ -22,8 +22,7 @@ utf-8 =		sys.tab \
 		$(copy_big5:S/.cin$/.tab/) \
 		cj5.tab \
 		phone.tab \
-		simplex5.tab \
-		wubizixing.tab
+		simplex5.tab
 
 include Makefile
 
