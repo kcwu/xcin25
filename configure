@@ -3416,10 +3416,10 @@ fi
 done
 
 
-OLD_CPP=$CPP
+OLD_CPPFLAGS=$CPPFLAGS
 OLD_LDFLAGS=$LDFLAGS
 OLD_LIBS=$LIBS
-CPP="$OLD_CPP $incs"
+CPPFLAGS="$OLD_CPPFLAGS $incs"
 LDFLAGS="$OLD_LDFLAGS $libs"
 
 LIBS="$OLD_LIBS"
@@ -4557,7 +4557,7 @@ fi
 
 
 LIBS="$OLD_LIBS"
-CPP="$CPP $x_includes"
+CPPFLAGS="$CPPFLAGS $x_includes"
 echo $ac_n "checking for tabeZhiInfoLookupYin in -ltabe""... $ac_c" 1>&6
 echo "configure:4563: checking for tabeZhiInfoLookupYin in -ltabe" >&5
 ac_lib_var=`echo tabe'_'tabeZhiInfoLookupYin | sed 'y%./+-%__p_%'`
@@ -4762,7 +4762,7 @@ EOF
 esac
 
 
-CPP=$OLD_CPP
+CPPFLAGS=$OLD_CPPFLAGS
 LIBS=$OLD_LIBS
 
 eval xcin_rcp=$with_xcin_rcdir

@@ -273,10 +273,10 @@ dnl	gethostname \
 dnl-----------------------------------------------------------------------
 dnl Set include and library paths.
 dnl-----------------------------------------------------------------------
-OLD_CPP=$CPP
+OLD_CPPFLAGS=$CPPFLAGS
 OLD_LDFLAGS=$LDFLAGS
 OLD_LIBS=$LIBS
-CPP="$OLD_CPP $incs"
+CPPFLAGS="$OLD_CPPFLAGS $incs"
 LDFLAGS="$OLD_LDFLAGS $libs"
 
 dnl-----------------------------------------------------------------------
@@ -485,7 +485,7 @@ fi
 AC_SUBST(tabe_data)
 
 LIBS="$OLD_LIBS"
-CPP="$CPP $x_includes"
+CPPFLAGS="$CPPFLAGS $x_includes"
 AC_CHECK_LIB(tabe, tabeZhiInfoLookupYin, , 
     [ AC_MSG_RESULT([You need libtabe to compile bimsphone module.])
       AC_MSG_RESULT([Please use --with-tabe-lib to configure.])
@@ -547,7 +547,7 @@ AC_SUBST(os_type)
 dnl-----------------------------------------------------------------------
 dnl Output Makefiles and config.h
 dnl-----------------------------------------------------------------------
-CPP=$OLD_CPP
+CPPFLAGS=$OLD_CPPFLAGS
 LIBS=$OLD_LIBS
 
 eval xcin_rcp=$with_xcin_rcdir
