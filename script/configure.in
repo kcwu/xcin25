@@ -649,6 +649,7 @@ AC_CONFIG_FILES([Makefile:script/Makefile.in \
 	cin/Makefile \
 	cin/big5/Makefile \
 	cin/gb/Makefile \
+	cin/utf-8/Makefile \
 	etc/Makefile \
 	po/Makefile \
 	doc/man/Makefile])

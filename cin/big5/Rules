@@ -32,33 +32,11 @@ big5hkscs =	sys.tab.$(BIG5HKENC) \
 		tcj.tab.$(BIG5HKENC) \
 		wm2.tab.$(BIG5HKENC)
 
-utf-8 = 	sys.tab.$(UTF8ENC) \
-		array30.tab.$(UTF8ENC) \
-		cj.tab.$(UTF8ENC) \
-		cj5.tab.$(UTF8ENC) \
-		ez.tab.$(UTF8ENC) \
-		phone.tab.$(UTF8ENC) \
-		pinyin.tab.$(UTF8ENC) \
-		pinyin0.tab.$(UTF8ENC) \
-		simplex.tab.$(UTF8ENC) \
-		simplex5.tab.$(UTF8ENC) \
-		jyutping.tab.$(UTF8ENC) \
-		jyutping0.tab.$(UTF8ENC) \
-		telecode.tab.$(UTF8ENC) \
-		bims_pinyin.tab.$(UTF8ENC) \
-		4corner.tab.$(UTF8ENC) \
-		daibuun.tab.$(UTF8ENC) \
-		hakka.tab.$(UTF8ENC) \
-		tcj.tab.$(UTF8ENC) \
-		wm2.tab.$(UTF8ENC) \
-		default.phr.$(UTF8ENC)
 include Makefile
 
 make-big5: $(big5) 
 
 make-big5hkscs: $(big5hkscs)
-
-make-utf8: $(utf-8)
 
 sys.tab.$(BIG5ENC): sys.cin.big5
 	$(build) -r $(xcinrc) -l $(BIG5ENC) -o $@ sys.cin.big5
@@ -156,69 +134,6 @@ wm2.tab.$(BIG5HKENC): wm2.cin sys.tab.$(BIG5HKENC)
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
 		-s sys.tab.$(BIG5HKENC) -o $@ wm2.cin
 
-sys.tab.$(UTF8ENC): sys.cin.utf-8
-	$(build) -r $(xcinrc) -l $(UTF8ENC) -o $@ sys.cin.utf-8
-	for f in *.cin ; do \
-	    iconv -c -f BIG5HKSCS -t UTF-8 $$f > $$f.$(UTF8ENC) || true;\
-	done
-	cp -f bims_pinyin.cin bims_pinyin.cin.utf-8
-array30.tab.$(UTF8ENC): array30.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ array30.cin.$(UTF8ENC)
-cj.tab.$(UTF8ENC): cj.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ cj.cin.$(UTF8ENC)
-cj5.tab.$(UTF8ENC): cj5.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ cj5.cin.$(UTF8ENC)
-ez.tab.$(UTF8ENC): ez.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ ez.cin.$(UTF8ENC)
-phone.tab.$(UTF8ENC): phone.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ phone.cin.$(UTF8ENC)
-pinyin.tab.$(UTF8ENC): pinyin.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ pinyin.cin.$(UTF8ENC)
-pinyin0.tab.$(UTF8ENC): pinyin0.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ pinyin0.cin.$(UTF8ENC)
-simplex.tab.$(UTF8ENC): simplex.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ simplex.cin.$(UTF8ENC)
-simplex5.tab.$(UTF8ENC): simplex5.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ simplex5.cin.$(UTF8ENC)
-jyutping.tab.$(UTF8ENC): jyutping.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ jyutping.cin.$(UTF8ENC)
-jyutping0.tab.$(UTF8ENC): jyutping0.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ jyutping0.cin.$(UTF8ENC)
-telecode.tab.$(UTF8ENC): telecode.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ telecode.cin.$(UTF8ENC)
-4corner.tab.$(UTF8ENC): 4corner.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ 4corner.cin.$(UTF8ENC)
-daibuun.tab.$(UTF8ENC): daibuun.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ daibuun.cin.$(UTF8ENC)
-hakka.tab.$(UTF8ENC): hakka.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ hakka.cin.$(UTF8ENC)
-tcj.tab.$(UTF8ENC): tcj.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ tcj.cin.$(UTF8ENC)
-wm2.tab.$(UTF8ENC): wm2.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ wm2.cin.$(UTF8ENC)
-bims_pinyin.tab.$(UTF8ENC): bims_pinyin.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
-	$(build) -r $(xcinrc) -l $(UTF8ENC) \
-		-s sys.tab.$(UTF8ENC) -o $@ bims_pinyin.cin.$(UTF8ENC)
-default.phr.$(UTF8ENC): default.phr
-	iconv -f big5 -t utf-8 default.phr > default.phr.$(UTF8ENC)
-
 install_big5:
 	if [ ! -d $(xcin_datap)/$(BIG5ENC) ]; then \
 	  $(INSTALL) -d $(xcin_datap)/$(BIG5ENC); fi
@@ -232,10 +147,3 @@ install_big5hkscs:
 	for f in $(big5hkscs) default.phr; do \
 	  ff=`basename $$f .$(BIG5HKENC)`; \
 	  $(INSTALL_DATA) $$f $(xcin_datap)/$(BIG5HKENC)/$$ff; done
-
-install_utf8:
-	if [ ! -d $(xcin_datap)/$(UTF8ENC) ]; then \
-	  $(INSTALL) -d $(xcin_datap)/$(UTF8ENC); fi
-	for f in $(utf-8) ; do \
-	  ff=`basename $$f .$(UTF8ENC)`; \
-	  $(INSTALL_DATA) $$f $(xcin_datap)/$(UTF8ENC)/$$ff; done

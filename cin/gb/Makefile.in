@@ -9,60 +9,60 @@ build = $(top_srcdir)/libtool --mode=execute $(cin2tab)
 all: all-$(OS_TYPE)
 
 all-LINUX:
-	( GB2312ENC=gb2312 GBKENC=gbk make -f Rules make-gb2312 make-gbk )
+	( GB2312ENC=gb2312 GBKENC=gbk $(MAKE) -f Rules make-gb2312 make-gbk )
 
 all-FREEBSD:
-	( GB2312ENC=euccn make -f Rules make-gb2312 )
+	( GB2312ENC=euccn $(MAKE) -f Rules make-gb2312 )
 
 all-OPENBSD:
-	( GB2312ENC=euc make -f Rules make-gb2312 )
+	( GB2312ENC=euc $(MAKE) -f Rules make-gb2312 )
 
 all-NETBSD:
-	( GB2312ENC=euccn make -f Rules make-gb2312 )
+	( GB2312ENC=euccn $(MAKE) -f Rules make-gb2312 )
 
 all-HPUX:
-	( GB2312ENC=hp15cn make -f Rules make-gb2312 )
+	( GB2312ENC=hp15cn $(MAKE) -f Rules make-gb2312 )
 
 all-SOLARIS:
-	( GB2312ENC=euc make -f Rules make-gb2312 )
+	( GB2312ENC=euc $(MAKE) -f Rules make-gb2312 )
 
 all-DARWIN:
-	( GB2312ENC=euccn make -f Rules make-gb2312 )
+	( GB2312ENC=euccn $(MAKE) -f Rules make-gb2312 )
 
 all-CYGWIN:
-	( GB2312ENC=gb2312 GBKENC=gbk make -f Rules make-gb2312 make-gbk )
+	( GB2312ENC=gb2312 GBKENC=gbk $(MAKE) -f Rules make-gb2312 make-gbk )
 
 all-UNKNOWN:
-	( GB2312ENC=euccn make -f Rules make-gb2312 )
+	( GB2312ENC=euccn $(MAKE) -f Rules make-gb2312 )
 
 install: all install-$(OS_TYPE)
 
 install-LINUX:
-	( GB2312ENC=gb2312 GBKENC=gbk make -f Rules install_gb2312 install_gbk )
+	( GB2312ENC=gb2312 GBKENC=gbk $(MAKE) -f Rules install_gb2312 install_gbk )
 
 install-FREEBSD:
-	( GB2312ENC=euccn make -f Rules install_gb2312 )
+	( GB2312ENC=euccn $(MAKE) -f Rules install_gb2312 )
 
 install-OPENBSD:
-	( GB2312ENC=euc make -f Rules install_gb2312 )
+	( GB2312ENC=euc $(MAKE) -f Rules install_gb2312 )
 
 install-NETBSD:
-	( GB2312ENC=euccn make -f Rules install_gb2312 )
+	( GB2312ENC=euccn $(MAKE) -f Rules install_gb2312 )
 
 install-HPUX:
-	( GB2312ENC=hp15cn make -f Rules install_gb2312 )
+	( GB2312ENC=hp15cn $(MAKE) -f Rules install_gb2312 )
 
 install-SOLARIS:
-	( GB2312ENC=euc make -f Rules install_gb2312 )
+	( GB2312ENC=euc $(MAKE) -f Rules install_gb2312 )
 
 install-DARWIN:
-	( GB2312ENC=euccn make -f Rules install_gb2312 )
+	( GB2312ENC=euccn $(MAKE) -f Rules install_gb2312 )
 
 install-CYGWIN:
-	( GB2312ENC=gb2312 GBKENC=gbk make -f Rules install_gb2312 install_gbk )
+	( GB2312ENC=gb2312 GBKENC=gbk $(MAKE) -f Rules install_gb2312 install_gbk )
 
 install-UNKNOWN:
-	( GB2312ENC=euccn make -f Rules install_gb2312 )
+	( GB2312ENC=euccn $(MAKE) -f Rules install_gb2312 )
 
 clean:
 	rm -f *.tab* core

@@ -1,0 +1,50 @@
+.SUFFIXES: .cin .tab
+
+from_big5=	array30.cin \
+		cj.cin \
+		ez.cin \
+		pinyin.cin \
+		pinyin0.cin \
+		simplex.cin \
+		jyutping.cin \
+		jyutping0.cin \
+		telecode.cin \
+		4corner.cin \
+		daibuun.cin \
+		hakka.cin \
+		tcj.cin \
+		wm2.cin \
+		default.phr
+copy_big5=	bims_pinyin.cin
+
+utf-8 =		sys.tab \
+		$(from_big5:S/.cin$/.tab/) \
+		$(copy_big5:S/.cin$/.tab/) \
+		cj5.tab \
+		phone.tab \
+		simplex5.tab \
+		wubizixing.tab
+
+include Makefile
+
+make-utf8: $(utf-8)
+
+
+sys.tab: sys.cin 
+	$(build) -r $(xcinrc) -l $(UTF8ENC) -o $@ sys.cin
+.cin.tab: # sys.tab
+	$(build) -r $(xcinrc) -l $(UTF8ENC) -s sys.tab -o $@ $<
+
+$(copy_big5): ../big5/$@
+	cp ../big5/$@ .
+$(from_big5): ../big5/$@
+	iconv -c -f BIG5HKSCS -t UTF-8 ../big5/$@ > $@ || true
+
+install_utf8:
+	if [ ! -d $(xcin_datap)/$(UTF8ENC) ]; then \
+	  $(INSTALL) -d $(xcin_datap)/$(UTF8ENC); fi
+	for f in $(utf-8) ; do \
+	  $(INSTALL_DATA) $$f $(xcin_datap)/$(UTF8ENC)/$$f; done
+
+clean-all:
+	rm -f $(utf-8) $(from_big5) $(copy_big5)

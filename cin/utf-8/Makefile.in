@@ -1,0 +1,60 @@
+srcdir      = @srcdir@
+top_srcdir  = @top_srcdir@
+include $(top_srcdir)/Rules
+
+build = $(top_srcdir)/libtool --mode=execute $(cin2tab)
+
+.PHONY: install clean distclean
+
+all: all-$(OS_TYPE)
+
+all-LINUX:
+	( UTF8ENC=utf-8 $(MAKE) -f Rules make-utf8 )
+
+all-FREEBSD:
+	( UTF8ENC=utf-8 $(MAKE) -f Rules make-utf8 )
+
+all-OPENBSD:
+
+all-NETBSD:
+
+all-HPUX:
+
+all-SOLARIS:
+
+all-DARWIN:
+
+all-CYGWIN:
+	( UTF8ENC=utf-8 $(MAKE) -f Rules make-utf8 )
+
+all-UNKNOWN:
+
+
+install: all install-$(OS_TYPE)
+
+install-LINUX:
+	( UTF8ENC=utf-8 $(MAKE) -f Rules install_utf8 )
+
+install-FREEBSD:
+	( UTF8ENC=utf-8 $(MAKE) -f Rules install_utf8 )
+
+install-OPENBSD:
+
+install-NETBSD:
+
+install-HPUX:
+
+install-SOLARIS:
+
+install-DARWIN:
+
+install-CYGWIN:
+	( UTF8ENC=utf-8 $(MAKE) -f Rules install_utf8 )
+
+install-UNKNOWN:
+
+clean:
+	rm -f *.tab* core
+	$(MAKE) -f Rules clean-all
+distclean: clean
+	rm -f Makefile

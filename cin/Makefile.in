@@ -1,6 +1,6 @@
 @SET_MAKE@
 
-SUBSYS = big5 gb
+SUBSYS = big5 gb utf-8
 
 all: subdirs
 

@@ -8,7 +8,7 @@ INPN_ENGLISH		英數
 INPN_SBYTE		半形
 INPN_2BYTES		全形
 
-ASCII_space		0xa140
+ASCII_space		0xe38080
 ASCII_exclam		！
 ASCII_quotedbl		”
 ASCII_numbersign	＃

@@ -26975,7 +26975,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-                                                                                                                                                                                                                            ac_config_files="$ac_config_files Makefile:script/Makefile.in Rules:script/Rules.in src/Makefile src/lib/Makefile src/lib/xcintool/Makefile src/lib/charset/Makefile src/lib/siod/Makefile src/lib/IMdkit/Makefile src/Cinput/Makefile src/Cinput/im_comm/Makefile src/Cinput/zh_hex/Makefile src/Cinput/gen_inp/Makefile src/Cinput/bimsphone/Makefile src/util/Makefile src/util/cin2tab/Makefile src/util/testprog/Makefile cin/Makefile cin/big5/Makefile cin/gb/Makefile etc/Makefile po/Makefile doc/man/Makefile"
+                                                                                                                                                                                                                            ac_config_files="$ac_config_files Makefile:script/Makefile.in Rules:script/Rules.in src/Makefile src/lib/Makefile src/lib/xcintool/Makefile src/lib/charset/Makefile src/lib/siod/Makefile src/lib/IMdkit/Makefile src/Cinput/Makefile src/Cinput/im_comm/Makefile src/Cinput/zh_hex/Makefile src/Cinput/gen_inp/Makefile src/Cinput/bimsphone/Makefile src/util/Makefile src/util/cin2tab/Makefile src/util/testprog/Makefile cin/Makefile cin/big5/Makefile cin/gb/Makefile cin/utf-8/Makefile etc/Makefile po/Makefile doc/man/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure

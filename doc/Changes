@@ -104,6 +104,11 @@ xcin-2.5.3-pre3:  2004/09/21
 
 36. Fix cin2tab i18n message display
 
+37. Correct the char code of full width space in sys.cin.utf-8
+
+38. Merge kMandarin field of Unicode 4.0.1 Unihan.txt into utf-8/phone.cin
+
+
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
 1. Fix memory leakage problem in IMdkit: i18nIc.c.
