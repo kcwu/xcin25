@@ -1,0 +1,18 @@
+srcdir      = @srcdir@
+top_srcdir  = @top_srcdir@
+include $(top_srcdir)/Rules
+
+MANPAGE1 = xcin.1
+
+all:
+
+.PHONY: clean distclean install pot
+
+install:
+	if [ ! -d $(xcin_manp) ]; then $(INSTALL) -d $(xcin_manp); fi
+	if [ ! -d $(xcin_manp)/man1 ]; then $(INSTALL) -d $(xcin_manp)/man1; fi
+	for f in $(MANPAGE1); do \
+	    $(INSTALL_DATA) $$f $(xcin_manp)/man1; done
+
+distclean:
+	rm -f Makefile

@@ -1,0 +1,244 @@
+.TH xcin 1 "Oct 26 2001" 
+.SH NAME
+xcin \- X window Chinese INput XIM server
+.SH SYNOPSIS
+.B xcin [ \-d DISPLAY ] 
+.B [ \-h ] 
+.B [ \-m ] 
+.B [ \-r rcfile ] 
+.B [ \-x XIM_name ] 
+.fB
+
+.SH DESCRIPTION
+XCIN is a XIM (X Input Method) server which is widely used in Taiwan to perform
+Chinese input under X Window system. It is originally developed by Edward Der-Hua Liu (Oct. 1994)
+and many other programmers in early days; while now it is supported by the XCIN Project.
+
+New XCIN design follows the Xi18N standard and locale mechanism. You should have locale
+supported in your system C library and installed before you run xcin.
+You also need the libtabe, a input method table, and Berkeley DB2 library to run xcin.
+XCIN allows you to input the Chinese characters to a X client which supports XIM
+mechanism too.
+
+Currently, XCIN project supports big5(used in Taiwan), big5hkscs(used in Hong Kong) 
+and gb2312(used in China) character set/encodings. The input method currently support
+
+big5 character set:
+cj simplex phone bimspinyin bimsphone jyutping 
+array30 jyutping0 zh_hex
+
+big5hkscs character set:
+cj zh_hex
+
+gb2312 character set:
+pinyin shuangpin jtcj_gb wubizixing phonegb2
+array30 zh_hex
+
+XCIN has been tested and supported in the following platform with different encoding name:
+
+GNU/Linux
+                $(BIG5):        big5
+                $(BIG5HKSCS):   big5hkscs
+                $(GB2312):      gb2312
+                $(GBK):         gbk
+
+FreeBSD
+                $(BIG5):        big5
+                $(GB2312):      euc
+
+HP-UX 
+                $(BIG5):        big5
+                $(BIG5HKSCS):   hkbig5
+                $(GB2312):      hp15cn
+
+.SH OPTIONS
+[ \-d ] : set X Display.
+
+[ \-h ] : print help message.
+
+[ \-m ] : print the comment of module "mod_name".
+
+[ \-r ] : set user specified rcfile.
+
+[ \-v ] : print the version of xcin.
+
+[ \-x ] : register XIM server name to Xlib.
+
+.SH FILES
+XCIN search the configuration file, the rcfile, in the following order.
+
+.TP
+$HOME/.xcin/xcinrc  
+This is a lisp file in user's home directory.
+.TP
+$HOME/.xcinrc       
+This is another lisp file in user's home directory.
+.TP
+$PREFIX/etc/xcinrc  
+This is a system wide configuration file.
+
+Note that the /etc/xcinrc or /usr/local/etc/xcinrc is set up by
+configure script when you compile the xcin with default prefix directory.
+
+.SH RCFILE
+The rcfile is a lisp program file. The main program global setting are:
+.TP
+XCIN_DEFAULT_DIR:
+XCIN default data directory, which will contain the IM tables, IM
+.BR 
+modules, and other data files.
+
+.TP
+XCIN_USER_DIR:
+User specified data directory. If it is not a relative path, then
+.BR
+it will start with the user's $HOME directory.
+
+.TP
+INDEX_FONT:
+The font used to display the English IM name (in the right-bottom
+.BR
+corner of the xcin main window).
+
+.TP
+FG_COLOR:
+The foreground color of xcin windows.
+
+.TP
+BG_COLOR:
+The background color of xcin windows.
+
+.TP
+M_FG_COLOR:
+The specially displayed foreground color (e.g., the preedit area,
+.BR
+mutiple characters for selection).
+
+.TP
+M_BG_COLOR:
+The specially displayed background color (e.g., the preedit area,
+.BR 
+mutiple characters for selection).
+
+.TP
+ULINE_COLOR:
+The color of phrases marking underline of xcin windows.
+
+.TP
+GRID_COLOR:
+The grid color of xcin windows.
+
+.TP
+X_GEOMETRY:
+The size and position of xcin main window.
+
+.TP
+START_MAINWIN2:
+Open the xcin 2nd main window or not? Because in the OverTheSpot
+.BR
+input_style, all the preedit information are moved into the 
+.BR
+OverTheSpot window (the small window appeared near the cursor of
+.BR
+the XIM client), so the original xcin main window seems to be too
+.BR
+large and waste a lot of space of the disktop. Therefore, if the
+.BR
+xcin 2nd main window is opened, then in the English input mode or
+.BR
+the OverTheSpot input_style, xcin will use the smaller 2nd main
+.BR
+window to display necessary information. But when the Root input_style
+.BR
+is enabled, the xcin will automatically switch to the original main
+.BR
+windown.
+
+.TP
+MAINWIN2_GEOMETRY:
+The size and position of xcin 2nd main window.
+
+.TP
+XCIN_HIDE:
+Hide xcin window when English input mode or not?
+
+.TP
+XKILL_DISABLE:
+Disable the facility such that the Window Manager can terminate xcin
+.BR 
+through WM protocol or not?
+
+.TP
+ICCHECK_DISABLE:
+Disable the IC checking facility or not? This facility can check the
+.BR 
+ICs and windows of all the XIM clients periodically.
+
+.TP
+SINGLE_IM_CONTEXT:
+Let all the XIM clients to share the same IM data structer or not.
+.BR 
+The default is NO, i.e., the IM data structer of each XIM client
+.BR 
+are distinct, so the IM status of each XIM client is independent.
+.BR 
+If set this option to YES, then all the XIM clients will have the
+.BR 
+same IM status.
+
+.TP
+IM_FOCUS_ON:
+Start the IM focus facility when running xcin. See the following for
+.BR 
+details.
+
+.TP
+KEEP_POSITION_ON:
+Keep the position of the xcin window or not? If this option is opened,
+.BR 
+then xcin window will automatically appeared on the disktop when we
+.BR 
+switch between the virtual disktops. Also when we move the xcin 
+
+.SH ENVIRONMENT VARIABLES 
+.TP
+XCIN_RCFILE     
+set the file name of "rcfile".
+
+.TP
+LC_CTYPE        
+set the character handling locale, default is "zh_TW.Big5".
+.BR
+This is depends on what kind of C library you are using.
+.BR
+Please refer to the command "locale -a".
+
+.TP
+LC_MESSAGES     
+set the message output locale, default is "C" or "POSIX".
+.BR
+This is depends on what kind of C library you are using.
+.BR
+Please refer to the command "locale -a".
+
+.TP
+XMODIFIERS	
+A usual locale name contains a definite format as following:
+for example: 
+under bash: XMODIFIERS="@im=<name>"; export XMODIFIERS
+
+.SH SEE ALSO
+locale(1) locale(5) locale(7), localedef(1) setlocale(3)
+
+cin2tab(1)
+
+.SH COPYRIGHT
+XCIN is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+.SH ACKNOWLEDGE
+XCIN Team.<mailing-list: xcin@linux.org.tw>
+          <www:          http://xcin.linux.org.tw>
+          <ftp:          ftp://xcin.linux.org.tw/pub/xcin>
