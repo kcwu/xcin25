@@ -327,7 +327,8 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
 	cf->tsidb = NULL;
 #else
     if (cfd.mode & (INP_MODE_HINTSEL | INP_MODE_HINTTSI)) {
-        printf("xcin complied without libtabe, HINTTSI & HINTSEL disabled.\n");
+        perr(XCINMSG_WARNING,
+	    N_("gen_inp: xcin complied without libtabe, HINTTSI & HINTSEL disabled.\n"));
     }
 #endif
 
