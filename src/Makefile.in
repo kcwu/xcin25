@@ -38,7 +38,7 @@ depend:
 	$(Dep_Rule) | $(PERL) $(makedep) $(rules) CC_Rule o > .depend
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} depend ); done
 
-install: install_path install_subsys install_xcin
+install: install_path install_subsys install_xcin install_header
 
 install_path:
 	if [ ! -d "$(xcin_binp)" ];  then $(INSTALL) -d $(xcin_binp);  fi
@@ -54,7 +54,7 @@ install_subsys:
 
 install_header:
 	if [ ! -d "$(xcin_incp)" ]; then $(INSTALL) -d $(xcin_incp); fi
-	@for f in IC.h constant.h fkey.h gui.h imodule.h module.h xcin.h xcintool.h; do ( $(LIBTOOL) --mode=install $(INSTALL_DATA) include/$$f $(xcin_incp) ); done
+	@for f in module.h xcintool.h; do ( $(LIBTOOL) --mode=install $(INSTALL_DATA) include/$$f $(xcin_incp) ); done
 
 clean:
 	rm -f $(OBJ) $(BIN) core
