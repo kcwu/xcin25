@@ -70,9 +70,6 @@
    */
 #undef HAVE_DIRENT_H
 
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
-
 /* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
 
@@ -237,6 +234,9 @@
 
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #undef HAVE_SYS_WAIT_H
+
+/* Define to 1 if you have the <tabe.h> header file. */
+#undef HAVE_TABE_H
 
 /* Define to 1 if you have the `uname' function. */
 #undef HAVE_UNAME
