@@ -27,6 +27,7 @@ utf-8 = 	sys.tab.$(UTF8ENC) \
 		array30.tab.$(UTF8ENC) \
 		cj.tab.$(UTF8ENC) \
 		cj5.tab.$(UTF8ENC) \
+		ez.tab.$(UTF8ENC) \
 		phone.tab.$(UTF8ENC) \
 		pinyin.tab.$(UTF8ENC) \
 		pinyin0.tab.$(UTF8ENC) \
@@ -129,6 +130,9 @@ cj.tab.$(UTF8ENC): cj.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
 cj5.tab.$(UTF8ENC): cj5.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
 	$(build) -r $(xcinrc) -l $(UTF8ENC) \
 		-s sys.tab.$(UTF8ENC) -o $@ cj5.cin.$(UTF8ENC)
+ez.tab.$(UTF8ENC): ez.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
+	$(build) -r $(xcinrc) -l $(UTF8ENC) \
+		-s sys.tab.$(UTF8ENC) -o $@ ez.cin.$(UTF8ENC)
 phone.tab.$(UTF8ENC): phone.cin.$(UTF8ENC) sys.tab.$(UTF8ENC)
 	$(build) -r $(xcinrc) -l $(UTF8ENC) \
 		-s sys.tab.$(UTF8ENC) -o $@ phone.cin.$(UTF8ENC)
