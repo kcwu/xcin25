@@ -48,4 +48,4 @@ clean:
 	rm -f *.o $(BIN) core
 distclean: clean
 	( cd po; rm -rf $(LC_MESG) )
-	rm -f Makefile
+	rm -rf Makefile .libs

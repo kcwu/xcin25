@@ -17,13 +17,10 @@ xcin-2.5.3-pre3:  2001/12
    Because not all the window will emit the XConfigureEvent when window is
    moved, and these codes may lead to some unstable situations.
 
-6. Readd xim_IC.c: check_ic_exist().
+6. Re-add xim_IC.c: check_ic_exist().
 
 7. Fix qphrase fallback mode bug in bimsphone.
-   THanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>
-
-7. Fix qphrase fallback mode bug in bimsphone.
-   THanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>
+   Thanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>
 
 8. Add bimsphone facility: user add Tsi by hand and store to user DB files.
    Thanks to Eric Cheng <eric@fractal.myip.org>.
