@@ -24,12 +24,11 @@
 (define MAINWIN2_GEOMETRY	"27x1+200-1")
 (define XCIN_HIDE   		"NO")
 (define XKILL_DISABLE		"NO")
-(define ICCHECK_DISABLE 	"NO")
 (define SINGLE_IM_CONTEXT	"NO")
 (define IM_FOCUS_ON		"NO")
 (define KEEP_POSITION_ON	"NO")
 (define DISABLE_WM_CTRL		"NO")
-(define DIFF_BEEP		"NO")
+(define DIFF_BEEP		"YES")
 (define KEYBOARD_TRANSLATE	"NO")
 
 (define LOCALE	'(zh_TW.Big5 zh_CN.EUC))
@@ -39,7 +38,7 @@
 ;
 (define INPUT_STYLE		'(Root OverTheSpot))
 (define OVERSPOT_USE_USRCOLOR	"YES")
-(define OVERSPOT_USE_USRFONTSET "NO")
+(define OVERSPOT_USE_USRFONTSET "YES")
 (define OVERSPOT_WINDOW_ONLY	"NO")
 
 ;
@@ -113,7 +112,7 @@
     (DEFAULT_IM_SINMD	"DEFAULT")
     (PHRASE		"default.phr")
     (CINPUT		(cj simplex phone bimspinyin bimsphone jyutping
-			 array30 zh_hex))
+			 array30 jyutping0 zh_hex))
     (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-big5-0")
     (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-16-*-big5-0")))
 ;
@@ -135,19 +134,23 @@
 	  (END_KEY		YES)
 	  (BEEP_DUPCHAR		YES)))
 
-(define bimspinyin@big5
-	'((SETKEY		5)
-	  (MODULE		"bimsphone")))
-
 (define bimsphone@big5
 	'((SETKEY		6)
+	  (MODULE		"bimsphone")))
+
+(define bimspinyin@big5
+	'((SETKEY		7)
 	  (MODULE		"bimsphone")))
 
 (define array30@big5
 	'((SETKEY		8)
       	  (BEEP_DUPCHAR		YES)
 	  (DISABLE_SEL_LIST	"w")
-	  (KEYSTROKE_REMAP	"t:0xaaba;")))
+	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba;")))
+
+(define jyutping0@big5
+	'((SETKEY		9)
+	  (BEEP_DUPCHAR		YES)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -159,7 +162,8 @@
     (DEFAULT_IM_MODULE	"gen_inp")
     (DEFAULT_IM_SINMD	"DEFAULT")
     (PHRASE		"default.phr")
-    (CINPUT		(pinyin shuangpin jtcj_gb wubizixing zh_hex))
+    (CINPUT		(pinyin shuangpin jtcj_gb wubizixing phonegb2
+			 array30 zh_hex))
     (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-gb2312.1980-0")
     (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-16-*-gb2312.1980-0")))
 ;
@@ -176,9 +180,19 @@
 (define jtcj_gb@euc
 	'((SETKEY		3)))
 
+(define phonegb2@gb2312
+	'((SETKEY		4)
+	  (END_KEY		YES)
+	  (BEEP_DUPCHAR		YES)))
+
 (define wubizixing@euc
 	'((SETKEY		5)))
 
+(define array30@gb2312
+	'((SETKEY		8)
+	  (BEEP_DUPCHAR		YES)
+	  (DISABLE_SEL_LIST	"w")
+	  (KEYSTROKE_REMAP	"t:0xb5c4;T:0xb5c4;")))
 
 ;
 ;  The zh_hex module (zh_hex input method) is a special IM, which can be

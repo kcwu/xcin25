@@ -25,12 +25,11 @@
 (define MAINWIN2_GEOMETRY	"27x1+200-1")
 (define XCIN_HIDE   		"NO")
 (define XKILL_DISABLE		"NO")
-(define ICCHECK_DISABLE 	"NO")
 (define SINGLE_IM_CONTEXT	"NO")
 (define IM_FOCUS_ON		"NO")
 (define KEEP_POSITION_ON	"NO")
 (define DISABLE_WM_CTRL		"NO")
-(define DIFF_BEEP		"NO")
+(define DIFF_BEEP		"YES")
 (define KEYBOARD_TRANSLATE	"NO")
 
 (define LOCALE	'(zh_TW.big5 zh_HK.hkbig5 zh_CN.hp15cn zh_CN.GBK))
@@ -40,7 +39,7 @@
 ;
 (define INPUT_STYLE		'(Root OverTheSpot))
 (define OVERSPOT_USE_USRCOLOR	"YES")
-(define OVERSPOT_USE_USRFONTSET "NO")
+(define OVERSPOT_USE_USRFONTSET "YES")
 (define OVERSPOT_WINDOW_ONLY	"NO")
 
 ;
@@ -114,7 +113,7 @@
     (DEFAULT_IM_SINMD	"DEFAULT")
     (PHRASE		"default.phr")
     (CINPUT		(cj simplex phone bimspinyin bimsphone jyutping
-			 array30 zh_hex))
+			 array30 jyutping0 zh_hex))
     (FONTSET		("-sony-*-24-*-iso8859-1,-*-24-*-hpbig5-"
 			 "-*-24-*-cns11643.1992-1,-*-24-*-cns11643.1992-2"))
     (OVERSPOT_FONTSET	("-sony-*-16-*-iso8859-1,-*-16-*-hpbig5-"
@@ -138,19 +137,19 @@
 	  (END_KEY		YES)
 	  (BEEP_DUPCHAR		YES)))
 
-(define bimspinyin@big5
-	'((SETKEY		5)
-	  (MODULE		"bimsphone")))
-
 (define bimsphone@big5
 	'((SETKEY		6)
+	  (MODULE		"bimsphone")))
+
+(define bimspinyin@big5
+	'((SETKEY		7)
 	  (MODULE		"bimsphone")))
 
 (define array30@big5
 	'((SETKEY		8)
       	  (BEEP_DUPCHAR		YES)
 	  (DISABLE_SEL_LIST	"w")
-	  (KEYSTROKE_REMAP	"t:0xaaba;")))
+	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba;")))
 
 (define jyutping0@big5
 	'((SETKEY		9)
@@ -166,7 +165,8 @@
     (DEFAULT_IM_MODULE	"gen_inp")
     (DEFAULT_IM_SINMD	"DEFAULT")
     (PHRASE		"default.phr")
-    (CINPUT		(pinyin shuangpin jtcj_gb wubizixing zh_hex))
+    (CINPUT		(pinyin shuangpin jtcj_gb wubizixing phonegb2
+			 array30 zh_hex))
     (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-gb2312.1980-1")
     (OVERSPOT_FONTSET	"-sony-*-16-*-iso8859-1,-*-16-*-gb2312.1980-1")))
 ;
@@ -183,9 +183,19 @@
 (define jtcj_gb@hp15CN
 	'((SETKEY		3)))
 
+(define phonegb2@gb2312
+	'((SETKEY		4)
+	  (END_KEY		YES)
+	  (BEEP_DUPCHAR		YES)))
+
 (define wubizixing@hp15CN
 	'((SETKEY		5)))
 
+(define array30@gb2312
+	'((SETKEY		8)
+	  (BEEP_DUPCHAR		YES)
+	  (DISABLE_SEL_LIST	"w")
+	  (KEYSTROKE_REMAP	"t:0xb5c4;T:0xb5c4;")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -200,11 +210,42 @@
     (FONTSET		"-sony-*-24-*-iso8859-1,-*-24-*-big5hkscs-0")
     (OVERSPOT_FONTSET	"NONE")))
 ;
-;  Here are detailed configuration of each IM (for zh_CN.GB2312 locale).
+;  Here are detailed configuration of each IM (for zh_HK.Big5HKSCS locale).
 ;
 (define cj@hkbig5
 	'((SETKEY		1)))
 
+(define simplex@big5hkscs
+	'((SETKEY		2)))
+
+(define phone@big5hkscs
+	'((SETKEY		3)
+	  (END_KEY		YES)
+	  (BEEP_DUPCHAR		YES)))
+
+(define jyutping@big5hkscs
+	'((SETKEY		4)
+	  (END_KEY		YES)
+	  (BEEP_DUPCHAR		YES)))
+
+(define bimsphone@big5hkscs
+	'((SETKEY		6)
+	  (MODULE		"bimsphone")))
+
+(define bimspinyin@big5hkscs
+	'((SETKEY		7)
+	  (MODULE		"bimsphone")))
+
+(define array30@big5hkscs
+	'((SETKEY		8)
+	  (BEEP_DUPCHAR		YES)
+	  (DISABLE_SEL_LIST	"w")
+	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba")))
+
+(define jyutping0@big5hkscs
+	'((SETKEY		9)
+	  (END_KEY		YES)
+	  (BEEP_DUPCHAR		YES)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;

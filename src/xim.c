@@ -100,11 +100,8 @@ commit_string(IC *ic, char *str)
         }
         strcpy(ic->imc->cch, str);
     }
-    if (commit_buf.icid!=ic->id || commit_buf.connect_id!=ic->connect_id) {
-	xim_commit();
-	commit_buf.icid = ic->id;
-	commit_buf.connect_id = ic->connect_id;
-    }
+    commit_buf.icid = ic->id;
+    commit_buf.connect_id = ic->connect_id;
     if (commit_buf.size-commit_buf.slen < cch_len+1) {
 	commit_buf.size = commit_buf.slen+cch_len+1;
 	commit_buf.str = xcin_realloc(commit_buf.str, commit_buf.size);

@@ -10,12 +10,12 @@ all: xcinrc
 xcinrc:
 	@if [ -f "xcinrc.$(OS_TYPE)" ]; then \
 	     echo "Creating xcinrc for $(OS_TYPE) ...."; \
-	     sed "s|%xcin_dir%|$(xcin_modp)|;\
+	     sed "s|%xcin_dir%|$(moddir)|;\
 		  s|%tabe_data%|$(tabe_data)|" xcinrc.$(OS_TYPE) > xcinrc; \
 	 else \
 	     echo "Warning: the locale support of your system is UNKNOWN!!"; \
 	     echo "Please report this to: xcin@linux.org.tw";\
-	     sed "s|%xcin_dir%|$(xcin_modp)|;\
+	     sed "s|%xcin_dir%|$(moddir)|;\
 		  s|%tabe_data%|$(tabe_data)|" xcinrc.UNKNOWN > xcinrc; \
 	 fi
 

@@ -10,8 +10,16 @@ big5 = 		sys.tab.$(BIG5ENC) \
 		jyutping0.tab.$(BIG5ENC) \
 		telecode.tab.$(BIG5ENC)
 
-big5hkscs = 	sys.tab.$(BIG5HKENC) \
-		cj.tab.$(BIG5HKENC)
+big5hkscs =	sys.tab.$(BIG5HKENC) \
+		array30.tab.$(BIG5HKENC) \
+		bims_pinyin.tab.$(BIG5HKENC) \
+		cj.tab.$(BIG5HKENC) \
+		phone.tab.$(BIG5HKENC) \
+		pinyin.tab.$(BIG5HKENC) \
+		simplex.tab.$(BIG5HKENC) \
+		jyutping.tab.$(BIG5HKENC) \
+		jyutping0.tab.$(BIG5HKENC) \
+		telecode.tab.$(BIG5HKENC)
 
 include Makefile
 
@@ -55,9 +63,33 @@ telecode.tab.$(BIG5ENC): telecode.cin sys.tab.$(BIG5ENC)
 
 sys.tab.$(BIG5HKENC): sys.cin.big5hkscs
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) -o $@ sys.cin.big5hkscs
+array30.tab.$(BIG5HKENC): array30.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ array30.cin
+bims_pinyin.tab.$(BIG5HKENC): bims_pinyin.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ bims_pinyin.cin
 cj.tab.$(BIG5HKENC): cj.cin sys.tab.$(BIG5HKENC)
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
 		-s sys.tab.$(BIG5HKENC) -o $@ cj.cin
+phone.tab.$(BIG5HKENC): phone.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ phone.cin
+pinyin.tab.$(BIG5HKENC): pinyin.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ pinyin.cin
+simplex.tab.$(BIG5HKENC): simplex.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ simplex.cin
+jyutping.tab.$(BIG5HKENC): jyutping.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ jyutping.cin
+jyutping0.tab.$(BIG5HKENC): jyutping0.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ jyutping0.cin
+telecode.tab.$(BIG5HKENC): telecode.cin sys.tab.$(BIG5HKENC)
+	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
+		-s sys.tab.$(BIG5HKENC) -o $@ telecode.cin
 
 
 install_big5:

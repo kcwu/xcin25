@@ -24,12 +24,11 @@
 (define MAINWIN2_GEOMETRY	"27x1+200-1")
 (define XCIN_HIDE   		"NO")
 (define XKILL_DISABLE		"NO")
-(define ICCHECK_DISABLE 	"NO")
 (define SINGLE_IM_CONTEXT	"NO")
 (define IM_FOCUS_ON		"NO")
 (define KEEP_POSITION_ON	"NO")
 (define DISABLE_WM_CTRL		"NO")
-(define DIFF_BEEP		"NO")
+(define DIFF_BEEP		"YES")
 (define KEYBOARD_TRANSLATE	"NO")
 
 ;
@@ -37,7 +36,7 @@
 ;
 (define INPUT_STYLE		'(Root OverTheSpot))
 (define OVERSPOT_USE_USRCOLOR	"YES")
-(define OVERSPOT_USE_USRFONTSET "NO")
+(define OVERSPOT_USE_USRFONTSET "YES")
 (define OVERSPOT_WINDOW_ONLY	"NO")
 
 (define LOCALE  '(zh_TW.Big5 zh_CN.EUC))
@@ -147,7 +146,7 @@
 	'((SETKEY		8)
       	  (BEEP_DUPCHAR		YES)
 	  (DISABLE_SEL_LIST	"w")
-	  (KEYSTROKE_REMAP	"t:0xaaba;")))
+	  (KEYSTROKE_REMAP	"t:0xaaba;T:0xaaba;")))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -43,9 +43,15 @@ Email: r8921131@ms1.cc.ntu.edu.tw
 Contribution:  General discussion on i18n, XIM and rcfile reading system.
 
 Name:  霍東靈 (Fok, Anthony)
+       (ThizLinux Laboratory Ltd.)
 Email: foka@debian.org
 Contribution:  Contribute the debian package directory.
 	       Many suggestions to improve the array30 input method.
+	       Many patches of .cin files for Big5HKSCS encodings.
+
+Name:  Guo, Rui-Xiang
+Email: rxg@ms25.url.com.tw
+Contribution:  Help porting xcin to NetBSD environment.
 
 Name:  惠普科技 (Hewlett-Packard Company)
 URL:   http://www.hp.com
@@ -60,6 +66,10 @@ Email: yhsiao@cae.wisc.edu
 Contribution:  1. Basic XIM server programming.
 	       2. Introduce the Xi18n & locale concept.
 	       3. Provide siod library for rcfile reading system.
+
+Name:  謝法安 (Hsieh, F-A)
+Email: bv1al@new7.com.tw
+Contribution:  Donate GB cin table: phonegb2.cin.
 
 Name:  謝東翰 (Hsieh, Tung-Han)
 Email: thhsieh@linux.org.tw
@@ -90,6 +100,19 @@ Name:  Kirin Chou
 Email: kirin@ms7.url.com.tw
 Contribution:  The pioneer to add pinyin support to bimsphone module.
 
+Name:  李果正 (Lee, Edward G.J.)
+Email: edt1023@ms17.hinet.net
+Contribution:  Help on testing of xcin/libtabe.
+	       Many improvement on libtabe: tsi.src.
+
+Name:  龍山 (Long Sam)
+Email: long_sam.tw@yahoo.com.tw
+Contribution:  Help on improvement of libtabe: tsi.src.
+
+Name:  毛慶禎 (Mao)
+Email: mao@blue.lins.fju.edu.tw
+Contribution:  Help on improvement of libtabe: tsi.src.
+
 Name:  Roger So
 Email: rogerso@sis.dhs.org
 Contribution:  Donation of Big5 jyutping.cin & jyutping0.cin.
@@ -108,6 +131,10 @@ Name:  王齊年 (Wang, Chinian)
 Email: chinian@linux.org.tw
 Contribution:  DNS maintainer of domain xcin.linux.org.tw & linux.org.tw.
 
+Name:  吳光哲 (Wu, Kuang-che)
+Email: kcwu@ck.tp.edu.tw
+Contribution:  Many suggestions/improvement of libtabe/tsi.src/IM modules.
+
 Name:  袁天竑 (與其中央研究院計算機中心裡的同仁) 
        (Yuan, Tein Horng, and his colleges in the Computing Center of 
         Academia Sinica, Taiwan)
@@ -118,6 +145,11 @@ Contribution:  Mailing-list, news, www, ftp servers maintainer.
 Name:
 Email: ljm@ljm.qqjane.net
 Contribution:  telecode.cin.
+
+
+Name:
+Email: cyril_huang@yahoo.com
+Contribution:  Man page: xcin.1.
 
 
 (To be continued .... :-))

@@ -89,6 +89,12 @@ set_lc_ctype(char *loc_name, char *loc_return, int loc_size,
 		s ++;
 	    }
 	}
+
+	/* Kludge to deal with the change from BIG5HKSCS to BIG5-HKSCS */
+	/* in glibc-2.2.4 */
+	/* This should be fixed. -- by T.H.Hsieh */
+	if (strncmp(enc_return, "big5-hkscs", 10) == 0)
+	    strcpy(enc_return, "big5hkscs");
     }
     return True;
 }
