@@ -149,7 +149,7 @@ struct _IC {
 
 extern IM_Context_t *imc_find(int imid);
 extern IC *ic_find(CARD16 icid);
-extern void xim_close(void);
+extern void xim_close(IC *ic);
 extern void call_xim_init(IC *ic, int reset_inpinfo);
 extern void call_xim_end(IC *ic, int ic_delete, int reset_inpinfo);
 extern void call_switch_in(IC *ic);

@@ -555,12 +555,7 @@ void sighandler(int sig)
     if (sig == SIGQUIT)
 	return;
 
-    xim_close();
-    if ((xcin_core.xcin_mode & XCIN_RUN_EXITALL)) {
-	xim_terminate();
-	IM_free_all();
-	exit(0);
-    }
+    xcin_core.xcin_mode |= XCIN_RUN_KILL;
 }
 
 int

@@ -606,80 +606,52 @@ ic_clean_all(CARD16 connect_id, xccore_t *xccore)
 #define IC_IDLE_TIME      600
 #endif
 
-static byte_t delete;
-
-static int
-bad_window_handler(Display *disp, XErrorEvent *err)
-{
-    delete = 1;
-    return 0;
-}
-
 void
 check_ic_exist(int icid, xccore_t *xccore)
 {
     static time_t last_check;
     IC *ic = ic_list, *last = NULL, *ref_ic;
     time_t current_time;
-    Window root;
-    int x, y;
-    unsigned width, height, bw, depth;
-    int (*old_handler)();
+    int delete;
 
     if (icid == -1 || (ref_ic = ic_find(icid)) == NULL)
 	return;
     current_time = time(NULL);
     if (current_time - last_check <= TIMECHECK_STEP)
 	return;
-/*
-#ifdef DEBUG
+
     DebugLog(3, verbose, "Begin check: current time = %d, last check = %d\n", 
 		(int)current_time, (int)last_check);
-#endif
-*/
 
-    old_handler = XSetErrorHandler(bad_window_handler);
     while (ic != NULL) {
-/*
-#ifdef DEBUG
 	DebugLog(3, verbose, "IC: id=%d, focus_w=0x%x, client_w=0x%x%s\n",
 		ic->id, (unsigned int)ic->ic_rec.focus_win, 
 		(unsigned int)ic->ic_rec.client_win, 
 		(ic==ref_ic) ? ", (ref)." : ".");
-#endif
-*/
 	delete = 0;
 
 	if (ic == ref_ic)
 	    ic->exec_time = current_time;
 	else if (ic->ic_rec.focus_win && 
 		 ic->ic_rec.focus_win == ref_ic->ic_rec.focus_win)
+	/* each IC should has its distinct window */
 	    delete = 1;
 	else if (current_time - ic->exec_time > IC_IDLE_TIME &&
 		 ic->ic_rec.client_win != 0) {
-/*
-#ifdef DEBUG
 	    DebugLog(3, verbose, 
 		    "Check IC: id=%d, window=0x%x, exec_time=%d.\n", 
 		    ic->id, (unsigned int)ic->ic_rec.client_win, 
 		    (int)ic->exec_time);
-#endif
-*/
 	    ic->exec_time = current_time;
-	    XGetGeometry(xccore->gui.display, ic->ic_rec.client_win, 
-			&root, &x, &y, &width, &height, &bw, &depth);
-	    XSync(xccore->gui.display, False);
+	    if (gui_check_window(ic->ic_rec.client_win) != True)
+		delete = 1;
 	}
 
 	if (delete) {
-/*
-#ifdef DEBUG
 	    DebugLog(3, verbose, 
 		    "Delete IC: id=%d, window=0x%x, exec_time=%d.\n", 
 		    ic->id, (unsigned int)ic->ic_rec.client_win, 
 		    (int)ic->exec_time);
-#endif
-*/
 	    delete_IC(ic, last, xccore);
 	    ic = (last) ? last->next : ic_list;
 	}
@@ -688,8 +660,6 @@ check_ic_exist(int icid, xccore_t *xccore)
 	    ic = ic->next;
 	}
     }
-    (void) XSetErrorHandler(old_handler);
-
     last_check = current_time;
 }
 

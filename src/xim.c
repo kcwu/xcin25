@@ -395,22 +395,24 @@ xim_close_handler(XIMS ims, IMCloseStruct *call_data)
 static int
 xim_create_ic_handler(XIMS ims, IMChangeICStruct *call_data, int *icid)
 {
-    DebugLog(2, verbose, "XIM_CREATE_IC\n");
+    int ret;
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
-    *icid = call_data->icid;
-    return ic_create(ims, call_data, xccore);
+    ret = ic_create(ims, call_data, xccore);
+    *icid = (ret == True) ? call_data->icid : -1;
+    DebugLog(2, verbose, "XIM_CREATE_IC: icid=%d\n", *icid);
+    return ret;
 }
 
 static int
 xim_destroy_ic_handler(XIMS ims, IMDestroyICStruct *call_data, int *icid)
 {
-    DebugLog(2, verbose, "XIM_DESTORY_IC\n");
+    *icid = call_data->icid;
+    DebugLog(2, verbose, "XIM_DESTORY_IC: icid=%d\n", *icid);
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
-    *icid = call_data->icid;
     return ic_destroy(ims, call_data, xccore);
 }
 
@@ -419,9 +421,9 @@ xim_set_focus_handler(XIMS ims, IMChangeFocusStruct *call_data, int *icid)
 {
     IC *ic;
 
-    DebugLog(2, verbose, "XIM_SET_IC_FOCUS\n");
-
     *icid = call_data->icid;
+    DebugLog(2, verbose, "XIM_SET_IC_FOCUS: icid=%d\n", *icid);
+
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
     if (! (ic = ic_find(call_data->icid)))
@@ -484,9 +486,9 @@ xim_unset_focus_handler(XIMS ims, IMChangeFocusStruct *call_data, int *icid)
 {
     IC *ic;
 
-    DebugLog(2, verbose, "XIM_UNSET_IC_FOCUS\n");
-
     *icid = call_data->icid;
+    DebugLog(2, verbose, "XIM_UNSET_IC_FOCUS: icid=%d\n", *icid);
+
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
     if (! (ic = ic_find(call_data->icid)))
@@ -519,12 +521,11 @@ xim_trigger_handler(XIMS ims, IMTriggerNotifyStruct *call_data, int *icid)
     char *str;
     IC *ic;
 
-    DebugLog(2, verbose, "XIM_TRIGGER_NOTIFY\n");
+    *icid = call_data->icid;
+    DebugLog(2, verbose, "XIM_TRIGGER_NOTIFY: icid=%d\n", *icid);
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
-
-    *icid = call_data->icid;
     if (! (ic = ic_find(call_data->icid)))
 	return False;
 
@@ -593,11 +594,11 @@ xim_forward_handler(XIMS ims, IMForwardEventStruct *call_data, int *icid)
     IC *ic=NULL;
     IM_Context_t *imc;
 
-    DebugLog(2, verbose, "XIM_FORWARD_EVENT\n");
+    *icid = call_data->icid;
+    DebugLog(2, verbose, "XIM_FORWARD_EVENT: icid=%d\n", *icid);
 
     if ((xccore->xcin_mode & XCIN_RUN_EXIT))
 	return True;
-    *icid = call_data->icid;
     if (! (ic = ic_find(call_data->icid)))
 	return False;
     if (call_data->event.type != KeyPress)
@@ -744,13 +745,11 @@ xim_set_ic_values_handler(XIMS ims, IMChangeICStruct *call_data, int *icid)
 {
     IC *ic;
 
-    DebugLog(2, verbose, "XIM_SET_IC_VALUES\n");
-
-    if ((xccore->xcin_mode & XCIN_RUN_EXIT)) {
-	xccore->xcin_mode |= XCIN_RUN_EXITALL;
-	return True;
-    }
     *icid = call_data->icid;
+    DebugLog(2, verbose, "XIM_SET_IC_VALUES: icid=%d\n", *icid);
+
+    if ((xccore->xcin_mode & XCIN_RUN_EXIT))
+	return True;
 
     if (! (ic = ic_find(call_data->icid)))
 	return False;
@@ -763,9 +762,8 @@ xim_get_ic_values_handler(XIMS ims, IMChangeICStruct *call_data, int *icid)
 {
     IC *ic;
 
-    DebugLog(2, verbose, "XIM_GET_IC_VALUES\n");
-
     *icid = call_data->icid;
+    DebugLog(2, verbose, "XIM_GET_IC_VALUES: icid=%d\n", *icid);
 
     if (! (ic = ic_find(call_data->icid)))
 	return False;
@@ -776,11 +774,62 @@ xim_get_ic_values_handler(XIMS ims, IMChangeICStruct *call_data, int *icid)
 static int
 xim_sync_reply_handler(XIMS ims, IMSyncXlibStruct *call_data, int *icid)
 {
-    DebugLog(2, verbose, "XIM_SYNC_REPLY\n");
+    static int n_check=0;
 
     *icid = call_data->icid;
-    if ((xccore->xcin_mode & XCIN_RUN_EXIT))
-	xccore->xcin_mode |= XCIN_RUN_EXITALL;
+    DebugLog(2, verbose, "XIM_SYNC_REPLY: icid=%d, n_check=%d\n",
+		*icid, n_check);
+/*
+ *  This is the main controlling process to terminate xcin, which is a really
+ *  involved and complicated process.
+ *
+ *  There are 2 ways to terminate xcin. 1. Use "kill" command in the shell.
+ *  2. Click the "kill" button of the xcin window. In the OverTheSpot style,
+ *  every action of the XIM client it will use XSetICValues() to send its
+ *  spot location to xcin, and xcin *must* reply it. So when the termination
+ *  occures, xcin have to ensure that it has replied all the XSetICValues()
+ *  request to the current IC on focus, and then actually exits.
+ *
+ *  So, when terminating, xcin will send XIM_SYNC to the on-focus IC and wait
+ *  for its response. This is the dummy event which is just giving the time
+ *  for the XIM client to send its XSetICValues() request to xcin in time
+ *  such that xcin can reply it. However, xcin cannot assume that the client
+ *  will always send the XSetICValues() request everytime when it is going to
+ *  exit or how many requests the client will send. So, we use the method
+ *  that xcin tries to send several XIM_SYNC one by one, and expect a centain
+ *  number of response from the client. In the amount of the response, the
+ *  client may send its XSetICValues() request *in time* (if it needs) such
+ *  that xcin can response to it.
+ *
+ *  For case 1 of termination, note that the "kill" signal is received by the
+ *  sighandler() of the main program, but not in the X event loop. In this
+ *  case we cannot send the XIM_SYNC in the sighandler(), because outside the
+ *  X event loop the XIM_SYNC request will be queued somewhere and cannot be
+ *  processed immediately. Hence in sighandler() XIM_SYNC we only set the
+ *  special flag XCIN_RUN_KILL to inform xcin this circumstance. When backing
+ *  the X event loop, xcin will check for this flag and send the XIM_SYNC
+ *  request to the client.
+ *
+ *  For case 2 since it is already in the X event loop, so it can send the
+ *  XIM_SYNC request directly (in gui_main*() when the xcin main window is
+ *  being killed).
+ *
+ *  All the XIM_SYNC request is sent by xim_close() function. When it is
+ *  called, it will check if the client window is really exist, and set the
+ *  special flag XCIN_RUN_EXIT to denote the situation that xcin is exiting.
+ *  Then in the xim_sync_reply_handler() it will decide when the xcin can
+ *  actually exit, determined by the number of the XIM_SYNC reply. If xcin
+ *  can actually exit, the flag XCIN_RUN_EXITALL is set.
+ */
+    if ((xccore->xcin_mode & XCIN_RUN_EXIT)) {
+	n_check ++;
+	if (n_check >= 2)
+	    xccore->xcin_mode |= XCIN_RUN_EXITALL;
+	else {
+	    IC *ic = ic_find(call_data->icid);
+	    xim_close(ic);
+	}
+    }
     return True;
 }
 
@@ -844,10 +893,14 @@ im_protocol_handler(XIMS ims, IMProtocol *call_data)
 	ret = False;
 	break;
     }
+    if (xccore->xcin_mode & XCIN_RUN_KILL) {
+	xccore->xcin_mode &= ~XCIN_RUN_KILL;
+	xim_close(xccore->ic);
+    }
     if (! (xccore->xcin_mode & XCIN_ICCHECK_OFF))
 	check_ic_exist(icid, xccore);
     gui_update_winlist(xccore);
-    return  ret;
+    return ret;
 }
 
 
@@ -1008,21 +1061,20 @@ xim_init(xccore_t *core)
 }
 
 void
-xim_close(void)
+xim_close(IC *ic)
 {
     IMSyncXlibStruct pass_data;
 
+    DebugLog(2, verbose, "xim_close\n");
     xccore->xcin_mode |= (XCIN_RUN_EXIT | XCIN_ICCHECK_OFF);
-    if (xccore->ic) {
-	xim_disconnect(xccore->ic);
-	xccore->ic->imc->inp_state &= ~(IM_XIMFOCUS | IM_2BFOCUS);
+    if (ic && gui_check_window(ic->ic_rec.client_win) == True) {
+	DebugLog(2, verbose, "xim_close sent\n");
 	pass_data.major_code = XIM_SYNC;
 	pass_data.minor_code = 0;
-	pass_data.connect_id = xccore->ic->connect_id;
-	pass_data.icid = xccore->ic->id;
+	pass_data.connect_id = ic->connect_id;
+	pass_data.icid = ic->id;
 	IMSyncXlib(ims, (XPointer)&pass_data);
 	XSync(xccore->gui.display, False);
-	xccore->ic = NULL;
     }
     else
 	xccore->xcin_mode |= XCIN_RUN_EXITALL;

@@ -103,5 +103,6 @@ extern void gui_freewin(Window window);
 extern void gui_winmap_change(winlist_t *win, int state);
 extern font_t *gui_create_fontset(char *base_font, int verbose);
 extern void gui_free_fontset(font_t *font);
+extern int gui_check_window(Window window);
 
 #endif

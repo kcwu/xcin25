@@ -47,7 +47,8 @@
 #define XCIN_RUN_IM_FOCUS       0x00100000      /* run time IM focus on */
 #define XCIN_RUN_2B_FOCUS	0x00200000	/* run time 2B focus on */
 #define XCIN_RUN_EXIT		0x00400000	/* xcin is now exiting */
-#define XCIN_RUN_EXITALL	0x00800000	/* XIM terminated, exiting */
+#define XCIN_RUN_KILL		0x00800000	/* xcin gets killed & exiting */
+#define XCIN_RUN_EXITALL	0x01000000	/* XIM terminated, exiting */
 
 /*
  *  XCIN initialization data structer.

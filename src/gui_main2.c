@@ -225,7 +225,7 @@ xcin_mainwin2_destroy(gui_t *gui, winlist_t *win)
 	if (imc->overspot_win)
 	    gui_freewin(imc->overspot_win);
     }
-    xim_close();
+    xim_close(xccore->ic);
 }
 
 /*----------------------------------------------------------------------------

@@ -278,6 +278,23 @@ gui_winmap_change(winlist_t *win, int state)
     }
 }
 
+int
+gui_check_window(Window window)
+{
+    Window root;
+    int x, y;
+    unsigned width, height, bw, depth;
+
+    XGetGeometry(gui->display, window,
+		&root, &x, &y, &width, &height, &bw, &depth);
+    XSync(gui->display, False);
+    if (errstatus == 0)
+	return True;
+    else {
+	errstatus = 0;
+	return False;
+    }
+}
 
 /*----------------------------------------------------------------------------
 
@@ -298,10 +315,9 @@ x_set_color(char *color_name)
     return  color.pixel;
 }
 
-static int errhandle(Display *disp,XErrorEvent *xevent)
+static int errhandle(Display *disp, XErrorEvent *xevent)
 {
-/*  need more works on error handle ... */
-    errstatus = 1;
+    errstatus = xevent->error_code;
     return 1;
 }
 
