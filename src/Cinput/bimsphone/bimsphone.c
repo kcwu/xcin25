@@ -510,7 +510,7 @@ determine_selection(phone_conf_t *cf, inpinfo_t *inpinfo, phone_iccf_t *iccf,
 	char *str;
 	for (i=base, j=0, word=0; j<cf->n_selphr && i<num; i++, j++) {
 	    str = (char *)selection[i];
-	    tmp = inpinfo->mcch_grouping[i+1] = strlen(str)/2;
+	    tmp = inpinfo->mcch_grouping[j+1] = strlen(str)/2;
 	    if (word+tmp >= MCCH_BUFSIZE) 
 		break;
 	    for (; *str; word++, str+=2) {

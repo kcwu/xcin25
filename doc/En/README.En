@@ -138,7 +138,7 @@ B. History:
 ------------------
 C. What's New (Please refer to Changes document for details):
 
-(version: xcin-2.5.2.1, needs libtabe-0.1.9 and above):
+(version: xcin-2.5.2.3, needs libtabe-0.1.8 and above):
 
 1. Improvement for bimsphone module:
    a. Now bimsphone supports 3 input modes:

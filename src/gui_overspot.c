@@ -495,7 +495,7 @@ gui_overspot_draw(gui_t *gui, winlist_t *win)
 	if ((display_mode & OVERSPOT_DRAW_EMPTY))
 	    flag = DRAW_EMPTY;
 	if ((imc->inp_state & IM_XIMFOCUS)) {
-	    if (imc->inpinfo.n_lcch && (imc->inpinfo.guimode & GUIMOD_LISTCHAR))
+	    if ((imc->inpinfo.guimode & GUIMOD_LISTCHAR))
 		flag = DRAW_LCCH;
 	    else if (imc->inpinfo.n_mcch) {
 		if ((imc->inpinfo.guimode & GUIMOD_SELKEYSPOT))
