@@ -27,10 +27,14 @@
 #  define _INCLUDE_XOPEN_SOURCE
 #endif
 
+#ifdef CYGWIN
+#  define X_LOCALE
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <locale.h>
+#include <X11/Xlocale.h>
 #include "xcintool.h"
 
 #ifdef HAVE_GETTEXT

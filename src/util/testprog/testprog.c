@@ -27,6 +27,10 @@
 #  define _INCLUDE_XOPEN_SOURCE
 #endif
 
+#ifdef CYGWIN
+#  define X_LOCALE
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
