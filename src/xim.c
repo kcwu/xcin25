@@ -1085,6 +1085,7 @@ xim_init(xccore_t *core)
 		N_("IMOpenIM() with name \"%s\" transport \"%s\" failed.\n"),
 		xim_name, transport);
     else {
+	xccore->xcin_mode |= XCIN_RUN_INIT;
 	perr(XCINMSG_NORMAL,
 		N_("XIM server \"%s\" transport \"%s\"\n"),
 		xim_name, transport);

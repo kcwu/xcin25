@@ -422,6 +422,7 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 extern int change_IM(IC *ic, int inp_num);
 extern int xim_connect(IC *ic);
 extern int xim_disconnect(IC *ic);
+extern int gui_check_input_focus(xccore_t *xccore, Window win);
 
 void
 ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
@@ -455,10 +456,22 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 	else if (match (XNClientWindow, ic_attr)) {
 	    checkset_ic_val(CLIENT_SETIC_CLIENTW, Window, ic_attr,
 			    ic_rec->client_win);
+/*
+	    if (ic_rec->ic_value_update & CLIENT_SETIC_CLIENTW) {
+		ic_rec->ic_value_update &= ~CLIENT_SETIC_CLIENTW;
+		gui_set_monitor(ic_rec->client_win, WIN_MONITOR_CLIENT, ic->id);
+	    }
+*/
 	}
         else if (match (XNFocusWindow, ic_attr)) {
 	    checkset_ic_val(CLIENT_SETIC_FOCUSW, Window, ic_attr,
 			    ic_rec->focus_win);
+/*
+	    if (ic_rec->ic_value_update & CLIENT_SETIC_FOCUSW) {
+		ic_rec->ic_value_update &= ~CLIENT_SETIC_FOCUSW;
+		gui_set_monitor(ic_rec->client_win, WIN_MONITOR_FOCUS, ic->id);
+	    }
+*/
 	}
 #ifdef XIM_COMPLETE
 	else if (match (XNResourceName, ic_attr))
@@ -572,23 +585,36 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 		N_("ic_set: unknown IC sts_attr: %s\n"), sts_attr->name);
     }
 #endif
-
+/*
+ *  Extra setting/checking after some IC values set.
+ */
     if (ic_rec->ic_value_update & CLIENT_SETIC_INPSTY) {
-	if (ic_rec->input_style == XIMSTY_OverSpot) {
-	    if (ic_rec->ic_value_update & CLIENT_SETIC_FOCUSW) {
-		gui_set_monitor(ic_rec->focus_win, 1, ic->id);
-		ic_rec->ic_value_update &= ~CLIENT_SETIC_FOCUSW;
-		ic_rec->ic_value_update &= ~CLIENT_SETIC_INPSTY;
-	    }
-	    else if (ic_rec->ic_value_update & CLIENT_SETIC_FOCUSW) {
-		gui_set_monitor(ic_rec->client_win, 1, ic->id);
-		ic_rec->ic_value_update &= ~CLIENT_SETIC_FOCUSW;
-		ic_rec->ic_value_update &= ~CLIENT_SETIC_INPSTY;
-	    }
-	}
-	else {
+	Window win = (Window)0;
+
+	if (ic_rec->ic_value_set & CLIENT_SETIC_FOCUSW)
+	    win = ic_rec->focus_win;
+	else if (ic_rec->ic_value_set & CLIENT_SETIC_CLIENTW)
+	    win = ic_rec->client_win;
+	if (win) {
 	    ic_rec->ic_value_update &= ~CLIENT_SETIC_INPSTY;
-	    gui_set_monitor(ic_rec->client_win, 0, ic->id);
+/*
+	    if (ic_rec->input_style == XIMSTY_OverSpot)
+		gui_set_monitor(win, WIN_MONITOR_OVERSPOT, ic->id);
+*/
+	    if ((xccore->xcin_mode & XCIN_RUN_INIT) && xccore->ic==NULL &&
+		gui_check_input_focus(xccore, win) == True) {
+/*
+ *  Get the first input-focus IC window, to keep xccore->ic != NULL in
+ *  the beginning. This is required when xcin is started in rxvt or other
+ *  XIM terminal. Because in this case xcin does not receive the XSetICFocus,
+ *  so it does not know that this XIM client is on focus now. If we kill
+ *  xcin immediately in this situation, the XIM client may crash because
+ *  xcin will not send XSync event to it. So we must get the initial input
+ *  focus window here.
+ */
+		xccore->ic = ic;
+		xccore->xcin_mode &= ~XCIN_RUN_INIT;
+	    }
 	}
     }
 }

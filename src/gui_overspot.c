@@ -53,8 +53,11 @@ static char inpn_2bytes[11];
 #define GCLINE_idx	4	/* For underline mark: uline_color */
 
 struct ov_cli_s {		/* Indices by icid */
+/*
     x_uint16 icid;
     x_int16  pos_update;
+*/
+    int icid;
     int pos_x, pos_y;
     GC gc[2];
     font_t *font;
@@ -132,6 +135,7 @@ overspot_check_ic(gui_t *gui, int idx, ic_rec_t *ic_rec)
     }   
 }
 
+/*
 void
 gui_overspot_check_client(gui_t *gui, int icid)
 {
@@ -140,6 +144,7 @@ gui_overspot_check_client(gui_t *gui, int icid)
     if ((idx = search_struct_oc(icid)) >= 0)
 	oc[idx]->pos_update = 1;
 }
+*/
 
 void
 gui_overspot_delete_client(gui_t *gui, int icid)
@@ -184,7 +189,9 @@ overspot_register_ic(gui_t *gui, winlist_t *win, int icid, ic_rec_t *ic_rec)
 	gui_overspot_delete_client(gui, idx+1);
 
     oc[idx]->icid = (x_uint16)icid;
+/*
     oc[idx]->pos_update = 0;
+*/
     w = (ic_rec->focus_win) ? ic_rec->focus_win : ic_rec->client_win;
     XTranslateCoordinates(gui->display, w, gui->root,
 	0, 0, &(oc[idx]->pos_x), &(oc[idx]->pos_y), &junkwin);
@@ -225,11 +232,15 @@ overspot_win_adjust(gui_t *gui, winlist_t *win,
     Window w, junkwin;
 
     w = (ic_rec->focus_win) ? ic_rec->focus_win : ic_rec->client_win;
+/*
     if (oc[idx]->pos_update == 1) {
 	XTranslateCoordinates(gui->display, w, gui->root,
 		0, 0, &(oc[idx]->pos_x), &(oc[idx]->pos_y), &junkwin);
 	oc[idx]->pos_update = 0;
     }
+*/
+    XTranslateCoordinates(gui->display, w, gui->root,
+		0, 0, &(oc[idx]->pos_x), &(oc[idx]->pos_y), &junkwin);
     ic_rec->ic_value_update &= ~CLIENT_SETIC_PRE_SPOTLOC;
     ic_rec->ic_value_update &= ~CLIENT_SETIC_PRE_AREA;
     new_x = oc[idx]->pos_x +

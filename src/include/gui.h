@@ -75,6 +75,10 @@ struct winlist_s {
 #define WIN_CHANGE_BELL2	0x0020
 #define WIN_CHANGE_BELLALL	0x00f0
 
+#define WIN_MONITOR_CLIENT	0x0001
+#define WIN_MONITOR_FOCUS	0x0002
+#define WIN_MONITOR_OVERSPOT	0x0004
+
 struct gui_s {
     Display *display;
     int display_width, display_height;
@@ -104,6 +108,6 @@ extern void gui_winmap_change(winlist_t *win, int state);
 extern font_t *gui_create_fontset(char *base_font, int verbose);
 extern void gui_free_fontset(font_t *font);
 extern int gui_check_window(Window window);
-extern void gui_set_monitor(Window w, int monitor_overspot, int icid);
+extern void gui_set_monitor(Window w, xmode_t flag, int icid);
 
 #endif

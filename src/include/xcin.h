@@ -48,6 +48,7 @@
 #define XCIN_RUN_EXIT		0x00400000	/* xcin is now exiting */
 #define XCIN_RUN_KILL		0x00800000	/* xcin gets killed & exiting */
 #define XCIN_RUN_EXITALL	0x01000000	/* XIM terminated, exiting */
+#define XCIN_RUN_INIT		0x02000000	/* xcin start to run */
 
 /*
  *  XCIN initialization data structer.

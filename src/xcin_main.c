@@ -77,6 +77,11 @@ static void
 print_usage(void)
 {
     perr(XCINMSG_EMPTY,
+	N_("XCIN (Chinese XIM server) version %s.\n" 
+	   "(module ver: %s, syscin ver: %s).\n"),
+	XCIN_VERSION, MODULE_VERSION, SYSCIN_VERSION);
+
+    perr(XCINMSG_EMPTY,
      N_("\n"
 	"Usage:  xcin [-h] [-m module] [-d DISPLAY] [-x XIM_name] [-r rcfile]\n"
 	"             [-U user_dir] [-D default_dir] [-v n]\n"

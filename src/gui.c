@@ -299,12 +299,22 @@ gui_check_window(Window window)
     }
 }
 
+int
+gui_check_input_focus(xccore_t *xccore, Window win)
+{
+    Window w;
+    int revert_to_return;
+
+    XGetInputFocus(xccore->gui.display, &w, &revert_to_return);
+    return (w == win) ? True : False;
+}
+
 /*----------------------------------------------------------------------------
 
 	GUI Monitoring the XIM client windows. 
 
 ----------------------------------------------------------------------------*/
-
+/*
 struct mw_s {
     Window win;
     int icid;
@@ -316,15 +326,17 @@ static struct mw_s *mw;
 static int mw_edx, mw_len;
 
 void
-gui_set_monitor(Window w, int monitor_overspot, int icid)
+gui_set_monitor(Window w, xmode_t flag, int icid)
 {
     int i, idx=-1;
 
     for (i=0; i<mw_edx; i++) {
 	if (idx == -1 && mw[i].win == (Window)0)
 	    idx = i;
-	if (mw[i].win == w)
+	if (mw[i].win == w) {
+	    mw[i].flag |= flag;
 	    return;
+	}
     }
     if (idx == -1) {
 	if (mw_edx >= mw_len) {
@@ -339,7 +351,7 @@ gui_set_monitor(Window w, int monitor_overspot, int icid)
     XSelectInput(gui->display, w, StructureNotifyMask);
     mw[idx].win = w;
     mw[idx].icid = icid;
-    mw[idx].flag = monitor_overspot;
+    mw[idx].flag = flag;
 }
 
 static void
@@ -348,7 +360,8 @@ gui_unset_monitor(Window w, xccore_t *xccore)
     int i;
 
     for (i=0; i<mw_edx; i++) {
-	if (mw[i].win == w) {
+	if (mw[i].win == w &&
+	    (mw[i].flag & WIN_MONITOR_CLIENT)) {
 	    ic_destroy(mw[i].icid, xccore);
 	    mw[i].win = (Window)0;
 	    mw[i].icid = 0;
@@ -366,13 +379,14 @@ gui_check_monitor(XConfigureEvent *event)
     int i;
 
     for (i=0; i<mw_edx; i++) {
-	if (mw[i].win == event->window && mw[i].flag) {
+	if (mw[i].win == event->window &&
+	    (mw[i].flag & WIN_MONITOR_OVERSPOT)) {
 	    gui_overspot_check_client(gui, mw[i].icid);
 	    break;
 	}
     }
 }
-
+*/
 /*----------------------------------------------------------------------------
 
 	GUI Initialization & Main loop
@@ -468,15 +482,20 @@ gui_loop(xccore_t *xccore)
 	    break;
 	case ConfigureNotify:
 	    win = gui_search_win(event.xconfigure.window);
+/*
 	    if (! win)
 		gui_check_monitor(&(event.xconfigure));
 	    else if (win->win_attrib_func)
+*/
+	    if (win->win_attrib_func)
 		win->win_attrib_func(gui, win, &(event.xconfigure),
 				(xccore->xcin_mode & XCIN_KEEP_POSITION));
 	    break;
+/*
 	case DestroyNotify:
 	    gui_unset_monitor(event.xdestroywindow.window, xccore);
 	    break;
+*/
 	case ClientMessage:
 	    if (event.xclient.format == 32 && 
 		event.xclient.data.l[0] == gui->wm_del_win)

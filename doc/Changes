@@ -1,3 +1,23 @@
+xcin-2.5.3-pre3:  2001/12
+------------------------------
+1. xcin will check the input-focus window when first IC created.
+
+2. Add xcin-2.5.3.pre2-CN-phrasebox.patch.
+   Thanks to Anthony Fok <anthony@thizlinux.com>.
+
+3. gen_inp: HINTTSI bug fix:
+   a. alt-0, b. alt-space, c. backspace.
+   Thanks to Edward G.J. Lee <edt1023@ms17.hinet.net>,
+	     Kuang-che Wu <kcwu@ck.tp.edu.tw>
+
+4. Add version info in "xcin -h".
+   suggested by Edward G.J. Lee <edt1023@ms17.hinet.net>.
+
+5. gui.c: the XIM window monitoring code are completely disabled.
+   Because not all the window will emit the XConfigureEvent when window is
+   moved, and these codes may lead to some unstable situations.
+
+
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------
 1. Fix memory leakage problem in IMdkit: i18nIc.c.
