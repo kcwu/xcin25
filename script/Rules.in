@@ -13,6 +13,7 @@ INSTALL_DATA	= @INSTALL_DATA@
 OS_TYPE		= @os_type@
 GNU_GETTEXT	= @GNU_GETTEXT@
 OLD_GNU_GETTEXT = @OLD_GNU_GETTEXT@
+PERL		= @PERL@
 @SET_MAKE@
 
 #
@@ -59,6 +60,7 @@ ximd_inc	= ${top_srcdir}/src/lib/IMdkit
 rules		= ${top_srcdir}/Rules
 makedep		= ${top_srcdir}/script/makedep
 pofix		= ${top_srcdir}/script/pofix
+noperl		= ${top_srcdir}/script/noperl
 
 LIBTOOL		= ${top_srcdir}/libtool
 xcininc		= -I$(xc_inc) -I$(top_srcdir) $(extra_inc)

@@ -17,7 +17,7 @@ install:
 		if [ "$(OLD_GNU_GETTEXT)" = 0 ]; then \
 		    msgfmt -o $$msgpath/xcin.mo xcin-$$l.po; \
 		else \
-		    $(pofix) $$msgpath/xcin.mo < xcin-$$l.po; \
+		    $(PERL) $(pofix) < xcin-$$l.po > $$msgpath/xcin.mo; \
 		fi \
 	    done; \
 	fi

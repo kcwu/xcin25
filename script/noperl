@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "Warning: The interpreter \`perl' is not available in your system." >&2
+echo "Warning: So I will ignore the following command ----" >&2
+echo "Warning: ----  perl $@" >&2

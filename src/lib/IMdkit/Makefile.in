@@ -22,7 +22,7 @@ $(TARGET): $(OBJ)
 	( cd ..; $(LN_S) IMdkit/$(TARGET) . )
 
 depend:
-	$(Dep_Rule) | $(makedep) $(rules) CC_Rule o > .depend
+	$(Dep_Rule) | $(PERL) $(makedep) $(rules) CC_Rule o > .depend
 
 clean:
 	rm -f $(OBJ) $(TARGET) core

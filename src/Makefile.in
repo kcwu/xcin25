@@ -35,7 +35,7 @@ util_bin:
 	@( cd ${UTIL}; ${MAKE} )
 
 depend:
-	$(Dep_Rule) | $(makedep) $(rules) CC_Rule o > .depend
+	$(Dep_Rule) | $(PERL) $(makedep) $(rules) CC_Rule o > .depend
 	@for d in ${SUBSYS} ${UTIL}; do ( cd $$d; ${MAKE} depend ); done
 
 install: install_path install_xcin install_subsys

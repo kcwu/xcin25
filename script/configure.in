@@ -199,6 +199,9 @@ fi
 rm -rf testdir
 AC_MSG_RESULT([checking for install -d: $INSTALL])
 
+AC_CHECK_PROG(PERL, perl, perl, sh $(noperl))
+AC_SUBST(PERL)
+
 
 dnl-----------------------------------------------------------------------
 dnl Checks for header files.

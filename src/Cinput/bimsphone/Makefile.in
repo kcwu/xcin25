@@ -19,7 +19,7 @@ $(TARGET): $(OBJ)
 include .depend
 
 depend:
-	$(Dep_Rule) | $(makedep) $(rules) LC_Rule lo > .depend
+	$(Dep_Rule) | $(PERL) $(makedep) $(rules) LC_Rule lo > .depend
 clean:
 	rm -f $(OBJ) *.o $(TARGET) core *.a
 distclean: clean

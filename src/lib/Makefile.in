@@ -33,6 +33,7 @@ build_IMdkit:
 	( cd IMdkit; $(MAKE) )
 
 depend:
+	( cd IMdkit; $(MAKE) depend )
 	( cd xcintool; $(MAKE) depend )
 	( cd charset; $(MAKE) depend )
 	( cd siod; $(MAKE) depend )

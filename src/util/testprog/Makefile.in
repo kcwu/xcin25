@@ -19,7 +19,7 @@ $(BIN): $(OBJ)
 include .depend
 
 depend:
-	$(Dep_Rule) | $(makedep) $(rules) CC_Rule o > .depend
+	$(Dep_Rule) | $(PERL) $(makedep) $(rules) CC_Rule o > .depend
 
 install: $(BIN)
 	if [ "$(GNU_GETTEXT)" = 1 ]; then \
@@ -30,7 +30,7 @@ install: $(BIN)
 		if [ "$(OLD_GNU_GETTEXT)" = 0 ]; then \
 		    msgfmt -o $$l/LC_MESSAGES/testprog.mo testprog-$$l.po; \
 		else \
-		    $(pofix) $$l/LC_MESSAGES/testprog.mo < testprog-$$l.po; \
+		    $(PERL) $(pofix) < testprog-$$l.po > $$l/LC_MESSAGES/testprog.mo; \ 
 		fi \
 	    done; \
 	fi
