@@ -35,9 +35,6 @@ winlist_t *gui_menusel_init(gui_t *gui, int imid, greq_win_t *gw);
 winlist_t *gui_overspot_init(gui_t *gui, IM_Context_t *imc, xmode_t xcin_mode);
 void xim_terminate(void);
 
-#ifdef DEBUG
-extern int verbose;
-#endif
 static gui_t *gui;
 
 
@@ -73,9 +70,6 @@ gui_create_fontset(char *base_font, int verb)
     ff = fontlist;
     while (ff) {
 	if (strcmp(base_font, ff->fontset.basename) == 0) {
-#ifdef DEBUG
-	DebugLog(2, verbose, "fontset in fontlist: %s\n", base_font);
-#endif
 	    ff->ref_cnt ++;
 	    return &(ff->fontset);
 	}
@@ -84,9 +78,6 @@ gui_create_fontset(char *base_font, int verb)
     ff = freef_head;
     while (ff) {
 	if (strcmp(base_font, ff->fontset.basename) == 0) {
-#ifdef DEBUG
-	DebugLog(2, verbose, "fontset in freef_head: %s\n", base_font);
-#endif
 	    if (ff->prev)
 		ff->prev->next = ff->next;
 	    else
@@ -105,9 +96,6 @@ gui_create_fontset(char *base_font, int verb)
 	ff = ff->next;
     }
     if (freef_end) {
-#ifdef DEBUG
-	DebugLog(2, verbose, "fontset in freef_end\n");
-#endif
 	ff = freef_end;
 	freef_end = ff->prev;
 	if (freef_end)
@@ -120,9 +108,6 @@ gui_create_fontset(char *base_font, int verb)
 /*
  *  Create a new fontset.
  */
-#ifdef DEBUG
-    DebugLog(2, verbose, "fontset creation: %s\n", base_font);
-#endif
     fontset = XCreateFontSet(gui->display, base_font,
 			&charset_list, &charset_count, &def_string);
     if (charset_count || ! fontset) {
@@ -174,9 +159,6 @@ gui_free_fontset(font_t *base_font)
 	if (base_font == &(ff->fontset)) {
 	    ff->ref_cnt --;
 	    if (ff->ref_cnt <= 0) {
-#ifdef DEBUG
-    DebugLog(2, verbose, "fontset goto freef_end: %s\n", base_font->basename);
-#endif
 		if (ff->prev)
 		    ff->prev->next = ff->next;
 		else

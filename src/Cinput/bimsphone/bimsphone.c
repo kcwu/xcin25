@@ -954,30 +954,36 @@ phone_show_keystroke(void *conf, simdinfo_t *simdinfo)
     static wch_t keystroke_list[5];
     phone_conf_t *cf = (phone_conf_t *)conf;
     char *str, *str1;
-    struct TsiDB *tdb;
-    struct TsiYinDB *ydb;
+    struct TsiDB **tdb;
+    struct TsiYinDB **ydb;
     struct TsiInfo zhi;
+    int n_db, i;
 
-    if (simdinfo->cch_publish.wch && bimsReturnDBPool(&tdb, &ydb) > 0) {
+    if (simdinfo->cch_publish.wch && (n_db=bimsReturnDBPool(&tdb, &ydb)) > 0) {
+	keystroke_list[0].wch = (wchar_t)0;
 	zhi.tsi = simdinfo->cch_publish.s;
 	zhi.refcount = 0;
 	zhi.yinnum = 0;
 	zhi.yindata = NULL;
-	if (tabeTsiInfoLookupZhiYin(tdb, &zhi) == 0) {
-    	    simdinfo->s_keystroke = keystroke_list;
-	    str = (char *)tabeYinToZuYinSymbolSequence(zhi.yindata[0]);
+	for (i=0; i<n_db; i++) {
+	    if (tabeTsiInfoLookupZhiYin(tdb[i], &zhi) == 0) {
+    		simdinfo->s_keystroke = keystroke_list;
+		str = (char *)tabeYinToZuYinSymbolSequence(zhi.yindata[0]);
 
-	    if ((cf->mode & BIMSPH_MODE_PINYIN))
-		str1 = pho2pinyinw(cf->pinyin, str);
-	    else
-		str1 = str;
-	    if (str1)
-		big5_mbs_wcs(keystroke_list, str1, 5);
-	    free(str);
-	    return True;
+		if ((cf->mode & BIMSPH_MODE_PINYIN))
+		    str1 = pho2pinyinw(cf->pinyin, str);
+		else
+		    str1 = str;
+		if (str1)
+		    big5_mbs_wcs(keystroke_list, str1, 5);
+		free(str);
+		break;
+	    }
 	}
 	free(tdb);
 	free(ydb);
+	if (keystroke_list[0].wch != (wchar_t)0)
+	    return True;
     }
     simdinfo->s_keystroke = NULL;
     return False;

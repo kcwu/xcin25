@@ -41,10 +41,6 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "xcintool.h"
 #include "xcin.h"
 
-#ifdef DEBUG
-extern int verbose;
-#endif
-
 /*----------------------------------------------------------------------------
 
 	Basic IMC handling functions.
@@ -612,19 +608,23 @@ check_ic_exist(int icid, xccore_t *xccore)
     current_time = time(NULL);
     if (current_time - last_check <= TIMECHECK_STEP)
 	return;
+/*
 #ifdef DEBUG
     DebugLog(3, verbose, "Begin check: current time = %d, last check = %d\n", 
 		(int)current_time, (int)last_check);
 #endif
+*/
 
     old_handler = XSetErrorHandler(bad_window_handler);
     while (ic != NULL) {
+/*
 #ifdef DEBUG
 	DebugLog(3, verbose, "IC: id=%d, focus_w=0x%x, client_w=0x%x%s\n",
 		ic->id, (unsigned int)ic->ic_rec.focus_win, 
 		(unsigned int)ic->ic_rec.client_win, 
 		(ic==ref_ic) ? ", (ref)." : ".");
 #endif
+*/
 	delete = 0;
 
 	if (ic == ref_ic)
@@ -634,12 +634,14 @@ check_ic_exist(int icid, xccore_t *xccore)
 	    delete = 1;
 	else if (current_time - ic->exec_time > IC_IDLE_TIME &&
 		 ic->ic_rec.client_win != 0) {
+/*
 #ifdef DEBUG
 	    DebugLog(3, verbose, 
 		    "Check IC: id=%d, window=0x%x, exec_time=%d.\n", 
 		    ic->id, (unsigned int)ic->ic_rec.client_win, 
 		    (int)ic->exec_time);
 #endif
+*/
 	    ic->exec_time = current_time;
 	    XGetGeometry(xccore->gui.display, ic->ic_rec.client_win, 
 			&root, &x, &y, &width, &height, &bw, &depth);
@@ -647,12 +649,14 @@ check_ic_exist(int icid, xccore_t *xccore)
 	}
 
 	if (delete) {
+/*
 #ifdef DEBUG
 	    DebugLog(3, verbose, 
 		    "Delete IC: id=%d, window=0x%x, exec_time=%d.\n", 
 		    ic->id, (unsigned int)ic->ic_rec.client_win, 
 		    (int)ic->exec_time);
 #endif
+*/
 	    delete_IC(ic, last, xccore);
 	    ic = (last) ? last->next : ic_list;
 	}
