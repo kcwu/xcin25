@@ -571,17 +571,17 @@ if test x$without_tabe = x; then
     else
 	with_db_lib="$test_db_lib -rpath $with_db_lib"
     fi
-    if test x$with_tabe_lib = x; then
-	with_tabe_lib="$test_tabe_lib"
-    else
-	with_tabe_lib="$test_tabe_lib -rpath $with_tabe_lib"
-    fi
     if test x$without_bims = x; then
 	if test x$with_tabe_lib = x; then
 	    with_bims_lib="$test_bims_lib"
 	else
 	    with_bims_lib="$test_bims_lib -rpath $with_tabe_lib"
 	fi
+    fi
+    if test x$with_tabe_lib = x; then
+	with_tabe_lib="$test_tabe_lib"
+    else
+	with_tabe_lib="$test_tabe_lib -rpath $with_tabe_lib"
     fi
 fi
 if test x$with_intl_lib = x; then
