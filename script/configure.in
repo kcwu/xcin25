@@ -494,10 +494,9 @@ dnl Checks for tabe & bims libraries.
 dnl-----------------------------------------------------------------------
 AC_MSG_CHECKING([tabe data files])
 if test x$with_tabe_lib = x; then
-    tabe_data="$with_extra_prefix/share/tabe/tsiyin/"
+    tabe_data="$with_extra_prefix/lib/tabe/"
 else
-    tabe_data=`echo $with_tabe_lib | \
-	sed 's|^\(.*\)/lib$|\1/share/tabe/tsiyin/|'`
+    tabe_data=`echo $with_tabe_lib | sed 's|^\(.*\)/lib$|\1/lib/tabe/|'`
 fi
 if test ! -f $tabe_data/tsi.db; then
     tabe_data=''

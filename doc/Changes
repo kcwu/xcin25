@@ -39,6 +39,8 @@ xcin-2.5.3-pre2:  2001/
 12. Bug fix for gen_inp.c: HINTTSI: absorb ESC, BackSpace, Delete, and modifier
     keys, such that the HINTTSI window will close when these keys pressed.
 
+13. Change the .db dir from $(prefix)/share/tabe/tsiyin to $(prefix)/lib/tabe/.
+
 
 xcin-2.5.3-pre1:  2001/10/19
 ------------------------------
