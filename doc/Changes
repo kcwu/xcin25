@@ -87,6 +87,9 @@ xcin-2.5.3-pre3:  2001/12
 29. Correct the cvs repository location in FAQ.
     Thanks to Kuo-Chieh Ting <kcting@Bayou.UH.EDU>.
 
+30. Add 64-bit patch from SuSE.
+    Thanks to Mike FABIAN <mfabian@suse.de>.
+
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------

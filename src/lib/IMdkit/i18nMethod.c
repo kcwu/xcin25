@@ -846,6 +846,8 @@ static void EventToWireEvent (XEvent *ev, xEvent *event, CARD16 *serial)
     /*endswitch*/
 }
 
+#define Swap16(n) (((n) << 8 & 0xff00) | ((n) >> 8 & 0xff))
+
 static Status xi18n_forwardEvent (XIMS ims, XPointer xp)
 {
     Xi18n i18n_core = ims->protocol;
@@ -892,6 +894,9 @@ static Status xi18n_forwardEvent (XIMS ims, XPointer xp)
     FrameMgrPutToken (fm, call_data->sync_bit);
 
     replyp += total_size;
+    if (_Xi18nNeedSwap(i18n_core, call_data->connect_id) != 0) {
+        call_data->event.xkey.state = Swap16(call_data->event.xkey.state);
+    }
     EventToWireEvent (&(call_data->event), (xEvent *) replyp, &serial);
 
     FrameMgrPutToken (fm, serial);

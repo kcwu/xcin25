@@ -135,10 +135,6 @@ static void SetPointAttribute (XICAttribute *value_ret,
     FrameMgrGetToken (fm, buf->y);
     FrameMgrFree (fm);
 
-    memmove (&(buf->x), p, sizeof (INT16));
-    p += sizeof (INT16);
-    memmove (&(buf->y), p, sizeof (INT16));
-
     value_ret->attribute_id = ic_attr->attribute_id;
     value_ret->name = ic_attr->name;
     value_ret->name_length = ic_attr->length;

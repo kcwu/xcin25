@@ -48,6 +48,8 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "xcintool.h"
 
+#define Swap16(n) (((n) << 8 & 0xff00) | ((n) >> 8 & 0xff))
+
 extern Xi18nClient *_Xi18nFindClient (Xi18n, CARD16);
 
 static void GetProtocolVersion (CARD16 client_major,
@@ -1047,8 +1049,12 @@ static void ResetICMessageProc (XIMS ims,
 static int WireEventToEvent (Xi18n i18n_core,
                              xEvent *event,
                              CARD16 serial,
-                             XEvent *ev)
+                             XEvent *ev,
+                             Bool byte_swap)
 {
+    if (byte_swap != 0) {
+        event->u.keyButtonPointer.state = Swap16(event->u.keyButtonPointer.state);
+    }    
     ev->xany.serial = event->u.u.sequenceNumber & ((unsigned long) 0xFFFF);
     ev->xany.serial |= serial << 16;
     ev->xany.send_event = False;
@@ -1100,7 +1106,8 @@ static void ForwardEventMessageProc (XIMS ims,
     if (WireEventToEvent (i18n_core,
                           &wire_event,
                           forward->serial_number,
-                          &forward->event) == True)
+                          &forward->event,
+                          _Xi18nNeedSwap (i18n_core, connect_id)) == True)
     {
         if (i18n_core->address.improto)
         {
