@@ -52,6 +52,6 @@ clean:
 	rm -f *.tab* core
 	find . -name "*.utf-8" ! -name sys.cin.utf-8 \
 		! -name cj5.cin.utf-8 ! -name simplex5.cin.utf-8 \
-		exec rm -f {} \;
+		-exec rm -f {} \;
 distclean: clean
 	rm -f Makefile
