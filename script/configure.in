@@ -22,6 +22,46 @@ AC_SUBST(AGE_VER)
 AC_MSG_RESULT([Configuring for XCIN $RELEASE_VER ....])
 
 dnl-----------------------------------------------------------------------
+dnl Checks for Host type.
+dnl-----------------------------------------------------------------------
+LIBS="$OLD_LIBS"
+
+extra_link_flag=''
+case "$host_os" in
+    linux*)  
+	os_type=LINUX
+        AC_DEFINE(LINUX)
+	;;
+    freebsd*)
+	os_type=FREEBSD
+        AC_DEFINE(FREEBSD)
+	;;
+    hp*)
+	os_type=HPUX
+        AC_DEFINE(HPUX)
+	;;
+    openbsd*)
+	os_type=OPENBSD
+	AC_DEFINE(OPENBSD)
+	;;
+    netbsd*)
+	os_type=NETBSD
+	extra_link_flag='-Wl,-R'
+	AC_DEFINE(NETBSD)
+	;;
+    solaris*)
+	os_type=SOLARIS
+	AC_DEFINE(SOLARIS)
+	;;
+    *)
+	AC_MSG_RESULT([Warning: xcin does not support this system yet.])
+	AC_MSG_RESULT([Warning: please report this to xcin@linux.org.tw])
+	os_type=UNKNOWN
+	;;
+esac
+AC_SUBST(os_type)
+
+dnl-----------------------------------------------------------------------
 dnl xcin configure command line options.
 dnl-----------------------------------------------------------------------
 AC_ARG_ENABLE(debug,
@@ -62,7 +102,11 @@ AC_ARG_WITH(db_inc,
 
 AC_ARG_WITH(db_lib,
     [  --with-db-lib=PATH        set the library dir of Berkeley DB2/3.],
-    [  test x$withval != x && with_db_lib="-L$withval" ],
+    [  if test x$withval != x; then
+	 if test x$extra_link_flag = x; then
+	   with_db_lib="-L$withval"
+	 else
+	   with_db_lib="-L$withval $extra_link_flag$withval"; fi; fi ],
     [  with_db_lib='' ])
 
 AC_ARG_WITH(tabe_inc,
@@ -72,7 +116,11 @@ AC_ARG_WITH(tabe_inc,
 
 AC_ARG_WITH(tabe_lib,
     [  --with-tabe-lib=PATH      set the library dir of libtabe.],
-    [  test x$withval != x && with_tabe_lib="-L$withval" ],
+    [  if test x$withval != x; then
+	 if test x$extra_link_flag = x; then
+	   with_tabe_lib="-L$withval"
+	 else
+	   with_tabe_lib="-L$withval $extra_link_flag$withval"; fi; fi ],
     [  with_tabe_lib='' ])
 
 AC_ARG_WITH(intl_inc,
@@ -82,7 +130,11 @@ AC_ARG_WITH(intl_inc,
 
 AC_ARG_WITH(intl_lib,
     [  --with-intl-lib=PATH      set the library dir of libintl (gettext).],
-    [  test x$withval != x && with_intl_lib="-L$withval" ],
+    [  if test x$withval != x; then
+	 if test x$extra_link_flag = x; then
+	   with_intl_lib="-L$withval"
+	 else
+	   with_intl_lib="-L$withval $extra_link_flag$withval"; fi; fi ],
     [  with_intl_lib='' ])
 
 AC_ARG_WITH(iconv_inc,
@@ -92,7 +144,11 @@ AC_ARG_WITH(iconv_inc,
 
 AC_ARG_WITH(iconv_lib,
     [  --with-iconv-lib=PATH     set the include dir of iconv library.],
-    [  test x$withval != x && with_iconv_lib="-L$withval" ],
+    [  if test x$withval != x; then
+	 if test x$extra_link_flag = x; then
+	   with_iconv_lib="$withval"
+	 else
+	   with_iconv_lib="-L$withval $extra_link_flag$withval"; fi; fi ],
     [  with_iconv_lib='' ])
 
 dnl-----------------------------------------------------------------------
@@ -201,7 +257,6 @@ AC_MSG_RESULT([checking for install -d: $INSTALL])
 
 AC_CHECK_PROG(PERL, perl, perl, sh $(noperl))
 AC_SUBST(PERL)
-
 
 dnl-----------------------------------------------------------------------
 dnl Checks for header files.
@@ -325,7 +380,6 @@ if test $found = n; then
 fi
 AC_SUBST(with_socket_lib)
 
-
 dnl-----------------------------------------------------------------------
 dnl Checks for gettext.
 dnl-----------------------------------------------------------------------
@@ -389,7 +443,7 @@ AC_CHECK_HEADERS(iconv.h, ,
       exit 1 ])
 
 AC_CHECK_FUNCS(iconv, [ found=y ], [ found=n ])
-dnl if test $found = n; then
+if test $found = n; then
     for f in x iconv giconv; do
 	if test $f != x; then
 	    LIBS="$OLD_LIBS -l$f"
@@ -412,7 +466,7 @@ iconv_close(cd);], [ found=y; AC_DEFINE(HAVE_ICONV)
 	    AC_MSG_RESULT([no])
 	fi
     done
-dnl fi
+fi
 if test $found = n; then
     AC_MSG_RESULT([iconv() is not supported in your system.])
     AC_MSG_RESULT([Please use --with-iconv-lib to configure.])
@@ -445,7 +499,6 @@ fi
 AC_SUBST(with_db_inc)
 AC_SUBST(with_db_lib)
 
-
 dnl-----------------------------------------------------------------------
 dnl Checks for X11R6 library
 dnl-----------------------------------------------------------------------
@@ -459,7 +512,7 @@ if test x$x_includes != x; then
     x_includes="-I$x_includes"
 fi
 AC_CHECK_LIB(X11, XmbDrawImageString, 
-    [ x_libraries="$x_libraries -lX11" ],
+    [ x_libraries="$x_libraries -lX11 -lXext" ],
     [ AC_MSG_RESULT([You need X11R6 to compile xcin.])
       AC_MSG_RESULT([Please use --x-includes and --x-libraries to configure.])
       exit 1 ])
@@ -467,7 +520,6 @@ AC_CHECK_LIB(X11, XmbDrawImageString,
 LDFLAGS="$OLD_LDFLAGS $libs"
 AC_SUBST(x_includes)
 AC_SUBST(x_libraries)
-
 
 dnl-----------------------------------------------------------------------
 dnl Checks for tabe & bims libraries.
@@ -507,45 +559,6 @@ with_tabe_lib="$with_tabe_lib -lbims -ltabe"
 
 AC_SUBST(with_tabe_inc)
 AC_SUBST(with_tabe_lib)
-
-
-dnl-----------------------------------------------------------------------
-dnl Checks for Host type & shared library & options.
-dnl-----------------------------------------------------------------------
-LIBS="$OLD_LIBS"
-
-case "$host_os" in
-    linux*)  
-	os_type=LINUX
-        AC_DEFINE(LINUX)
-	;;
-    freebsd*)
-	os_type=FREEBSD
-        AC_DEFINE(FREEBSD)
-	;;
-    hp*)
-	os_type=HPUX
-        AC_DEFINE(HPUX)
-	;;
-    openbsd*)
-	os_type=OPENBSD
-	AC_DEFINE(OPENBSD)
-	;;
-    netbsd*)
-	os_type=NETBSD
-	AC_DEFINE(NETBSD)
-	;;
-    solaris*)
-	os_type=SOLARIS
-	AC_DEFINE(SOLARIS)
-	;;
-    *)
-	AC_MSG_RESULT([Warning: xcin does not support this system yet.])
-	AC_MSG_RESULT([Warning: please report this to xcin@linux.org.tw])
-	os_type=UNKNOWN
-	;;
-esac
-AC_SUBST(os_type)
 
 dnl-----------------------------------------------------------------------
 dnl Output Makefiles and config.h

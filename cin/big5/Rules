@@ -66,14 +66,6 @@ install_big5:
 	for f in $(big5) default.phr; do \
 	  ff=`basename $$f .$(BIG5ENC)`; \
 	  $(INSTALL_DATA) $$f $(xcin_datap)/$(BIG5ENC)/$$ff; done
-	if [ -d $(xcin_datap)/$(BIG5ENC) ]; then \
-	  if [ -f $(tabe_data)/tsi.db ]; then \
-	    ( cd $(xcin_datap)/$(BIG5ENC); \
-	      rm -f tsi.db; ln -s $(tabe_data)/tsi.db . ); fi; \
-	  if [ -f $(tabe_data)/yin.db ]; then \
-	    ( cd $(xcin_datap)/$(BIG5ENC); \
-	      rm -f yin.db; ln -s $(tabe_data)/yin.db . ); fi; \
-	fi
 
 install_big5hkscs:
 	if [ ! -d $(xcin_datap)/$(BIG5HKENC) ]; then \

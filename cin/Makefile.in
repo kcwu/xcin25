@@ -1,4 +1,3 @@
-LN_S = @LN_S@
 @SET_MAKE@
 
 SUBSYS = big5 gb
