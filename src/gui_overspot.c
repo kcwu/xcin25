@@ -293,19 +293,17 @@ overspot_draw_multich(gui_t *gui, winlist_t *win, font_t *font, GC *gc,
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
 	if (selkey->wch != (wchar_t)0) {
-	    /* Modify by Firefly(firefly@firefly.idv.tw) */
-	    len = strlen(selkey->s);
+	    len = strlen(selkey);
 	    XmbDrawImageString(gui->display, win->window, font->fontset,
 			gc[spot_GC_idx], x, y, (char *)selkey->s, len);
 	    x += (XmbTextEscapement(font->fontset, (char *)selkey->s, len) + 2);
         }
         for (j=0; j<n; j++, cch++) {
-	    /* Modify by Firefly(firefly@firefly.idv.tw) */
-	    len = strlen(cch->s);
 	    if (cch->wch == (wchar_t)0) {
 		toggle_flag = -1;
 		break;
 	    }
+	    len = wchlen(cch);
 	    x2 = x + XmbTextEscapement(font->fontset, (char *)cch->s, len);
 	    if (inpinfo->mcch_hint &&
 		inpinfo->mcch_hint[(int)(cch-inpinfo->mcch)])
@@ -382,8 +380,7 @@ overspot_draw_multichBW(gui_t *gui, winlist_t *win, font_t *font , GC *gc,
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
 	if (selkey->wch != (wchar_t)0) {
-	    /* Modify by Firefly(firefly@firefly.idv.tw) */
-	    len = strlen(selkey->s);
+	    len = strlen(selkey);
 	    nwchs_to_mbs(buf+bufidx, selkey, 1, BUFSIZE-bufidx);
 	    strncat(buf, " ", BUFSIZE-bufidx-len);
 	    bufidx += (len + 1);
@@ -393,8 +390,7 @@ overspot_draw_multichBW(gui_t *gui, winlist_t *win, font_t *font , GC *gc,
 		toggle_flag = -1;
 		break;
 	    }
-	    /* Modify by Firefly(firefly@firefly.idv.tw) */
-	    len = strlen(cch->s);
+	    len = wchlen(cch);
 	    nwchs_to_mbs(buf+bufidx, cch, 1, BUFSIZE-bufidx);
 	    bufidx += len;
 	}

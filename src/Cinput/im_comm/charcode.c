@@ -34,10 +34,10 @@ typedef struct {
     unsigned long base;
 } ccode_t;
 
-static ccode_t charcode[WCH_SIZE];
-
-static unsigned int total_char;
-static byte_t highest_idx;
+static ccode_t charcode[N_ENC_SCHEMA * WCH_SIZE];
+  
+static unsigned int total_char[N_ENC_SCHEMA];
+static byte_t highest_idx[N_ENC_SCHEMA];
 
 /* KhoGuan: After reading ccp[4] from sys.tab, we pass ccp to ccode_init(),
    calculate various numbers, fill them into charcode[4] 
@@ -46,70 +46,116 @@ static byte_t highest_idx;
 void
 ccode_init(charcode_t *ccp, int n)
 {
-    int i, j, idx;
+    int i, j, idx, enc_schema;
 
-    for (i=0; i<WCH_SIZE && i<n && ccp[i].n; i++) {
-	idx = charcode[i].n = ccp[i].n;
-	for (j=0; j<idx; j++) {
-	    charcode[i].begin[j] = ccp[i].begin[j];
-	    charcode[i].end[j] = ccp[i].end[j];
-	    charcode[i].num[j] = charcode[i].end[j] - charcode[i].begin[j] + 1;
-	    charcode[i].total_num += charcode[i].num[j];
-	    if (j > 0)
-		charcode[i].ac_num[j] = 
-			charcode[i].ac_num[j-1] + charcode[i].num[j-1];
-	}
-	if (i == 0)
-	    charcode[i].base = 1;
-	else
-	    charcode[i].base = charcode[i-1].total_num * charcode[i-1].base;
+    for (enc_schema = 0; enc_schema < N_ENC_SCHEMA; ++enc_schema) {
+        charcode_t *tmp_ccp = ccp + enc_schema * WCH_SIZE;
+        ccode_t    *tmp_charcode = charcode + enc_schema * WCH_SIZE;
+
+	if (tmp_ccp[0].n == 0) return;
+
+        for (i=0; i<WCH_SIZE && i<n && tmp_ccp[i].n; i++) {
+	    idx = tmp_charcode[i].n = tmp_ccp[i].n;
+	    for (j=0; j<idx; j++) {
+	       tmp_charcode[i].begin[j] = tmp_ccp[i].begin[j];
+	       tmp_charcode[i].end[j] = tmp_ccp[i].end[j];
+	       tmp_charcode[i].num[j] = tmp_charcode[i].end[j] - tmp_charcode[i].begin[j] + 1;
+	       tmp_charcode[i].total_num += tmp_charcode[i].num[j];
+	       if (j > 0)
+	   	  tmp_charcode[i].ac_num[j] = 
+			tmp_charcode[i].ac_num[j-1] + tmp_charcode[i].num[j-1];
+	    }
+	    if (i == 0)
+	        tmp_charcode[i].base = 1;
+	    else
+	        tmp_charcode[i].base = tmp_charcode[i-1].total_num * tmp_charcode[i-1].base;
+        }
+        total_char[enc_schema] = tmp_charcode[i-1].total_num * tmp_charcode[i-1].base;
+        highest_idx[enc_schema] = i - 1;
     }
-    total_char = charcode[i-1].total_num * charcode[i-1].base;
-    highest_idx = i - 1;
 }
 
 void
 ccode_info(ccode_info_t *info)
 {
-    int i, j;
+    int i, j, enc_schema;
 
-    info->total_char = total_char;
-    info->n_ch_encoding = highest_idx + 1;
+    info->total_char = 0;
+    for (enc_schema = 0; enc_schema < N_ENC_SCHEMA; ++enc_schema) {
+	ccode_t     *tmp_charcode = charcode + enc_schema * WCH_SIZE;
+	charcode_t  *info_ccode = info->ccode + enc_schema * WCH_SIZE;
 
-    for (i=0; i<=highest_idx; i++) {
-	memset(info->ccode+i, 0, sizeof(charcode_t));
-	info->ccode[i].n = charcode[i].n;
-	for (j=0; j<charcode[i].n; j++) {
-	    info->ccode[i].begin[j] = charcode[i].begin[j];
-	    info->ccode[i].end[j] = charcode[i].end[j];
+        info->total_char += total_char[enc_schema];
+        info->n_ch_encoding[enc_schema] = highest_idx[enc_schema] + 1;
+
+        for (i=0; i<=highest_idx[enc_schema]; i++) {
+            memset(info_ccode+i, 0, sizeof(charcode_t));
+	    info_ccode[i].n = tmp_charcode[i].n;
+	    for (j=0; j<tmp_charcode[i].n; j++) {
+	        info_ccode[i].begin[j] = tmp_charcode[i].begin[j];
+	        info_ccode[i].end[j] = tmp_charcode[i].end[j];
+	    }
+        }
+    }
+}
+
+static int
+mbtowch_enc(wch_t *wch, const unsigned char *wch_str, size_t nbytes, int *schema)
+{
+    int i, j, n, enc_schema;
+
+    for(enc_schema=0; enc_schema<N_ENC_SCHEMA; ++enc_schema) {
+	ccode_t *tmp_charcode = charcode + enc_schema * WCH_SIZE;
+
+	for(i=0; i<WCH_SIZE && i<=highest_idx[enc_schema] && i<nbytes; i++) {
+	    n = tmp_charcode[i].n;
+	    for(j=0; j<n; j++) {
+	        if (wch_str[i] >= tmp_charcode[i].begin[j] && wch_str[i] <= tmp_charcode[i].end[j])
+		    break;
+	    }
+	    if (j >= tmp_charcode[i].n)
+	        break;
+	}
+	if ( i > highest_idx[enc_schema]) {
+	    if(wch) {
+		wch->wch='\0';
+		memcpy(wch->s, wch_str, highest_idx[enc_schema]+1);
+	    }
+	    if(schema) {
+		*schema=enc_schema;
+	    }
+	    return highest_idx[enc_schema]+1;
 	}
     }
+    return 0;
+}
+
+int
+mbtowch(wch_t *wch, const char *wch_str, int nbytes)
+{
+    return mbtowch_enc(wch, wch_str, nbytes, NULL);
 }
 
 int
 match_encoding(wch_t *wch)
 {
-    int i, j, n;
-    unsigned char *s = wch->s;
-
-    for (i=0; i<WCH_SIZE && i<=highest_idx; i++, s++) {
-	n = charcode[i].n;
-	for (j=0; j<n; j++) {
-	    if (*s >= charcode[i].begin[j] && *s <= charcode[i].end[j])
-		break;
-	}
-	if (j >= charcode[i].n)
-	    return 0;
-    }
-    return 1;
+    int enc_schema;
+    if(mbtowch_enc(NULL, wch->s, WCH_SIZE, &enc_schema)==0)
+	return 0;
+    return enc_schema+1;
 }
+
 /* ccode_to_idx(): non-linear big5 char code to linear index number */
 int
 ccode_to_idx(wch_t *wch)
 {
-    int i, j, n, idx=0;
+    int i, j, n, idx=0, enc_schema;
     ccode_t *ccp = charcode;
     ubyte_t *s = (ubyte_t *)(wch->s);
+    if ((enc_schema = match_encoding(wch)) == 0) return -1;
+    --enc_schema;
+    ccp = charcode + enc_schema * WCH_SIZE; 
+
 /* KhoGuan: for big5, only ccp[0] and ccp[1] are used, so ccp[2]->n == 0.
    If we has arg1 in our cin table with 2 chinese chars (4bytes), *wch
    will has its all 4 bytes filled. When i goes to 2,
@@ -131,22 +177,35 @@ ccode_to_idx(wch_t *wch)
 	    return -1;
 	idx += (*s - ccp->begin[j] + ccp->ac_num[j]) * ccp->base;
     }
-    return (idx < total_char) ? idx : -1;
+
+   if (idx > total_char[enc_schema]) return -1;
+
+   while (enc_schema) idx += total_char[--enc_schema];
+
+   return idx;
 }
 /* linear char code to non-linear big5 code */
 int
 ccode_to_char(int idx, unsigned char *mbs, int mbs_size)
 {
-    ccode_t *ccp = charcode + highest_idx;
-    int i, j, n;
-    int idx_tmp = idx;
+    ccode_t *ccp;
+    int i, j, n, enc_schema;
+    int idx_tmp;
     ubyte_t ch;
 
-    if (idx < 0 || idx >= total_char || highest_idx >= mbs_size)
+    for (enc_schema = 0; enc_schema < N_ENC_SCHEMA; ++enc_schema)
+	if (idx < total_char[enc_schema]) break;
+	else idx -= total_char[enc_schema];
+    if ( enc_schema == N_ENC_SCHEMA) return 0;
+
+    idx_tmp = idx;
+    ccp = charcode + enc_schema * WCH_SIZE + highest_idx[enc_schema];
+
+    if (idx < 0 || idx >= total_char[enc_schema] || highest_idx[enc_schema] >= mbs_size)
 	return 0;
 
     memset(mbs, 0, mbs_size);
-    for (i=highest_idx; i >= 0; i--, ccp--) {
+    for (i=highest_idx[enc_schema]; i >= 0; i--, ccp--) {
 	ch = (ubyte_t)(idx_tmp / ccp->base);
 	idx_tmp -= ch * ccp->base;
 

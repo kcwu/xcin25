@@ -33,7 +33,6 @@
 #include "module.h"
 #include "cin2tab.h"
 
-
 /*--------------------------------------------------------------------------
 
 	syscin function.
@@ -181,6 +180,8 @@ read_encoding(charcode_t *ccp, cintab_t *cintab)
 {
     int i, num=0, idx;
     char cmd[80], arg[80], numbuf[20], **p, *s;
+    int enc_schema = 0;
+    charcode_t *tmp_ccp = ccp;
 
     while(cmd_arg(cmd, 80, arg, 80, NULL)) {
 	if (! cmd[0] || ! arg[0])
@@ -192,30 +193,42 @@ read_encoding(charcode_t *ccp, cintab_t *cintab)
 	    p ++;
 	if (! strcmp("%charcode", cmd) && ! strcmp("end", arg))
 	    return;
-	else if (! *p)
+	if ( ! strcmp("%schema", cmd)) {
+	    if ( enc_schema == N_ENC_SCHEMA -1 )
+	   	perr(XCINMSG_ERROR, N_("%s(%d): too many encoding schemas: %s.\n"), 
+		    cintab->fname_cin, cintab->lineno, cmd);
+	    else {
+		++enc_schema;
+		tmp_ccp = ccp + enc_schema * WCH_SIZE;
+		continue; 
+	    }
+	} else if (! *p)
 	    perr(XCINMSG_ERROR, N_("%s(%d): unexpected syscin key: %s.\n"),
 		cintab->fname_cin, cintab->lineno, cmd);
 
 	i = (int)(p-plane_str);
-	if (ccp[i].n >= N_CCODE_RULE)
+	if (tmp_ccp[i].n >= N_CCODE_RULE)
 	    perr(XCINMSG_WARNING, 
 		N_("%s(%d): too many rules for char plane %d, ignore.\n"),
 		cintab->fname_cin, cintab->lineno, i+1);
 
 	s = arg;
-	idx = ccp[i].n;
+	idx = tmp_ccp[i].n;
 	if (! get_word(&s, numbuf, 20, "-") || 
 	    check_hex_num(numbuf, &num) == -1)
 	    perr(XCINMSG_ERROR, N_("%s(%d): hex number expected.\n"),
 		cintab->fname_cin, cintab->lineno);
-	ccp[i].begin[idx] = (ubyte_t)num;
+	tmp_ccp[i].begin[idx] = (ubyte_t)num;
 	s ++;
 	if (! get_word(&s, numbuf, 20, "-") || 
 	    check_hex_num(numbuf, &num) == -1)
 	    perr(XCINMSG_ERROR, N_("%s(%d): hex number expected.\n"),
 		cintab->fname_cin, cintab->lineno);
-	ccp[i].end[idx] = (ubyte_t)num;
-	ccp[i].n ++;
+	tmp_ccp[i].end[idx] = (ubyte_t)num;
+	if (tmp_ccp[i].begin[idx] > tmp_ccp[i].end[idx])
+	    perr(XCINMSG_ERROR, N_("%s(%d): the begin value is greater than the end value.\n"),
+		cintab->fname_cin, cintab->lineno);
+	tmp_ccp[i].n ++;
     }
 }
 
@@ -227,7 +240,7 @@ syscin(cintab_t *cintab)
     char inpn_2bytes[CIN_CNAME_LENGTH];
     char cmd[30], arg[15];
     wch_t ascii[N_ASCII_KEY];
-    charcode_t ccp[WCH_SIZE];
+    charcode_t ccp[N_ENC_SCHEMA * WCH_SIZE];
     int i;
 
     memset(inpn_english, 0, CIN_CNAME_LENGTH);
@@ -253,8 +266,7 @@ syscin(cintab_t *cintab)
 		perr(XCINMSG_ERROR, 
 			N_("%s(%d): %s: argument \"begin\" expected.\n"),
 			cintab->fname_cin, cintab->lineno, cmd);
-	    for (i=0; i<WCH_SIZE; i++)
-		memset(ccp+i, 0, sizeof(charcode_t));
+	    memset(ccp, 0, sizeof(ccp));
 	    read_encoding(ccp, cintab);
 	}
 	else if (i < 4) {
@@ -284,5 +296,5 @@ syscin(cintab_t *cintab)
     fwrite(inpn_sbyte, sizeof(char), CIN_CNAME_LENGTH, cintab->fw);
     fwrite(inpn_2bytes, sizeof(char), CIN_CNAME_LENGTH, cintab->fw);
     fwrite(ascii, sizeof(wch_t), N_ASCII_KEY, cintab->fw);
-    fwrite(ccp, sizeof(charcode_t), WCH_SIZE, cintab->fw);
+    fwrite(ccp, sizeof(charcode_t), WCH_SIZE * N_ENC_SCHEMA, cintab->fw);
 }

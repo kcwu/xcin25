@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include "xcintool.h"
@@ -165,27 +166,69 @@ zh_hex_xim_end(void *conf, inpinfo_t *inpinfo)
 
 ----------------------------------------------------------------------------*/
 
-static wchar_t 
-zh_hex_check_char(zh_hex_conf_t *cf, char *keystroke)
+#define MIN(a,b) ((a) <= (b) ? (a) : (b))
+static int
+IsValidByteSeq(charcode_t *ccp, unsigned char *s, int num, int incomplete)
 {
-    unsigned int cc;
+   int i, j, idx, enc_schema, num_char;
+
+   num_char = MIN(num, WCH_SIZE);
+   for (enc_schema = 0; enc_schema < N_ENC_SCHEMA; ++enc_schema) {
+       charcode_t *tmp_ccp = ccp + enc_schema * WCH_SIZE;
+       if (tmp_ccp[0].n == 0) return -1;
+
+       for (i=0; i<num_char; i++) {
+           idx = tmp_ccp[i].n;
+
+           for (j=0; j<idx; j++) {
+	       unsigned char s1, begin, end;
+
+	       if (incomplete && i == num_char -1) {
+		   s1 = *(s+i) & 0xf0;
+		   begin = tmp_ccp[i].begin[j] & 0xf0;
+		   end = tmp_ccp[i].end[j] & 0xf0;
+	       } else {
+		   s1 = *(s+i);
+		   begin = tmp_ccp[i].begin[j];
+		   end = tmp_ccp[i].end[j];
+	       }
+
+	       if ( s1 >= begin && s1 <= end ) break;
+           }
+
+          if (idx == 0  || j == idx) break;
+       }
+
+       if (i == num_char) return enc_schema;
+   }
+
+  return -1;
+}
+#undef MIN
+
+static int
+zh_hex_compose_char(char *s, char *keystroke, int num_keys)
+{
+    unsigned int cc, i;
+
+    for (i = 0; i < num_keys; ++i) {
+    	cc = keystroke[i];
+    	cc -= ('0' <= cc && cc <= '9') ? '0' : ('A'-10);
+	if (i % 2) s[i/2] |= cc;
+	else s[i/2] |= (cc << 4);
+    }
+   
+    return (num_keys + 1)/2;
+}
+
+static wchar_t
+zh_hex_check_char(zh_hex_conf_t *cf, char *keystroke, int num_keys)
+{
     wch_t cch;
 
     cch.wch = 0;
 
-    cc = keystroke[0];
-    cc -= ('0' <= cc && cc <= '9') ? '0' : ('A'-10);
-    cch.s[0] |= (cc << 4);
-    cc = keystroke[1];
-    cc -= ('0' <= cc && cc <= '9') ? '0' : ('A'-10);
-    cch.s[0] |= cc;
-
-    cc = keystroke[2];
-    cc -= ('0' <= cc && cc <= '9') ? '0' : ('A'-10);
-    cch.s[1] |= (cc << 4);
-    cc = keystroke[3];
-    cc -= ('0' <= cc && cc <= '9') ? '0' : ('A'-10);
-    cch.s[1] |= cc;
+    zh_hex_compose_char(cch.s, keystroke, num_keys);
 
     return (match_encoding(&cch)) ? cch.wch : 0;
 }
@@ -221,6 +264,11 @@ zh_hex_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
     else if ((XK_0 <= keysym && keysym <= XK_9) ||
              (XK_A <= keysym && keysym <= XK_F) ||
              (XK_a <= keysym && keysym <= XK_f)) {
+
+	int enc_schema, num_char;
+	unsigned char keystroke[KEY_CODE_LEN];
+	char code[4];
+
 	if ((keyinfo->keystate & ShiftMask))
 	    return IMKEY_SHIFTESC;
 	else if ((keyinfo->keystate & ControlMask) || 
@@ -232,6 +280,16 @@ zh_hex_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 
         inpinfo->cch_publish.wch = (wchar_t)0;
 	keychar = (char)toupper(keyinfo->keystr[0]);
+
+	memset(code, 0, 4);
+	if (len) strncpy(keystroke, iccf->keystroke, len);
+	keystroke[len] = keychar;
+	num_char = zh_hex_compose_char(code, keystroke, len+1);
+	if ((enc_schema = IsValidByteSeq(cf->ccode_info.ccode, code, num_char, 
+				(len+1) % 2 ? 1 : 0)) == -1)
+	    return ((cf->beep_mode & INP_MODE_BEEPWRONG)) ?
+                        IMKEY_BELL : IMKEY_ABSORB;
+
 	iccf->keystroke[len] = keychar;
 	iccf->keystroke[len+1] = '\0';
 	inpinfo->s_keystroke[len].wch = (wchar_t)0;
@@ -239,12 +297,12 @@ zh_hex_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	inpinfo->s_keystroke[len+1].wch = (wchar_t)0;
 	len ++;
 
-	if (len < cf->ccode_info.n_ch_encoding * 2) {
+	if (len < cf->ccode_info.n_ch_encoding[enc_schema] * 2) {
 	    inpinfo->keystroke_len ++;
 	    return IMKEY_ABSORB;
 	}
 	else {
-	    if ((cch_w.wch = zh_hex_check_char(cf, iccf->keystroke))) {
+	    if ((cch_w.wch = zh_hex_check_char(cf, iccf->keystroke, len))) {
 		strncpy(cch_s, (char *)cch_w.s, WCH_SIZE);
 		cch_s[WCH_SIZE] = '\0';
 

@@ -49,11 +49,11 @@ typedef signed char tsisize_t;        /* max length of a "tsi" is 127 "zi" */
 #define  MAX_TSI_LEN         30		/* smaller length for less memory consumption before fix */
 
 #define  INVALID_ICODE_IDX      -128
-#define  FIRST_TSI_NUM          200000
+#define  FIRST_TSI_NUM          2000000
 /* icode_idx_t ranges:
    -128                         => INVALID_ICDOE_IDX
    -127 ~ -1                    => ASCII
-      0 ~ 199999                => single multibyte char
+      0 ~ 1999999               => single multibyte char
    FIRST_TSI_NUM ~ INT_MAX      => valid tsi_num
 */
 

@@ -9,7 +9,7 @@ build = $(top_srcdir)/libtool --mode=execute $(cin2tab)
 all: all-$(OS_TYPE)
 
 all-LINUX:
-	( BIG5ENC=big5 BIG5HKENC=big5hkscs $(MAKE) -f Rules make-big5 make-big5hkscs )
+	( BIG5ENC=big5 BIG5HKENC=big5hkscs EUCTWENC=euc-tw $(MAKE) -f Rules make-big5 make-big5hkscs make-cns11643 )
 
 all-FREEBSD:
 	( BIG5ENC=big5 $(MAKE) -f Rules make-big5 )
@@ -40,7 +40,7 @@ all-UNKNOWN:
 install: all install-$(OS_TYPE)
 
 install-LINUX:
-	( BIG5ENC=big5 BIG5HKENC=big5hkscs $(MAKE) -f Rules install_big5 install_big5hkscs )
+	( BIG5ENC=big5 BIG5HKENC=big5hkscs EUCTWENC=euc-tw $(MAKE) -f Rules install_big5 install_big5hkscs install_cns11643 )
 
 install-FREEBSD:
 	( BIG5ENC=big5 $(MAKE) -f Rules install_big5 )

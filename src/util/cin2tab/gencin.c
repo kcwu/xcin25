@@ -146,20 +146,15 @@ cin_keyname(char *arg, cintab_t *cintab)
 static int
 icode_cmp(const void *a, const void *b)
 {
+    int i;
     cin_char_t *aa=(cin_char_t *)a, *bb=(cin_char_t *)b;
 
-    if (aa->key[0] == bb->key[0]) {
-	if (aa->key[1] == bb->key[1])
-	    return 0;
-	else if (aa->key[1] > bb->key[1])
+    for(i=0; i<MAX_ICODE_MODE; i++)
+	if(aa->key[i] > bb->key[i])
 	    return 1;
-	else
+	else if(aa->key[i] < bb->key[i])
 	    return -1;
-    }
-    else if (aa->key[0] > bb->key[0])
-	return 1;
-    else
-	return -1;
+    return 0;
 }
 
 /* A "phrase" as processed in parse_phrase() may consist of one or 
@@ -172,147 +167,43 @@ parse_phrase(char arg[], icode_idx_t tsi[], tsisize_t* tsi_len_p)
 {
     char *cp = arg;
     static icode_idx_t tsi_num = FIRST_TSI_NUM;
-    int arg_len;
-    int n_plane;
-    int hexwch_len;
-    /* int non_hexwch_0x = 0; */   /* 0 => false, 1 => true */
-    char hexstr[2+WCH_SIZE*2+1];
+    int len;
     icode_idx_t ic;
     wch_t wch;
-    int i;
-
-    arg_len = strlen(arg);
-    n_plane = ccinfo.n_ch_encoding;
-    hexwch_len = 2 + n_plane * 2;    /* e.g. 0xa140 has 2+2*2 bytes long */
-
-    memset(wch.s, 0, sizeof(wch_t));
 
     *tsi_len_p = 0;
 
-    if (arg_len < n_plane) {
-        *tsi_len_p = 0;
-        return (tsi[0] = INVALID_ICODE_IDX);
-    }
-    else if (arg_len == n_plane) {
-    /* maybe a single multibyte char */
-    /* We don't accept singelbyte ASCII string with length equal to n_plane */
-        if (n_plane > WCH_SIZE)
-            perr(XCINMSG_ERROR, 
-                 N_("The encoding has %d bytes for a multibyte character!\n"),
-                 n_plane);
-        strncpy((char *)wch.s, arg, arg_len);
-        tsi[0] = ccode_to_idx(&wch);
-        if (tsi[0] == -1)
-            *tsi_len_p = 0;
-        else
-            *tsi_len_p = 1;
-        return tsi[0]; 
-    }
-    /* "hex-rep zi" case*/
-    else if (arg_len == hexwch_len && 
-             (strncmp(arg, "0x", 2) == 0 || strncmp(arg, "0X", 2) == 0)) {
-        /* maybe a single multibyte char with 0xaabb representation */
-        if (read_hexwch(wch.s, arg)) {
-            tsi[0] = ccode_to_idx(&wch);
-            if (tsi[0] != -1)
-                *tsi_len_p = 1;
-            else
-                *tsi_len_p = 0;
-            return tsi[0];
-        } 
-/*
-        else
-            non_hexwch_0x = 1;
-*/
-    }
-
-/* The following is when (arg_len > n_plane) except for "hex-rep zi" case*/
-
-    while (*cp) {
-        /* maybe several multibyte chars combined with 0 or more
-         * singlebyte char */
-
-        while (strncmp(cp, "0x", 2) == 0 || 
-               strncmp(cp, "0X", 2) == 0   ) {
-            if (strlen(cp) < hexwch_len) {
-                tsi[(*tsi_len_p)] = (icode_idx_t)(cp[0] * -1);
-                (*tsi_len_p)++;
-                tsi[(*tsi_len_p)] = (icode_idx_t)(cp[1] * -1);
-                (*tsi_len_p)++;
-                cp += 2;
-                continue;
-            }
-            /* when strlen(cp) >= hexwch_len */
-            strncpy(hexstr, cp, hexwch_len);
-            hexstr[hexwch_len] = '\0';
-            if (read_hexwch(wch.s, hexstr)) {
-                ic = ccode_to_idx(&wch);
-                if (ic != -1) {
-                    tsi[(*tsi_len_p)] = ic;
-                    (*tsi_len_p)++;
-                    cp += hexwch_len;
-                } 
-                else { /* common hex digit string with length == hexwch_len */
-                    for (i = 0; i < hexwch_len; i++) {
-                        tsi[(*tsi_len_p)] = (icode_idx_t)(cp[i] * -1);
-                        (*tsi_len_p)++;
-                    }
-                    cp += hexwch_len;
-                }
-            }
-            else {
-                tsi[(*tsi_len_p)] = (icode_idx_t)(cp[0] * -1); /* '0' */
-                (*tsi_len_p)++;
-                tsi[(*tsi_len_p)] = (icode_idx_t)(cp[1] * -1); /* 'x' or 'X' */
-                (*tsi_len_p)++;
-                cp += 2;
-            }
+    while (*cp && *tsi_len_p < MAX_TSI_LEN) {
+        len=read_hexch_enc(&wch, cp);
+	if(len==0)
+	    len=mbtowch(&wch, cp, WCH_SIZE);
+	if(len) {
+	    ic = ccode_to_idx(&wch);
+	    if (ic != -1) {
+		tsi[(*tsi_len_p)] = ic;
+		(*tsi_len_p)++;
+		cp += len;
+		continue;
+	    } 
         }
-
-        if (strlen(cp) >= n_plane) {
-            strncpy(wch.s, cp, n_plane);
-            ic = ccode_to_idx(&wch);
-            if (ic != -1) {
-                tsi[(*tsi_len_p)] = ic;
-                (*tsi_len_p)++;
-                cp += n_plane;
-                continue;
-            }
-            /* if (ic == -1) */
-            if (! isgraph(wch.s[0])) {
-                *tsi_len_p = 0;
-                return (tsi[0] = INVALID_ICODE_IDX);
-            }
-            else {
-                tsi[(*tsi_len_p)] = (icode_idx_t)(wch.s[0] * -1);
-                (*tsi_len_p)++;
-                cp++;
-            }
-        }
-        else {
-            while (*cp) {
-                if (! isgraph(*cp)) {
-                     *tsi_len_p = 0;
-                     return (tsi[0] = INVALID_ICODE_IDX);
-                }
-                else {
-                    tsi[(*tsi_len_p)] = (icode_idx_t)(cp[0] * -1);
-                    (*tsi_len_p)++;
-                    cp++;
-                }
-            }
+	if(isgraph(*cp)) {
+	    tsi[(*tsi_len_p)] = (icode_idx_t)((unsigned)*cp * -1);
+	    (*tsi_len_p)++;
+	    cp++;
+	} else {
+	    *tsi_len_p = 0;
+	    break;
         }
     }
 
-    if (*tsi_len_p > 1) {
-        return tsi_num++;
-    }
-    else {
-        perr(XCINMSG_ERROR,
-             N_("The length of tsi(%d) is not larger than 1\n"), *tsi_len_p);
-        return (tsi[0] = INVALID_ICODE_IDX);
-    }
-
+    if (*tsi_len_p == 0)
+	return (tsi[0] = INVALID_ICODE_IDX);
+    else if(*tsi_len_p == 1)
+	return tsi[0];
+    else if(*tsi_len_p == MAX_TSI_LEN && *cp)
+	perr(XCINMSG_WARNING, N_("phrase too long\n"));
+    else
+	return tsi_num++;
 }
         
 static void

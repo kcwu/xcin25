@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 
-#define KEY_CODE_LEN	     4
+#define KEY_CODE_LEN	     8
 
 #define INP_MODE_BEEPWRONG   0x01     /* Beap when type a wrong char. */
 

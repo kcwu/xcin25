@@ -30,6 +30,7 @@
 #include <X11/Xos.h>
 #include "constant.h"
 #include "xcintool.h"
+#include "module.h"
 #include "gui.h"
 #include "xcin.h"
 
@@ -130,8 +131,7 @@ win_draw_multich(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
     for (i=0; i<n_groups && toggle_flag!=-1; i++, selkey++) {
 	n = (toggle_flag > 0) ? inpinfo->mcch_grouping[i+1] : 1;
 	if (selkey->wch != (wchar_t)0) {
-	    /* Modify by Firefly(firefly@firefly.idv.tw) */
-	    len = strlen(selkey->s);
+	    len = strlen(selkey);
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[spot_GC_idx], x, y, (char *)selkey->s, len);
 	    x += (XmbTextEscapement(win->font->fontset, 
@@ -142,8 +142,7 @@ win_draw_multich(gui_t *gui, winlist_t *win, inpinfo_t *inpinfo)
 		toggle_flag = -1;
 		break;
 	    }
-	    /* Modify by Firefly(firefly@firefly.idv.tw) */
-	    len = strlen(cch->s);
+	    len = wchlen(cch);
 	    XmbDrawImageString(gui->display, win->window, win->font->fontset, 
 			win->wingc[GC_idx], x, y, (char *)cch->s, len);
 	    x += XmbTextEscapement(win->font->fontset, (char *)cch->s, len);
@@ -308,6 +307,7 @@ win_draw(gui_t *gui, winlist_t *win, IC *ic, xmode_t xcin_mode)
 
 	/* Draw area 4. */
 	if (imc->inpinfo.cch_publish.wch) {
+	    imc->inpinfo.cch_publish.s[MB_CUR_MAX] = 0x0;
             slen = snprintf(buf, 256, "%s:", imc->inpinfo.cch_publish.s);
 	    str = buf + slen;
             if (imc->sinmd_keystroke[0].wch &&

@@ -474,7 +474,7 @@ void load_syscin(void)
     char inpn_sbyte[CIN_CNAME_LENGTH];
     char inpn_2bytes[CIN_CNAME_LENGTH];
     wch_t ascii[N_ASCII_KEY];
-    charcode_t ccp[WCH_SIZE];
+    charcode_t ccp[N_ENC_SCHEMA * WCH_SIZE];
 
     snprintf(sub_path, 256, "tab/%s", xrc->locale.encoding);
     if (check_datafile("sys.tab", sub_path, xrc, truefn, 256) == True)
@@ -495,7 +495,7 @@ void load_syscin(void)
 	fread(inpn_2bytes, sizeof(char), CIN_CNAME_LENGTH, fp)
 		!= CIN_CNAME_LENGTH ||
 	fread(ascii, sizeof(wch_t), N_ASCII_KEY, fp) != N_ASCII_KEY ||
-	fread(ccp, sizeof(charcode_t), WCH_SIZE, fp) != WCH_SIZE)
+	fread(ccp, sizeof(charcode_t), N_ENC_SCHEMA * WCH_SIZE, fp) != N_ENC_SCHEMA * WCH_SIZE)
 	perr(XCINMSG_ERROR, N_("sys.tab reading error.\n"));
     fclose(fp);
 

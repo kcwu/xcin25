@@ -1,0 +1,119 @@
+%sys
+#
+# This is the system constant string cin file of xcin-2.5.
+# 
+# keyname		big5-char
+
+INPN_ENGLISH		ÓÁí°
+INPN_SBYTE		Æ¤Ê°
+INPN_2BYTES		ÇÀÊ°
+
+ASCII_space		0xa1a1
+ASCII_exclam		¡ª
+ASCII_quotedbl		¡ç
+ASCII_numbersign	¡ì
+ASCII_dollar		¢ã
+ASCII_percent		¢è
+ASCII_ampersand		¡í
+ASCII_apostrophe	¡å
+ASCII_parenleft		¡¾
+ASCII_parenright	¡¿
+ASCII_asterisk		¡î
+ASCII_plus		¢°
+ASCII_comma		¡¢
+ASCII_minus		¢±
+ASCII_period		¡¥
+ASCII_slash		£Ì
+ASCII_0			¤¡
+ASCII_1			¤¢
+ASCII_2			¤£
+ASCII_3			¤¤
+ASCII_4			¤¥
+ASCII_5			¤¦
+ASCII_6			¤§
+ASCII_7			¤¨
+ASCII_8			¤©
+ASCII_9			¤ª
+ASCII_colon		¡¨
+ASCII_semicolon		¡§
+ASCII_less		¢¶
+ASCII_equal		¢¸
+ASCII_greater		¢·
+ASCII_question		¡©
+ASCII_at		¢é
+ASCII_A			¤Á
+ASCII_B			¤Â
+ASCII_C			¤Ã
+ASCII_D			¤Ä
+ASCII_E			¤Å
+ASCII_F			¤Æ
+ASCII_G			¤Ç
+ASCII_H			¤È
+ASCII_I			¤É
+ASCII_J			¤Ê
+ASCII_K			¤Ë
+ASCII_L			¤Ì
+ASCII_M			¤Í
+ASCII_N			¤Î
+ASCII_O			¤Ï
+ASCII_P			¤Ð
+ASCII_Q			¤Ñ
+ASCII_R			¤Ò
+ASCII_S			¤Ó
+ASCII_T			¤Ô
+ASCII_U			¤Õ
+ASCII_V			¤Ö
+ASCII_W			¤×
+ASCII_X			¤Ø
+ASCII_Y			¤Ù
+ASCII_Z			¤Ú
+ASCII_bracketleft	¡Æ
+ASCII_backslash		£Í
+ASCII_bracketright	¡Ç
+ASCII_asciicircum	¡Ô
+ASCII_underscore	¢¥
+ASCII_grave		¡ê
+ASCII_a			¤Û
+ASCII_b			¤Ü
+ASCII_c			¤Ý
+ASCII_d			¤Þ
+ASCII_e			¤ß
+ASCII_f			¤à
+ASCII_g			¤á
+ASCII_h			¤â
+ASCII_i			¤ã
+ASCII_j			¤ä
+ASCII_k			¤å
+ASCII_l			¤æ
+ASCII_m			¤ç
+ASCII_n			¤è
+ASCII_o			¤é
+ASCII_p			¤ê
+ASCII_q			¤ë
+ASCII_r			¤ì
+ASCII_s			¤í
+ASCII_t			¤î
+ASCII_u			¤ï
+ASCII_v			¤ð
+ASCII_w			¤ñ
+ASCII_x			¤ò
+ASCII_y			¤ó
+ASCII_z			¤ô
+ASCII_braceleft		¡Â
+ASCII_bar		¡¶
+ASCII_braceright	¡Ã
+ASCII_asciitilde	¢Ä
+
+#
+#  This is Big5 encoding, char1: <0xa1> ... <0xf9>
+#			  char2: <0x40> ... <0x7e>, <0xa1> ... <0xfe>
+%charcode	begin
+plane1		0xa1-0xfe
+plane2		0xa1-0xfe
+%schema		1
+plane1		0x8e-0x8e
+plane2		0xa2-0xa2
+plane2		0xae-0xae
+plane3		0xa1-0xfe
+plane4		0xa1-0xfe
+%charcode	end

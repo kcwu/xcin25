@@ -95,6 +95,32 @@ cmd_arg(char *cmd, int cmdlen, ...)
 }
 
 int
+read_hexch_enc(wch_t *wch, char *arg)
+{
+    int i;
+    char *s;
+    unsigned char wch_str[WCH_SIZE+1];
+    char tmp[3];
+    int len;
+
+    if (arg[0] != '0' || !(arg[1] == 'x' || arg[1] == 'X'))
+	return 0;
+
+    tmp[2] = '\0';
+    s=arg+2;
+    for(i=0; i<WCH_SIZE && isxdigit(s[0]) && isxdigit(s[1]); i++, s+=2) {
+	tmp[0]=s[0];
+	tmp[1]=s[1];
+	wch_str[i] = (unsigned char)strtoul(tmp, NULL, 16);
+    }
+    wch_str[i] = '\0';
+
+    len=mbtowch(wch, wch_str, WCH_SIZE);
+    if(len==0) return 0;
+    return 2+len*2;
+}
+
+int
 read_hexwch(unsigned char *wch_str, char *arg)
 {
     if (arg[0] == '0' && (arg[1] == 'x' || arg[1] == 'X')) {
@@ -144,7 +170,7 @@ load_systab(char *sysfn, xcin_rc_t *xrc)
 {
     FILE *fp=NULL;
     char  version[40], true_fn[256];
-    charcode_t ccp[WCH_SIZE];
+    charcode_t ccp[N_ENC_SCHEMA * WCH_SIZE];
 
     if (sysfn) {
 	if (! (fp = open_file(sysfn, "rb", XCINMSG_EMPTY))) {
@@ -170,7 +196,7 @@ load_systab(char *sysfn, xcin_rc_t *xrc)
 	perr(XCINMSG_ERROR, N_("%s: invalid version.\n"), true_fn);
 
     if (fseek(fp, CIN_CNAME_LENGTH*3+sizeof(wch_t)*N_ASCII_KEY, SEEK_CUR)==-1 ||
-	fread(ccp, sizeof(charcode_t), WCH_SIZE, fp) != WCH_SIZE)
+	fread(ccp, sizeof(charcode_t), WCH_SIZE * N_ENC_SCHEMA, fp) != WCH_SIZE * N_ENC_SCHEMA)
 	perr(XCINMSG_ERROR, N_("%s: reading error.\n"), true_fn);
 
     fclose(fp);

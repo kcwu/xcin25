@@ -114,6 +114,11 @@ xcin-2.5.3-pre3:  2004/09/21
     Add tlpa.cin, Taiwanese Languages Phonetic Alphabet
     Thanks to Phuann, KhoGuan <khoguanp@yahoo.com>
 
+41. Multiple encoding schema support for variable length encoding, 
+    e.g. utf8, cns11643(euc-tw), gb18030
+    Add sys.cin and cj.cin for cns11643
+    Thanks to Federic Zhang <Federic.Zhang@Sun.COM>
+
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------

@@ -232,6 +232,7 @@ struct module_s {
 #define  N_CCODE_RULE           5       /* # of rules of encoding */
 #define  N_KEYCODE              50      /* # of valid keys 0-9, a-z, .... */
 #define  N_ASCII_KEY            95      /* Num of printable ASCII char */
+#define  N_ENC_SCHEMA		3	/* Num of encoding schema */
 
 /* For encoding check. */
 typedef struct {
@@ -241,8 +242,8 @@ typedef struct {
 
 typedef struct {
     unsigned int total_char;
-    ubyte_t n_ch_encoding;
-    charcode_t ccode[WCH_SIZE];
+    ubyte_t n_ch_encoding[N_ENC_SCHEMA];
+    charcode_t ccode[N_ENC_SCHEMA * WCH_SIZE];
 } ccode_info_t;
 
 /* Define the qphrase classes. */
@@ -264,6 +265,7 @@ extern void codes2keys(unsigned int *klist, int n_klist, char *keystroke, int ke
 /* CharCode system */
 extern void ccode_init(charcode_t *ccp, int n);
 extern void ccode_info(ccode_info_t *info);
+extern int mbtowch(wch_T *wch, const char *wch_str, int nbytes);
 extern int match_encoding(wch_t *wch);
 extern int ccode_to_idx(wch_t *wch);
 extern int ccode_to_char(int idx, unsigned char *mbs, int mbs_size);

@@ -33,11 +33,16 @@ big5hkscs =	sys.tab.$(BIG5HKENC) \
 		tcj.tab.$(BIG5HKENC) \
 		wm2.tab.$(BIG5HKENC)
 
+cns11643 =	sys.tab.$(EUCTWENC) \
+		cj.tab.$(EUCTWENC)
+
 include Makefile
 
 make-big5: $(big5) 
 
 make-big5hkscs: $(big5hkscs)
+
+make-cns11643: $(cns11643)
 
 sys.tab.$(BIG5ENC): sys.cin.big5
 	$(build) -r $(xcinrc) -l $(BIG5ENC) -o $@ sys.cin.big5
@@ -93,6 +98,12 @@ tlpa.tab.$(BIG5ENC): tlpa.cin sys.tab.$(BIG5ENC)
 	$(build) -r $(xcinrc) -l $(BIG5ENC) \
 		-s sys.tab.$(BIG5ENC) -o $@ tlpa.cin
 
+sys.tab.$(EUCTWENC): sys.cin.cns11643
+	$(build) -r $(xcinrc) -l $(EUCTWENC) -o $@ sys.cin.cns11643
+cj.tab.$(EUCTWENC): cj.cin sys.tab.$(EUCTWENC)
+	$(build) -r $(xcinrc) -l $(EUCTWENC) \
+	    -s sys.tab.$(EUCTWENC) -o $@ cj.cin.cns11643
+
 sys.tab.$(BIG5HKENC): sys.cin.big5hkscs
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) -o $@ sys.cin.big5hkscs
 array30.tab.$(BIG5HKENC): array30.cin sys.tab.$(BIG5HKENC)
@@ -138,6 +149,12 @@ wm2.tab.$(BIG5HKENC): wm2.cin sys.tab.$(BIG5HKENC)
 	$(build) -r $(xcinrc) -l $(BIG5HKENC) \
 		-s sys.tab.$(BIG5HKENC) -o $@ wm2.cin
 
+install_cns11643:
+	if [ ! -d $(xcin_datap)/$(EUCTWENC) ]; then \
+	  $(INSTALL) -d $(xcin_datap)/$(EUCTWENC); fi
+	for f in $(cns11643) default.phr; do \
+	  ff=`basename $$f .$(EUCTWENC)`; \
+	  $(INSTALL_DATA) $$f $(xcin_datap)/$(EUCTWENC)/$$ff; done
 install_big5:
 	if [ ! -d $(xcin_datap)/$(BIG5ENC) ]; then \
 	  $(INSTALL) -d $(xcin_datap)/$(BIG5ENC); fi

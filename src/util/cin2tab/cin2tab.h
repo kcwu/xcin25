@@ -36,6 +36,7 @@ typedef struct {
 
 extern int cmd_arg(char *cmd, int cmdlen, ...);
 extern int read_hexwch(unsigned char *wch_str, char *arg);
+extern int read_hexwch_enc(unsigned char *wch_str, char *arg);
 extern void load_systab(char *sysfn, xcin_rc_t *xrc);
 
 #endif
