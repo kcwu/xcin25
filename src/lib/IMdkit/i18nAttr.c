@@ -51,7 +51,7 @@ typedef struct
 IMListOfAttr Default_IMattr[] =
 {
     {XNQueryInputStyle,   XimType_XIMStyles},
-/*    {XNQueryIMValuesList, XimType_XIMValuesList},	*/
+    {XNQueryIMValuesList, XimType_XIMValuesList},
     {(char *) NULL, (CARD16) 0}
 };
 

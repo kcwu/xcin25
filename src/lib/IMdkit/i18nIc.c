@@ -717,9 +717,23 @@ void _Xi18nChangeIC (XIMS ims,
 
     if (i18n_core->address.improto)
     {
-        if (!(i18n_core->address.improto(ims, call_data)))
+	int ret, i;
+
+	ret = i18n_core->address.improto(ims, call_data);
+	for (i=0; i<preedit_ic_num; i++) {
+	    if (pre_attr[i].value_length)
+		free(pre_attr[i].value);
+	}
+	for (i=0; i<status_ic_num; i++) {
+	    if (sts_attr[i].value_length)
+		free(sts_attr[i].value);
+	}
+	for (i=0; i<ic_num; i++) {
+	    if (ic_attr[i].value_length)
+		free(ic_attr[i].value);
+	}
+	if (ret == 0)
             return;
-        /*endif*/
     }
     /*endif*/
     if (create_flag == True)
