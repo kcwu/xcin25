@@ -102,6 +102,7 @@ xcin-2.5.3-pre3:  2004/09/21
 
 35. Support toggle of bims tsiguess feature, which disabled by default
 
+36. Fix cin2tab i18n message display
 
 xcin-2.5.3-pre2:  2001/12/02
 ------------------------------

@@ -258,12 +258,14 @@ main(int argc, char **argv)
 {
     char *s;
     int rev;
+    char loc_return[128], enc_return[128];
 #ifdef HPUX
     extern char *optarg;
     extern int opterr, optopt, optind;
 #endif
 
     set_perr("cin2tab");
+    set_lc_ctype("", loc_return, 128, enc_return, 128, XCINMSG_ERROR);
     set_lc_messages("", NULL, 0);
     cintab.xrc.argc = argc;
     cintab.xrc.argv = argv;
