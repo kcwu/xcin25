@@ -28,10 +28,13 @@
 #include <X11/keysym.h>
 #ifdef HAVE_LIBTABE
 #include <tabe.h>
+#include <iconv.h>
 #endif
 #include "xcintool.h"
 #include "module.h"
 #include "gen_inp.h"
+#define XCIN_BYTE_NATIVE   2
+#define XCIN_BYTE_UTF8     3
 
 /*----------------------------------------------------------------------------
 
@@ -307,6 +310,10 @@ gen_inp_init(void *conf, char *objname, xcin_rc_t *xrc)
     }
 
 #ifdef HAVE_LIBTABE
+    if ( strcasecmp(xrc->locale.encoding,"utf-8")==0 )
+	cf->codeset=XCIN_BYTE_UTF8;
+    else
+	cf->codeset=XCIN_BYTE_NATIVE;
     if (cfd.mode & (INP_MODE_HINTSEL | INP_MODE_HINTTSI)) {
 	snprintf(sub_path, 256, "tab/%s", xrc->locale.encoding);
 	if (check_datafile(ftsi, sub_path, xrc, truefn, 256) == True) {
@@ -1169,17 +1176,50 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 ----------------------------------------------------------------------------*/
 
 #ifdef HAVE_LIBTABE
-static void
-record_commit(gen_inp_iccf_t *iccf, char *cmtstr)
+static int my_mbstowcs(gen_inp_conf_t *cf, wch_t *wcs, const char *mbs, size_t nwcs)
 {
-    char *history=iccf->commithistory;
-    int len=strlen(cmtstr);
+    int i;
+    size_t nb;
+    if(cf->codeset == XCIN_BYTE_UTF8) {
+	nb=3;
+    } else {
+	nb=2;
+    }
+    for(i=0; i<nwcs && *mbs; i++, mbs+=nb) {
+	wcs[i].wch='\0';
+	memcpy(wcs[i].s, mbs, nb);
+    }
+    return i;
+}
+
+static int my_wcstombs(gen_inp_conf_t *cf, char *mbs, const wch_t *wcs, size_t nbyte)
+{
+    int i;
+    size_t nb;
+    if(cf->codeset == XCIN_BYTE_UTF8) {
+	nb=3;
+    } else {
+	nb=2;
+    }
+    for(i=0; i<nbyte && wcs->wch; i+=nb, wcs++) {
+	memcpy(mbs+i, wcs->s, nb);
+	mbs[i+nb]='\0';
+    }
+    return i;
+}
+
+static void
+record_commit(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, char *cmtstr)
+{
+    wch_t *history=iccf->commithistory;
+    wch_t cmtwcs[HINTSZ];
+    int len=my_mbstowcs(cf, cmtwcs, cmtstr, HINTSZ);
 
     if(len > HINTSZ)
-	memcpy(history, cmtstr+len-HINTSZ, HINTSZ);
+	memcpy(history, cmtwcs+len-HINTSZ, HINTSZ*sizeof(wch_t));
     else {
 	memmove(history, history+len, HINTSZ-len);
-	memcpy(history+HINTSZ-len, cmtstr, len);
+	memcpy(history+HINTSZ-len, cmtwcs, len*sizeof(wch_t));
     }
 }
 
@@ -1188,7 +1228,7 @@ typedef struct candidate {
     int matchlen;
     long int ref;
     int len;
-    char str[TSISZ*2+1];
+    wch_t str[TSISZ+1];
 } candidate_t;
 
 static int
@@ -1201,7 +1241,7 @@ insert_candidate(int ncandi, candidate_t candi[], candidate_t *one, int max)
 	      one->ref <= candi[i].ref))
 	    break;
 	else if(candi[i].len == one->len &&
-		memcmp(candi[i].str, one->str, one->len*2) == 0)
+		memcmp(candi[i].str, one->str, one->len*sizeof(wch_t)) == 0)
 	    return ncandi;
     }
     if(i < max) {
@@ -1213,24 +1253,69 @@ insert_candidate(int ncandi, candidate_t candi[], candidate_t *one, int max)
     return ncandi;
 }
 
+static int iconv_to_big5(gen_inp_conf_t *cf, const char *from, char *to, size_t to_len)
+{
+    if(cf->codeset == XCIN_BYTE_UTF8) {
+	size_t from_len=strlen(from);
+	int rtv = 0;
+	iconv_t cd=iconv_open("BIG-5","UTF-8");
+	if(iconv(cd, &from, &from_len, &to, &to_len)==(size_t)-1)
+	    rtv = errno;
+	if(to_len)
+	    *to='\0';
+	iconv_close(cd);
+	return rtv;
+    } else {
+	strcpy(to, from);
+    }
+    return 0;
+}
+
+static int iconv_from_big5(gen_inp_conf_t *cf, const char *from, char *to, size_t to_len)
+{
+    if(cf->codeset == XCIN_BYTE_UTF8) {
+	size_t from_len=strlen(from);
+	int rtv = 0;
+	iconv_t cd=iconv_open("UTF-8","BIG-5");
+	if(iconv(cd, &from, &from_len, &to, &to_len)==(size_t)-1)
+	    rtv = errno;
+	if(to_len)
+	    *to='\0';
+	iconv_close(cd);
+	return rtv;
+    } else {
+	strcpy(to, from);
+    }
+    return 0;
+}
+
 static int
 may_next(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf, wch_t word)
 {
     struct TsiInfo tsi;
-    char tmp[TSISZ*2+1], tsi_str[1024];
-    char *histend;
+    wch_t tmp[TSISZ+1];
+    char tsi_str[1024];
+    wch_t *histend;
+    char tmp_mbs[TSISZ*4],tmp_mbs_big5[TSISZ*4];
     int match;
+    int len;
 
     histend = iccf->commithistory+HINTSZ;
     tsi.tsi = (ZhiStr)tsi_str;
     for(match=TSISZ-1; match>=1; match--) {	/* Max Tsi len = TSISZ-1 */
-	memcpy(tmp, histend-match*2, match*2);
-	memcpy(tmp+match*2, word.s, 2);
-	tmp[match*2+2] = '\0';
-	strncpy(tsi_str, tmp, 1024);
+	memcpy(tmp, histend-match, match*sizeof(wch_t));
+	tmp[match]=word;
+	tmp[match+1].wch = '\0';
+	if(tmp[0].wch=='\0') continue;
+
+	len=my_wcstombs(cf, tmp_mbs, tmp, sizeof(tmp_mbs));
+	if(iconv_to_big5(cf, tmp_mbs, tmp_mbs_big5, sizeof(tmp_mbs_big5))!=0)
+	    continue;
+	strcpy(tsi_str, tmp_mbs_big5);
+	len=strlen(tsi_str);
 
 	if (cf->tsidb->CursorSet(cf->tsidb, &tsi, 1) == 0) {
-	    if (strncmp(tsi_str, tmp, match*2+2) == 0)
+	    if (strncmp(tsi_str, tmp_mbs_big5, len) == 0)
 		return True;
 	}
     }
@@ -1242,34 +1327,45 @@ guess_next(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf,
 	   candidate_t candi[], int maxcandi)
 {
     struct TsiInfo tsi;
-    char *histend, tsi_str[1024];
+    wch_t *histend;
+    char tsi_str[1024];
+    wch_t matched_wc[128];
+    char matched_mb[1024], matched_mb_big5[1024];
     int ncandi=0, match, guess, slen, errno;
     candidate_t one;
+    int match_strlen;
 
     histend = iccf->commithistory+HINTSZ;
     tsi.tsi = (ZhiStr)tsi_str;
     for(match=TSISZ-1; match>=1; match--) {	/* Max Tsi len = TSISZ-1 */
-	if (match*2 > HINTSZ)
+	if (match > HINTSZ)
 	    continue;
-	if (*(histend-match*2)=='\0')
+	if ((histend-match)->wch=='\0')
 	    continue;
 
 	for (guess=TSISZ-1-match; guess>=1; guess--) {
 	    if (guess-match > 2)
 		continue;
 
-	    strncpy(tsi_str, histend-match*2, match*2);
-	    tsi_str[match*2] = '\0';
+	    memcpy(matched_wc, histend-match, match*sizeof(wch_t));
+	    matched_wc[match].wch='\0';
+	    my_wcstombs(cf, matched_mb, matched_wc, sizeof(matched_mb));
+	    if(iconv_to_big5(cf, matched_mb, matched_mb_big5, sizeof(matched_mb_big5))!=0)
+		continue;
+	    strcpy(tsi_str, matched_mb_big5);
+	    match_strlen=strlen(matched_mb_big5);
 	    errno = cf->tsidb->CursorSet(cf->tsidb, &tsi, 1);
 	    while (errno == 0) {
-		if (memcmp(tsi_str, histend-match*2, match*2))
+		if (memcmp(tsi_str, matched_mb_big5, match_strlen))
 		    break;
-		slen = strlen(tsi_str)/2;
+		if(iconv_from_big5(cf, tsi_str, matched_mb, sizeof(matched_mb))!=0)
+		    continue;
+		slen = my_mbstowcs(cf, matched_wc, matched_mb, sizeof(matched_wc)/sizeof(wch_t));
 		if (slen == (match+guess)) {
 		    one.matchlen = match;
 		    one.ref = tsi.refcount;
 		    one.len = slen-match;
-		    strncpy(one.str, tsi_str+match*2, (slen-match)*2);
+		    memcpy(one.str, matched_wc+match, (slen-match)*sizeof(wch_t));
 		    ncandi = insert_candidate(ncandi, candi, &one, maxcandi);
 		}
 		errno = cf->tsidb->CursorNext(cf->tsidb, &tsi);
@@ -1314,9 +1410,11 @@ gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 			choice ++;
 		}
 		if (choice >= 1 && choice <= iccf->nreltsi) {
-		    strncpy(cch_s, iccf->reltsi+iccf->tsiindex[choice-1], 
-			    iccf->tsigroup[choice]*2);
-		    cch_s[iccf->tsigroup[choice]*2] = 0;
+		    wch_t tmp[TSISZ+1];
+		    memcpy(tmp, iccf->reltsi+iccf->tsiindex[choice-1],
+			    iccf->tsigroup[choice]*sizeof(wch_t));
+		    tmp[iccf->tsigroup[choice]].wch='\0';
+		    my_wcstombs(cf, cch_s, tmp, sizeof(cch_s));
 		    inpinfo->cch = cch_s;
 		    ret |= IMKEY_COMMIT;
 		}
@@ -1338,7 +1436,7 @@ gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	ret = gen_inp_keystroke(conf, inpinfo, keyinfo);
 
     if (ret & IMKEY_COMMIT)
-	record_commit(iccf, inpinfo->cch);
+	record_commit(cf, iccf, inpinfo->cch);
 
     if (cf->mode & INP_MODE_HINTTSI) {
 	if (ret != IMKEY_IGNORE)
@@ -1353,9 +1451,9 @@ gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	    for (i=0; i<ncandi; i++) {
 		int n = iccf->nreltsi;
 		memcpy(iccf->reltsi+iccf->tsiindex[n], candi[i].str,
-		       candi[i].len*2);
+		       candi[i].len*sizeof(wch_t));
 		iccf->tsigroup[n+1] = candi[i].len;
-		iccf->tsiindex[n+1] = iccf->tsiindex[n] + candi[i].len*2;
+		iccf->tsiindex[n+1] = iccf->tsiindex[n] + candi[i].len;
 		iccf->nreltsi ++;
 	    }
 	    iccf->showtsiflag = 1;
@@ -1365,10 +1463,8 @@ gen_inp_keystroke_wrap(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	    inpinfo->mcch_grouping    = iccf->tsigroup;
 	    inpinfo->mcch_grouping[0] = iccf->nreltsi;
 
-	    for (i=0; i<inpinfo->n_mcch; i++) {
-		inpinfo->mcch[i].s[0] = iccf->reltsi[i*2];
-		inpinfo->mcch[i].s[1] = iccf->reltsi[i*2+1];
-	    }
+	    for (i=0; i<inpinfo->n_mcch; i++)
+		inpinfo->mcch[i] = iccf->reltsi[i];
 	}
     }
 

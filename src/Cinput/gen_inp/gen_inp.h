@@ -71,6 +71,7 @@ typedef struct {
 
 #ifdef HAVE_LIBTABE
     struct TsiDB *tsidb;	/* tsi db */
+    int codeset;
 #endif
 } gen_inp_conf_t;
 
@@ -84,10 +85,10 @@ typedef struct {
     unsigned int n_mcch_list, mcch_hidx, mcch_eidx, n_mkey_list;
 
 #ifdef HAVE_LIBTABE
-    char commithistory[HINTSZ];	/* committed words */
+    wch_t commithistory[HINTSZ];	/* committed words */
     int showtsiflag;		/* show tsi flag */
     int nreltsi;
-    char reltsi[HINTSZ];	/* related tsi */
+    wch_t reltsi[HINTSZ];	/* related tsi */
     int tsiindex[HINTSZ];	/* index of tsi */
     ubyte_t tsigroup[HINTSZ];	/* group of tsi */
 #endif
