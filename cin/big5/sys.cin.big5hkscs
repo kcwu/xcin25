@@ -105,7 +105,7 @@ ASCII_braceright	бb
 ASCII_asciitilde	бу
 
 #
-#  This is Big5 encoding, char1: <0xa1> ... <0xf9>
+#  This is Big5 encoding, char1: <0x81> ... <0xfe>
 #			  char2: <0x40> ... <0x7e>, <0xa1> ... <0xfe>
 %charcode	begin
 plane1		0x81-0xfe
