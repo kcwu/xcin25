@@ -349,19 +349,22 @@ xcin_mainwin_draw(gui_t *gui, winlist_t *win)
     inp_state = (ic) ? ic->imc->inp_state : 0;
     if (! (inp_state & IM_CINPUT) && ! (inp_state & IM_2BYTES)) {
 	if ((xccore->xcin_mode & XCIN_MODE_HIDE) ||
-	    (xccore->xcin_mode & XCIN_MAINWIN2)) {
+	    (xccore->xcin_mode & XCIN_MAINWIN2)  ||
+	    (xccore->xcin_mode & XCIN_OVERSPOT_WINONLY)) {
 	    gui_winmap_change(win, 0);
 	    return;
 	}
     }
     else {
-	if ((xccore->xcin_mode & XCIN_MAINWIN2) && 
+	if (((xccore->xcin_mode & XCIN_MAINWIN2) ||
+	     (xccore->xcin_mode & XCIN_OVERSPOT_WINONLY)) && 
 	    ic->ic_rec.input_style != XIMSTY_Root) {
 	    gui_winmap_change(win, 0);
 	    return;
 	}
 	if ((xccore->xcin_mode & XCIN_MODE_HIDE) ||
-	    (xccore->xcin_mode & XCIN_MAINWIN2))
+	    (xccore->xcin_mode & XCIN_MAINWIN2)  ||
+	    (xccore->xcin_mode & XCIN_OVERSPOT_WINONLY))
 	    gui_winmap_change(win, 1);
 	if ((inp_state & IM_XIMFOCUS))
 	    XRaiseWindow(gui->display, win->window);
@@ -578,6 +581,7 @@ xcin_mainwin_init(gui_t *gui, xccore_t *xccore)
     XSelectInput(gui->display, win->window, (ExposureMask|StructureNotifyMask));
 
     if (! (xccore->xcin_mode & XCIN_MODE_HIDE) && 
+	! (xccore->xcin_mode & XCIN_OVERSPOT_WINONLY) &&
 	! (xccore->xcin_mode & XCIN_MAINWIN2))
 	gui_winmap_change(win, 1);
     return win;
