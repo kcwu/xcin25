@@ -234,7 +234,7 @@ read_xcinrc(xcin_rc_t *xrc, char *rcfile)
  *  Check xcin rcfile.
  */
     if (rcfile && rcfile[0])
-	strncpy(path, xrc->rcfile, 511);
+	strncpy(path, rcfile, 511);
     else if ((s = getenv("XCIN_RCFILE")))
 	strncpy(path, s, 511);
 

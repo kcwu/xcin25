@@ -1,6 +1,15 @@
 xcin-2.5.3-pre2:  2001/
 ------------------------------
 1. Fix memory leakage problem in IMdkit: i18nIc.c.
+   Thanks to <cwhuang@linux.org.tw>.
+
+2. Add $(intl_inc) variables in several Makefiles.
+   Change src/lib/IMdkit/IMConn.c: #include <malloc.h> to <stdlib.h>.
+   Thanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>.
+
+3. Fix bug of ic_set_values() of initailly setting ic values for new ICs.
+
+4. 
 
 
 xcin-2.5.3-pre1:  2001/10/19

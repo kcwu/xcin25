@@ -390,11 +390,13 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
 #define checkset_ic_val(flag, type, val) 				\
     if (ic_rec->ic_value_set & flag) {					\
 	if (memcmp(&(val), pre_attr->value, sizeof(type)) != 0) {	\
-	    ic_rec->ic_value_update |= flag;				\
 	    val = *(type *)pre_attr->value;				\
+	    ic_rec->ic_value_update |= flag;				\
 	}								\
     }									\
     else {								\
+	val = *(type *)pre_attr->value;					\
+	ic_rec->ic_value_update |= flag;				\
 	ic_rec->ic_value_set |= flag;					\
     }
 
@@ -402,11 +404,13 @@ ic_get_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
     if ((ic_rec->ic_value_set & flag) && str) {				\
 	if (strcmp(str, pre_attr->value) != 0) {			\
 	    free(str);							\
-	    ic_rec->ic_value_update |= flag;				\
 	    str = (char *)strdup(pre_attr->value);			\
+	    ic_rec->ic_value_update |= flag;				\
 	}								\
     }									\
     else {								\
+	str = (char *)strdup(pre_attr->value);				\
+	ic_rec->ic_value_update |= flag;				\
 	ic_rec->ic_value_set |= flag;					\
     }
 
@@ -467,7 +471,6 @@ ic_set_values(IC *ic, IMChangeICStruct *call_data, xccore_t *xccore)
         else if (match (XNFontSet, pre_attr)) {
 	    checkset_ic_str(CLIENT_SETIC_PRE_FONTSET,
 			    ic_rec->pre_attr.base_font);
-
         } 
         else if (match (XNForeground, pre_attr)) {
 	    checkset_ic_val(CLIENT_SETIC_PRE_FGCOLOR, CARD32,

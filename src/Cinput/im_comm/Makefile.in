@@ -2,7 +2,7 @@ srcdir      = @srcdir@
 top_srcdir  = @top_srcdir@
 include $(top_srcdir)/Rules
 
-INC      = $(xcininc) $(x_includes)
+INC      = $(xcininc) $(intl_inc) $(x_includes)
 TARGET   = libim_comm.a
 
 SRC = ascii_wb.c keymap.c charcode.c qphrase.c

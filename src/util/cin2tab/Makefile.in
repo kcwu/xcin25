@@ -2,7 +2,7 @@ srcdir	   = @srcdir@
 top_srcdir = @top_srcdir@
 include $(top_srcdir)/Rules
 
-INC = $(x_includes) $(xcininc)
+INC = $(x_includes) $(xcininc) $(intl_inc)
 LIB = $(xcinlib) -lim_comm ../../lib/libxcin.la $(locale_lib) $(intl_lib) -lm
 
 BIN = cin2tab

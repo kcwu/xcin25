@@ -5,7 +5,7 @@ srcdir		= @srcdir@
 top_srcdir	= @top_srcdir@
 include $(top_srcdir)/Rules
 
-INC	= ${xcininc} ${x_includes} -I${ximd_inc}
+INC	= ${xcininc} ${intl_inc} ${x_includes} -I${ximd_inc}
 LIB	= ${xcinlib} -lXimd -lim_comm lib/libxcin.la \
 	  ${x_libraries} ${locale_lib} ${dl_lib} ${intl_lib} -lm
 
