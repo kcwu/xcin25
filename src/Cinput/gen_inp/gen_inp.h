@@ -73,6 +73,7 @@ typedef struct {
     unsigned short mode;
     wch_t *mcch_list;
     unsigned int n_mcch_list, mcch_hidx, mcch_eidx;
+    unsigned int bsearch_idx;
 } gen_inp_iccf_t;
 
 

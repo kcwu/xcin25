@@ -1,10 +1,19 @@
-xcin-2.5.2.3:  2001/01/
+xcin-2.5.2.3:  2001/02/
 ------------------------------
 1. Fix bug in bimsphone for multiple-phrases choosing.
    Thanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>.
 
 2. Fix bug in gui_overspot for DRAW_LCCH situation.
    Thanks to Kang-Ming Liu <gugod@gugod.org>.
+
+3. Fix bug in xcintool/strcmp_wild.c.
+   Merge duplicated code in gen_inp.c/pick_cch_wild().
+   Fix bug in gen_inp.c/gen_inp_keystroke():
+	BackSpace will trun on wild mode.
+	In wild mode, the default will not do SPACEAUTOUP.
+   Thanks to Kuang-che Wu <kcwu@ck.tp.edu.tw>.
+
+4. Fix bug in gen_inp.c to fill in inpinfo->suggest_skeystroke in wild mode.
 
 
 xcin-2.5.2.2:  2001/01/02

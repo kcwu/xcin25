@@ -464,41 +464,22 @@ pick_cch_wild(gen_inp_conf_t *cf, int *head, byte_t dir, char *keystroke,
     ks_size = cf->header.n_max_keystroke + 1;
     ks = malloc(ks_size);
     n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
+    dir = (dir > 0) ? (byte_t)1 : (byte_t)-1;
 
-    if (dir == 1) {
-        for (i=0, idx = *head; idx<size && i<=mcch_size; idx++) {
-	    klist[0] = cf->ic1[idx];
-	    if (cf->header.icode_mode == ICODE_MODE2)
-		klist[1] = cf->ic2[idx];
-	    codes2keys(klist, n_klist, ks, ks_size);
+    for (i=0, idx = *head; idx>=0 && idx<size && i<=mcch_size; idx+=dir) {
+	klist[0] = cf->ic1[idx];
+	if (cf->header.icode_mode == ICODE_MODE2)
+	    klist[1] = cf->ic2[idx];
+	codes2keys(klist, n_klist, ks, ks_size);
 
-	    if (strcmp_wild(keystroke, ks) == 0) {
-		if (i < mcch_size) {
-		    ccode_to_char(cf->icidx[idx], mcch[i].s, WCH_SIZE);
-		    *head = idx;
-		    i ++;
-		}
-		else
-		    r = 1;
+	if (strcmp_wild(keystroke, ks) == 0) {
+	    if (i < mcch_size) {
+		ccode_to_char(cf->icidx[idx], mcch[i].s, WCH_SIZE);
+		*head = idx;
+		i ++;
 	    }
-	}
-    }
-    else {
-        for (i=0, idx = *head; idx>=0 && i<=mcch_size; idx--) {
-	    klist[0] = cf->ic1[idx];
-	    if (cf->header.icode_mode == ICODE_MODE2)
-		klist[1] = cf->ic2[idx];
-	    codes2keys(klist, n_klist, ks, ks_size);
-
-	    if (strcmp_wild(keystroke, ks) == 0) {
-		if (i < mcch_size) {
-		    ccode_to_char(cf->icidx[idx], mcch[i].s, WCH_SIZE);
-		    *head = idx;
-		    i ++;
-		}
-		else
-		    r = 1;
-	    }
+	    else
+		r = 1;
 	}
     }
     free(ks);
@@ -535,6 +516,7 @@ match_keystroke_wild(gen_inp_conf_t *cf,
     keys2codes(icode, 2, iccf->keystroke);
     idx = bsearch_char(cf->ic1, cf->ic2, icode[0], icode[1], 
 			cf->header.n_icode, md, 1);
+    iccf->bsearch_idx = idx;
     *s = tmpch;
     iccf->mcch_hidx = idx;		/* refer to head index of cf->icidx */
 
@@ -571,6 +553,7 @@ match_keystroke_normal(gen_inp_conf_t *cf,
     if ((idx = bsearch_char(cf->ic1, cf->ic2, 
 		icode[0], icode[1], size, md, 0)) == -1)
 	return 0;
+    iccf->bsearch_idx = idx;
 
     /*
      *  Search for all the chars with the same keystroke.
@@ -632,17 +615,60 @@ match_keystroke(gen_inp_conf_t *cf, inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 /*------------------------------------------------------------------------*/
 
 static void
-commit_char(inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, wch_t *cch)
+get_correct_skeystroke(gen_inp_conf_t *cf,
+		inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, wch_t *cch)
+{
+    unsigned int i, j, size, klist[2];
+    int n_klist, ks_size, keycode;
+    wch_t ch;
+    char *ks;
+
+    size = cf->header.n_icode;
+    ks_size = cf->header.n_max_keystroke + 1;
+    ks = malloc(ks_size);
+    n_klist = (cf->header.icode_mode == ICODE_MODE1) ? 1 : 2;
+
+    for (i=iccf->bsearch_idx; i>=0 && i<size; i++) {
+	ccode_to_char(cf->icidx[i], ch.s, WCH_SIZE);
+	if (ch.wch == cch->wch)
+	    break;
+    }
+    if (ch.wch == cch->wch) {
+	klist[0] = cf->ic1[i];
+	if (cf->header.icode_mode == ICODE_MODE2)
+	    klist[1] = cf->ic2[i];
+	codes2keys(klist, n_klist, iccf->keystroke, ks_size);
+
+	for (j=0; iccf->keystroke[j] != '\0'; j++) {
+	    keycode = key2code(iccf->keystroke[j]);
+	    inpinfo->suggest_skeystroke[j].wch =
+			cf->header.keyname[keycode].wch;
+	}
+	inpinfo->suggest_skeystroke[j].wch = (wchar_t)0;
+    }
+    else
+	inpinfo->suggest_skeystroke[0].wch = (wchar_t)0;
+}
+
+static void
+commit_char(gen_inp_conf_t *cf,
+	    inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, wch_t *cch)
 {
     static char cch_s[WCH_SIZE+1];
+    char *s=NULL;
     int i;
 
     inpinfo->cch = cch_s;
     strncpy(cch_s, (char *)cch->s, WCH_SIZE);
     cch_s[WCH_SIZE] = '\0';
 
-    for (i=0; i<=inpinfo->keystroke_len; i++)
-	inpinfo->suggest_skeystroke[i].wch = inpinfo->s_keystroke[i].wch; 
+    if (! (s = strchr(iccf->keystroke,'*')) &&
+	! (s = strchr(iccf->keystroke,'?'))) {
+	for (i=0; i<=inpinfo->keystroke_len; i++)
+	    inpinfo->suggest_skeystroke[i].wch = inpinfo->s_keystroke[i].wch;
+    }
+    else
+	get_correct_skeystroke(cf, inpinfo, iccf, cch);
     inpinfo->keystroke_len = 0;
     inpinfo->s_keystroke[0].wch = (wchar_t)0;
     inpinfo->n_mcch = 0;
@@ -662,7 +688,7 @@ commit_keystroke(gen_inp_conf_t *cf, inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 	int i;
 	for (i=0; i<cf->n_kremap; i++) {
 	    if (strcmp(iccf->keystroke, cf->kremap[i].keystroke) == 0) {
-		commit_char(inpinfo, iccf, &(cf->kremap[i].wch));
+		commit_char(cf, inpinfo, iccf, &(cf->kremap[i].wch));
 		return IMKEY_COMMIT;
 	    }
 	}
@@ -670,7 +696,7 @@ commit_keystroke(gen_inp_conf_t *cf, inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 
     if (match_keystroke(cf, inpinfo, iccf)) {
         if (inpinfo->n_mcch == 1) {
-            commit_char(inpinfo, iccf, inpinfo->mcch);
+            commit_char(cf, inpinfo, iccf, inpinfo->mcch);
             return IMKEY_COMMIT;
         }
         else {
@@ -693,7 +719,7 @@ commit_keystroke(gen_inp_conf_t *cf, inpinfo_t *inpinfo, gen_inp_iccf_t *iccf)
 
 static int
 mcch_choosech(gen_inp_conf_t *cf, 
-		inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, int idx)
+	      inpinfo_t *inpinfo, gen_inp_iccf_t *iccf, int idx)
 {
     int min;
     wch_t wch;
@@ -712,7 +738,7 @@ mcch_choosech(gen_inp_conf_t *cf,
             return 0;
     }
     wch.wch = inpinfo->mcch[idx].wch;
-    commit_char(inpinfo, iccf, &wch);
+    commit_char(cf, inpinfo, iccf, &wch);
     reset_keystroke(inpinfo, iccf);
 
     return 1;
@@ -939,7 +965,8 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
 	inpinfo->mcch_pgstate = MCCH_ONEPG;
 	inpinfo->guimode &= ~(GUIMOD_SELKEYSPOT);
 	iccf->mode = 0;
-	if (strchr(iccf->keystroke, '*') || strchr(iccf->keystroke, '?'))
+	if ((cf->mode & INP_MODE_WILDON) &&
+	    (strchr(iccf->keystroke, '*') || strchr(iccf->keystroke, '?')))
 	    iccf->mode |= INPINFO_MODE_INWILD;
 	if (len-1 > 0 && (cf->mode & INP_MODE_AUTOCOMPOSE))
 	    match_keystroke(cf, inpinfo, iccf);
@@ -958,6 +985,10 @@ gen_inp_keystroke(void *conf, inpinfo_t *inpinfo, keyinfo_t *keyinfo)
         inpinfo->cch_publish.wch = (wchar_t)0;
 
 	if ((cf->mode & INP_MODE_SPACEAUTOUP) && 
+/* avoid wild mode auto up */
+	    (! (iccf->mode & INPINFO_MODE_INWILD) ||
+	       (iccf->mode & INPINFO_MODE_MCCH)) &&
+/* end of wild mod */
 	    (inpinfo->n_mcch > 1 || inpinfo->mcch_pgstate != MCCH_ONEPG)) {
             if ((mcch_choosech(cf, inpinfo, iccf, -1)))
                 return IMKEY_COMMIT;

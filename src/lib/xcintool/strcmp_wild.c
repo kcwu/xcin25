@@ -32,6 +32,7 @@ static int
 next_token(char **s, char *tok, int tok_size)
 {
     char *s1;
+    int token_len;
 
     if (! *s || ! **s || tok_size < 2)
 	return 0;
@@ -52,8 +53,11 @@ next_token(char **s, char *tok, int tok_size)
 	s1 = *s;
 	while (*s1 && *s1 != '*' && *s1 != '?')
 	    s1 ++;
-	strncpy(tok, *s, tok_size-1);
-	tok[tok_size-1] = '\0';
+	token_len = (int)(s1 - *s);
+	if (token_len >= tok_size)
+	    token_len = tok_size-1;
+	strncpy(tok, *s, token_len);
+	tok[token_len] = '\0';
 	*s = s1;
     }
     return 1;
@@ -73,7 +77,7 @@ strcmp_wild(char *s1, char *s2)
 		cp2 ++;
 	}
 	else if (*tok == '*') {
-	    if (!  next_token(&cp1, tok, 1024)) {
+	    if (! next_token(&cp1, tok, 1024)) {
 		while (*cp2)
 		    cp2 ++;
 	    }
@@ -81,7 +85,10 @@ strcmp_wild(char *s1, char *s2)
                 slen = strlen(tok);
 	        while (*cp2 && strncmp(tok, cp2, slen))
 		    cp2 ++;
-	        cp2 += slen;
+		if (*cp2)
+		    cp2 += slen;
+		else
+		    ret = 1;
 	    }
 	}
 	else {
@@ -95,7 +102,7 @@ strcmp_wild(char *s1, char *s2)
         if (*cp2)
 	    ret = -1;
         else if (next_token(&cp1, tok, 1024)) {
-	    if (*tok == '*')
+	    if (*tok == '*' && ! next_token(&cp1, tok, 1024))
 		ret = 0;
 	    else
 		ret = 1;
