@@ -1235,17 +1235,17 @@ guess_next(gen_inp_conf_t *cf, gen_inp_iccf_t *iccf,
     histend = iccf->commithistory+HINTSZ;
     tsi.tsi = (ZhiStr)tsi_str;
     for(match=TSISZ-1; match>=1; match--) {	/* Max Tsi len = TSISZ-1 */
-	if (match > HINTSZ)
+	if (match*2 > HINTSZ)
 	    continue;
-	strncpy(tsi_str, histend-match*2, match*2);
-	if (tsi_str[0]=='\0')
+	if (*(histend-match*2)=='\0')
 	    continue;
-	tsi_str[match*2] = '\0';
 
 	for (guess=TSISZ-1-match; guess>=1; guess--) {
 	    if (guess-match > 2)
 		continue;
 
+	    strncpy(tsi_str, histend-match*2, match*2);
+	    tsi_str[match*2] = '\0';
 	    errno = cf->tsidb->CursorSet(cf->tsidb, &tsi, 1);
 	    while (errno == 0) {
 		if (memcmp(tsi_str, histend-match*2, match*2))
